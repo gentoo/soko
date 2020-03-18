@@ -21,7 +21,6 @@ services:
         target: "/var/cache/pgo-egencache"
     labels:
       com.centurylinklabs.watchtower.enable: "true"
-    restart: always
     depends_on:
       - db
   db:
