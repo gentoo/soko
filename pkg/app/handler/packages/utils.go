@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"github.com/go-pg/pg/v9/orm"
 	"html/template"
-	"log"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -222,7 +221,6 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 	var localUseflags, globalUseflags, useExpands []models.Useflag
 	for _, useflag := range gpackage.Versions[len(gpackage.Versions)-1].Useflags{
 
-		log.Println(useflag)
 		var tmp_useflags []models.Useflag
 		err := database.DBCon.Model(&tmp_useflags).
 			Where("Name LIKE ?", "%" + strings.Replace(useflag, "+", "", 1)).
