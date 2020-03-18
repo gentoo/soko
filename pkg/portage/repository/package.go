@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"soko/pkg/config"
@@ -49,7 +50,12 @@ func updateDeletedPackage(changedFile string){
 	atom := category + "/" + packagename
 
 	gpackage := &models.Package{ Atom: atom }
-	database.DBCon.Model(gpackage).Delete()
+	_, err := database.DBCon.Model(gpackage).WherePK().Delete()
+
+	if err != nil {
+		log.Println("Error during deleting package " + atom)
+		log.Println(err)
+	}
 }
 
 // updateModifiedPackage adds a package to the database or

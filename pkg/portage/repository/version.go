@@ -3,6 +3,7 @@
 package repository
 
 import (
+	"log"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
@@ -49,7 +50,12 @@ func updateDeletedVersion(changedFile string){
 	id := atom + "-" + version
 
 	versionObject := &models.Version{Id: id}
-	database.DBCon.Model(versionObject).Delete()
+	_, err := database.DBCon.Model(versionObject).WherePK().Delete()
+
+	if err != nil {
+		log.Println("Error during deleting version " + id)
+		log.Println(err)
+	}
 }
 
 // updateModifiedVersion adds a package version to the database or

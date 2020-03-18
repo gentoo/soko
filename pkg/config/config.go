@@ -35,7 +35,7 @@ func Quiet() string {
 }
 
 func Version() string {
-	return getEnv("SOKO_VERSION", "v0.1.0")
+	return getEnv("SOKO_VERSION", "v0.1.1")
 }
 
 func Port() string {
