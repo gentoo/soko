@@ -28,7 +28,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Select()
 
 	if err != nil {
-		panic(err)
+		http.NotFound(w,r)
+		return
 	}
 
 	localUseflags, globalUseflags, useExpands := getPackageUseflags(gpackage)

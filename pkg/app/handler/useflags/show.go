@@ -19,8 +19,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).Where("name = ? ", useflagName).Select()
-	if err != nil {
-		panic(err)
+	if err != nil || len(useflags) < 1 {
+		http.NotFound(w,r)
+		return
 	}
 
 	useflag := useflags[0]

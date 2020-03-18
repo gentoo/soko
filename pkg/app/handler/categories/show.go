@@ -18,7 +18,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		                  Relation("Packages.Versions").
 		                  Select()
 	if err != nil {
-		panic(err)
+		http.NotFound(w,r)
+		return
 	}
 
 	renderCategoryTemplate("show", createCategoryData(*category), w)

@@ -4,7 +4,6 @@ package useflags
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	utils2 "soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -18,8 +17,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	results, _ := r.URL.Query()["q"]
 
 	param := results[0]
-
-	log.Print(param)
 
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).Where("name LIKE ? ", (param + "%")).Select()
