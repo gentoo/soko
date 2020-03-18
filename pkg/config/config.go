@@ -39,7 +39,7 @@ func Version() string {
 }
 
 func Port() string {
-	return getEnv("SOKO_PORT", "8080")
+	return getEnv("SOKO_PORT", "5000")
 }
 
 
