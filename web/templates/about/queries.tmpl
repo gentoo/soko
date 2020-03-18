@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/about">About</a></li>
+                <li class="breadcrumb-item active">Advanced Search Queries</li>
+            </ol>
+
+            <h1>Advanced Search Queries</h1>
+
+            This website provides a search functionality to find Gentoo packages. You can use field/value pairs combined with operators to run advanced search queries.
+            The possible fields and operators are summarized in the following tables:
+            <ul style="margin-top:5px;">
+                <li><a href="#fields">Possible Fields</a></li>
+                <li><a href="#operators">Possible Operators</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+
+            <hr>
+
+            <div class="card ml-5 mr-5 mb-5">
+                <h4 class="card-header" id="fields">Possible Fields</h4>
+
+                <table class="table mb-0">
+                    <thead>
+                    <tr>
+                        <th scope="col">Field</th>
+                        <th scope="col">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row">atom</th>
+                        <td>The unique identifier of a package <br> <i style="padding-left:2em">e.g. sys-kernel/gentoo-sources</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">category</th>
+                        <td>The category of a package <br> <i style="padding-left:2em">e.g. sys-kernel</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">name</th>
+                        <td>The name of a package <br> <i style="padding-left:2em">e.g. gentoo-sources</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">description</th>
+                        <td>The description of a package <br> <i style="padding-left:2em">e.g. A tiling window manager</i> </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">longdescription</th>
+                        <td>The full descripiton of a package <br> <i style="padding-left:2em">e.g. xmonad is a tiling window manager for [...]</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">homepage</th>
+                        <td>The homepage of a package <br> <i style="padding-left:2em">e.g. http://xmonad.org</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">license</th>
+                        <td>The license of a package <br> <i style="padding-left:2em">e.g. BSD</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Maintainers</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">maintainers.name</th>
+                        <td>The name of the maintainer <br> <i style="padding-left:2em">e.g. Gentoo Haskell</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">maintainers.description</th>
+                        <td>The description of the maintainers</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">maintainers.type</th>
+                        <td>The type of maintainter <br> <i style="padding-left:2em">e.g. project</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">maintainers.restrict</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">maintainers.email</th>
+                        <td>The email of the maintainer <br> <i style="padding-left:2em">e.g. haskell@gentoo.org</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Useflag</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:1em">global</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.global.name</th>
+                        <td>The name of the global useflag <br> <i style="padding-left:2em">e.g. hscolour</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.global.description</th>
+                        <td>The description of the global useflag <br> <i style="padding-left:2em">e.g. Include coloured haskell sources to [...]</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:1em">local</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.local.name</th>
+                        <td>The name of the local useflag</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.local.description</th>
+                        <td>The description of the local useflag</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:1em">use_expand</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.use_expand.name</th>
+                        <td>The name of the local use_expand</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.use_expand.description</th>
+                        <td>The description of the use_expand</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" style="padding-left:2em">useflags.use_expand.use_expand_prefix</th>
+                        <td>The use_expand prefix <br> <i style="padding-left:2em">e.g. python_targets</i></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">metadata_hash</th>
+                        <td>The hash of the metadata <br> <i style="padding-left:2em">e.g. 5cd76e098f966b4edcd1848866dd9099</i></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card ml-5 mr-5 mb-5">
+                <h4 class="card-header" id="operators">Possible Operators</h4>
+
+                <table class="table mb-0">
+                    <thead>
+                    <tr>
+                        <th scope="col">Operator</th>
+                        <th scope="col">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row"></th>
+                        <td>The term <b>should</b> appear (default)</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">+</th>
+                        <td>The term <b>must</b> appear</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">-</th>
+                        <td>The term <b>must not</b> appear</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">"..."</th>
+                        <td>Can be used to <b>group</b> phrases <br> <i style="padding-left:2em">e.g. +description:"window manager"</i></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 id="examples">Examples</h2>
+
+            <ul>
+                <li>Find all packages named git: <br><code style="margin-left:2em">+name:git</code></li>
+                <li>Find all packages in the category sys-kernel: <br><code style="margin-left:2em">+category:sys-kernel</code></li>
+                <li>Find all packages with a BSD license: <br><code style="margin-left:2em">+license:BSD</code></li>
+                <li>Find all packages that neither have a BSD license nor a MIT license: <br><code style="margin-left:2em">-license:BSD -license:MIT</code></li>
+                <li>Find all packages maintained by the Haskell Team: <br><code style="margin-left:2em">+maintainer.email:haskell@gentoo.org</code></li>
+                <li>Find all packages maintained by the Haskell Team but that aren't in the 'dev-haskell' category: <br><code style="margin-left:2em">+maintainer.email:haskell@gentoo.org -category:dev-haskell</code></li>
+                <li>Find all packages those description contains 'window manager': <br><code style="margin-left:2em">+description:"window manager"</code></li>
+                <li>Find all packages that contain the use_expand 'python_targets': <br><code style="margin-left:2em">+useflags.use_expand.use_expand_prefix:python_targets</code></li>
+            </ul>
+        </div>
+</div>
+</div>
+
+
+{{template "footer" .Application }}
+
+</body>
+</html>

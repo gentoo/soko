@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+
+        <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active">About</li>
+</ol>
+
+<h1>About packages.gentoo.org</h1>
+
+
+            <p>Welcome to the new packages.gentoo.org!</p>
+
+            <p>
+                This section will be extended with further information as the site continues to develop.
+                Feel free to <a href="/about/feedback">get in touch</a> if you have any questions that are not answered on this page.
+            </p>
+
+            <h2>FAQ</h2>
+
+            <dl>
+                <dt>Which version is currently running?</dt>
+                <dd>
+                    Currently {{.Application.Version}} is running.
+                </dd>
+                <br>
+                <dt>How do I use advanced search queries?</dt>
+                <dd>
+                    Please view the <a href="/about/queries">advanced search queries page</a> for further information about advanced search queries.
+                </dd>
+                <br>
+                <dt>How often is the site updated?</dt>
+                <dd>
+                    Updates are scheduled <strong>every 10 minutes</strong> and are processed using delayed jobs.
+                    You can find the last time an import task was started in the footer.
+                </dd>
+            </dl>
+
+</div>
+</div>
+</div>
+
+
+{{template "footer" .Application }}
+
+</body>
+</html>

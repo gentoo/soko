@@ -1,0 +1,37 @@
+.kk-keyword {
+  padding: .2em .6em .3em;
+  border-radius: .25em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kk-keyword-stable {
+  @extend .kk-keyword;
+  background-color: #81C784;
+  color: #2E7D32;
+}
+
+.kk-keyword-testing {
+  @extend .kk-keyword;
+  background-color: #FFF176 !important;
+  color: #a08700;
+}
+
+.kk-keyword-unavailable {
+  @extend .kk-keyword;
+  background-color: #d5d5d5 !important;
+  color: #666;
+}
+
+.kk-keyword-masked {
+  @extend .kk-keyword;
+  background-color: #EF9A9A !important;
+  color: #B71C1C;
+}
+
+.kk-keyword-unknown {
+  @extend .kk-keyword;
+  background-color: #fafafa !important;
+  color: #333;
+}

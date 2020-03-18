@@ -1,0 +1,45 @@
+stages:
+  - build
+  - test
+  - dast
+
+info:
+  stage: .pre
+  script:
+    - docker info
+  
+build:
+  stage: build
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA
+    UPDATER_IMAGE_TAG: $CI_REGISTRY_IMAGE-updater/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA
+    LATEST_IMAGE_TAG: $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest
+    LATEST_UPDATER_IMAGE_TAG: $CI_REGISTRY_IMAGE-updater/$CI_COMMIT_BRANCH:latest
+  script:
+    - echo $IMAGE_TAG
+    - echo $UPDATER_IMAGE_TAG
+    - echo $LATEST_IMAGE_TAG
+    - echo $LATEST_UPDATER_IMAGE_TAG
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - docker pull gentoo/portage:latest
+    - docker pull gentoo/stage3-amd64
+    - docker pull $LATEST_IMAGE_TAG || true
+    - docker pull $LATEST_UPDATER_IMAGE_TAG || true
+    - docker build --cache-from $LATEST_IMAGE_TAG -t $IMAGE_TAG -t $LATEST_IMAGE_TAG .
+    - docker build --cache-from $LATEST_UPDATER_IMAGE_TAG -t $UPDATER_IMAGE_TAG -t $LATEST_UPDATER_IMAGE_TAG -f Dockerfile.updater .
+    - docker push $LATEST_IMAGE_TAG
+    - docker push $IMAGE_TAG
+    - docker push $UPDATER_IMAGE_TAG
+    - docker push $LATEST_UPDATER_IMAGE_TAG
+
+include:
+  - template: Dependency-Scanning.gitlab-ci.yml
+  - template: Container-Scanning.gitlab-ci.yml  
+  - template: SAST.gitlab-ci.yml
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DS_DISABLE_DIND: "true"
+  SAST_DISABLE_DIND: "true"
+  DAST_WEBSITE: https://packagestest.gentoo.org
+#  DAST_FULL_SCAN_ENABLED: "true"

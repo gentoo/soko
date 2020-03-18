@@ -1,0 +1,6 @@
+{{define "packageline"}}
+    <tr>
+        <th class="kk-nobreak-cell"><a href="/packages/{{.Atom}}">{{.Name}}</a></th>
+        <td>{{ (index .Versions 0).Description }}</td>
+    </tr>
+{{end}}

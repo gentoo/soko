@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+
+            <h1 class="first-header">Search Results <small>for {{.Search}}</small>
+                <a title="Atom feed" href="https://packages.gentoo.org/packages/search.atom?q={{.Search}}" class="kk-feed-icon"><span class="fa fa-fw fa-rss-square"></span></a></h1>
+
+            {{ if .Packages }}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Results 1—{{len .Packages}} of {{len .Packages}}
+                </div>
+                <div class="list-group">
+                    {{range .Packages}}
+                        <a class="list-group-item" href="/packages/{{.Atom}}">
+                            <h3 class="kk-search-result-header"><span class="text-muted">{{.Category}}/</span>{{.Name}}</h3>
+                            {{ (index .Versions 0).Description}}
+                        </a>
+                    {{end}}
+                </div>
+                <!-- TODO paging
+                <div class="panel-footer">
+                    <div class="btn-group" role="group" aria-label="Result navigation">
+                        <%= link_to '< Prev', search_packages_path(q: params[:q], o: [@offset - PackageRepository.default_search_size, 0].max), class: 'btn btn-default' + (@offset > 0 ? '' : ' disabled') %>
+                        <%= link_to 'Next >', search_packages_path(q: params[:q], o: @offset + PackageRepository.default_search_size), class: 'btn btn-default ' + ((@offset + PackageRepository.default_search_size) > @packages.total ? 'disabled' : '') %>
+                    </div>
+                </div>
+                -->
+
+            </div>
+
+            <!-- TODO in head: alternate_feed_link(search_packages_url(format: :atom, params: request.query_parameters), t(:atom_feed)) -->
+            {{ else }}
+            <div class="jumbotron">
+                <h2 class="site-welcome stick-top">Nothing found. :( Try again?</h2>
+
+                <form action="/packages/search" method="get">
+                    <div class="typeahead-container">
+                        <div class="typeahead-field">
+        <span class="typeahead-query">
+          <input id="q" name="q" type="search" autocomplete="off" placeholder="Find Packages" aria-label="Find Packages" value="{{.Search}}">
+        </span>
+                            <span class="typeahead-button">
+          <button type="submit" title="Find" aria-label="Find">
+            <span class="typeahead-search-icon"></span><span class="sr-only">Find</span>
+          </button>
+        </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {{end}}
+
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer" .Application }}
+
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+{{define "footer"}}
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-12 offset-md-2 col-md-7">
+                    <h3 class="footerhead">Gentoo Packages Database</h3>
+                    <div class="row">
+                        <div class="col-xs-12 col-md-4">
+                            <span class="kk-group-header">Data as current of</span><br>{{ .LastUpdate.Format "Jan 02, 2006 15:04:05 UTC" }}
+                        </div>
+                        <div class="col-xs-12 col-md-4">
+                        </div>
+                        <div class="col-xs-12 col-md-4">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <h3 class="footerhead">Questions or comments?</h3>
+                    Please feel free to <a href="https://www.gentoo.org/inside-gentoo/contact/">contact us</a>.
+                    <p class="mt-2">{{ .Version }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2 col-sm-3 col-md-2">
+                    <ul class="footerlinks three-icons">
+                        <li><a href="https://twitter.com/gentoo" title="@Gentoo on Twitter"><span class="fa fa-twitter fa-fw"></span></a></li>
+                        <li><a href="https://www.facebook.com/gentoo.org" title="Gentoo on Facebook"><span class="fa fa-facebook fa-fw"></span></a></li>
+                        <li><a href="https://www.reddit.com/r/Gentoo/" title="Gentoo on Reddit"><span class="fa fa-reddit-alien fa-fw"></span></a></li>
+                    </ul>
+                </div>
+                <div class="col-10 col-sm-9 col-md-10">
+                    <strong>&copy; 2001&ndash;2020 Gentoo Foundation, Inc.</strong><br>
+                    <small>
+                        Gentoo is a trademark of the Gentoo Foundation, Inc.
+                        The contents of this document, unless otherwise expressly stated, are licensed under the
+                        <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC-BY-SA-4.0</a> license.
+                        The <a href="https://www.gentoo.org/inside-gentoo/foundation/name-logo-guidelines.html">Gentoo Name and Logo Usage Guidelines</a> apply.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+{{end}}

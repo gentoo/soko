@@ -1,0 +1,33 @@
+{{define "resources"}}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Resources</h4>
+        </div>
+        <div class="list-group">
+            <a href="https://bugs.gentoo.org/buglist.cgi?quicksearch={{.Package.Atom}}" class="list-group-item list-group-item-action text-dark" target="_blank">
+                <span class="fa fa-fw fa-bug"></span>
+                Related bugs
+            </a>
+            <a href="https://wiki.gentoo.org/wiki/Special:Search/{{.Package.Name}}" class="list-group-item list-group-item-action text-dark" target="_blank">
+                <span class="fa fa-fw fa-book"></span>
+                Documentation
+            </a>
+            <a href="https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords={{.Package.Name}}&mode=results" class="list-group-item list-group-item-action text-dark" target="_blank">
+                <span class="fa fa-fw fa-comments-o"></span>
+                Forums posts
+            </a>
+            <a href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Package.Atom}}" class="list-group-item list-group-item-action text-dark" target="_blank">
+                <span class="fa fa-fw fa-code-fork"></span>
+                Git repository browser
+            </a>
+            <a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}?showmsg=1" class="list-group-item list-group-item-action text-dark" target="_blank">
+                <span class="fa fa-fw fa-history"></span>
+                Git log
+            </a>
+            <a href="https://gitweb.gentoo.org/repo/gentoo.git/atom/{{.Package.Atom}}?h=master" class="list-group-item list-group-item-action text-dark" target="_blank">
+                <span class="fa fa-fw fa-rss"></span>
+                Changes Feed
+            </a>
+        </div>
+    </div>
+{{end}}

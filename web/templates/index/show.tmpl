@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+
+<div class="jumbotron">
+    <h2 class="site-welcome stick-top">Welcome to the Home of <span class="text-primary"> {{.PackageCount}} </span> Gentoo Packages</h2>
+
+    <form action="/packages/search" method="get">
+        <div class="typeahead-container">
+            <div class="typeahead-field">
+        <span class="typeahead-query">
+          <input id="q" name="q" type="search" autocomplete="off" placeholder="Find Packages" aria-label="Find Packages" autofocus>
+        </span>
+
+                <span class="typeahead-button">
+          <button type="button" onclick="$('#searchHelp').modal('show')" title="Help" aria-label="Help">
+            <span class="fa fa-question" style="font-size: 15px;"></span><span class="sr-only">Help</span>
+                    </button>
+        </span>
+                <span class="typeahead-button">
+          <button type="submit" title="Find" aria-label="Find">
+            <span class="typeahead-search-icon"></span><span class="sr-only">Find</span>
+          </button>
+        </span>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">
+            <span class="fa fa-fw fa-history"></span>
+            <a class="text-dark" href="/packages/added">Added Packages</a>
+        </h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+        <tbody>
+        {{range .AddedPackages}}
+            <tr>
+                <td>
+                    <a href="/packages/{{.Atom}}">
+                        <span class="text-muted">{{.Category}}</span>/<strong>{{.Name}}</strong>
+                    </a>
+                </td>
+                <td>{{(index .Versions 0).Description}}</td>
+            </tr>
+        {{end}}
+        </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">
+            <span class="fa fa-fw fa-asterisk"></span>
+            <a class="text-dark" href="/packages/updated">Updated Packages</a>
+        </h4>
+    </div>
+    <ul class="list-group">
+        {{range .UpdatedPackages}}
+            {{template "changedversion" .}}
+        {{end}}
+    </ul>
+</div>
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer" .Application}}
+
+<script src="assets/index.js"></script>
+
+</body>
+</html>

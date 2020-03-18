@@ -1,0 +1,41 @@
+{{define "versionrow"}}
+    <tr>
+        <td class="kk-version kk-cell-sep-right"><strong><a class="kk-ebuild-link" href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Id}}.ebuild">{{.Version}}</a></strong><span class="kk-slot" title="subslot {{ .Subslot }}"> : {{ .Slot }}</span>
+
+
+            {{ if .Restricts }}
+                <span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{ .Restricts }}">T</span>
+            {{ end }}
+
+        </td>
+
+        <!-- keyword_cell version, 'amd64' -->
+        {{ $arches := mkSlice "amd64" "x86" "alpha" "arm" "arm64" "hppa" "ia64" "ppc" "ppc64" "sparc" }}
+        {{ range $arches }}
+
+            {{ if contains $.Keywords (print "~" .) }}
+
+                <td class="kk-keyword kk-keyword-testing" title="{{$.Version}}  is testing on amd64">
+                    <svg height="16" class="octicon octicon-diff-modified" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM4 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"></path></svg>
+                    <span class="sr-only">~{{.}}</span>
+                </td>
+
+            {{ else if contains $.Keywords . }}
+
+                <td class="kk-keyword kk-keyword-stable" title="{{$.Version}} is stable on amd64">
+                    <svg height="16" class="octicon octicon-diff-added" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM6 9H3V7h3V4h2v3h3v2H8v3H6V9z"></path></svg>
+                    <span class="sr-only">{{.}}</span>
+                </td>
+
+            {{else}}
+
+                <td class="kk-keyword kk-keyword-unkown" title="{{$.Version}} is unknown on amd64">
+                    <span class="sr-only">{{.}}</span>
+                </td>
+
+            {{end}}
+
+        {{end}}
+
+    </tr>
+{{end}}

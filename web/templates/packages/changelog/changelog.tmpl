@@ -1,0 +1,82 @@
+<html>
+<head></head>
+<body>
+
+{{ if .Commits }}
+    {{range $commit := .Commits}}
+        <li class="list-group-item">
+            <!-- TODO(arzano) Annonate Message with bug links -->
+            <strong>{{.Message}}</strong><span class="float-right" style="font-size:0.825rem;"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></span>
+            <div class="kk-byline">
+
+                {{ if (ne .AuthorName .CommitterName)}}
+                <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
+                <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
+                {{end}}
+
+                <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
+                <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on
+                {{ .CommitterDate }}
+
+            </div>
+
+            <table class="table table-condensed kk-changelog-diffstat">
+
+
+                {{if .ChangedFiles.Added}}
+                <tr class="kk-success">
+                    <td class="kk-changelog-diffstat-icon"><span class="octicon octicon-diff-added"></span></td>
+                    <td>
+                        {{range .ChangedFiles.Added }}
+                            {{ if contains .Path (print $.Atom "/")}}
+                                <a href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Atom }}/{{replaceall .Path (print $.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Atom "/") ""}}</a>
+                            {{end}}
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+
+
+                {{if .ChangedFiles.Modified}}
+                <tr class="kk-warning">
+                    <td class="kk-changelog-diffstat-icon"><span class="octicon octicon-diff-modified"></span></td>
+                    <td>
+                        {{range .ChangedFiles.Modified}}
+                            {{ if contains .Path (print $.Atom "/")}}
+                                <a href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Atom }}/{{replaceall .Path (print $.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Atom "/") ""}}</a>
+                            {{end}}
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+
+                {{if .ChangedFiles.Deleted}}
+                <tr class="kk-danger">
+                    <td class="kk-changelog-diffstat-icon"><span class="octicon octicon-diff-removed"></span></td>
+                    <td>
+                        {{range .ChangedFiles.Deleted}}
+                            {{ if contains .Path (print $.Atom "/")}}
+                                <a href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Atom }}/{{replaceall .Path (print $.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Atom "/") ""}}</a>
+                            {{end}}
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+
+            </table>
+        </li>
+
+    {{end}}
+{{else}}
+    <li class="list-group-item kk-panel-content-sorry">
+        This package has not been changed since our repository has moved to Git.
+        <br><br>
+        <a href="https://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/<%= @package.atom %>/ChangeLog?view=markup" class="btn btn-default">
+            <span class="fa fa-fw fa-history"></span>
+            View old CVS Changelog
+        </a>
+    </li>
+{{end}}
+
+</body>
+</html>

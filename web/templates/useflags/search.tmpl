@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/useflags">USE flags</a></li>
+                <li class="breadcrumb-item active">Search</li>
+            </ol>
+
+            <h1>USE Flag Search Results <small>for {{ .Search }}</small></h1>
+
+            <div class="card">
+                <div class="card-header">
+                    Results
+                </div>
+                <div class="list-group">
+                    {{ range .Useflags }}
+                    <a class="list-group-item list-group-item-action text-dark" href="/useflags/{{.Name}}">
+                        <h3 class="kk-search-result-header">{{.Name}}</h3>
+                        {{.Description}}
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer" .Application }}
+
+
+</body>
+</html>

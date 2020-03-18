@@ -1,0 +1,179 @@
+h1 {
+  a.kk-feed-icon {
+    font-size: 65%;
+  }
+}
+
+.label {
+  cursor: default;
+}
+
+.kk-cell-sep-right {
+  border-right-width: 3px !important;
+}
+
+.panel {
+  table.table {
+    tr {
+      th:first-child,
+      td:first-child {
+        padding-left: 1em;
+      }
+    }
+  }
+}
+
+.octicon {
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+}
+
+.black {
+  color: #333;
+}
+
+td .alert {
+  margin-bottom: 0;
+}
+
+.kk-nobreak-cell {
+  white-space: nowrap;
+}
+
+.kk-panel-content-sorry {
+  background-color: #f0f0f0;
+  text-align: center;
+  padding-top: 2em;
+  padding-bottom: 2em;
+  color: #666;
+}
+
+.kk-3col-list {
+  columns: 3;
+  -webkit-columns: 3;
+  -moz-columns: 3;
+}
+
+.kk-4col-list {
+  columns: 4;
+  -webkit-columns: 4;
+  -moz-columns: 4;
+}
+
+.kk-5col-list {
+  columns: 5;
+  -webkit-columns: 5;
+  -moz-columns: 5;
+}
+
+.kk-6col-list {
+  columns: 6;
+  -webkit-columns: 6;
+  -moz-columns: 6;
+}
+
+.kk-col-list {
+  @media screen and (max-width: 767px) {
+    columns: 1;
+    -webkit-columns: 1;
+    -moz-columns: 1;
+  }
+
+  padding: 0;
+
+  li {
+    list-style-type: none;
+
+    a:link,
+    a:hover,
+    a:active,
+    a:visited {
+      display: block;
+      padding: .2em;
+    }
+
+    a:hover {
+      background-color: #eee;
+      border-radius: 2px;
+      text-decoration: none;
+    }
+  }
+}
+
+.kk-col-list-header {
+  margin-top: 1em;
+
+  .kk-group-header {
+    display: block;
+    border-bottom: 1px solid #eee;
+  }
+}
+
+.kk-col-list .kk-col-list-header:first-of-type {
+  margin-top: 0;
+}
+
+.kk-group-header {
+  color: #8a8a8a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 90%;
+}
+
+.kk-suggest-cat {
+  color: #8a8a8a;
+}
+
+.kk-suggest-pkg {
+}
+
+.kk-suggest-detail {
+  float: right;
+  color: #8a8a8a;
+  font-size: 90%;
+
+  @media screen and (max-width: 767px) {
+    display: block;
+    float: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+body.kk .typeahead-list > li > a {
+  // Firefox workaround again
+  white-space: normal;
+}
+
+.kk-site-notice {
+  font-size: 90%;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  text-align: center;
+}
+
+a.kk-box-meta-link:link,
+a.kk-box-meta-link:active,
+a.kk-box-meta-link:visited {
+  color: #aaa;
+}
+
+a.kk-box-meta-link:hover {
+  color: #555;
+}
+
+.kk-header-container {
+  background: #ebebeb;
+  background: -moz-linear-gradient(top, #fafafa 0%, #ebebeb 100%);
+  background: -webkit-linear-gradient(top, #fafafa 0%, #ebebeb 100%);
+  background: linear-gradient(to bottom, #fafafa 0%, #ebebeb 100%);
+  margin-top: -20px;
+  padding-top: 10px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+
+  .breadcrumb {
+    background: none;
+  }
+}

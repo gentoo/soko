@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">USE flags</li>
+            </ol>
+
+            <h1>USE flags</h1>
+
+            <div class="alert alert-info">
+                Looking for the full USE flag index?
+                You can find it on our <a href="https://www.gentoo.org/support/use-flags/" class="alert-link">main website</a>.
+            </div>
+
+            <form action="/useflags/search" method="get" class="useflag-search">
+                <div class="typeahead-container">
+                    <div class="typeahead-field">
+      <span class="typeahead-query">
+        <input id="q" name="q" type="search" autocomplete="off" placeholder="Find USE flags">
+      </span>
+                        <span class="typeahead-button">
+        <button type="submit">
+          <span class="typeahead-search-icon"></span>
+        </button>
+      </span>
+                    </div>
+                </div>
+            </form>
+
+            <br>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Most widely used USE flags</h4>
+                </div>
+                <noscript>
+                    <div class="panel-body kk-panel-content-sorry">
+                        This feature requires JavaScript to work.
+                    </div>
+                </noscript>
+                <div class="panel-body kk-useflag-bubble-container" id="bubble-placeholder" style="display: none;">
+                </div>
+            </div>
+
+            <!-- javascript_pack_tag 'useflags' -->
+
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer" .Application }}
+
+
+<script src="/assets/useflags.js"></script>
+
+
+</body>
+</html>

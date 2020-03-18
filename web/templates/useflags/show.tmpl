@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head"}}
+<body>
+{{template "header" .Page}}
+
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/useflags">USE flags</a></li>
+                <li class="breadcrumb-item active">{{.Useflag.Name}}</li>
+            </ol>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <h1 class="stick-top">
+                        <span class="fa fa-fw fa-sliders"></span>
+                        {{.Useflag.Name}}
+                    </h1>
+                </div>
+                <div class="col-md-8">
+                    <div class="kk-useflag-group">Global USE flag</div>
+                    <p class="lead" style="margin: 0;">
+                        {{.Useflag.Description}}
+                    </p>
+                    <!-- TODO
+                    <div class="kk-useflag-group">Local USE flag</div>
+                    -->
+                </div>
+            </div>
+
+            <hr>
+
+
+            {{ if .LocalUseflags }}
+            <div class="card mb-4">
+                <h4 class="card-header">
+                    Packages describing “{{.Useflag.Name}}” as local USE flag
+                </h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <th>Package</th>
+                        <th>“{{.Useflag.Name}}” Flag Description</th>
+                        </thead>
+                        <tbody>
+                        <!-- TODO sort by package -->
+                        {{ range .LocalUseflags}}
+                        <tr>
+                            <th class="kk-nobreak-cell"><a href="/packages/{{.Package}}">{{.Package}}</a></th>
+                            <!-- TODO sanitization needed here? -->
+                            <td>{{.Description}}</td>
+                        </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{end}}
+
+            {{ if .Packages }}
+            <div class="card">
+                <h4 class="card-header">
+                    All packages providing a “{{.Useflag.Name}}” USE flag ({{len .Packages}})
+                </h4>
+                <div class="card-body">
+                    <ul class="kk-col-list kk-3col-list kk-useflag-listing">
+                        {{range .Packages}}
+                        <li><a href="/packages/{{.}}">{{.}}</a></li>
+                        {{end}}
+                    </ul>
+                </div>
+            </div>
+            {{end}}
+
+        </div>
+    </div>
+</div>
+
+
+{{template "footer" .Application }}
+
+
+
+</body>
+</html>

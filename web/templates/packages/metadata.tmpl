@@ -1,0 +1,100 @@
+{{define "metadata"}}
+<div class="card mb-3">
+    <div class="card-header">
+        <h4 class="mb-0">Package Metadata</h4>
+    </div>
+    <ul class="list-group kk-metadata-list">
+
+        <!-- TODO -->
+        {{ if gt (len (index .Versions 0).Homepage) 1 }}
+        <li class="kk-metadata-item list-group-item">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 kk-metadata-key">
+                    <span class="fa fa-fw fa-home"></span>
+                    Other homepage(s)
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    <a href="{{ (index (index .Versions 0).Homepage 1) }}">{{ (index (index .Versions 0).Homepage 1) }}</a>
+                </div>
+            </div>
+        </li>
+        {{end}}
+
+        {{ if .Package.Longdescription }}
+        <li class="kk-metadata-item list-group-item">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 kk-metadata-key">
+                    <span class="fa fa-fw fa-info"></span>
+                    Full description
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    {{ .Package.Longdescription }}
+                </div>
+            </div>
+        </li>
+        {{end}}
+
+
+        <li class="kk-metadata-item list-group-item">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 kk-metadata-key">
+                    <span class="fa fa-fw fa-sliders"></span>
+                    USE flags
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    {{ template "useflag" .}}
+                </div>
+            </div>
+        </li>
+
+
+        {{ if (index .Versions 0).License }}
+        <li class="kk-metadata-item list-group-item">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 kk-metadata-key">
+                    <span class="fa fa-fw fa-legal"></span>
+                    License
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    {{ (index .Versions 0).License }}
+                </div>
+            </div>
+        </li>
+        {{end}}
+
+        <!-- TODO
+        <li class="kk-metadata-item list-group-item">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 kk-metadata-key">
+                    <span class="fa fa-fw fa-group"></span>
+                    <%= t :herds %>
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    <%= render partial: 'herd', collection: package.herds.sort, as: 'herd', spacer_template: 'maintainer_spacer' %>
+                </div>
+            </div>
+        </li>
+        -->
+
+        {{ if .Package.Maintainers }}
+        <li class="kk-metadata-item list-group-item">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 kk-metadata-key">
+                    <span class="fa fa-fw fa-user"></span>
+                    Maintainer(s)
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    {{ range .Package.Maintainers }}
+                        {{if (ne .Name (index $.Package.Maintainers 0).Name)}}
+                            ,&nbsp;
+                        {{end}}
+                        <a title="{{.Email}}" href="mailto:{{.Email}}">{{.Name}}</a>
+                    {{end}}
+                </div>
+            </div>
+        </li>
+        {{end}}
+
+    </ul>
+</div>
+{{end}}

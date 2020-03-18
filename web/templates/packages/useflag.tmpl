@@ -1,0 +1,39 @@
+{{define "useflag"}}
+    {{ if .LocalUseflags }}
+        <span class="kk-useflag-group">Local Use Flgas</span>
+        <ul class="kk-useflag-container {{ if ge (len .LocalUseflags) 10 }}kk-useflag-container-many{{else}}kk-useflag-container-few{{end}}">
+        {{range .LocalUseflags}}
+            <li class="kk-useflag">
+                <a title="{{.Description}}" data-toggle="tooltip" href="/useflags/{{.Name}}">{{.Name}}</a>
+            </li>
+        {{end}}
+        </ul>
+
+    {{end}}
+
+
+
+    {{ if .GlobalUseflags }}
+        <span class="kk-useflag-group">Global Use Flgas</span>
+        <ul class="kk-useflag-container {{ if ge (len .GlobalUseflags) 10 }}kk-useflag-container-many{{else}}kk-useflag-container-few{{end}}">
+            {{range .GlobalUseflags}}
+                <li class="kk-useflag">
+                    <a title="{{.Description}}" data-toggle="tooltip" href="/useflags/{{.Name}}">{{.Name}}</a>
+                </li>
+            {{end}}
+        </ul>
+    {{end}}
+
+
+    {{ if .UseExpands }}
+        <!-- TODO group by -->
+        <span class="kk-useflag-group">{{ (index .UseExpands 0).UseExpand}} (Use Expand)</span>
+        <ul class="kk-useflag-container {{ if ge (len .UseExpands) 10 }}kk-useflag-container-many{{else}}kk-useflag-container-few{{end}}">
+            {{range .UseExpands}}
+                <li class="kk-useflag">
+                    <a title="{{.Description}}" data-toggle="tooltip" href="/useflags/{{.Name}}">{{ replaceall .Name (print .UseExpand "_") "" }}</a>
+                </li>
+            {{end}}
+        </ul>
+    {{end}}
+{{end}}

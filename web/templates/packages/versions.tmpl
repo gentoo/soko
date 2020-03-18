@@ -1,0 +1,38 @@
+{{define "versions"}}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h4 class="mb-0">
+                Available Versions
+                <span class="pull-right">
+            <a href="/about/help#keyword-legend" aria-label="Show table legend" title="Legend" class="kk-box-meta-link" tabindex="0" role="button" id="kk-keyword-legend-btn">
+              <span class="fa fa-fw fa-question-circle"></span>
+            </a>
+          </span>
+            </h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered kk-versions-table mb-0">
+                <thead>
+                <tr>
+                    <th class="kk-version kk-cell-sep-right">Version</th>
+                    <th class="kk-keyword-header kk-keyword">amd64</th>
+                    <th class="kk-keyword-header kk-keyword kk-cell-sep-right">x86</th>
+                    <th class="kk-keyword-header kk-keyword">alpha</th>
+                    <th class="kk-keyword-header kk-keyword">arm</th>
+                    <th class="kk-keyword-header kk-keyword">arm64</th>
+                    <th class="kk-keyword-header kk-keyword">hppa</th>
+                    <th class="kk-keyword-header kk-keyword">ia64</th>
+                    <th class="kk-keyword-header kk-keyword">ppc</th>
+                    <th class="kk-keyword-header kk-keyword">ppc64</th>
+                    <th class="kk-keyword-header kk-keyword">sparc</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{range $index, $element := .Package.Versions}}
+                        {{template "versionrow" (getReverse $index $.Package.Versions)}}
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{{end}}

@@ -1,0 +1,41 @@
+version: '3.2'
+
+services:
+  http-serving:
+    image: ${SOKO_IMAGE:-gentoo/soko:latest}
+    ports:
+      - 127.0.0.1:5000:5000
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    restart: always
+    depends_on:
+      - db
+  updater:
+    image: ${SOKO_UPDATER_IMAGE:-gentoo/soko-updater:latest}
+    volumes:
+      - type: "bind"
+        source: "/mnt/packages-tree"
+        target: "/mnt/packages-tree"
+      - type: "bind"
+        source: "/var/cache/pgo-egencache"
+        target: "/var/cache/pgo-egencache"
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    restart: always
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: ${SOKO_POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${SOKO_POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${SOKO_POSTGRES_DB:-soko}
+    volumes:
+      - ${POSTGRES_DATA_PATH:-/var/lib/postgresql/data}:/var/lib/postgresql/data
+  watchtower:
+    image: containrrr/watchtower:0.3.10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --label-enable

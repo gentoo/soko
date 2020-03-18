@@ -1,0 +1,266 @@
+.kk-keyword-header {
+  width: 5em;
+  font-size: 85%;
+  white-space: normal !important;
+}
+
+@media screen and (max-width: 767px) {
+  .kk-keyword-header {
+  min-width: 5em;
+  max-width: 5em;
+  }
+}
+
+.kk-version {
+  // Only set on small screens due to:
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=488725
+  @media screen and (max-width: 767px) {
+    white-space: nowrap;
+  }
+}
+
+.kk-slot {
+  color: #888;
+}
+
+.kk-keyword {
+  text-align: center;
+  white-space: normal !important;
+}
+
+.kk-search-result-header {
+  margin-top: 0;
+}
+
+.kk-metadata-key {
+  font-weight: bold;
+}
+
+.kk-package-title {
+  margin-bottom: 0;
+
+  .kk-package-icon {
+    float: left;
+  }
+
+  .kk-package-name {
+    margin-left: 1.3em;
+    word-wrap: break-word;
+  }
+
+  .kk-package-cat {
+    padding-left: 2.05em;
+  }
+}
+
+.kk-package-maindesc {
+  margin-top: 1.75em;
+  margin-bottom: 0;
+}
+
+.kk-package-homepage {
+  margin: 0;
+  margin-top: 1em;
+  font-size: 125%;
+}
+
+.kk-byline {
+  padding-left: 1em;
+  font-style: italic;
+}
+
+.kk-commit {
+  font-family: monospace;
+  color: #8a8a8a;
+}
+
+.kk-changelog-diffstat {
+  margin-top: 1em;
+  margin-bottom: 0;
+  border: 1px solid #ddd;
+  border-top: none;
+}
+
+.kk-changelog-diffstat {
+  a:link, a:visited, a:active {
+    color: #333;
+  }
+}
+
+.kk-changelog-diffstat-icon {
+  width: 20px;
+}
+
+.kk-octicon-spacer {
+  padding-left: 18px;
+}
+
+.kk-useflag a:link,
+.kk-useflag a:visited {
+  padding: 0.2em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+  background-color: #f0f0f0;
+  border: 1px solid #eaeaea;
+  border-radius: 2px;
+  color: #333;
+  font-family: monospace;
+  font-size: 90%;
+}
+
+.kk-useflag a:hover {
+  background-color: #e9e9e9;
+  color: #305d8c;
+}
+
+.kk-useflag a:hover {
+  text-decoration: none;
+}
+
+.kk-useflag {
+  list-style-type: none;
+  margin-bottom: 0.4em;
+  margin-right: 0.2em;
+}
+
+.kk-useflag-container {
+  padding: 0;
+  margin-top: .4em;
+
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.kk-useflag-container-many {
+  justify-content: space-between;
+}
+
+.kk-useflag-container-few {
+  justify-content: flex-start;
+}
+
+.kk-useflag-group {
+  color: #8a8a8a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 90%;
+}
+
+.kk-versions-table {
+  .kk-restrict-label,
+  .kk-properties-label {
+    float: right;
+
+    @media screen and (max-width: 767px) {
+      float: none;
+    }
+  }
+}
+
+.kk-version-card > p:last-of-type {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 767px) {
+  .kk-version-card > p:first-of-type {
+    margin-top: .5em;
+  }
+}
+
+.kk-mask {
+  background-color: #f2dede;
+}
+
+.kk-mask-details {
+  font-size: 90%;
+
+  .row {
+    margin-bottom: 1em;
+  }
+
+  margin-top: 1em;
+  margin-bottom: -1em;
+}
+
+.kk-mask-reason {
+  a:link,
+  a:visited {
+    color: inherit;
+    text-decoration: underline;
+  }
+}
+
+.kk-mask-atoms {
+  max-height: 3.6em;
+  overflow-x: scroll;
+  line-height: 1.2em;
+}
+
+.popover .kk-keyword-legend {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 240px;
+}
+
+.kk-package-detailed {
+  h4 {
+    margin-bottom: 5px;
+  }
+}
+
+.kk-package-detailed-toolbox {
+  float:right;
+  margin-top: -1.75em;
+}
+
+.kk-btn-xs {
+  padding: .0625rem .3125rem !important;
+  font-size: .75rem !important;
+  line-height: 1.5 !important;
+  border-radius: .2rem !important;
+  border-color: #adadad !important;
+}
+
+.kk-inline-changelog-entry {
+  font-size: 90%;
+  border-radius: 2px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  margin-top: 5px;
+
+  a:link,
+  a:active,
+  a:visited,
+  a:hover {
+    display: block;
+    padding: 5px;
+    color: #333;
+  }
+
+  .kk-commit-message {
+    margin-left: .5em;
+  }
+
+  .kk-commit {
+    color: #999;
+  }
+}
+
+.kk-success {
+  background-color: #dff0d8;
+}
+
+.kk-warning {
+  background-color: #fcf8e3;
+}
+
+.kk-danger {
+  background-color: #f2dede;
+}
+
+a.kk-ebuild-link {
+  &:link,
+  &:visited {
+    color: #333;
+  }
+}

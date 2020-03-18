@@ -1,0 +1,23 @@
+{{define "categoryheader"}}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/categories">Packages</a></li>
+        <li class="breadcrumb-item active">{{.Name}}</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h1 class="stick-top">
+                <span class="fa fa-fw fa-cubes"></span>
+                {{.Name}}
+            </h1>
+        </div>
+        <div class="col-md-8">
+            <p class="lead" style="margin: 0;">
+                {{.Description}}
+            </p>
+        </div>
+    </div>
+
+    <hr>
+{{end}}
