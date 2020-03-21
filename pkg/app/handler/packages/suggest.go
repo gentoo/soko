@@ -24,20 +24,19 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-
-	type Result struct{
-		Name    string `json:"name"`
-		Category string `json:"category"`
+	type Result struct {
+		Name        string `json:"name"`
+		Category    string `json:"category"`
 		description string `json:"description"`
 	}
 
-	type Results struct{
-		Results  []*Result `json:"results"`
+	type Results struct {
+		Results []*Result `json:"results"`
 	}
 
 	var results []*Result
 
-	for  _, gpackage := range packages{
+	for _, gpackage := range packages {
 		results = append(results, &Result{
 			Name:        gpackage.Name,
 			Category:    gpackage.Category,
@@ -46,7 +45,7 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := Results{
-		Results:  results,
+		Results: results,
 	}
 
 	b, err := json.Marshal(result)

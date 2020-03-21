@@ -42,11 +42,10 @@ func Port() string {
 	return getEnv("SOKO_PORT", "5000")
 }
 
-
-func getEnv(key string, fallback string) string{
-	if os.Getenv("") != ""{
+func getEnv(key string, fallback string) string {
+	if os.Getenv("") != "" {
 		return os.Getenv(key)
-	}else{
+	} else {
 		return fallback
 	}
 }

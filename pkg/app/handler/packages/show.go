@@ -15,7 +15,7 @@ import (
 func Show(w http.ResponseWriter, r *http.Request) {
 
 	if strings.HasSuffix(r.URL.Path, "/changelog.html") {
-		changelog(w,r)
+		changelog(w, r)
 		return
 	}
 
@@ -28,17 +28,17 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Select()
 
 	if err != nil {
-		http.NotFound(w,r)
+		http.NotFound(w, r)
 		return
 	}
 
 	localUseflags, globalUseflags, useExpands := getPackageUseflags(gpackage)
 
 	renderPackageTemplate("show",
-		           "*",
-		                        GetFuncMap(),
-		                        createPackageData(gpackage, localUseflags, globalUseflags, useExpands),
-		                        w)
+		"*",
+		GetFuncMap(),
+		createPackageData(gpackage, localUseflags, globalUseflags, useExpands),
+		w)
 }
 
 // changelog renders a template to show the changelog of a given package

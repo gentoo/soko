@@ -17,9 +17,9 @@ import (
 func ChangedFiles(startCommit string, endCommit string) []string {
 
 	cmd := exec.Command("git", "--no-pager",
-		                "diff",
-		                "--name-status",
-		                startCommit + ".." + endCommit)
+		"diff",
+		"--name-status",
+		startCommit+".."+endCommit)
 
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
@@ -27,7 +27,7 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 	}
 
-	return strings.Split(string(out),"\n")
+	return strings.Split(string(out), "\n")
 }
 
 // GetCommits returns the log message of all commits after
@@ -41,14 +41,14 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 func GetCommits(startCommit string, endCommit string) []string {
 
 	cmd := exec.Command("git", "--no-pager",
-		                "log",
-		                "--name-status",
-		                "--no-renames",
-		                "--no-merges",
-		                "--date=format:'%Y-%m-%dT%H:%M:%S%z'",
-		                "--format=fuller",
-		                "--reverse",
-		                startCommit + ".." + endCommit)
+		"log",
+		"--name-status",
+		"--no-renames",
+		"--no-merges",
+		"--date=format:'%Y-%m-%dT%H:%M:%S%z'",
+		"--format=fuller",
+		"--reverse",
+		startCommit+".."+endCommit)
 
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
@@ -56,7 +56,7 @@ func GetCommits(startCommit string, endCommit string) []string {
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 	}
 
-	return strings.Split(string(out),"\n\ncommit")
+	return strings.Split(string(out), "\n\ncommit")
 }
 
 // GetLatestCommit retrieves the latest commit in

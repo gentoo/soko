@@ -8,5 +8,5 @@ import "net/http"
 // a list of 50 recently stabilized versions
 func Stabilized(w http.ResponseWriter, r *http.Request) {
 	stabilizedVersions := GetStabilizedVersions(50)
-	RenderPackageTemplates("changedVersions","changedVersions", "changedVersionRow", GetFuncMap(), CreateFeedData("Stabilized", stabilizedVersions),w)
+	RenderPackageTemplates("changedVersions", "changedVersions", "changedVersionRow", GetFuncMap(), CreateFeedData("Stabilized", stabilizedVersions), w)
 }

@@ -5,8 +5,8 @@ package models
 import "time"
 
 type Application struct {
-	Id                     string `pg:",pk"`
-	LastUpdate             time.Time
-	LastCommit             string
-	Version                string
+	Id         string `pg:",pk"`
+	LastUpdate time.Time
+	LastCommit string
+	Version    string
 }

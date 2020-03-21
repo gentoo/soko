@@ -10,7 +10,7 @@ import (
 
 // GetApplicationData is used to retrieve the
 // application data from the database
-func GetApplicationData() models.Application{
+func GetApplicationData() models.Application {
 	// Select user by primary key.
 	applicationData := &models.Application{Id: "latest"}
 	err := database.DBCon.Select(applicationData)

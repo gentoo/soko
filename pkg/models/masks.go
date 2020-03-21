@@ -3,5 +3,5 @@
 package models
 
 type Mask struct {
-	Description                    string
+	Description string
 }

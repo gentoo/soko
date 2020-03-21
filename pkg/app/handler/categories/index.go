@@ -14,7 +14,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	var categories []*models.Category
 	err := database.DBCon.Model(&categories).Order("name ASC").Select()
 	if err != nil {
-		http.NotFound(w,r)
+		http.NotFound(w, r)
 		return
 	}
 

@@ -8,5 +8,5 @@ import "net/http"
 // a list of 50 recently added versions
 func Added(w http.ResponseWriter, r *http.Request) {
 	addedVersions := getAddedVersions(50)
-	RenderPackageTemplates("changedVersions","changedVersions", "changedVersionRow", GetFuncMap(), CreateFeedData("Added", addedVersions),w)
+	RenderPackageTemplates("changedVersions", "changedVersions", "changedVersionRow", GetFuncMap(), CreateFeedData("Added", addedVersions), w)
 }

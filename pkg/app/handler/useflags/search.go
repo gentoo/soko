@@ -24,24 +24,22 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-
 	data := struct {
-		Page          string
-		Search        string
-		Useflags      []models.Useflag
-		Application   models.Application
+		Page        string
+		Search      string
+		Useflags    []models.Useflag
+		Application models.Application
 	}{
-		Page:     "useflags",
-		Search: param,
-		Useflags: useflags,
+		Page:        "useflags",
+		Search:      param,
+		Useflags:    useflags,
 		Application: utils2.GetApplicationData(),
-
 	}
 
-	templates :=	template.Must(
-						template.Must(
-							template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
-							ParseGlob("web/templates/useflags/search.tmpl"))
+	templates := template.Must(
+		template.Must(
+			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/useflags/search.tmpl"))
 
 	templates.ExecuteTemplate(w, "search.tmpl", data)
 }

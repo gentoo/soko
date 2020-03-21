@@ -20,37 +20,36 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).Where("name = ? ", useflagName).Select()
 	if err != nil || len(useflags) < 1 {
-		http.NotFound(w,r)
+		http.NotFound(w, r)
 		return
 	}
 
 	useflag := useflags[0]
 	var localuseflags []models.Useflag
 
-	for _, use := range useflags{
-		if(use.Scope == "global"){
+	for _, use := range useflags {
+		if use.Scope == "global" {
 			useflag = use
-		}else if(use.Scope == "local"){
+		} else if use.Scope == "local" {
 			localuseflags = append(localuseflags, use)
-		}else if(use.Scope == "use_expand"){
+		} else if use.Scope == "use_expand" {
 			ShowUseExpand(w, r, use)
 			return
 		}
 	}
 
 	var versions []models.Version
-	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\"" + useflagName + "\"").Select()
+	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\""+useflagName+"\"").Select()
 	if err != nil {
 		panic(err)
 	}
 
 	var packages []string
-	for _, version := range versions{
+	for _, version := range versions {
 		packages = append(packages, version.Atom)
 	}
 
 	packages = utils.Deduplicate(packages)
-
 
 	data := struct {
 		Page          string
@@ -59,14 +58,14 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Packages      []string
 		Application   models.Application
 	}{
-		Page:     "useflags",
-		Useflag: useflag,
+		Page:          "useflags",
+		Useflag:       useflag,
 		LocalUseflags: localuseflags,
-		Packages:    packages,
-		Application: utils2.GetApplicationData(),
+		Packages:      packages,
+		Application:   utils2.GetApplicationData(),
 	}
 
-	templates :=	template.Must(
+	templates := template.Must(
 		template.Must(
 			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/useflags/show.tmpl"))
@@ -88,33 +87,33 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 	}
 
 	var versions []models.Version
-	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\"" + useExpand.Name + "\"").Select()
+	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\""+useExpand.Name+"\"").Select()
 	if err != nil {
 		panic(err)
 	}
 
 	var packages []string
-	for _, version := range versions{
+	for _, version := range versions {
 		packages = append(packages, version.Atom)
 	}
 
 	packages = utils.Deduplicate(packages)
 
 	data := struct {
-		Page          string
-		Useflag       models.Useflag
+		Page            string
+		Useflag         models.Useflag
 		OtherUseExpands []models.Useflag
-		Packages      []string
-		Application models.Application
+		Packages        []string
+		Application     models.Application
 	}{
-		Page:     "useflags",
-		Useflag:  useExpand,
+		Page:            "useflags",
+		Useflag:         useExpand,
 		OtherUseExpands: otheruseexpands,
-		Packages: packages,
-		Application: utils2.GetApplicationData(),
+		Packages:        packages,
+		Application:     utils2.GetApplicationData(),
 	}
 
-	templates :=	template.Must(
+	templates := template.Must(
 		template.Must(
 			template.New("Show").Funcs(funcMap).ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/useflags/showexpand.tmpl"))

@@ -27,28 +27,27 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Suggest struct {
-		Id  string `json:"id"`
-		Name string `json:"name"`
+		Id          string `json:"id"`
+		Name        string `json:"name"`
 		Description string `json:"description"`
 	}
 
 	type Suggestions struct {
-		Results          []Suggest `json:"results"`
+		Results []Suggest `json:"results"`
 	}
-
 
 	var suggests []Suggest
 
-	for _, useflag := range useflags{
+	for _, useflag := range useflags {
 		suggests = append(suggests, Suggest{
-			Id:     useflag.Id,
-			Name:     useflag.Name,
-			Description:     useflag.Description,
+			Id:          useflag.Id,
+			Name:        useflag.Name,
+			Description: useflag.Description,
 		})
 	}
 
 	suggestions := Suggestions{
-		Results:      suggests,
+		Results: suggests,
 	}
 
 	jsondata, err := json.Marshal(suggestions)

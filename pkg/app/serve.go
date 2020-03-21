@@ -3,13 +3,13 @@
 package app
 
 import (
+	"log"
+	"net/http"
 	"soko/pkg/app/handler/about"
 	"soko/pkg/app/handler/arches"
 	"soko/pkg/app/handler/categories"
 	"soko/pkg/app/handler/index"
 	"soko/pkg/app/handler/packages"
-	"log"
-	"net/http"
 	"soko/pkg/app/handler/useflags"
 	"soko/pkg/config"
 	"soko/pkg/database"
@@ -51,6 +51,6 @@ func Serve() {
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
 
-	log.Fatal(http.ListenAndServe(":" + config.Port(), nil))
+	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
 
 }

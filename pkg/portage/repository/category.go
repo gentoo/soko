@@ -42,17 +42,17 @@ func UpdateCategory(path string) {
 }
 
 // updateDeletedCategory deletes a category from the database
-func updateDeletedCategory(changedFile string){
+func updateDeletedCategory(changedFile string) {
 	splitted := strings.Split(changedFile, "/")
 	id := splitted[0]
 
-	category := &models.Category{ Name: id }
+	category := &models.Category{Name: id}
 	database.DBCon.Model(category).Delete()
 }
 
 // updateModifiedCategory adds a category to the database or
 // updates it. To do so, it parses the metadata from metadata.xml
-func updateModifiedCategory(changedFile string){
+func updateModifiedCategory(changedFile string) {
 	splitted := strings.Split(changedFile, "/")
 	id := splitted[0]
 
@@ -60,7 +60,7 @@ func updateModifiedCategory(changedFile string){
 	description := ""
 
 	for _, longdescription := range catmetadata.Longdescriptions {
-		if (longdescription.Lang == "en") {
+		if longdescription.Lang == "en" {
 			description = strings.TrimSpace(longdescription.Content)
 		}
 	}
@@ -79,7 +79,7 @@ func updateModifiedCategory(changedFile string){
 
 // GetCatMetadata reads and parses the category
 // metadata from the metadata.xml file
-func GetCatMetadata(path string) Catmetadata{
+func GetCatMetadata(path string) Catmetadata {
 	xmlFile, err := os.Open(path)
 	if err != nil {
 		fmt.Println(err)
@@ -91,16 +91,15 @@ func GetCatMetadata(path string) Catmetadata{
 	return catmetadata
 }
 
-
 // Descriptions of the category metadata.xml format
 
 type Catmetadata struct {
-	XMLName    xml.Name `xml:"catmetadata"`
+	XMLName          xml.Name          `xml:"catmetadata"`
 	Longdescriptions []Longdescription `xml:"longdescription"`
 }
 
 type Longdescription struct {
-	XMLName   xml.Name `xml:"longdescription"`
+	XMLName xml.Name `xml:"longdescription"`
 	Lang    string   `xml:"lang,attr"`
-	Content string `xml:",chardata"`
+	Content string   `xml:",chardata"`
 }

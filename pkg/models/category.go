@@ -3,7 +3,7 @@
 package models
 
 type Category struct {
-	Name                    string `pg:",pk"`
-	Description             string
-	Packages             []*Package `pg:",fk:category"`
+	Name        string `pg:",pk"`
+	Description string
+	Packages    []*Package `pg:",fk:category"`
 }

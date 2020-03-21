@@ -14,17 +14,17 @@ import (
 func Index(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
-		Page          string
+		Page        string
 		Application models.Application
 	}{
-		Page:     "useflags",
+		Page:        "useflags",
 		Application: utils2.GetApplicationData(),
 	}
 
-	templates :=	template.Must(
-						template.Must(
-							template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
-							ParseGlob("web/templates/useflags/index.tmpl"))
+	templates := template.Must(
+		template.Must(
+			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/useflags/index.tmpl"))
 
 	templates.ExecuteTemplate(w, "index.tmpl", data)
 }

@@ -21,14 +21,14 @@ var (
 // in case they don't alreay exist
 func CreateSchema() error {
 	for _, model := range []interface{}{(*models.Package)(nil),
-		                                (*models.Category)(nil),
-		                                (*models.Version)(nil),
-		                                (*models.Commit)(nil),
-		                                (*models.KeywordChange)(nil),
-		                                (*models.CommitToPackage)(nil),
-		                                (*models.CommitToVersion)(nil),
-		                                (*models.Useflag)(nil),
-		                                (*models.Application)(nil)} {
+		(*models.Category)(nil),
+		(*models.Version)(nil),
+		(*models.Commit)(nil),
+		(*models.KeywordChange)(nil),
+		(*models.CommitToPackage)(nil),
+		(*models.CommitToVersion)(nil),
+		(*models.Useflag)(nil),
+		(*models.Application)(nil)} {
 
 		err := DBCon.CreateTable(model, &orm.CreateTableOptions{
 			IfNotExists: true,
@@ -41,7 +41,7 @@ func CreateSchema() error {
 	return nil
 }
 
-type dbLogger struct { }
+type dbLogger struct{}
 
 func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Context, error) {
 	return c, nil
@@ -60,10 +60,10 @@ func Connect() {
 		User:     config.PostgresUser(),
 		Password: config.PostgresPass(),
 		Database: config.PostgresDb(),
-		Addr:  config.PostgresHost() + ":" + config.PostgresPort(),
+		Addr:     config.PostgresHost() + ":" + config.PostgresPort(),
 	})
 
-	if(config.Debug() == "true"){
+	if config.Debug() == "true" {
 		DBCon.AddQueryHook(dbLogger{})
 	}
 

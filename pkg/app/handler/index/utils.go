@@ -45,26 +45,26 @@ func getUpdatedVersions(n int) []*models.Version {
 	if err != nil {
 		panic(err)
 	}
-	for _, commit := range updates{
-		for _, changedVersion := range commit.ChangedVersions{
+	for _, commit := range updates {
+		for _, changedVersion := range commit.ChangedVersions {
 			changedVersion.Commits = changedVersion.Commits[:1]
 		}
 		updatedVersions = append(updatedVersions, commit.ChangedVersions...)
 	}
-	if(len(updatedVersions) > n){
+	if len(updatedVersions) > n {
 		updatedVersions = updatedVersions[:10]
 	}
 	return updatedVersions
 }
 
 // createPageData creates the data used in the template of the landing page
-func createPageData(packagecount int, addedPackages []models.Package, updatedVersions []*models.Version) interface{}{
+func createPageData(packagecount int, addedPackages []models.Package, updatedVersions []*models.Version) interface{} {
 	return struct {
-		Page             string
-		PackageCount     string
-		AddedPackages    []models.Package
-		UpdatedPackages    []*models.Version
-		Application      models.Application
+		Page            string
+		PackageCount    string
+		AddedPackages   []models.Package
+		UpdatedPackages []*models.Version
+		Application     models.Application
 	}{
 		Page:            "home",
 		Application:     utils.GetApplicationData(),
@@ -75,25 +75,24 @@ func createPageData(packagecount int, addedPackages []models.Package, updatedVer
 }
 
 // renderIndexTemplate renders all templates used for the landing page
-func renderIndexTemplate(w http.ResponseWriter, pageData interface{}){
-	templates :=	template.Must(
-						template.Must(
-							template.Must(
-								template.New("Show").
-									Funcs(getFuncMap()).
-									ParseGlob("web/templates/layout/*.tmpl")).
-									ParseGlob("web/templates/packages/changedVersionRow.tmpl")).
-									ParseGlob("web/templates/index/*.tmpl"))
-
+func renderIndexTemplate(w http.ResponseWriter, pageData interface{}) {
+	templates := template.Must(
+		template.Must(
+			template.Must(
+				template.New("Show").
+					Funcs(getFuncMap()).
+					ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/packages/changedVersionRow.tmpl")).
+			ParseGlob("web/templates/index/*.tmpl"))
 
 	templates.ExecuteTemplate(w, "show.tmpl", pageData)
 }
 
 // GetFuncMap returns the FuncMap used in templates
-func getFuncMap() template.FuncMap{
+func getFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"contains":     strings.Contains,
-		"mkSlice":      mkSlice,
+		"contains":        strings.Contains,
+		"mkSlice":         mkSlice,
 		"formatRestricts": packages.FormatRestricts,
 	}
 }
@@ -106,9 +105,9 @@ func formatPackageCount(packageCount int) string {
 		return packages[:3] + "," + packages[3:]
 	} else if len(packages) == 5 {
 		return packages[:2] + "," + packages[2:]
-	}else if len(packages) == 4 {
+	} else if len(packages) == 4 {
 		return packages[:1] + "," + packages[1:]
-	}else{
+	} else {
 		return packages
 	}
 }

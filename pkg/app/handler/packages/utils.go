@@ -36,7 +36,7 @@ func getAddedPackages(n int) []*models.Package {
 func getAddedVersions(n int) []*models.Version {
 	addedPackages := getAddedPackages(n)
 	var addedVersions []*models.Version
-	for _, addedPackage := range addedPackages{
+	for _, addedPackage := range addedPackages {
 		addedVersions = append(addedVersions, addedPackage.Versions...)
 	}
 	return addedVersions
@@ -58,13 +58,13 @@ func GetUpdatedVersions(n int) []*models.Version {
 	if err != nil {
 		panic(err)
 	}
-	for _, commit := range updates{
-		for _, changedVersion := range commit.ChangedVersions{
+	for _, commit := range updates {
+		for _, changedVersion := range commit.ChangedVersions {
 			changedVersion.Commits = changedVersion.Commits[:1]
 		}
 		updatedVersions = append(updatedVersions, commit.ChangedVersions...)
 	}
-	if(len(updatedVersions) > n){
+	if len(updatedVersions) > n {
 		updatedVersions = updatedVersions[:10]
 	}
 	return updatedVersions
@@ -85,8 +85,8 @@ func GetStabilizedVersions(n int) []*models.Version {
 	if err != nil {
 		panic(err)
 	}
-	for _, update := range updates{
-		if(update.Version != nil){
+	for _, update := range updates {
+		if update.Version != nil {
 			update.Version.Commits = []*models.Commit{update.Commit}
 			stabilizedVersions = append(stabilizedVersions, update.Version)
 		}
@@ -109,8 +109,8 @@ func GetKeywordedVersions(n int) []*models.Version {
 	if err != nil {
 		panic(err)
 	}
-	for _, update := range updates{
-		if(update.Version != nil){
+	for _, update := range updates {
+		if update.Version != nil {
 			update.Version.Commits = []*models.Commit{update.Commit}
 			stabilizedVersions = append(stabilizedVersions, update.Version)
 		}
@@ -120,27 +120,27 @@ func GetKeywordedVersions(n int) []*models.Version {
 
 // RenderPackageTemplates renders the given templates using the given data
 // One pattern can be used to specify templates
-func renderPackageTemplate(page string, templatepattern string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter){
+func renderPackageTemplate(page string, templatepattern string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
 	templates := template.Must(
-					template.Must(
-						template.New(page).
-							Funcs(funcMap).
-							ParseGlob("web/templates/layout/*.tmpl")).
-							ParseGlob("web/templates/packages/" + templatepattern + ".tmpl"))
+		template.Must(
+			template.New(page).
+				Funcs(funcMap).
+				ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/packages/" + templatepattern + ".tmpl"))
 	templates.ExecuteTemplate(w, page+".tmpl", data)
 }
 
 // RenderPackageTemplates renders the given templates using the given data
 // Two patterns can be used to specify templates
-func RenderPackageTemplates(page string, templatepattern1 string, templatepattern2 string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter){
+func RenderPackageTemplates(page string, templatepattern1 string, templatepattern2 string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
 	templates := template.Must(
 		template.Must(
 			template.Must(
 				template.New(page).
 					Funcs(funcMap).
 					ParseGlob("web/templates/layout/*.tmpl")).
-					ParseGlob("web/templates/packages/" + templatepattern1 + ".tmpl")).
-					ParseGlob("web/templates/packages/" + templatepattern2 + ".tmpl"))
+				ParseGlob("web/templates/packages/" + templatepattern1 + ".tmpl")).
+			ParseGlob("web/templates/packages/" + templatepattern2 + ".tmpl"))
 	templates.ExecuteTemplate(w, page+".tmpl", data)
 }
 
@@ -151,47 +151,47 @@ func getAtom(r *http.Request) string {
 }
 
 // getSearchData returns the data used in search templates
-func getSearchData(packages []models.Package, search string) interface{}{
-	return struct{
-		Page           string
-		Search         string
-		Packages     []models.Package
-		Application    models.Application
+func getSearchData(packages []models.Package, search string) interface{} {
+	return struct {
+		Page        string
+		Search      string
+		Packages    []models.Package
+		Application models.Application
 	}{
-		Page:          "packages",
-		Search:        search,
-		Packages:      packages,
-		Application:   utils.GetApplicationData(),
+		Page:        "packages",
+		Search:      search,
+		Packages:    packages,
+		Application: utils.GetApplicationData(),
 	}
 }
 
 // getChangelogData returns the data used in changelog templates
-func getChangelogData(commits []*models.Commit, atom string) interface{}{
+func getChangelogData(commits []*models.Commit, atom string) interface{} {
 	return struct {
-		Commits  []*models.Commit
-		Atom       string
+		Commits []*models.Commit
+		Atom    string
 	}{
-		Commits:     commits,
-		Atom:        atom,
+		Commits: commits,
+		Atom:    atom,
 	}
 }
 
 // GetFuncMap returns the FuncMap used in templates
-func GetFuncMap() template.FuncMap{
+func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"contains":     strings.Contains,
-		"replaceall":   strings.ReplaceAll,
-		"gravatar":     gravatar,
-		"mkSlice":      mkSlice,
-		"getReverse":   getReverse,
-		"tolower":		strings.ToLower,
+		"contains":        strings.Contains,
+		"replaceall":      strings.ReplaceAll,
+		"gravatar":        gravatar,
+		"mkSlice":         mkSlice,
+		"getReverse":      getReverse,
+		"tolower":         strings.ToLower,
 		"formatRestricts": FormatRestricts,
 	}
 }
 
 // gravatar creates a link to the gravatar
 // based on the email
-func gravatar(email string) string{
+func gravatar(email string) string {
 	hasher := md5.Sum([]byte(email))
 	hash := hex.EncodeToString(hasher[:])
 	return "https://www.gravatar.com/avatar/" + hash + "?s=13&amp;d=retro"
@@ -204,7 +204,7 @@ func mkSlice(args ...interface{}) []interface{} {
 
 // getReverse returns the element of a slice in
 // reverse direction based on the index
-func getReverse(index int, versions []*models.Version) *models.Version{
+func getReverse(index int, versions []*models.Version) *models.Version {
 	return versions[len(versions)-1-index]
 }
 
@@ -219,64 +219,63 @@ func getParameterValue(parameterName string, r *http.Request) string {
 // flags and use expands for a given package
 func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, []models.Useflag) {
 	var localUseflags, globalUseflags, useExpands []models.Useflag
-	for _, useflag := range gpackage.Versions[len(gpackage.Versions)-1].Useflags{
+	for _, useflag := range gpackage.Versions[len(gpackage.Versions)-1].Useflags {
 
 		var tmp_useflags []models.Useflag
 		err := database.DBCon.Model(&tmp_useflags).
-			Where("Name LIKE ?", "%" + strings.Replace(useflag, "+", "", 1)).
+			Where("Name LIKE ?", "%"+strings.Replace(useflag, "+", "", 1)).
 			Select()
 
 		if err != nil {
 			panic(err)
 		}
 
-		if(len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "global"){
+		if len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "global" {
 			globalUseflags = append(globalUseflags, tmp_useflags[0])
-		}else if(len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "local") {
+		} else if len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "local" {
 			localUseflags = append(localUseflags, tmp_useflags[0])
-		}else if(len(tmp_useflags) >= 1){
+		} else if len(tmp_useflags) >= 1 {
 			useExpands = append(useExpands, tmp_useflags[0])
 		}
 	}
 	return localUseflags, globalUseflags, useExpands
 }
 
-
 // createPackageData creates the data used in the show package template
-func createPackageData(gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands []models.Useflag) interface{}{
+func createPackageData(gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands []models.Useflag) interface{} {
 	return struct {
-		Page                  string
-		Package               models.Package
-		Versions            []*models.Version
-		Masks               []models.Mask
-		LocalUseflags       []models.Useflag
-		GlobalUseflags      []models.Useflag
-		UseExpands          []models.Useflag
-		Application           models.Application
+		Page           string
+		Package        models.Package
+		Versions       []*models.Version
+		Masks          []models.Mask
+		LocalUseflags  []models.Useflag
+		GlobalUseflags []models.Useflag
+		UseExpands     []models.Useflag
+		Application    models.Application
 	}{
-		Page:                 "packages",
-		Package:              *gpackage,
-		Versions:             gpackage.Versions,
-		LocalUseflags:        localUseflags,
-		GlobalUseflags:       globalUseflags,
-		UseExpands:           useExpands,
-		Masks:                nil,
-		Application:          utils.GetApplicationData(),
+		Page:           "packages",
+		Package:        *gpackage,
+		Versions:       gpackage.Versions,
+		LocalUseflags:  localUseflags,
+		GlobalUseflags: globalUseflags,
+		UseExpands:     useExpands,
+		Masks:          nil,
+		Application:    utils.GetApplicationData(),
 	}
 }
 
 // CreateFeedData creates the data used in changedVersions template
-func CreateFeedData(name string, versions []*models.Version) interface{}{
+func CreateFeedData(name string, versions []*models.Version) interface{} {
 	return struct {
-		Page                  string
-		Name                  string
-		Versions            []*models.Version
-		Application           models.Application
+		Page        string
+		Name        string
+		Versions    []*models.Version
+		Application models.Application
 	}{
-		Page:                 "packages",
-		Name:                 name,
-		Versions:             versions,
-		Application:          utils.GetApplicationData(),
+		Page:        "packages",
+		Name:        name,
+		Versions:    versions,
+		Application: utils.GetApplicationData(),
 	}
 }
 
@@ -284,7 +283,7 @@ func CreateFeedData(name string, versions []*models.Version) interface{}{
 // list of capitalized first letters of the package restricts
 func FormatRestricts(restricts []string) string {
 	var result []string
-	for _, restrict := range restricts{
+	for _, restrict := range restricts {
 		if restrict != "(" && restrict != ")" && !strings.HasSuffix(restrict, "?") {
 			result = append(result, strings.ToUpper(string(restrict[0])))
 		}

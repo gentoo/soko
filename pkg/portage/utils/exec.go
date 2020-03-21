@@ -14,5 +14,5 @@ func Exec(dir string, command string, arg ...string) ([]string, error) {
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 
-	return strings.Split(strings.TrimSpace(string(out)),"\n"), err
+	return strings.Split(strings.TrimSpace(string(out)), "\n"), err
 }

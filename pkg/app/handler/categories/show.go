@@ -13,12 +13,12 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	category := new(models.Category)
 	err := database.DBCon.Model(category).
-		                  Where("name = ?", getCategoryName(r)).
-		                  Relation("Packages").
-		                  Relation("Packages.Versions").
-		                  Select()
+		Where("name = ?", getCategoryName(r)).
+		Relation("Packages").
+		Relation("Packages.Versions").
+		Select()
 	if err != nil {
-		http.NotFound(w,r)
+		http.NotFound(w, r)
 		return
 	}
 

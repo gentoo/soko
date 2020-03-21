@@ -40,7 +40,7 @@ func UpdateVersion(path string) {
 }
 
 // updateDeletedVersion deletes a package version from the database
-func updateDeletedVersion(changedFile string){
+func updateDeletedVersion(changedFile string) {
 	splitted := strings.Split(strings.ReplaceAll(changedFile, ".ebuild", ""), "/")
 	category := splitted[0]
 	packagename := splitted[1]
@@ -60,7 +60,7 @@ func updateDeletedVersion(changedFile string){
 
 // updateModifiedVersion adds a package version to the database or
 // updates it. To do so, it parses the metadata from the md5-cache
-func updateModifiedVersion(changedFile string){
+func updateModifiedVersion(changedFile string) {
 	splitted := strings.Split(strings.ReplaceAll(changedFile, ".ebuild", ""), "/")
 	category := splitted[0]
 	packagename := splitted[1]

@@ -48,7 +48,7 @@ func Update() {
 // retrieving the last commit in the database (if present) and parsing all
 // following commits. In case no last commit is present a full import
 // starting with the first commit in the tree is done.
-func updateMetadata(){
+func updateMetadata() {
 
 	log.Print("Start updating changed metadata")
 
@@ -68,7 +68,7 @@ func updateMetadata(){
 //  - packages
 //  - versions
 // changed data is determined by parsing all commits since the last update.
-func updatePackageData(){
+func updatePackageData() {
 
 	log.Print("Start updating changed package data")
 
@@ -86,17 +86,17 @@ func updatePackageData(){
 // determined by retrieving the last commit in the database (if present)
 // and parsing all following commits. In case no last commit is present
 // a full import starting with the first commit in the tree is done.
-func updateHistory(){
+func updateHistory() {
 
 	log.Print("Start updating the history")
 
 	latestCommit := repository.UpdateCommits()
 
 	application := &models.Application{
-		Id:                "latest",
-		LastUpdate:        time.Now(),
-		Version:           config.Version(),
-		LastCommit:        latestCommit,
+		Id:         "latest",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+		LastCommit: latestCommit,
 	}
 
 	_, err := database.DBCon.Model(application).

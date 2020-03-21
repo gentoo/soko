@@ -10,24 +10,24 @@ import (
 )
 
 // renderAboutTemplate renders a specific about template
-func renderAboutTemplate(w http.ResponseWriter, r *http.Request, page string){
-	templates :=	template.Must(
-						template.Must(
-							template.New(page).
-								ParseGlob("web/templates/layout/*.tmpl")).
-								ParseGlob("web/templates/about/" + page + ".tmpl"))
+func renderAboutTemplate(w http.ResponseWriter, r *http.Request, page string) {
+	templates := template.Must(
+		template.Must(
+			template.New(page).
+				ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/about/" + page + ".tmpl"))
 
-	templates.ExecuteTemplate(w, page + ".tmpl", getPageData())
+	templates.ExecuteTemplate(w, page+".tmpl", getPageData())
 }
 
 // getPageData returns the data used
 // in all about templates
-func getPageData() interface{}{
+func getPageData() interface{} {
 	return struct {
-		Page            string
-		Application     models.Application
+		Page        string
+		Application models.Application
 	}{
-		Page:           "about",
-		Application:    utils.GetApplicationData(),
+		Page:        "about",
+		Application: utils.GetApplicationData(),
 	}
 }

@@ -13,7 +13,7 @@ import (
 // UpdateUse reads all USE flags descriptions from the given file in
 // case the given file contains USE flags descriptions and imports
 // each USE flag into the database
-func UpdateUse(path string){
+func UpdateUse(path string) {
 
 	splittedLine := strings.Split(path, "\t")
 
@@ -34,9 +34,9 @@ func UpdateUse(path string){
 				scope := getScope(changedFile)
 				var err error
 
-				if scope == "local" || scope == "global"{
+				if scope == "local" || scope == "global" {
 					err = createUseflag(rawFlag, scope)
-				} else if scope == "use_expand"{
+				} else if scope == "use_expand" {
 					file := strings.Split(changedFile, "/")[2]
 					err = createUseExpand(rawFlag, file)
 				}
@@ -56,16 +56,16 @@ func createUseflag(rawFlag string, scope string) error {
 	splitted := strings.Split(line[0], ":")
 	gpackage := ""
 
-	if scope == "local"{
+	if scope == "local" {
 		gpackage = splitted[0]
 	}
 
 	useflag := &models.Useflag{
-		Id:                  line[0] + "-" + scope,
-		Package:             gpackage,
-		Name:                splitted[len(splitted)-1],
-		Scope:               scope,
-		Description:         strings.Join(line[1:], ""),
+		Id:          line[0] + "-" + scope,
+		Package:     gpackage,
+		Name:        splitted[len(splitted)-1],
+		Scope:       scope,
+		Description: strings.Join(line[1:], ""),
 	}
 
 	_, err := database.DBCon.Model(useflag).OnConflict("(id) DO UPDATE").Insert()
@@ -76,16 +76,16 @@ func createUseflag(rawFlag string, scope string) error {
 // createUseExpand parses the description from the file,
 // creates a USE expand flag and imports it into the database
 func createUseExpand(rawFlag string, file string) error {
-	name := strings.ReplaceAll(file, ".desc","")
+	name := strings.ReplaceAll(file, ".desc", "")
 	line := strings.Split(rawFlag, " - ")
 	id := name + "_" + line[0]
 
 	useExpand := &models.Useflag{
-		Id:                  id,
-		Name:                name + "_" + line[0],
-		Scope:               "use_expand",
-		Description:         strings.Join(line[1:], ""),
-		UseExpand:           name,
+		Id:          id,
+		Name:        name + "_" + line[0],
+		Scope:       "use_expand",
+		Description: strings.Join(line[1:], ""),
+		UseExpand:   name,
 	}
 
 	_, err := database.DBCon.Model(useExpand).OnConflict("(id) DO UPDATE").Insert()

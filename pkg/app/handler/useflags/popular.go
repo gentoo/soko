@@ -21,24 +21,24 @@ func Popular(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	dict:= make(map[string]int)
-	for _ , version :=  range versions {
-		for _ , useflag :=  range version.Useflags {
-			if (useflag != "test" && useflag != "doc" && useflag != "debug" && len(strings.Split(useflag, "_")) < 2) {
+	dict := make(map[string]int)
+	for _, version := range versions {
+		for _, useflag := range version.Useflags {
+			if useflag != "test" && useflag != "doc" && useflag != "debug" && len(strings.Split(useflag, "_")) < 2 {
 				dict[strings.ReplaceAll(useflag, "+", "")] = dict[strings.ReplaceAll(useflag, "+", "")] + 1
 			}
 		}
 	}
 
 	type kv struct {
-		Key   string `json:"name"`
-		Value int `json:"size"`
+		Key      string       `json:"name"`
+		Value    int          `json:"size"`
 		Children types.Object `json:"children"`
 	}
 
 	type p struct {
-		Name   string `json:"name"`
-		Children []kv `json:"children"`
+		Name     string `json:"name"`
+		Children []kv   `json:"children"`
 	}
 
 	var ss []kv
@@ -50,14 +50,12 @@ func Popular(w http.ResponseWriter, r *http.Request) {
 		return ss[i].Value > ss[j].Value
 	})
 
-
 	popular := p{
 		Name:     "flags",
 		Children: ss[0:66],
 	}
 
 	b, err := json.Marshal(popular)
-
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)

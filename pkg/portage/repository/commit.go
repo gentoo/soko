@@ -31,9 +31,8 @@ func UpdateCommits() string {
 	return latestCommit
 }
 
-
 // processCommit parses a single commit log output and updates it into the database
-func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit string) string{
+func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit string) string {
 
 	commitLines := strings.Split(rawCommit, "\n")
 
@@ -110,7 +109,7 @@ func processChangedFiles(PrecedingCommits int, PrecedingCommitsOffset int, commi
 		} else if strings.HasPrefix(commitLine, "A") {
 
 			addedFiles = addChangedFile(addedFiles, path, "A")
-			updateFirstCommitOfPackage(path, commitLine, PrecedingCommitsOffset + PrecedingCommits + 1)
+			updateFirstCommitOfPackage(path, commitLine, PrecedingCommitsOffset+PrecedingCommits+1)
 			createAddedKeywords(id, path, commitLine)
 
 		}
@@ -137,13 +136,12 @@ func logProgess(counter int) {
 	}
 }
 
-
-func linkCommitToPackage(commitLine string, path string, id string){
+func linkCommitToPackage(commitLine string, path string, id string) {
 	var commitToPackage *models.CommitToPackage
 	if (len(strings.Split(commitLine, "/")) >= 3) &&
 		(strings.HasPrefix(commitLine, "M") ||
-		 strings.HasPrefix(commitLine, "D") ||
-		 strings.HasPrefix(commitLine, "A")) {
+			strings.HasPrefix(commitLine, "D") ||
+			strings.HasPrefix(commitLine, "A")) {
 
 		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
 
@@ -162,8 +160,7 @@ func linkCommitToPackage(commitLine string, path string, id string){
 	}
 }
 
-
-func linkCommitToVersion(commitLine string, path string, id string){
+func linkCommitToVersion(commitLine string, path string, id string) {
 	var commitToVersion *models.CommitToVersion
 	if (strings.HasPrefix(commitLine, "M") ||
 		strings.HasPrefix(commitLine, "D") ||
@@ -188,8 +185,7 @@ func linkCommitToVersion(commitLine string, path string, id string){
 	}
 }
 
-
-func createKeywordChange(id string, path string, commitLine string){
+func createKeywordChange(id string, path string, commitLine string) {
 
 	if !strings.HasSuffix(path, ".ebuild") || !(len(strings.Split(commitLine, "/")) >= 3) {
 		return
@@ -253,8 +249,7 @@ func createKeywordChange(id string, path string, commitLine string){
 	}
 }
 
-
-func createAddedKeywords(id string, path string, commitLine string){
+func createAddedKeywords(id string, path string, commitLine string) {
 	var change *models.KeywordChange
 	if strings.HasSuffix(strings.TrimSpace(strings.Split(commitLine, "\t")[1]), ".ebuild") &&
 		(len(strings.Split(commitLine, "/")) >= 3) {
@@ -294,8 +289,7 @@ func createAddedKeywords(id string, path string, commitLine string){
 	}
 }
 
-
-func updateFirstCommitOfPackage(path string, commitLine string, precedingCommits int){
+func updateFirstCommitOfPackage(path string, commitLine string, precedingCommits int) {
 	// Added Package
 	if strings.HasSuffix(path, "metadata.xml") && len(strings.Split(path, "/")) == 3 {
 
@@ -312,8 +306,7 @@ func updateFirstCommitOfPackage(path string, commitLine string, precedingCommits
 	}
 }
 
-
-func addChangedFile(changedFiles []*models.ChangedFile, path string, status string) []*models.ChangedFile{
+func addChangedFile(changedFiles []*models.ChangedFile, path string, status string) []*models.ChangedFile {
 	return append(changedFiles, &models.ChangedFile{
 		Path:       path,
 		ChangeType: status,
