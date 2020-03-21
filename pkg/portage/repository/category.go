@@ -4,12 +4,12 @@ package repository
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 )
@@ -47,7 +47,13 @@ func updateDeletedCategory(changedFile string) {
 	id := splitted[0]
 
 	category := &models.Category{Name: id}
-	database.DBCon.Model(category).Delete()
+	_, err := database.DBCon.Model(category).WherePK().Delete()
+
+	if err != nil {
+		logger.Error.Println("Error during deleting category " + id)
+		logger.Error.Println(err)
+	}
+
 }
 
 // updateModifiedCategory adds a category to the database or
@@ -73,7 +79,8 @@ func updateModifiedCategory(changedFile string) {
 	_, err := database.DBCon.Model(category).OnConflict("(name) DO UPDATE").Insert()
 
 	if err != nil {
-		panic(err)
+		logger.Error.Println("Error during updating category " + id)
+		logger.Error.Println(err)
 	}
 }
 
@@ -82,7 +89,8 @@ func updateModifiedCategory(changedFile string) {
 func GetCatMetadata(path string) Catmetadata {
 	xmlFile, err := os.Open(path)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error.Println("Error during reading category metadata")
+		logger.Error.Println(err)
 	}
 	defer xmlFile.Close()
 	byteValue, _ := ioutil.ReadAll(xmlFile)

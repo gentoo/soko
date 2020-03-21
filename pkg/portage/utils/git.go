@@ -3,10 +3,10 @@
 package utils
 
 import (
-	"log"
 	"os/exec"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 )
@@ -15,7 +15,7 @@ import (
 // between the startCommit and the endCommit. The status of the
 // change as well as the path to the file is returned for each file
 func ChangedFiles(startCommit string, endCommit string) []string {
-
+	var changedFiles []string
 	cmd := exec.Command("git", "--no-pager",
 		"diff",
 		"--name-status",
@@ -24,10 +24,12 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		logger.Error.Println("ERROR: cmd.Run() failed with %s\n", err)
+		return changedFiles
 	}
 
-	return strings.Split(string(out), "\n")
+	changedFiles = strings.Split(string(out), "\n")
+	return changedFiles
 }
 
 // GetCommits returns the log message of all commits after
@@ -39,7 +41,7 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 //  - includes the status of the changed files
 // Furthermore the commits are in reverse order.
 func GetCommits(startCommit string, endCommit string) []string {
-
+	var commits []string
 	cmd := exec.Command("git", "--no-pager",
 		"log",
 		"--name-status",
@@ -53,10 +55,12 @@ func GetCommits(startCommit string, endCommit string) []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		logger.Error.Println("cmd.Run() failed with %s\n", err)
+		return commits
 	}
 
-	return strings.Split(string(out), "\n\ncommit")
+	commits = strings.Split(string(out), "\n\ncommit")
+	return commits
 }
 
 // GetLatestCommit retrieves the latest commit in

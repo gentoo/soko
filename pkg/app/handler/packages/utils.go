@@ -5,11 +5,13 @@ package packages
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/v9/orm"
 	"html/template"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	utils2 "soko/pkg/utils"
 	"strings"
@@ -25,8 +27,9 @@ func getAddedPackages(n int) []*models.Package {
 		Relation("Versions").
 		Relation("Versions.Commits").
 		Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		logger.Error.Println("Error during fetching added packages from database")
+		logger.Error.Println(err)
 	}
 	return addedPackages
 }
@@ -56,7 +59,7 @@ func GetUpdatedVersions(n int) []*models.Version {
 		}).
 		Select()
 	if err != nil {
-		panic(err)
+		return updatedVersions
 	}
 	for _, commit := range updates {
 		for _, changedVersion := range commit.ChangedVersions {
@@ -83,7 +86,7 @@ func GetStabilizedVersions(n int) []*models.Version {
 		Limit(n).
 		Select()
 	if err != nil {
-		panic(err)
+		return stabilizedVersions
 	}
 	for _, update := range updates {
 		if update.Version != nil {
@@ -97,7 +100,7 @@ func GetStabilizedVersions(n int) []*models.Version {
 // GetKeywordedVersions returns a list of recently keyworded
 // versions containing a given number of versions
 func GetKeywordedVersions(n int) []*models.Version {
-	var stabilizedVersions []*models.Version
+	var keywordedVersions []*models.Version
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
 		Relation("Version").
@@ -107,15 +110,15 @@ func GetKeywordedVersions(n int) []*models.Version {
 		Limit(n).
 		Select()
 	if err != nil {
-		panic(err)
+		return keywordedVersions
 	}
 	for _, update := range updates {
 		if update.Version != nil {
 			update.Version.Commits = []*models.Commit{update.Commit}
-			stabilizedVersions = append(stabilizedVersions, update.Version)
+			keywordedVersions = append(keywordedVersions, update.Version)
 		}
 	}
-	return stabilizedVersions
+	return keywordedVersions
 }
 
 // RenderPackageTemplates renders the given templates using the given data
@@ -226,8 +229,9 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 			Where("Name LIKE ?", "%"+strings.Replace(useflag, "+", "", 1)).
 			Select()
 
-		if err != nil {
-			panic(err)
+		if err != nil && err != pg.ErrNoRows {
+			logger.Error.Println("Error during fetching added packages from database")
+			logger.Error.Println(err)
 		}
 
 		if len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "global" {

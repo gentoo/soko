@@ -3,10 +3,10 @@
 package repository
 
 import (
-	"log"
 	"os/exec"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strconv"
@@ -19,14 +19,14 @@ import (
 // and parsing all following commits. In case no last commit is present
 // a full import starting with the first commit in the tree is done.
 func UpdateCommits() string {
-	log.Print("Start updating commits")
+	logger.Info.Println("Start updating commits")
 
 	latestCommit, PrecedingCommitsOffset := utils.GetLatestCommitAndPreceeding()
 
 	for PrecedingCommits, rawCommit := range utils.GetCommits(latestCommit, "HEAD") {
 		latestCommit = processCommit(PrecedingCommits, PrecedingCommitsOffset, rawCommit)
 	}
-	log.Print("Finished updating commits")
+	logger.Info.Println("Finished updating commits")
 
 	return latestCommit
 }
@@ -75,7 +75,8 @@ func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit s
 	_, err := database.DBCon.Model(commit).OnConflict("(id) DO UPDATE").Insert()
 
 	if err != nil {
-		panic(err)
+		logger.Error.Println("Error during updating commit: " + id)
+		logger.Error.Println(err)
 	}
 	return id
 }
@@ -129,10 +130,10 @@ func processChangedFiles(PrecedingCommits int, PrecedingCommitsOffset int, commi
 // logProgess logs the progress of a loop
 func logProgess(counter int) {
 	if counter%1000 == 0 {
-		log.Println("Processed commits: " + strconv.Itoa(counter))
+		logger.Info.Println("Processed commits: " + strconv.Itoa(counter))
 	} else if counter == 1 {
 		// The initial commit is *huge* that's why we log it as well
-		log.Println("Processed first commit.")
+		logger.Info.Println("Processed first commit.")
 	}
 }
 
@@ -145,8 +146,9 @@ func linkCommitToPackage(commitLine string, path string, id string) {
 
 		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
 
+		commitToPackageId := id + "-" + pathParts[0] + "/" + strings.Split(commitLine, "/")[1]
 		commitToPackage = &models.CommitToPackage{
-			Id:          id + "-" + pathParts[0] + "/" + strings.Split(commitLine, "/")[1],
+			Id:          commitToPackageId,
 			CommitId:    id,
 			PackageAtom: pathParts[0] + "/" + strings.Split(commitLine, "/")[1],
 		}
@@ -154,7 +156,8 @@ func linkCommitToPackage(commitLine string, path string, id string) {
 		_, err := database.DBCon.Model(commitToPackage).OnConflict("(id) DO NOTHING").Insert()
 
 		if err != nil {
-			panic(err)
+			logger.Error.Println("Error during updating CommitToPackage: " + commitToPackageId)
+			logger.Error.Println(err)
 		}
 
 	}
@@ -170,8 +173,9 @@ func linkCommitToVersion(commitLine string, path string, id string) {
 
 		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
 
+		commitToVersionId := id + "-" + pathParts[0] + "/" + pathParts[2]
 		commitToVersion = &models.CommitToVersion{
-			Id:        id + "-" + pathParts[0] + "/" + pathParts[2],
+			Id:        commitToVersionId,
 			CommitId:  id,
 			VersionId: pathParts[0] + "/" + pathParts[2],
 		}
@@ -179,7 +183,8 @@ func linkCommitToVersion(commitLine string, path string, id string) {
 		_, err := database.DBCon.Model(commitToVersion).OnConflict("(id) DO NOTHING").Insert()
 
 		if err != nil {
-			panic(err)
+			logger.Error.Println("Error during updating CommitToVersion: " + commitToVersionId)
+			logger.Error.Println(err)
 		}
 
 	}
@@ -196,7 +201,7 @@ func createKeywordChange(id string, path string, commitLine string) {
 	raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
-			log.Println("WARNING: Problem parsing file")
+			logger.Error.Println("Problem parsing file")
 			return
 		}
 	}
@@ -230,8 +235,9 @@ func createKeywordChange(id string, path string, commitLine string) {
 
 		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
 
+		keywordChangeId := id + "-" + strings.TrimSpace(strings.Split(commitLine, "\t")[1])
 		change = &models.KeywordChange{
-			Id:         id + "-" + strings.TrimSpace(strings.Split(commitLine, "\t")[1]),
+			Id:         keywordChangeId,
 			CommitId:   id,
 			VersionId:  pathParts[0] + "/" + pathParts[2],
 			PackageId:  pathParts[0] + "/" + strings.Split(commitLine, "/")[1],
@@ -243,7 +249,8 @@ func createKeywordChange(id string, path string, commitLine string) {
 		_, err := database.DBCon.Model(change).OnConflict("(id) DO UPDATE").Insert()
 
 		if err != nil {
-			panic(err)
+			logger.Error.Println("Error updating Keyword change: " + keywordChangeId)
+			logger.Error.Println(err)
 		}
 
 	}
@@ -257,7 +264,8 @@ func createAddedKeywords(id string, path string, commitLine string) {
 		raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
 		if err != nil {
 			if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
-				log.Println("WARNING: Problem parsing file")
+				logger.Error.Println("Problem parsing file")
+				logger.Error.Println(exitError)
 				return
 			}
 		}
@@ -268,8 +276,9 @@ func createAddedKeywords(id string, path string, commitLine string) {
 				pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
 				keywords := strings.Split(strings.ReplaceAll(strings.ReplaceAll(line, "+KEYWORDS=", ""), "\"", ""), " ")
 
+				keywordChangeId := id + "-" + strings.TrimSpace(strings.Split(commitLine, "\t")[1])
 				change = &models.KeywordChange{
-					Id:        id + "-" + strings.TrimSpace(strings.Split(commitLine, "\t")[1]),
+					Id:        keywordChangeId,
 					CommitId:  id,
 					VersionId: pathParts[0] + "/" + pathParts[2],
 					PackageId: pathParts[0] + "/" + strings.Split(commitLine, "/")[1],
@@ -280,7 +289,8 @@ func createAddedKeywords(id string, path string, commitLine string) {
 				_, err := database.DBCon.Model(change).OnConflict("(id) DO UPDATE").Insert()
 
 				if err != nil {
-					panic(err)
+					logger.Error.Println("Error updating Keyword change: " + keywordChangeId)
+					logger.Error.Println(err)
 				}
 
 			}
@@ -293,14 +303,16 @@ func updateFirstCommitOfPackage(path string, commitLine string, precedingCommits
 	// Added Package
 	if strings.HasSuffix(path, "metadata.xml") && len(strings.Split(path, "/")) == 3 {
 
+		atom := strings.Split(path, "/")[0] + "/" + strings.Split(path, "/")[1]
 		addedpackage := &models.Package{
-			Atom:             strings.Split(path, "/")[0] + "/" + strings.Split(path, "/")[1],
+			Atom:             atom,
 			PrecedingCommits: precedingCommits,
 		}
 
 		_, err := database.DBCon.Model(addedpackage).Column("preceding_commits").WherePK().Update()
 		if err != nil {
-			panic(err)
+			logger.Error.Println("Error updating precedingCommits (" + strconv.Itoa(precedingCommits) + ") of package: " + atom)
+			logger.Error.Println(err)
 		}
 
 	}

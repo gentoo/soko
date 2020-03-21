@@ -5,6 +5,7 @@ package repository
 import (
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
@@ -42,7 +43,8 @@ func UpdateUse(path string) {
 				}
 
 				if err != nil {
-					panic(err)
+					logger.Error.Println("Error during updating useflag " + rawFlag)
+					logger.Error.Println(err)
 				}
 			}
 		}

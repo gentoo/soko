@@ -4,6 +4,7 @@ package packages
 
 import (
 	"encoding/json"
+	"github.com/go-pg/pg"
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -20,8 +21,10 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 		Where("atom LIKE ? ", ("%" + searchTerm + "%")).
 		Relation("Versions").
 		Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	type Result struct {
@@ -49,6 +52,12 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b, err := json.Marshal(result)
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)

@@ -3,6 +3,7 @@
 package useflags
 
 import (
+	"github.com/go-pg/pg/v9"
 	"html/template"
 	"net/http"
 	utils2 "soko/pkg/app/utils"
@@ -40,8 +41,10 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	var versions []models.Version
 	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\""+useflagName+"\"").Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	var packages []string
@@ -82,14 +85,18 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 
 	var otheruseexpands []models.Useflag
 	err := database.DBCon.Model(&otheruseexpands).Where("use_expand = ? ", useExpand.UseExpand).Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	var versions []models.Version
 	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\""+useExpand.Name+"\"").Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	var packages []string

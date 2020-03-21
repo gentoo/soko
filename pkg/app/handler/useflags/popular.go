@@ -18,7 +18,9 @@ func Popular(w http.ResponseWriter, r *http.Request) {
 	var versions []models.Version
 	err := database.DBCon.Model(&versions).Column("useflags").Select()
 	if err != nil {
-		panic(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	dict := make(map[string]int)
@@ -56,6 +58,12 @@ func Popular(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b, err := json.Marshal(popular)
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)

@@ -3,6 +3,7 @@
 package packages
 
 import (
+	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/v9/orm"
 	"html/template"
 	"net/http"
@@ -53,8 +54,10 @@ func changelog(w http.ResponseWriter, r *http.Request) {
 		}).
 		Select()
 
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	templates := template.Must(

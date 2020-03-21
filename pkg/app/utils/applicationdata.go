@@ -4,6 +4,7 @@ package utils
 
 import (
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"time"
 )
@@ -15,6 +16,7 @@ func GetApplicationData() models.Application {
 	applicationData := &models.Application{Id: "latest"}
 	err := database.DBCon.Select(applicationData)
 	if err != nil {
+		logger.Error.Println("Error fetching application data")
 		return models.Application{
 			Id:         "latest",
 			LastUpdate: time.Now(),

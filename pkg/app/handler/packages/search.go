@@ -3,6 +3,7 @@
 package packages
 
 import (
+	"github.com/go-pg/pg"
 	"html/template"
 	"net/http"
 	"soko/pkg/database"
@@ -20,8 +21,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		Where("atom LIKE ? ", ("%" + searchTerm + "%")).
 		Relation("Versions").
 		Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	renderPackageTemplate("search",

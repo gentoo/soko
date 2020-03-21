@@ -34,8 +34,12 @@ func Quiet() string {
 	return getEnv("SOKO_QUIET", "false")
 }
 
+func LogFile() string {
+	return getEnv("SOKO_LOG_FILE", "/var/log/soko/errors.log")
+}
+
 func Version() string {
-	return getEnv("SOKO_VERSION", "v0.1.1")
+	return getEnv("SOKO_VERSION", "v0.1.2")
 }
 
 func Port() string {
@@ -43,7 +47,7 @@ func Port() string {
 }
 
 func getEnv(key string, fallback string) string {
-	if os.Getenv("") != "" {
+	if os.Getenv(key) != "" {
 		return os.Getenv(key)
 	} else {
 		return fallback

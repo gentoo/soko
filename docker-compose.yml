@@ -3,11 +3,17 @@ version: '3.2'
 services:
   http-serving:
     image: ${SOKO_IMAGE:-gentoo/soko:latest}
+    volumes:
+      - type: "bind"
+        source: "/var/log/soko"
+        target: "/var/log/soko"
     ports:
       - 127.0.0.1:5000:5000
     labels:
       com.centurylinklabs.watchtower.enable: "true"
     restart: always
+    environment:
+      SOKO_LOG_FILE: '/var/log/soko/web.log'
     depends_on:
       - db
   updater:
@@ -19,8 +25,13 @@ services:
       - type: "bind"
         source: "/var/cache/pgo-egencache"
         target: "/var/cache/pgo-egencache"
+      - type: "bind"
+        source: "/var/log/soko"
+        target: "/var/log/soko"
     labels:
       com.centurylinklabs.watchtower.enable: "true"
+    environment:
+      SOKO_LOG_FILE: '/var/log/soko/updater.log'
     depends_on:
       - db
   db:

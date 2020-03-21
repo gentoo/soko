@@ -24,7 +24,7 @@ func getPageData() interface{} {
 
 // getStabilizedVersionsForArch returns the given number of recently
 // stabilized versions of a specific arch
-func getStabilizedVersionsForArch(arch string, n int) []*models.Version {
+func getStabilizedVersionsForArch(arch string, n int) ([]*models.Version, error) {
 	var stabilizedVersions []*models.Version
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
@@ -35,7 +35,7 @@ func getStabilizedVersionsForArch(arch string, n int) []*models.Version {
 		Limit(n).
 		Select()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	for _, update := range updates {
@@ -45,12 +45,12 @@ func getStabilizedVersionsForArch(arch string, n int) []*models.Version {
 		}
 	}
 
-	return stabilizedVersions
+	return stabilizedVersions, err
 }
 
 // getKeywordedVersionsForArch returns the given number of recently
 // keyworded versions of a specific arch
-func getKeywordedVersionsForArch(arch string, n int) []*models.Version {
+func getKeywordedVersionsForArch(arch string, n int) ([]*models.Version, error) {
 	var stabilizedVersions []*models.Version
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
@@ -61,7 +61,7 @@ func getKeywordedVersionsForArch(arch string, n int) []*models.Version {
 		Limit(n).
 		Select()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	for _, update := range updates {
@@ -71,7 +71,7 @@ func getKeywordedVersionsForArch(arch string, n int) []*models.Version {
 		}
 	}
 
-	return stabilizedVersions
+	return stabilizedVersions, err
 }
 
 // RenderPackageTemplates renders the arches templates using the given data

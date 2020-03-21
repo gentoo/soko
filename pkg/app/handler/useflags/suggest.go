@@ -4,7 +4,7 @@ package useflags
 
 import (
 	"encoding/json"
-	"log"
+	"github.com/go-pg/pg/v9"
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -18,12 +18,12 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 
 	param := results[0]
 
-	log.Print(param)
-
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).Where("name LIKE ? ", (param + "%")).Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	type Suggest struct {
@@ -51,6 +51,12 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsondata, err := json.Marshal(suggestions)
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsondata)

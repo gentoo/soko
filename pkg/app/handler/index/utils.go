@@ -24,7 +24,7 @@ func getAddedPackages(n int) []models.Package {
 		Relation("Versions").
 		Select()
 	if err != nil {
-		panic(err)
+		return addedPackages
 	}
 	return addedPackages
 }
@@ -43,7 +43,7 @@ func getUpdatedVersions(n int) []*models.Version {
 		}).
 		Select()
 	if err != nil {
-		panic(err)
+		return updatedVersions
 	}
 	for _, commit := range updates {
 		for _, changedVersion := range commit.ChangedVersions {

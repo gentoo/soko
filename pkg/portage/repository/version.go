@@ -3,10 +3,10 @@
 package repository
 
 import (
-	"log"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
@@ -53,8 +53,8 @@ func updateDeletedVersion(changedFile string) {
 	_, err := database.DBCon.Model(versionObject).WherePK().Delete()
 
 	if err != nil {
-		log.Println("Error during deleting version " + id)
-		log.Println(err)
+		logger.Error.Println("Error during deleting version " + id)
+		logger.Error.Println(err)
 	}
 }
 
@@ -140,6 +140,7 @@ func updateModifiedVersion(changedFile string) {
 	_, err := database.DBCon.Model(ebuildVersion).OnConflict("(id) DO UPDATE").Insert()
 
 	if err != nil {
-		panic(err)
+		logger.Error.Println("Error during updating version " + id)
+		logger.Error.Println(err)
 	}
 }

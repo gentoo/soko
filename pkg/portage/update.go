@@ -7,6 +7,7 @@ import (
 	"log"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/repository"
 	"soko/pkg/portage/utils"
@@ -26,7 +27,7 @@ func Update() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	log.Println("Start update...")
+	logger.Info.Println("Start update...")
 
 	updateMetadata()
 	updatePackageData()
@@ -50,7 +51,7 @@ func Update() {
 // starting with the first commit in the tree is done.
 func updateMetadata() {
 
-	log.Print("Start updating changed metadata")
+	logger.Info.Println("Start updating changed metadata")
 
 	latestCommit := utils.GetLatestCommit()
 
@@ -70,7 +71,7 @@ func updateMetadata() {
 // changed data is determined by parsing all commits since the last update.
 func updatePackageData() {
 
-	log.Print("Start updating changed package data")
+	logger.Info.Println("Start updating changed package data")
 
 	latestCommit := utils.GetLatestCommit()
 
@@ -88,7 +89,7 @@ func updatePackageData() {
 // a full import starting with the first commit in the tree is done.
 func updateHistory() {
 
-	log.Print("Start updating the history")
+	logger.Info.Println("Start updating the history")
 
 	latestCommit := repository.UpdateCommits()
 
@@ -104,6 +105,7 @@ func updateHistory() {
 		Insert()
 
 	if err != nil {
-		panic(err)
+		logger.Error.Println("Updating application data failed")
+		logger.Error.Println(err)
 	}
 }

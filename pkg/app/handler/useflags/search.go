@@ -3,6 +3,7 @@
 package useflags
 
 import (
+	"github.com/go-pg/pg"
 	"html/template"
 	"net/http"
 	utils2 "soko/pkg/app/utils"
@@ -20,8 +21,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).Where("name LIKE ? ", (param + "%")).Select()
-	if err != nil {
-		panic(err)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
 
 	data := struct {

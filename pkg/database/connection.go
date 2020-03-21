@@ -8,6 +8,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"log"
 	"soko/pkg/config"
+	"soko/pkg/logger"
 	"soko/pkg/models"
 )
 
@@ -49,7 +50,7 @@ func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Cont
 
 // AfterQuery is used to log SQL queries
 func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
-	log.Println(q.FormattedQuery())
+	logger.Debug.Println(q.FormattedQuery())
 	return nil
 }
 
@@ -63,13 +64,13 @@ func Connect() {
 		Addr:     config.PostgresHost() + ":" + config.PostgresPort(),
 	})
 
-	if config.Debug() == "true" {
-		DBCon.AddQueryHook(dbLogger{})
-	}
+	DBCon.AddQueryHook(dbLogger{})
 
 	err := CreateSchema()
 	if err != nil {
-		panic(err)
+		logger.Error.Println("ERROR: Could not create database schema")
+		logger.Error.Println(err)
+		log.Fatalln(err)
 	}
 
 }
