@@ -4,7 +4,7 @@
 
 
             {{ if .Restricts }}
-                <span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{ .Restricts }}">T</span>
+                <span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{ .Restricts }}">{{ formatRestricts .Restricts }}</span>
             {{ end }}
 
         </td>
