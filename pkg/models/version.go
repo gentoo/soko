@@ -19,4 +19,5 @@ type Version struct {
 	License     string
 	Description string
 	Commits     []*Commit `pg:"many2many:commit_to_versions,joinFK:commit_id"`
+	Masks       []*Mask   `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
 }

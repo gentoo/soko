@@ -17,15 +17,58 @@
 
                     {{template "versions" .}}
 
-                    <!-- if @package.removal_pending? -->
-                    <!-- render partial: 'removal_notice', object: @package, as: 'package' -->
-                    <!-- end -->
+                    {{ if isMasked .Versions }}
+                        <div class="card kk-mask mb-3">
+                            <div class="card-body">
+                                <h4 class="card-title mb-0">
+                                    Masks
+                                </h4>
+                            </div>
+                            <ul class="list-group list-group-flush kk-mask">
+                                <li class="list-group-item kk-mask">
+                                    {{ if showRemovalNotice .Versions }}
+                                        <p style="color:#721c24;">
+                                            <strong><span class="fa fa-fw fa-warning"></span> This package is masked and could be removed soon!</strong><br>
+                                            The mask comment indicates that this package is scheduled for removal from our package repository.<br>
+                                            Please review the mask information below for more details.
+                                        </p>
+                                    {{end}}
 
-                    <!-- render partial: 'maintainer_needed_notice', object: @package, as: 'package' -->
+                                    <strong class="kk-mask-reason">{{(getMask .Versions).Reason}}</strong>
+
+                                    <div class="kk-mask-details">
+
+                                        <div class="row">
+                                            <div class="col-xs-12 col-md-3 kk-metadata-key">
+                                                Affected packages
+                                            </div>
+                                            <div class="col-xs-12 col-md-9 kk-mask-atoms overflow-hidden">
+                                                {{(getMask .Versions).Versions}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12 col-md-3 kk-metadata-key">
+                                                Author/Date
+                                            </div>
+                                            <div class="col-xs-12 col-md-9">
+                                                {{(getMask .Versions).Author}} &lt;{{(getMask .Versions).AuthorEmail}}&gt; <span class="text-muted">({{(getMask .Versions).Date}})</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    {{end}}
+
+                    {{ if not .Package.Maintainers }}
+                        <div class="alert alert-info">
+                            <strong><span class="fa fa-fw fa-wrench"></span> This package needs a new maintainer!</strong><br>
+                            If you are interested in helping with the maintenance of opencsg, please get in touch with our
+                            <a href="https://wiki.gentoo.org/wiki/Project:Proxy_Maintainers" class="alert-link">Proxy Maintainers team</a>.
+                        </div>
+                    {{end}}
 
                     {{template "metadata" .}}
-
-                    <!-- render partial: 'masks', object: @package.versions, as: 'versions' -->
 
                     {{template "changelogwrapper" .}}
 

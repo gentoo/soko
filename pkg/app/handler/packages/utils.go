@@ -182,13 +182,16 @@ func getChangelogData(commits []*models.Commit, atom string) interface{} {
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"contains":        strings.Contains,
-		"replaceall":      strings.ReplaceAll,
-		"gravatar":        gravatar,
-		"mkSlice":         mkSlice,
-		"getReverse":      getReverse,
-		"tolower":         strings.ToLower,
-		"formatRestricts": FormatRestricts,
+		"contains":          strings.Contains,
+		"replaceall":        strings.ReplaceAll,
+		"gravatar":          gravatar,
+		"mkSlice":           mkSlice,
+		"getReverse":        getReverse,
+		"tolower":           strings.ToLower,
+		"formatRestricts":   FormatRestricts,
+		"isMasked":          isMasked,
+		"getMask":           getMask,
+		"showRemovalNotice": showRemovalNotice,
 	}
 }
 
@@ -294,4 +297,35 @@ func FormatRestricts(restricts []string) string {
 	}
 	result = utils2.Deduplicate(result)
 	return strings.Join(result, ", ")
+}
+
+// isMasked returns true if any version is masked
+func isMasked(versions []*models.Version) bool {
+	for _, version := range versions {
+		if len(version.Masks) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// getMask returns the mask entry of the first version that is masked
+func getMask(versions []*models.Version) *models.Mask {
+	for _, version := range versions {
+		if len(version.Masks) > 0 {
+			return version.Masks[0]
+		}
+	}
+	return nil
+}
+
+// showRemovalNotice if all versions of the package are masked
+func showRemovalNotice(versions []*models.Version) bool {
+	showNotice := false
+	for _, version := range versions {
+		if len(version.Masks) > 0 && version.Masks[0].Versions == version.Atom {
+			showNotice = true
+		}
+	}
+	return showNotice
 }

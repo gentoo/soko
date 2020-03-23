@@ -29,6 +29,8 @@ func CreateSchema() error {
 		(*models.CommitToPackage)(nil),
 		(*models.CommitToVersion)(nil),
 		(*models.Useflag)(nil),
+		(*models.Mask)(nil),
+		(*models.MaskToVersion)(nil),
 		(*models.Application)(nil)} {
 
 		err := DBCon.CreateTable(model, &orm.CreateTableOptions{

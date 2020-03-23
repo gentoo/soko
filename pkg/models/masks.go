@@ -2,6 +2,18 @@
 
 package models
 
+import "time"
+
 type Mask struct {
-	Description string
+	Versions    string `pg:",pk"`
+	Author      string
+	AuthorEmail string
+	Date        time.Time
+	Reason      string
+}
+
+type MaskToVersion struct {
+	Id           string `pg:",pk"`
+	MaskVersions string
+	VersionId    string
 }

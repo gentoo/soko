@@ -33,6 +33,8 @@ func Update() {
 	updatePackageData()
 	updateHistory()
 
+	repository.CalculateMaskedVersions()
+
 }
 
 // updateMetadata updates all USE flags, package masks and arches in the database

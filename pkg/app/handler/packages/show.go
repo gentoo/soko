@@ -26,6 +26,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	err := database.DBCon.Model(gpackage).
 		Where("atom = ?", atom).
 		Relation("Versions").
+		Relation("Versions.Masks").
 		Select()
 
 	if err != nil {

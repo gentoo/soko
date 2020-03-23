@@ -27,7 +27,7 @@
 
                             <!-- unless package.homepage.nil? || package.homepage.first.nil? || package.homepage.first.empty? -->
                             <p class="kk-package-homepage">
-                                <a href="{{(index .Versions 0).Homepage}}">{{ ( index (index .Versions 0).Homepage 0) }}</a>
+                                <a href="{{ ( index (index .Versions 0).Homepage 0) }}">{{ ( index (index .Versions 0).Homepage 0) }}</a>
                             </p>
 
                         </div>
