@@ -205,7 +205,6 @@ func allRevisions(versionSpecifier string, packageAtom string) []*models.Version
 	revision := regexp.MustCompile(`-r[0-9]*$`)
 	versionWithoutRevision := revision.Split(versionSpecifier, 1)[0]
 	versionWithoutRevision = strings.ReplaceAll(versionWithoutRevision, "~", "")
-	logger.Info.Println("id LIKE " + versionWithoutRevision + "%")
 	database.DBCon.Model(&versions).
 		Where("id LIKE ?", versionWithoutRevision+"%").
 		Select()
