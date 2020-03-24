@@ -39,11 +39,15 @@ func LogFile() string {
 }
 
 func Version() string {
-	return getEnv("SOKO_VERSION", "v0.1.3")
+	return getEnv("SOKO_VERSION", "v0.1.4")
 }
 
 func Port() string {
 	return getEnv("SOKO_PORT", "5000")
+}
+
+func CacheControl() string {
+	return getEnv("SOKO_CACHE_CONTROL", "max-age=300")
 }
 
 func getEnv(key string, fallback string) string {

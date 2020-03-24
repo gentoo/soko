@@ -21,36 +21,54 @@ func Serve() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	http.HandleFunc("/categories", categories.Index)
-	http.HandleFunc("/categories/", categories.Show)
+	setRoute("/categories", categories.Index)
+	setRoute("/categories/", categories.Show)
 
-	http.HandleFunc("/useflags/popular.json", useflags.Popular)
-	http.HandleFunc("/useflags/suggest.json", useflags.Suggest)
-	http.HandleFunc("/useflags/search", useflags.Search)
-	http.HandleFunc("/useflags/", useflags.Show)
-	http.HandleFunc("/useflags", useflags.Index)
+	setRoute("/useflags/popular.json", useflags.Popular)
+	setRoute("/useflags/suggest.json", useflags.Suggest)
+	setRoute("/useflags/search", useflags.Search)
+	setRoute("/useflags/", useflags.Show)
+	setRoute("/useflags", useflags.Index)
 
-	http.HandleFunc("/arches", arches.Index)
-	http.HandleFunc("/arches/", arches.Show)
+	setRoute("/arches", arches.Index)
+	setRoute("/arches/", arches.Show)
 
-	http.HandleFunc("/about", about.Index)
-	http.HandleFunc("/about/help", about.Help)
-	http.HandleFunc("/about/queries", about.Queries)
-	http.HandleFunc("/about/feedback", about.Feedback)
-	http.HandleFunc("/about/feeds", about.Feeds)
+	setRoute("/about", about.Index)
+	setRoute("/about/help", about.Help)
+	setRoute("/about/queries", about.Queries)
+	setRoute("/about/feedback", about.Feedback)
+	setRoute("/about/feeds", about.Feeds)
 
-	http.HandleFunc("/packages/search", packages.Search)
-	http.HandleFunc("/packages/suggest.json", packages.Suggest)
-	http.HandleFunc("/packages/added", packages.Added)
-	http.HandleFunc("/packages/updated", packages.Updated)
-	http.HandleFunc("/packages/stable", packages.Stabilized)
-	http.HandleFunc("/packages/keyworded", packages.Keyworded)
-	http.HandleFunc("/packages/", packages.Show)
-	http.HandleFunc("/", index.Show)
+	setRoute("/packages/search", packages.Search)
+	setRoute("/packages/suggest.json", packages.Suggest)
+	setRoute("/packages/added", packages.Added)
+	setRoute("/packages/updated", packages.Updated)
+	setRoute("/packages/stable", packages.Stabilized)
+	setRoute("/packages/keyworded", packages.Keyworded)
+	setRoute("/packages/", packages.Show)
+	setRoute("/", index.Show)
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
 
 	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
 
+}
+
+// define a route using the default middleware and the given handler
+func setRoute(path string, handler http.HandlerFunc){
+	http.HandleFunc(path, mw(handler))
+}
+
+// mw is used as default middleware to set the default headers
+func mw(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		setDefaultHeaders(w)
+		handler(w, r)
+	}
+}
+
+// setDefaultHeaders sets the default headers that apply for all pages
+func setDefaultHeaders(w http.ResponseWriter){
+	w.Header().Set("Cache-Control", config.CacheControl())
 }
