@@ -41,13 +41,16 @@ func getUpdatedVersions(n int) []*models.Version {
 			return q.Limit(n), nil
 		}).
 		Relation("ChangedVersions.Commits", func(q *orm.Query) (*orm.Query, error) {
-			return q.Order("preceding_commits DESC").Limit(1), nil
+			return q.Order("preceding_commits DESC"), nil
 		}).
 		Select()
 	if err != nil {
 		return updatedVersions
 	}
 	for _, commit := range updates {
+		for _, changedVersion := range commit.ChangedVersions {
+			changedVersion.Commits = changedVersion.Commits[:1]
+		}
 		updatedVersions = append(updatedVersions, commit.ChangedVersions...)
 	}
 	if len(updatedVersions) > n {
