@@ -13,7 +13,7 @@
         {{ $arches := mkSlice "amd64" "x86" "alpha" "arm" "arm64" "hppa" "ia64" "ppc" "ppc64" "sparc" }}
         {{ range $arches }}
 
-            {{ if contains $.Keywords (print "~" .) }}
+            {{ if contains (print " " $.Keywords " ") (print "~" . " ") }}
 
                 {{ if ge (len $.Masks) 1 }}
                     <td class="kk-keyword kk-keyword-masked" title="{{$.Version}}  is masked (testing) on {{.}}">
@@ -27,14 +27,14 @@
                     </td>
                 {{end}}
 
-            {{ else if contains $.Keywords (print "-" .) }}
+            {{ else if contains (print " " $.Keywords " ") (print "-" . " ") }}
 
                 <td class="kk-keyword kk-keyword-unavailable" title="{{$.Version}} is unavailable on {{.}}">
                     <svg height="16" class="octicon octicon-diff-removed" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zm-2-5H3V7h8v2z"></path></svg>
                     <span class="sr-only">-{{.}}</span>
                 </td>
 
-            {{ else if contains $.Keywords . }}
+            {{ else if contains (print " " $.Keywords " ") (print . " ") }}
 
                 {{ if ge (len $.Masks) 1 }}
                     <td class="kk-keyword kk-keyword-masked" title="{{$.Version}} is masked (stable) on {{.}}">

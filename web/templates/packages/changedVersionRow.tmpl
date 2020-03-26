@@ -59,9 +59,9 @@
                     <p>
                         {{ $arches := mkSlice "amd64" "x86" "alpha" "arm" "arm64" "hppa" "ia64" "ppc" "ppc64" "sparc" }}
                         {{ range $arches }}
-                            {{if contains (print " " $.Keywords) (print " " .)}}
+                            {{if contains (print " " $.Keywords " ") (print " " . " ")}}
                                 <span class="label kk-keyword-stable" title="{{$.Version}} is testing on {{.}}">~{{.}}</span>
-                            {{else if contains $.Keywords (print "~" .)}}
+                            {{else if contains (print " " $.Keywords " ") (print "~" . " ")}}
                                 <span class="label kk-keyword-testing" title="{{$.Version}} is stable on {{.}}">{{.}}</span>
                             {{else}}
                                 <span class="label kk-keyword-unknown" title="{{$.Version}} is unknown on {{.}}">?{{.}}</span>
