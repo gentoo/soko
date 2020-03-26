@@ -37,18 +37,17 @@ func getUpdatedVersions(n int) []*models.Version {
 	err := database.DBCon.Model(&updates).
 		Order("preceding_commits DESC").
 		Limit(3*n).
-		Relation("ChangedVersions").
+		Relation("ChangedVersions", func(q *orm.Query) (*orm.Query, error) {
+			return q.Limit(n), nil
+		}).
 		Relation("ChangedVersions.Commits", func(q *orm.Query) (*orm.Query, error) {
-			return q.Order("preceding_commits DESC"), nil
+			return q.Order("preceding_commits DESC").Limit(1), nil
 		}).
 		Select()
 	if err != nil {
 		return updatedVersions
 	}
 	for _, commit := range updates {
-		for _, changedVersion := range commit.ChangedVersions {
-			changedVersion.Commits = changedVersion.Commits[:1]
-		}
 		updatedVersions = append(updatedVersions, commit.ChangedVersions...)
 	}
 	if len(updatedVersions) > n {
