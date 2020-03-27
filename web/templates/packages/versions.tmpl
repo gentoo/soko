@@ -29,7 +29,7 @@
                 </thead>
                 <tbody>
                     {{range $index, $element := .Package.Versions}}
-                        {{template "versionrow" (getReverse $index $.Package.Versions)}}
+                        {{template "versionrow" $element}}
                     {{end}}
                 </tbody>
             </table>

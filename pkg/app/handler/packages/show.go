@@ -34,6 +34,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sortVersionsDesc(gpackage.Versions)
+
 	localUseflags, globalUseflags, useExpands := getPackageUseflags(gpackage)
 
 	renderPackageTemplate("show",
