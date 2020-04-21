@@ -23,3 +23,13 @@ func ReadLines(path string) ([]string, error) {
 	}
 	return lines, scanner.Err()
 }
+
+// FileExists checks whether the file
+// at the given path does exist
+func FileExists(path string) bool {
+	if _, err := os.Stat(path); err == nil {
+		return true
+	} else {
+		return false
+	}
+}

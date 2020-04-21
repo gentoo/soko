@@ -111,3 +111,48 @@ func updateHistory() {
 		logger.Error.Println(err)
 	}
 }
+
+
+// CleanUp iterates through all ebuild versions in the database and
+// checks whether they are still present in main tree. Normally there
+// should be no version in the database anymore that is not present in
+// the main gentoo tree. However in case this does happen, it does indiciate
+// an error during the update process. In this case the version will be
+// logged and deleted from the database. That is, CleanUp is currently
+// used to a) find errors / outdated data and b) update the outdated data
+// This method will be removed as soon as it shows that there are no
+// errors present.
+func CleanUp() {
+
+	database.Connect()
+	defer database.DBCon.Close()
+
+	if config.Quiet() == "true" {
+		log.SetOutput(ioutil.Discard)
+	}
+
+	logger.Info.Println("Start clean up...")
+
+	var versions []*models.Version
+	database.DBCon.Model(versions).Select()
+
+	for _, version := range versions {
+		path := config.PortDir() + "/" + version.Atom + "/" + version.Package + "-" + version.Version + ".ebuild"
+		if !utils.FileExists(path) {
+
+			logger.Error.Println("Found ebuild version in the database that should not exist anymore.")
+			logger.Error.Println("The ebuild version got already deleted from the tree and should thus not exist in the database anymore:")
+			logger.Error.Println(version.Atom + "-" + version.Version)
+
+			_, err := database.DBCon.Model(&version).WherePK().Delete()
+
+			if err != nil {
+				logger.Error.Println("Error deleting version")
+				logger.Error.Println(version.Atom + " - " + version.Version)
+				logger.Error.Println(err)
+			}
+		}
+
+	}
+	logger.Info.Println("Finished clean up...")
+}
