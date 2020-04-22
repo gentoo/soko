@@ -148,6 +148,8 @@ func FullUpdate() {
 	deleteRemovedPackages()
 	deleteRemovedCategories()
 
+	fixPrecedingCommitsOfPackages()
+
 	logger.Info.Println("Finished update up...")
 }
 
@@ -220,5 +222,24 @@ func deleteRemovedCategories(){
 			}
 		}
 
+	}
+}
+
+// fixPreviousCommitsOfPackages updates packages that have
+// preceding commits == null, that is preceding commits == 0
+// This should not happen and will thus be logged. Furthermore
+// preceding commits will be set to 1 in this case so that
+// package does not mistakenly appears in the 'lately added
+// packages' section.
+func fixPrecedingCommitsOfPackages(){
+	var packages []*models.Package
+	database.DBCon.Model(&packages).Select()
+	for _, gpackage := range packages {
+		if gpackage.PrecedingCommits == 0 {
+			logger.Error.Println("Preceding Commits of package " + gpackage.Atom + " is null.")
+			logger.Error.Println("This should not happen. Preceding Commits will be set to 1")
+			gpackage.PrecedingCommits = 1
+			database.DBCon.Model(gpackage).WherePK().Update()
+		}
 	}
 }

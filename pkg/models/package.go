@@ -10,7 +10,7 @@ type Package struct {
 	Longdescription  string
 	Maintainers      []*Maintainer
 	Commits          []*Commit `pg:"many2many:commit_to_packages,joinFK:commit_id"`
-	PrecedingCommits int
+	PrecedingCommits int `pg:",use_zero"`
 }
 
 type Maintainer struct {
