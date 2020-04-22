@@ -134,17 +134,18 @@ func CleanUp() {
 	logger.Info.Println("Start clean up...")
 
 	var versions []*models.Version
-	database.DBCon.Model(versions).Select()
+	database.DBCon.Model(&versions).Select()
 
 	for _, version := range versions {
 		path := config.PortDir() + "/" + version.Atom + "/" + version.Package + "-" + version.Version + ".ebuild"
 		if !utils.FileExists(path) {
 
-			logger.Error.Println("Found ebuild version in the database that should not exist anymore.")
+			logger.Error.Println("Found ebuild version in the database that does not exist at:")
+			logger.Error.Println(path)
 			logger.Error.Println("The ebuild version got already deleted from the tree and should thus not exist in the database anymore:")
 			logger.Error.Println(version.Atom + "-" + version.Version)
 
-			_, err := database.DBCon.Model(&version).WherePK().Delete()
+			_, err := database.DBCon.Model(version).WherePK().Delete()
 
 			if err != nil {
 				logger.Error.Println("Error deleting version")
