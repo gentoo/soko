@@ -38,7 +38,7 @@ func getUpdatedVersions(n int) []*models.Version {
 		Order("preceding_commits DESC").
 		Limit(3*n).
 		Relation("ChangedVersions", func(q *orm.Query) (*orm.Query, error) {
-			return q.Limit(n), nil
+			return q.Limit(30*n), nil
 		}).
 		Relation("ChangedVersions.Commits", func(q *orm.Query) (*orm.Query, error) {
 			return q.Order("preceding_commits DESC"), nil
