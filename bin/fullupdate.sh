@@ -13,7 +13,7 @@ update_repository(){
 
 cleanup_database(){
   cd /mnt/packages-tree/gentoo/ || exit 1
-  /go/src/soko/bin/soko cleanup
+  /go/src/soko/bin/soko fullupdate
 }
 
 

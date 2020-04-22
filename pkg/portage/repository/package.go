@@ -28,6 +28,9 @@ func UpdatePackage(path string) {
 	splittedLine := strings.Split(path, "\t")
 
 	if len(splittedLine) != 2 {
+		if len(splittedLine) == 1 && isPackage(path) {
+			updateModifiedPackage(path)
+		}
 		return
 	}
 

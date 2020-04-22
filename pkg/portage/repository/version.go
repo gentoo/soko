@@ -26,6 +26,9 @@ func UpdateVersion(path string) {
 	line := strings.Split(path, "\t")
 
 	if len(line) != 2 {
+		if len(line) == 1 && isVersion(path) {
+			updateModifiedVersion(path)
+		}
 		return
 	}
 

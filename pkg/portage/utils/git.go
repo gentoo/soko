@@ -11,6 +11,28 @@ import (
 	"strings"
 )
 
+
+// ChangedFiles returns a list of files that are
+// currently present in the master branch
+func AllFiles() []string {
+	var allFiles []string
+	cmd := exec.Command("git",
+		"ls-tree",
+		"-r", "master",
+		"--name-only")
+
+	cmd.Dir = config.PortDir()
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		logger.Error.Println("ERROR: cmd.Run() failed with:")
+		logger.Error.Println(err)
+		return allFiles
+	}
+
+	allFiles = strings.Split(string(out), "\n")
+	return allFiles
+}
+
 // ChangedFiles returns a list of files that have been changed
 // between the startCommit and the endCommit. The status of the
 // change as well as the path to the file is returned for each file

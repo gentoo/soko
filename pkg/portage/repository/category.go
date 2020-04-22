@@ -28,6 +28,9 @@ func UpdateCategory(path string) {
 	splittedLine := strings.Split(path, "\t")
 
 	if len(splittedLine) != 2 {
+		if len(splittedLine) == 1 && isCategory(path) {
+			updateModifiedCategory(path)
+		}
 		return
 	}
 

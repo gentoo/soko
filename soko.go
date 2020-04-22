@@ -14,9 +14,9 @@ import (
 
 func printHelp() {
 	fmt.Println("Please specific one of the following options:")
-	fmt.Println("  soko update  -- update the database")
-	fmt.Println("  soko cleanup -- log and update outdated data ")
-	fmt.Println("  soko serve   -- serve the application")
+	fmt.Println("  soko update     -- incrementally update the database")
+	fmt.Println("  soko fullupdate -- update the database ")
+	fmt.Println("  soko serve      -- serve the application")
 }
 
 func isCommand(command string) bool {
@@ -35,8 +35,8 @@ func main() {
 		app.Serve()
 	} else if isCommand("update") {
 		portage.Update()
-	} else if isCommand("cleanup") {
-		portage.CleanUp()
+	} else if isCommand("fullupdate") {
+		portage.FullUpdate()
 	} else {
 		printHelp()
 	}

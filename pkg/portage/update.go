@@ -113,16 +113,17 @@ func updateHistory() {
 }
 
 
-// CleanUp iterates through all ebuild versions in the database and
-// checks whether they are still present in main tree. Normally there
-// should be no version in the database anymore that is not present in
-// the main gentoo tree. However in case this does happen, it does indiciate
-// an error during the update process. In this case the version will be
-// logged and deleted from the database. That is, CleanUp is currently
-// used to a) find errors / outdated data and b) update the outdated data
-// This method will be removed as soon as it shows that there are no
-// errors present.
-func CleanUp() {
+// FullUpdate does - as the name applies - a full update. That is, it
+// iterates through *all* files in the tree and updates their records
+// in the database. Afterwards it is checked whether all records that
+// that are in the database, are present in the main tree. This way
+// files which already got deleted from the main tree, get deleted
+// from the database. All deleted files will be logged.
+// This method is mainly intended for cleaning up the data and finding
+// outdated data, which indicates bugs in the incremental update.
+// Once there is no outdated data found anymore this method may become
+// obsolete.
+func FullUpdate() {
 
 	database.Connect()
 	defer database.DBCon.Close()
@@ -131,8 +132,28 @@ func CleanUp() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	logger.Info.Println("Start clean up...")
+	logger.Info.Println("Full update up...")
 
+	// Add new entries & update existing
+	logger.Info.Println("Update all present files")
+	for _, path := range utils.AllFiles() {
+		repository.UpdateVersion(path)
+		repository.UpdatePackage(path)
+		repository.UpdateCategory(path)
+	}
+
+	// Delete removed entries
+	logger.Info.Println("Delete removed files from the database")
+	deleteRemovedVersions()
+	deleteRemovedPackages()
+	deleteRemovedCategories()
+
+	logger.Info.Println("Finished update up...")
+}
+
+// deleteRemovedVersions removes all versions from the database
+// that are present in the database but not in the main tree.
+func deleteRemovedVersions(){
 	var versions []*models.Version
 	database.DBCon.Model(&versions).Select()
 
@@ -142,18 +163,62 @@ func CleanUp() {
 
 			logger.Error.Println("Found ebuild version in the database that does not exist at:")
 			logger.Error.Println(path)
-			logger.Error.Println("The ebuild version got already deleted from the tree and should thus not exist in the database anymore:")
-			logger.Error.Println(version.Atom + "-" + version.Version)
 
 			_, err := database.DBCon.Model(version).WherePK().Delete()
 
 			if err != nil {
-				logger.Error.Println("Error deleting version")
-				logger.Error.Println(version.Atom + " - " + version.Version)
+				logger.Error.Println("Error deleting version " + version.Atom + " - " + version.Version)
 				logger.Error.Println(err)
 			}
 		}
 
 	}
-	logger.Info.Println("Finished clean up...")
+}
+
+// deleteRemovedPackages removes all packages from the database
+// that are present in the database but not in the main tree.
+func deleteRemovedPackages(){
+	var packages []*models.Package
+	database.DBCon.Model(&packages).Select()
+
+	for _, gpackage := range packages {
+		path := config.PortDir() + "/" + gpackage.Atom
+		if !utils.FileExists(path) {
+
+			logger.Error.Println("Found package in the database that does not exist at:")
+			logger.Error.Println(path)
+
+			_, err := database.DBCon.Model(gpackage).WherePK().Delete()
+
+			if err != nil {
+				logger.Error.Println("Error deleting package " + gpackage.Atom)
+				logger.Error.Println(err)
+			}
+		}
+
+	}
+}
+
+// deleteRemovedCategories removes all categories from the database
+// that are present in the database but not in the main tree.
+func deleteRemovedCategories(){
+	var categories []*models.Category
+	database.DBCon.Model(&categories).Select()
+
+	for _, category := range categories {
+		path := config.PortDir() + "/" + category.Name
+		if !utils.FileExists(path) {
+
+			logger.Error.Println("Found category in the database that does not exist at:")
+			logger.Error.Println(path)
+
+			_, err := database.DBCon.Model(category).WherePK().Delete()
+
+			if err != nil {
+				logger.Error.Println("Error deleting category " + category.Name)
+				logger.Error.Println(err)
+			}
+		}
+
+	}
 }
