@@ -34,7 +34,7 @@
         </li>
         {{end}}
 
-
+        {{ if or .LocalUseflags .GlobalUseflags .UseExpands }}
         <li class="kk-metadata-item list-group-item">
             <div class="row">
                 <div class="col-xs-12 col-md-3 kk-metadata-key">
@@ -46,6 +46,7 @@
                 </div>
             </div>
         </li>
+        {{end}}
 
 
         {{ if (index .Versions 0).License }}
