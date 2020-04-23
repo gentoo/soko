@@ -89,7 +89,7 @@
                         {{if (ne .Name (index $.Package.Maintainers 0).Name)}}
                             ,&nbsp;
                         {{end}}
-                        <a title="{{.Email}}" href="mailto:{{.Email}}">{{.Name}}</a>
+                        <a title="{{.Email}}" href="mailto:{{.Email}}">{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}</a>
                     {{end}}
                 </div>
             </div>
