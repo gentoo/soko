@@ -7,12 +7,13 @@ import (
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/models"
+	"strings"
 )
 
 // getCategoryName returns the name of the
 // category based on the given URL
 func getCategoryName(r *http.Request) string {
-	return r.URL.Path[len("/categories/"):]
+	return strings.ReplaceAll(r.URL.Path[len("/categories/"):], ".json", "")
 }
 
 // createCategoriesData creates the data used in
