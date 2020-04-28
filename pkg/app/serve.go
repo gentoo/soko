@@ -42,6 +42,7 @@ func Serve() {
 
 	setRoute("/packages/search", packages.Search)
 	setRoute("/packages/suggest.json", packages.Suggest)
+	setRoute("/packages/resolve.json", packages.Resolve)
 	setRoute("/packages/added", packages.Added)
 	setRoute("/packages/updated", packages.Updated)
 	setRoute("/packages/stable", packages.Stabilized)
