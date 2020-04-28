@@ -39,8 +39,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 func buildSearchQuery(searchString string) string {
 	var searchClauses []string
 	for _, searchTerm := range strings.Split(searchString, " "){
+		searchTerm = strings.ReplaceAll(searchTerm, "*", "%")
 		searchClauses = append(searchClauses,
-			"(ARRAY[atom, category, name] && ARRAY['" + searchTerm +"'] OR (maintainers @> '[{\"Name\": \"" + searchTerm + "\"}]' OR maintainers @> '[{\"Email\": \"" + searchTerm + "\"}]'))")
+			"( (category LIKE '" + searchTerm + "') OR (name LIKE '" + searchTerm + "') OR (atom LIKE '" + searchTerm + "') OR (maintainers @> '[{\"Name\": \"" + searchTerm + "\"}]' OR maintainers @> '[{\"Email\": \"" + searchTerm + "\"}]'))")
 	}
 	return strings.Join(searchClauses, " AND ")
 }
