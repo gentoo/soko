@@ -54,6 +54,7 @@ func Serve() {
 	setRoute("/packages/updated.atom", packages.UpdatedFeed)
 	setRoute("/packages/keyworded.atom", packages.KeywordedFeed)
 	setRoute("/packages/stable.atom", packages.StabilizedFeed)
+	setRoute("/packages/search.atom", packages.SearchFeed)
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
