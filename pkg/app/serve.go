@@ -50,6 +50,11 @@ func Serve() {
 	setRoute("/packages/", packages.Show)
 	setRoute("/", index.Show)
 
+	setRoute("/packages/added.atom", packages.AddedFeed)
+	setRoute("/packages/updated.atom", packages.UpdatedFeed)
+	setRoute("/packages/keyworded.atom", packages.KeywordedFeed)
+	setRoute("/packages/stable.atom", packages.StabilizedFeed)
+
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
 

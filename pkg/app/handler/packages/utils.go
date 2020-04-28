@@ -9,6 +9,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/mcuadros/go-version"
 	"html/template"
+	textTemplate "text/template"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -189,6 +190,22 @@ func getChangelogData(commits []*models.Commit, atom string) interface{} {
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
+		"contains":          strings.Contains,
+		"replaceall":        strings.ReplaceAll,
+		"gravatar":          gravatar,
+		"mkSlice":           mkSlice,
+		"getReverse":        getReverse,
+		"tolower":           strings.ToLower,
+		"formatRestricts":   FormatRestricts,
+		"isMasked":          isMasked,
+		"getMask":           getMask,
+		"showRemovalNotice": showRemovalNotice,
+	}
+}
+
+// GetFuncMap returns the FuncMap used in templates
+func GetTextFuncMap() textTemplate.FuncMap {
+	return textTemplate.FuncMap{
 		"contains":          strings.Contains,
 		"replaceall":        strings.ReplaceAll,
 		"gravatar":          gravatar,
