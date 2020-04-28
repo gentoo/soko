@@ -56,6 +56,6 @@ func JSONCategories(w http.ResponseWriter, r *http.Request) {
 
 type CategoryDescription struct {
 	Name        string `json:"name"`
-	Url         string `json:"url"`
 	Description string `json:"description"`
+	Url         string `json:"url"`
 }

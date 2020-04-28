@@ -81,13 +81,13 @@ func getJSONPackages(category *models.Category) []Package {
 }
 
 type Category struct {
-	Name     string
-	Href     string
-	Packages []Package
+	Name     string    `json:"name"`
+	Href     string    `json:"href"`
+	Packages []Package `json:"packages"`
 }
 
 type Package struct {
-	Name        string
-	Href        string
-	Description string
+	Name        string `json:"name"`
+	Href        string `json:"href"`
+	Description string `json:"description"`
 }
