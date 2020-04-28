@@ -154,8 +154,9 @@ func RenderPackageTemplates(page string, templatepattern1 string, templatepatter
 // getAtom returns the atom of the package from the given url
 func getAtom(r *http.Request) string {
 	atom := r.URL.Path[len("/packages/"):]
-	return strings.Replace(atom, ".json", "", 1)
-	return strings.Replace(atom, "/changelog.html", "", 1)
+	atom = strings.Replace(atom, ".json", "", 1)
+	atom = strings.Replace(atom, "/changelog.html", "", 1)
+	return atom
 }
 
 // getSearchData returns the data used in search templates
