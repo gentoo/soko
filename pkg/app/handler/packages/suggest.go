@@ -15,11 +15,10 @@ import (
 func Suggest(w http.ResponseWriter, r *http.Request) {
 
 	searchTerm := getParameterValue("q", r)
-	searchQuery := buildSearchQuery(searchTerm)
 
 	var packages []models.Package
 	err := database.DBCon.Model(&packages).
-		Where(searchQuery).
+		Where("atom LIKE ? ", ("%" + searchTerm + "%")).
 		Relation("Versions").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
