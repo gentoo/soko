@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"strings"
 )
 
 // Search renders a template containing a list of search results
@@ -15,10 +16,11 @@ import (
 func Search(w http.ResponseWriter, r *http.Request) {
 
 	searchTerm := getParameterValue("q", r)
+	searchQuery := buildSearchQuery(searchTerm)
 
 	var packages []models.Package
 	err := database.DBCon.Model(&packages).
-		Where("atom LIKE ? ", ("%" + searchTerm + "%")).
+		Where(searchQuery).
 		Relation("Versions").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
@@ -32,4 +34,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		template.FuncMap{},
 		getSearchData(packages, searchTerm),
 		w)
+}
+
+func buildSearchQuery(searchString string) string {
+	var searchClauses []string
+	for _, searchTerm := range strings.Split(searchString, " "){
+		searchClauses = append(searchClauses,
+			"(ARRAY[atom, category, name] && ARRAY['" + searchTerm +"'] OR (maintainers @> '[{\"Name\": \"" + searchTerm + "\"}]' OR maintainers @> '[{\"Email\": \"" + searchTerm + "\"}]'))")
+	}
+	return strings.Join(searchClauses, " AND ")
 }
