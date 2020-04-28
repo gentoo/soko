@@ -22,6 +22,7 @@ func Serve() {
 	defer database.DBCon.Close()
 
 	setRoute("/categories", categories.Index)
+	setRoute("/categories.json", categories.JSONCategories)
 	setRoute("/categories/", categories.Show)
 
 	setRoute("/useflags/popular.json", useflags.Popular)
