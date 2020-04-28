@@ -18,6 +18,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	if strings.HasSuffix(r.URL.Path, "/changelog.html") {
 		changelog(w, r)
 		return
+	} else if strings.HasSuffix(r.URL.Path, ".json") {
+		buildJson(w, r)
+		return
 	}
 
 	atom := r.URL.Path[len("/packages/"):]

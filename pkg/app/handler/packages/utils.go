@@ -56,7 +56,7 @@ func GetUpdatedVersions(n int) []*models.Version {
 		Order("preceding_commits DESC").
 		Limit(n).
 		Relation("ChangedVersions", func(q *orm.Query) (*orm.Query, error) {
-			return q.Limit(10*n), nil
+			return q.Limit(10 * n), nil
 		}).
 		Relation("ChangedVersions.Commits", func(q *orm.Query) (*orm.Query, error) {
 			return q.Order("preceding_commits DESC"), nil
@@ -154,6 +154,7 @@ func RenderPackageTemplates(page string, templatepattern1 string, templatepatter
 // getAtom returns the atom of the package from the given url
 func getAtom(r *http.Request) string {
 	atom := r.URL.Path[len("/packages/"):]
+	return strings.Replace(atom, ".json", "", 1)
 	return strings.Replace(atom, "/changelog.html", "", 1)
 }
 
@@ -335,17 +336,17 @@ func showRemovalNotice(versions []*models.Version) bool {
 }
 
 // sort the versions in ascending order
-func sortVersionsAsc(versions []*models.Version){
+func sortVersionsAsc(versions []*models.Version) {
 	sortVersions(versions, "<")
 }
 
 // sort the versions in descending order
-func sortVersionsDesc(versions []*models.Version){
+func sortVersionsDesc(versions []*models.Version) {
 	sortVersions(versions, ">")
 }
 
 // sort the versions - the order is given by the given operator
-func sortVersions(versions []*models.Version, operator string){
+func sortVersions(versions []*models.Version, operator string) {
 	sort.SliceStable(versions, func(i, j int) bool {
 		// the version library normally results in i.e. 1.1-r1 < 1.1
 		// that's why we replace -rXXX by .XXX so that 1.1-r1 > 1.1

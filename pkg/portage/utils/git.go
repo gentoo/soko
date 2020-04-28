@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-
 // ChangedFiles returns a list of files that are
 // currently present in the master branch
 func AllFiles() []string {

@@ -112,7 +112,6 @@ func updateHistory() {
 	}
 }
 
-
 // FullUpdate does - as the name applies - a full update. That is, it
 // iterates through *all* files in the tree and updates their records
 // in the database. Afterwards it is checked whether all records that
@@ -155,7 +154,7 @@ func FullUpdate() {
 
 // deleteRemovedVersions removes all versions from the database
 // that are present in the database but not in the main tree.
-func deleteRemovedVersions(){
+func deleteRemovedVersions() {
 	var versions []*models.Version
 	database.DBCon.Model(&versions).Select()
 
@@ -179,7 +178,7 @@ func deleteRemovedVersions(){
 
 // deleteRemovedPackages removes all packages from the database
 // that are present in the database but not in the main tree.
-func deleteRemovedPackages(){
+func deleteRemovedPackages() {
 	var packages []*models.Package
 	database.DBCon.Model(&packages).Select()
 
@@ -203,7 +202,7 @@ func deleteRemovedPackages(){
 
 // deleteRemovedCategories removes all categories from the database
 // that are present in the database but not in the main tree.
-func deleteRemovedCategories(){
+func deleteRemovedCategories() {
 	var categories []*models.Category
 	database.DBCon.Model(&categories).Select()
 
@@ -231,7 +230,7 @@ func deleteRemovedCategories(){
 // preceding commits will be set to 1 in this case so that
 // package does not mistakenly appears in the 'lately added
 // packages' section.
-func fixPrecedingCommitsOfPackages(){
+func fixPrecedingCommitsOfPackages() {
 	var packages []*models.Package
 	database.DBCon.Model(&packages).Select()
 	for _, gpackage := range packages {

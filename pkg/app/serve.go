@@ -56,7 +56,7 @@ func Serve() {
 }
 
 // define a route using the default middleware and the given handler
-func setRoute(path string, handler http.HandlerFunc){
+func setRoute(path string, handler http.HandlerFunc) {
 	http.HandleFunc(path, mw(handler))
 }
 
@@ -69,6 +69,6 @@ func mw(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 // setDefaultHeaders sets the default headers that apply for all pages
-func setDefaultHeaders(w http.ResponseWriter){
+func setDefaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Cache-Control", config.CacheControl())
 }

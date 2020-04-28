@@ -69,7 +69,7 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 // and returns the author name, author email and the date
 func parseAuthorLine(authorLine string) (string, string, time.Time) {
 
-	if ! ( strings.Contains(authorLine, "<") && strings.Contains(authorLine, ">") ) {
+	if !(strings.Contains(authorLine, "<") && strings.Contains(authorLine, ">")) {
 		logger.Error.Println("Error while parsing the author line in mask entry:")
 		logger.Error.Println(authorLine)
 		return "", "", time.Now()
