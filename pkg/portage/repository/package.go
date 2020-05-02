@@ -81,11 +81,18 @@ func updateModifiedPackage(changedFile string) {
 		maintainers = append(maintainers, maintainer)
 	}
 
+	longDescription := ""
+	for _, l := range pkgmetadata.LongdescriptionList {
+		if l.Language == "" {
+			longDescription = l.Content
+		}
+	}
+
 	gpackage := &models.Package{
 		Atom:            atom,
 		Category:        category,
 		Name:            packagename,
-		Longdescription: pkgmetadata.Longdescription,
+		Longdescription: longDescription,
 		Maintainers:     maintainers,
 	}
 
@@ -121,9 +128,9 @@ func GetPkgMetadata(path string) Pkgmetadata {
 // Descriptions of the package metadata.xml format
 
 type Pkgmetadata struct {
-	XMLName         xml.Name     `xml:"pkgmetadata"`
-	MaintainerList  []Maintainer `xml:"maintainer"`
-	Longdescription string       `xml:"longdescription"`
+	XMLName             xml.Name              `xml:"pkgmetadata"`
+	MaintainerList      []Maintainer          `xml:"maintainer"`
+	LongdescriptionList []LongdescriptionItem `xml:"longdescription"`
 }
 
 type Maintainer struct {
@@ -132,4 +139,10 @@ type Maintainer struct {
 	Restrict string   `xml:"restrict,attr"`
 	Email    string   `xml:"email"`
 	Name     string   `xml:"name"`
+}
+
+type LongdescriptionItem struct {
+	XMLName  xml.Name `xml:"longdescription"`
+	Content  string   `xml:",chardata"`
+	Language string   `xml:"lang,attr"`
 }
