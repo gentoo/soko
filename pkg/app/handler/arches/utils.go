@@ -14,10 +14,10 @@ import (
 // templates used in the arches section
 func getPageData() interface{} {
 	return struct {
-		Page        string
+		Header models.Header
 		Application models.Application
 	}{
-		Page:        "arches",
+		Header:         models.Header{Title: "Architectures – ", Tab:   "arches", },
 		Application: utils.GetApplicationData(),
 	}
 }
@@ -92,14 +92,14 @@ func renderPackageTemplates(page string, funcMap template.FuncMap, data interfac
 // CreateFeedData creates the data used in changedVersions template
 func createFeedData(arch string, name string, feedtype string, versions []*models.Version) interface{} {
 	return struct {
-		Page        string
+		Header      models.Header
 		Arch        string
 		Name        string
 		FeedName    string
 		Versions    []*models.Version
 		Application models.Application
 	}{
-		Page:        "arches",
+		Header:         models.Header{Title: "Architectures – ", Tab:   "arches", },
 		Arch:        arch,
 		Name:        name,
 		FeedName:    feedtype,

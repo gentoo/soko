@@ -28,12 +28,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Page        string
+		Header      models.Header
 		Search      string
 		Useflags    []models.Useflag
 		Application models.Application
 	}{
-		Page:        "useflags",
+		Header:         models.Header{Title: param + " – ", Tab:   "useflags", },
 		Search:      param,
 		Useflags:    useflags,
 		Application: utils2.GetApplicationData(),

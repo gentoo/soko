@@ -55,13 +55,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	packages = utils.Deduplicate(packages)
 
 	data := struct {
-		Page          string
+		Header        models.Header
 		Useflag       models.Useflag
 		LocalUseflags []models.Useflag
 		Packages      []string
 		Application   models.Application
 	}{
-		Page:          "useflags",
+		Header:         models.Header{Title: useflag.Name + " – ", Tab:   "useflags", },
 		Useflag:       useflag,
 		LocalUseflags: localuseflags,
 		Packages:      packages,
@@ -107,13 +107,13 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 	packages = utils.Deduplicate(packages)
 
 	data := struct {
-		Page            string
+		Header          models.Header
 		Useflag         models.Useflag
 		OtherUseExpands []models.Useflag
 		Packages        []string
 		Application     models.Application
 	}{
-		Page:            "useflags",
+		Header:         models.Header{Title: useExpand.Name + " – ", Tab:   "useflags", },
 		Useflag:         useExpand,
 		OtherUseExpands: otheruseexpands,
 		Packages:        packages,

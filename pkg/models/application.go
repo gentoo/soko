@@ -10,3 +10,8 @@ type Application struct {
 	LastCommit string
 	Version    string
 }
+
+type Header struct {
+	Title string
+	Tab   string
+}

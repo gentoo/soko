@@ -62,13 +62,13 @@ func getUpdatedVersions(n int) []*models.Version {
 // createPageData creates the data used in the template of the landing page
 func createPageData(packagecount int, addedPackages []models.Package, updatedVersions []*models.Version) interface{} {
 	return struct {
-		Page            string
+		Header          models.Header
 		PackageCount    string
 		AddedPackages   []models.Package
 		UpdatedPackages []*models.Version
 		Application     models.Application
 	}{
-		Page:            "home",
+		Header:         models.Header{Title: "", Tab:   "home", },
 		Application:     utils.GetApplicationData(),
 		PackageCount:    formatPackageCount(packagecount),
 		AddedPackages:   addedPackages,

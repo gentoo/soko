@@ -20,11 +20,11 @@ func getCategoryName(r *http.Request) string {
 // the template to display all categories
 func createCategoriesData(categories []*models.Category) interface{} {
 	return struct {
-		Page        string
+		Header models.Header
 		Categories  []*models.Category
 		Application models.Application
 	}{
-		Page:        "packages",
+		Header:         models.Header{Title: "Categories – ", Tab:   "packages", },
 		Categories:  categories,
 		Application: utils.GetApplicationData(),
 	}
@@ -34,11 +34,11 @@ func createCategoriesData(categories []*models.Category) interface{} {
 // the template to display a specific category
 func createCategoryData(category models.Category) interface{} {
 	return struct {
-		Page        string
+		Header      models.Header
 		Category    models.Category
 		Application models.Application
 	}{
-		Page:        "packages",
+		Header:         models.Header{Title: category.Name + " – ", Tab:   "packages", },
 		Category:    category,
 		Application: utils.GetApplicationData(),
 	}

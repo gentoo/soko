@@ -164,12 +164,12 @@ func getAtom(r *http.Request) string {
 // getSearchData returns the data used in search templates
 func getSearchData(packages []models.Package, search string) interface{} {
 	return struct {
-		Page        string
+		Header      models.Header
 		Search      string
 		Packages    []models.Package
 		Application models.Application
 	}{
-		Page:        "packages",
+		Header:         models.Header{Title: search + " – ", Tab:   "packages", },
 		Search:      search,
 		Packages:    packages,
 		Application: utils.GetApplicationData(),
@@ -275,7 +275,7 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 // createPackageData creates the data used in the show package template
 func createPackageData(gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands []models.Useflag) interface{} {
 	return struct {
-		Page           string
+		Header         models.Header
 		Package        models.Package
 		Versions       []*models.Version
 		Masks          []models.Mask
@@ -284,7 +284,7 @@ func createPackageData(gpackage *models.Package, localUseflags []models.Useflag,
 		UseExpands     []models.Useflag
 		Application    models.Application
 	}{
-		Page:           "packages",
+		Header:         models.Header{Title: gpackage.Atom + " – ", Tab:   "packages", },
 		Package:        *gpackage,
 		Versions:       gpackage.Versions,
 		LocalUseflags:  localUseflags,
@@ -298,12 +298,12 @@ func createPackageData(gpackage *models.Package, localUseflags []models.Useflag,
 // CreateFeedData creates the data used in changedVersions template
 func CreateFeedData(name string, versions []*models.Version) interface{} {
 	return struct {
-		Page        string
+		Header      models.Header
 		Name        string
 		Versions    []*models.Version
 		Application models.Application
 	}{
-		Page:        "packages",
+		Header:         models.Header{Title: "Packages – ", Tab:   "packages", },
 		Name:        name,
 		Versions:    versions,
 		Application: utils.GetApplicationData(),

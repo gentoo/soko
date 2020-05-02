@@ -14,10 +14,10 @@ import (
 func Index(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
-		Page        string
+		Header   models.Header
 		Application models.Application
 	}{
-		Page:        "useflags",
+		Header:         models.Header{Title: "Useflags – ", Tab:   "useflags", },
 		Application: utils2.GetApplicationData(),
 	}
 

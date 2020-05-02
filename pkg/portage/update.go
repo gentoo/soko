@@ -11,6 +11,7 @@ import (
 	"soko/pkg/models"
 	"soko/pkg/portage/repository"
 	"soko/pkg/portage/utils"
+	"strings"
 	"time"
 )
 
@@ -136,9 +137,12 @@ func FullUpdate() {
 	// Add new entries & update existing
 	logger.Info.Println("Update all present files")
 	for _, path := range utils.AllFiles() {
-		repository.UpdateVersion(path)
-		repository.UpdatePackage(path)
-		repository.UpdateCategory(path)
+
+		if strings.Contains(path, "net-misc/chrony/metadata.xml"){
+			//repository.UpdateVersion(path)
+			repository.UpdatePackage(path)
+			//repository.UpdateCategory(path)
+		}
 	}
 
 	// Delete removed entries
