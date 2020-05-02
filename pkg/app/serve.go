@@ -36,7 +36,6 @@ func Serve() {
 
 	setRoute("/about", about.Index)
 	setRoute("/about/help", about.Help)
-	setRoute("/about/queries", about.Queries)
 	setRoute("/about/feedback", about.Feedback)
 	setRoute("/about/feeds", about.Feeds)
 
