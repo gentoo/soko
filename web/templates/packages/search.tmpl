@@ -19,7 +19,7 @@
                 </div>
                 <div class="list-group">
                     {{range .Packages}}
-                        <a class="list-group-item" href="/packages/{{.Atom}}">
+                        <a class="list-group-item list-group-item-action" href="/packages/{{.Atom}}">
                             <h3 class="kk-search-result-header"><span class="text-muted">{{.Category}}/</span>{{.Name}}</h3>
                             {{ (index .Versions 0).Description}}
                         </a>
