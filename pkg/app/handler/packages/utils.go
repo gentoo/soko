@@ -249,24 +249,29 @@ func getParameterValue(parameterName string, r *http.Request) string {
 // flags and use expands for a given package
 func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, []models.Useflag) {
 	var localUseflags, globalUseflags, useExpands []models.Useflag
-	for _, useflag := range gpackage.Versions[len(gpackage.Versions)-1].Useflags {
+	for _, rawUseflag := range gpackage.Versions[len(gpackage.Versions)-1].Useflags {
 
 		var tmp_useflags []models.Useflag
 		err := database.DBCon.Model(&tmp_useflags).
-			Where("Name LIKE ?", "%"+strings.Replace(useflag, "+", "", 1)).
+			Where("Name = ?", strings.Replace(rawUseflag, "+", "", 1)).
 			Select()
 
 		if err != nil && err != pg.ErrNoRows {
 			logger.Error.Println("Error during fetching added packages from database")
 			logger.Error.Println(err)
+			continue
 		}
 
-		if len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "global" {
-			globalUseflags = append(globalUseflags, tmp_useflags[0])
-		} else if len(tmp_useflags) >= 1 && tmp_useflags[0].Scope == "local" {
-			localUseflags = append(localUseflags, tmp_useflags[0])
-		} else if len(tmp_useflags) >= 1 {
-			useExpands = append(useExpands, tmp_useflags[0])
+		for _, useflag := range tmp_useflags {
+			if useflag.Scope == "global" {
+				globalUseflags = append(globalUseflags, useflag)
+			} else if useflag.Scope == "local" {
+				if useflag.Package == gpackage.Atom {
+					localUseflags = append(localUseflags, useflag)
+				}
+			} else {
+				useExpands = append(useExpands, useflag)
+			}
 		}
 	}
 	return localUseflags, globalUseflags, useExpands
