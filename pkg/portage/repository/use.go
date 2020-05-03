@@ -42,17 +42,11 @@ func UpdateUse(path string) {
 			}
 
 			scope := getScope(changedFile)
-			var err error
 
+			var err error
 			if scope == "local" || scope == "global" {
-				if scope == "local" {
-					logger.Info.Println("Creating local useflag: " + rawFlag)
-				} else {
-					continue
-				}
 				err = createUseflag(rawFlag, scope)
 			} else if scope == "use_expand" {
-				continue
 				file := strings.Split(changedFile, "/")[2]
 				err = createUseExpand(rawFlag, file)
 			}
