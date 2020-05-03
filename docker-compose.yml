@@ -41,6 +41,7 @@ services:
       POSTGRES_USER: ${SOKO_POSTGRES_USER:-root}
       POSTGRES_PASSWORD: ${SOKO_POSTGRES_PASSWORD:-root}
       POSTGRES_DB: ${SOKO_POSTGRES_DB:-soko}
+    shm_size: 512mb
     volumes:
       - ${POSTGRES_DATA_PATH:-/var/lib/postgresql/data}:/var/lib/postgresql/data
   watchtower:
