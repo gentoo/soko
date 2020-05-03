@@ -35,17 +35,25 @@ func UpdateMask(path string) {
 
 	splittedLine := strings.Split(path, "\t")
 
+	var status, changedFile string
 	if len(splittedLine) == 2 {
-		status := splittedLine[0]
-		changedFile := splittedLine[1]
+		status = splittedLine[0]
+		changedFile = splittedLine[1]
+	} else if len(splittedLine) == 1 {
+		// This happens in case of a full update
+		status = "A"
+		changedFile = splittedLine[0]
+	} else {
+		// should not happen
+		return
+	}
 
-		if status != "D" && isMask(changedFile) {
+	if status != "D" && isMask(changedFile) {
 
-			logger.Info.Println("Updating Masks")
+		logger.Info.Println("Updating Masks")
 
-			for _, packageMask := range getMasks(changedFile) {
-				parsePackageMask(packageMask)
-			}
+		for _, packageMask := range getMasks(changedFile) {
+			parsePackageMask(packageMask)
 		}
 	}
 }

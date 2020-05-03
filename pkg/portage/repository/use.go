@@ -18,37 +18,54 @@ func UpdateUse(path string) {
 
 	splittedLine := strings.Split(path, "\t")
 
+	var status, changedFile string
 	if len(splittedLine) == 2 {
-		status := splittedLine[0]
-		changedFile := splittedLine[1]
+		status = splittedLine[0]
+		changedFile = splittedLine[1]
+	} else if len(splittedLine) == 1 {
+		// This happens in case of a full update
+		status = "A"
+		changedFile = splittedLine[0]
+	} else {
+		// should not happen
+		return
+	}
 
-		if status != "D" && (isLocalUseflag(changedFile) || isGlobalUseflag(changedFile) || isUseExpand(changedFile)) {
+	if status != "D" && (isLocalUseflag(changedFile) || isGlobalUseflag(changedFile) || isUseExpand(changedFile)) {
 
-			rawFlags, _ := utils.ReadLines(config.PortDir() + "/" + changedFile)
+		rawFlags, _ := utils.ReadLines(config.PortDir() + "/" + changedFile)
 
-			for _, rawFlag := range rawFlags {
+		for _, rawFlag := range rawFlags {
 
-				if strings.TrimSpace(rawFlag) == "" || rawFlag[0:1] == "#" {
+			if strings.TrimSpace(rawFlag) == "" || rawFlag[0:1] == "#" {
+				continue
+			}
+
+			scope := getScope(changedFile)
+			var err error
+
+			if scope == "local" || scope == "global" {
+				if scope == "local" {
+					logger.Info.Println("Creating local useflag: " + rawFlag)
+				} else {
 					continue
 				}
+				err = createUseflag(rawFlag, scope)
+			} else if scope == "use_expand" {
+				continue
+				file := strings.Split(changedFile, "/")[2]
+				err = createUseExpand(rawFlag, file)
+			}
 
-				scope := getScope(changedFile)
-				var err error
-
-				if scope == "local" || scope == "global" {
-					err = createUseflag(rawFlag, scope)
-				} else if scope == "use_expand" {
-					file := strings.Split(changedFile, "/")[2]
-					err = createUseExpand(rawFlag, file)
-				}
-
-				if err != nil {
-					logger.Error.Println("Error during updating useflag " + rawFlag)
-					logger.Error.Println(err)
-				}
+			if err != nil {
+				logger.Info.Println("Error during updating useflag " + rawFlag)
+				logger.Info.Println(err)
+				logger.Error.Println("Error during updating useflag " + rawFlag)
+				logger.Error.Println(err)
 			}
 		}
 	}
+
 }
 
 // createUseflag parses the description from the file,

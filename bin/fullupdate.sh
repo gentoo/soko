@@ -11,11 +11,25 @@ update_repository(){
   fi
 }
 
-cleanup_database(){
+update_md5cache(){
+  mkdir -p /var/cache/pgo-egencache
+  cd /mnt/packages-tree/gentoo/ || exit 1
+
+  #echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
+
+  egencache -j 6 --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
+  location = /mnt/packages-tree/gentoo' --update
+
+  egencache -j 6 --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
+  location = /mnt/packages-tree/gentoo' --update-use-local-desc
+}
+
+fullupdate_database(){
   cd /mnt/packages-tree/gentoo/ || exit 1
   /go/src/soko/bin/soko fullupdate
 }
 
 
 update_repository
-cleanup_database
+update_md5cache
+fullupdate_database
