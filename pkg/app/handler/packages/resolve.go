@@ -47,7 +47,13 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:   gpackage.Commits[0].CommitterDate,
 	}
 
-	b, err := json.Marshal(jsonPackage)
+	result := struct {
+		Packages []Package `json:"packages"`
+	}{
+		Packages: []Package{ jsonPackage },
+	}
+
+	b, err := json.Marshal(result)
 
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
