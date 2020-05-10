@@ -7,9 +7,7 @@ import (
 	"encoding/hex"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/v9/orm"
-	"github.com/mcuadros/go-version"
 	"html/template"
-	textTemplate "text/template"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -18,6 +16,7 @@ import (
 	utils2 "soko/pkg/utils"
 	"sort"
 	"strings"
+	textTemplate "text/template"
 )
 
 // getAddedPackages returns a list of recently added
@@ -361,23 +360,14 @@ func showRemovalNotice(versions []*models.Version) bool {
 
 // sort the versions in ascending order
 func sortVersionsAsc(versions []*models.Version) {
-	sortVersions(versions, "<")
+	sort.Slice(versions, func(i, j int) bool {
+		return !versions[i].CompareTo(*versions[j])
+	})
 }
 
 // sort the versions in descending order
 func sortVersionsDesc(versions []*models.Version) {
-	sortVersions(versions, ">")
-}
-
-// sort the versions - the order is given by the given operator
-func sortVersions(versions []*models.Version, operator string) {
-	sort.SliceStable(versions, func(i, j int) bool {
-		// the version library normally results in i.e. 1.1-r1 < 1.1
-		// that's why we replace -rXXX by .XXX so that 1.1-r1 > 1.1
-		firstVersion := strings.ReplaceAll(versions[i].Version, "-r", ".")
-		secondVersion := strings.ReplaceAll(versions[j].Version, "-r", ".")
-		firstVersion = version.Normalize(firstVersion)
-		secondVersion = version.Normalize(secondVersion)
-		return version.Compare(firstVersion, secondVersion, operator)
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].CompareTo(*versions[j])
 	})
 }
