@@ -39,7 +39,7 @@ func LogFile() string {
 }
 
 func Version() string {
-	return getEnv("SOKO_VERSION", "v0.1.20")
+	return getEnv("SOKO_VERSION", "v0.1.21")
 }
 
 func Port() string {
