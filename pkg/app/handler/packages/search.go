@@ -23,6 +23,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	var packages []models.Package
 	err := database.DBCon.Model(&packages).
 		Where(searchQuery).
+		WhereOr("atom LIKE ? ", ("%" + searchTerm + "%")).
 		Relation("Versions").
 		OrderExpr("name <-> '" + searchTerm + "'").
 		Select()
