@@ -17,16 +17,29 @@ import (
 func Search(w http.ResponseWriter, r *http.Request) {
 
 	searchTerm := getParameterValue("q", r)
-	searchTerm = strings.ReplaceAll(searchTerm, "*", "")
-	searchQuery := buildSearchQuery(searchTerm)
-
 	var packages []models.Package
-	err := database.DBCon.Model(&packages).
-		Where(searchQuery).
-		WhereOr("atom LIKE ? ", ("%" + searchTerm + "%")).
-		Relation("Versions").
-		OrderExpr("name <-> '" + searchTerm + "'").
-		Select()
+	var err error
+
+	if strings.Contains(searchTerm, "*"){
+		// if the query contains wildcards
+		wildcardSearchTerm := strings.ReplaceAll(searchTerm, "*", "%")
+		err = database.DBCon.Model(&packages).
+			WhereOr("atom LIKE ? ", wildcardSearchTerm).
+			WhereOr("name LIKE ? ", wildcardSearchTerm).
+			Relation("Versions").
+			OrderExpr("name <-> '" + searchTerm + "'").
+			Select()
+	}else{
+		// if the query contains no wildcards do a fuzzy search
+		searchQuery := buildSearchQuery(searchTerm)
+		err = database.DBCon.Model(&packages).
+			Where(searchQuery).
+			WhereOr("atom LIKE ? ", ("%" + searchTerm + "%")).
+			Relation("Versions").
+			OrderExpr("name <-> '" + searchTerm + "'").
+			Select()
+	}
+
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
