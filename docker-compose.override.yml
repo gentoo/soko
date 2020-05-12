@@ -1,0 +1,63 @@
+version: '3.2'
+
+services:
+  http-serving:
+    build: .
+    volumes:
+      - type: "bind"
+        source: "/var/log/soko"
+        target: "/var/log/soko"
+    environment:
+      SOKO_LOG_FILE: '/var/log/soko/web.log'
+#      SOKO_DEBUG: 'true'
+    ports:
+      - 127.0.0.1:5000:5000
+    depends_on:
+      - db
+  updater:
+    build:
+      context: .
+      dockerfile: Dockerfile.updater
+    volumes:
+      - type: "bind"
+        source: "/mnt/packages-tree"
+        target: "/mnt/packages-tree"
+      - type: "bind"
+        source: "/var/cache/pgo-egencache"
+        target: "/var/cache/pgo-egencache"
+#      - type: "bind"
+#        source: "."
+#        target: "/go/src/soko"
+      - type: "bind"
+        source: "/var/log/soko"
+        target: "/var/log/soko"
+    environment:
+      SOKO_LOG_FILE: '/var/log/soko/updater.log'
+#      SOKO_DEBUG: 'true'
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: ${SOKO_POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${SOKO_POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${SOKO_POSTGRES_DB:-soko}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    logging:
+      driver: none
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin:/root/.pgadmin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  pgadmin:
