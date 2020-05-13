@@ -52,6 +52,10 @@ func UpdateMask(path string) {
 
 		logger.Info.Println("Updating Masks")
 
+		// delete all existing masks before parsing the file again
+		// in future we might implement a incremental version here
+		deleteAllMasks()
+
 		for _, packageMask := range getMasks(changedFile) {
 			parsePackageMask(packageMask)
 		}
@@ -274,5 +278,14 @@ func maskVersions(versionSpecifier string, versions []*models.Version) {
 
 		logger.Error.Println("Error while inserting mask to version entry")
 		logger.Error.Println(err)
+	}
+}
+
+// deleteAllMasks deletes all entries in the mask table
+func deleteAllMasks() {
+	var masks []*models.Mask
+	database.DBCon.Model(&masks).Select()
+	for _, mask := range masks {
+		database.DBCon.Model(mask).WherePK().Delete()
 	}
 }
