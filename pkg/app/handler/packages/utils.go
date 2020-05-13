@@ -248,7 +248,7 @@ func getParameterValue(parameterName string, r *http.Request) string {
 // flags and use expands for a given package
 func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, []models.Useflag) {
 	var localUseflags, globalUseflags, useExpands []models.Useflag
-	for _, rawUseflag := range gpackage.Versions[len(gpackage.Versions)-1].Useflags {
+	for _, rawUseflag := range gpackage.Versions[0].Useflags {
 
 		var tmp_useflags []models.Useflag
 		err := database.DBCon.Model(&tmp_useflags).
