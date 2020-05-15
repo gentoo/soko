@@ -14,6 +14,7 @@ services:
       - 127.0.0.1:5000:5000
     depends_on:
       - db
+    image: http-serving
   updater:
     build:
       context: .
@@ -36,6 +37,7 @@ services:
 #      SOKO_DEBUG: 'true'
     depends_on:
       - db
+    image: updater
   db:
     image: postgres:12
     restart: always
