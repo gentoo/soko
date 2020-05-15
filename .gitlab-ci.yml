@@ -21,6 +21,7 @@ build:
     - echo $LATEST_IMAGE_TAG
     - echo $LATEST_UPDATER_IMAGE_TAG
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - export SOKO_VERSION="${CI_COMMIT_SHA}"
     - docker pull gentoo/portage:latest
     - docker pull gentoo/stage3-amd64
     - docker pull $LATEST_IMAGE_TAG || true
