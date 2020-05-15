@@ -15,7 +15,7 @@
             <link rel="alternate" type="text/html" href="https://packages.gentoo.org/packages/{{.Atom}}"/>
             <updated>{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate}}{{else}}unknown{{end}}</updated>
             <title>{{.Atom}} ({{.Description}})</title>
-            <content>{{.Atom}} is now available in Gentoo on these architectures: {{.Keywords}}</content>
+            <content>{{.Atom}} is now available in Gentoo on these architectures: {{.Keywords}}. {{if ge (len .Commits) 1}}Commit: https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{(index .Commits 0).Id}}{{end}}</content>
         </entry>
     {{end}}
 </feed>
