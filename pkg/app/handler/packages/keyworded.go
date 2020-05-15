@@ -15,6 +15,6 @@ func Keyworded(w http.ResponseWriter, r *http.Request) {
 }
 
 func KeywordedFeed(w http.ResponseWriter, r *http.Request) {
-	keywordedVersions := GetKeywordedVersions(50)
+	keywordedVersions := GetKeywordedVersions(1000)
 	feeds.Changes(GetTextFuncMap(), CreateFeedData("Keyworded", keywordedVersions), w)
 }

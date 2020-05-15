@@ -15,6 +15,6 @@ func Updated(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatedFeed(w http.ResponseWriter, r *http.Request) {
-	updatedVersions := GetUpdatedVersions(50)
+	updatedVersions := GetUpdatedVersions(1000)
 	feeds.Changes(GetTextFuncMap(), CreateFeedData("Updated", updatedVersions), w)
 }

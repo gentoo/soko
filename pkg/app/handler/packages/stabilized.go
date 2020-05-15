@@ -15,6 +15,6 @@ func Stabilized(w http.ResponseWriter, r *http.Request) {
 }
 
 func StabilizedFeed(w http.ResponseWriter, r *http.Request) {
-	stabilizedVersions := GetStabilizedVersions(50)
+	stabilizedVersions := GetStabilizedVersions(1000)
 	feeds.Changes(GetTextFuncMap(), CreateFeedData("Stabilized", stabilizedVersions), w)
 }
