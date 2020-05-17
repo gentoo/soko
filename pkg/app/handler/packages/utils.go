@@ -247,7 +247,7 @@ func getParameterValue(parameterName string, r *http.Request) string {
 // getPackageUseflags retrieves all local USE flags, global USE
 // flags and use expands for a given package
 func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, map[string][]models.Useflag) {
-	var localUseflags, globalUseflags []models.Useflag
+	var localUseflags, allGlobalUseflags, filteredGlobalUseflags []models.Useflag
 	useExpands := make(map[string][]models.Useflag)
 	for _, rawUseflag := range gpackage.Versions[0].Useflags {
 
@@ -264,7 +264,7 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 
 		for _, useflag := range tmp_useflags {
 			if useflag.Scope == "global" {
-				globalUseflags = append(globalUseflags, useflag)
+				allGlobalUseflags = append(allGlobalUseflags, useflag)
 			} else if useflag.Scope == "local" {
 				if useflag.Package == gpackage.Atom {
 					localUseflags = append(localUseflags, useflag)
@@ -277,8 +277,16 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 				}
 			}
 		}
+
+		// Only add global useflags that are not present in the local useflags
+		for _, useflag := range allGlobalUseflags {
+			if !containsUseflag(useflag, localUseflags){
+				filteredGlobalUseflags = append(filteredGlobalUseflags, useflag)
+			}
+		}
+
 	}
-	return localUseflags, globalUseflags, useExpands
+	return localUseflags, filteredGlobalUseflags, useExpands
 }
 
 // createPackageData creates the data used in the show package template
@@ -375,4 +383,15 @@ func sortVersionsDesc(versions []*models.Version) {
 	sort.Slice(versions, func(i, j int) bool {
 		return versions[i].CompareTo(*versions[j])
 	})
+}
+
+// containsUseflag returns true if the given list of useflags contains the
+// given userflag. Otherwise false will be returned.
+func containsUseflag(useflag models.Useflag, useflags []models.Useflag) bool {
+	for _, flag := range useflags {
+		if useflag.Id == flag.Id {
+			return true
+		}
+	}
+	return false
 }
