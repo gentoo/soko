@@ -168,7 +168,7 @@ func getSearchData(packages []models.Package, search string) interface{} {
 		Packages    []models.Package
 		Application models.Application
 	}{
-		Header:         models.Header{Title: search + " – ", Tab:   "packages", },
+		Header:      models.Header{Title: search + " – ", Tab: "packages"},
 		Search:      search,
 		Packages:    packages,
 		Application: utils.GetApplicationData(),
@@ -246,8 +246,9 @@ func getParameterValue(parameterName string, r *http.Request) string {
 
 // getPackageUseflags retrieves all local USE flags, global USE
 // flags and use expands for a given package
-func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, []models.Useflag) {
-	var localUseflags, globalUseflags, useExpands []models.Useflag
+func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, map[string][]models.Useflag) {
+	var localUseflags, globalUseflags []models.Useflag
+	useExpands := make(map[string][]models.Useflag)
 	for _, rawUseflag := range gpackage.Versions[0].Useflags {
 
 		var tmp_useflags []models.Useflag
@@ -269,7 +270,11 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 					localUseflags = append(localUseflags, useflag)
 				}
 			} else {
-				useExpands = append(useExpands, useflag)
+				if _, ok := useExpands[useflag.UseExpand]; !ok {
+					useExpands[useflag.UseExpand] = []models.Useflag{useflag}
+				} else {
+					useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], useflag)
+				}
 			}
 		}
 	}
@@ -277,7 +282,7 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 }
 
 // createPackageData creates the data used in the show package template
-func createPackageData(gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands []models.Useflag) interface{} {
+func createPackageData(gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag) interface{} {
 	return struct {
 		Header         models.Header
 		Package        models.Package
@@ -285,10 +290,10 @@ func createPackageData(gpackage *models.Package, localUseflags []models.Useflag,
 		Masks          []models.Mask
 		LocalUseflags  []models.Useflag
 		GlobalUseflags []models.Useflag
-		UseExpands     []models.Useflag
+		UseExpands     map[string][]models.Useflag
 		Application    models.Application
 	}{
-		Header:         models.Header{Title: gpackage.Atom + " – ", Tab:   "packages", },
+		Header:         models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
 		Package:        *gpackage,
 		Versions:       gpackage.Versions,
 		LocalUseflags:  localUseflags,
@@ -307,7 +312,7 @@ func CreateFeedData(name string, versions []*models.Version) interface{} {
 		Versions    []*models.Version
 		Application models.Application
 	}{
-		Header:         models.Header{Title: "Packages – ", Tab:   "packages", },
+		Header:      models.Header{Title: "Packages – ", Tab: "packages"},
 		Name:        name,
 		Versions:    versions,
 		Application: utils.GetApplicationData(),

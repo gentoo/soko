@@ -125,11 +125,13 @@ func getJSONUseflag(gpackage *models.Package) Use {
 			Description: useflag.Description,
 		})
 	}
-	for _, useflag := range useExpands {
-		useflags.UseExpand = append(useflags.UseExpand, Useflag{
-			Name:        useflag.Name,
-			Description: useflag.Description,
-		})
+	for _, flags := range useExpands {
+		for _, flag := range flags {
+			useflags.UseExpand = append(useflags.UseExpand, Useflag{
+				Name:        flag.Name,
+				Description: flag.Description,
+			})
+		}
 	}
 	return useflags
 }
