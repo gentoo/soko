@@ -277,15 +277,15 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 				}
 			}
 		}
-
-		// Only add global useflags that are not present in the local useflags
-		for _, useflag := range allGlobalUseflags {
-			if !containsUseflag(useflag, localUseflags){
-				filteredGlobalUseflags = append(filteredGlobalUseflags, useflag)
-			}
-		}
-
 	}
+
+	// Only add global useflags that are not present in the local useflags
+	for _, useflag := range allGlobalUseflags {
+		if !containsUseflag(useflag, localUseflags){
+			filteredGlobalUseflags = append(filteredGlobalUseflags, useflag)
+		}
+	}
+
 	return localUseflags, filteredGlobalUseflags, useExpands
 }
 
