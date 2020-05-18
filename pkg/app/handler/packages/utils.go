@@ -389,7 +389,7 @@ func sortVersionsDesc(versions []*models.Version) {
 // given userflag. Otherwise false will be returned.
 func containsUseflag(useflag models.Useflag, useflags []models.Useflag) bool {
 	for _, flag := range useflags {
-		if useflag.Id == flag.Id {
+		if useflag.Name == flag.Name {
 			return true
 		}
 	}
