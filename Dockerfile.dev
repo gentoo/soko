@@ -1,0 +1,6 @@
+FROM golang:1.14.0
+RUN apt update && apt install -y ca-certificates ntp ntpdate
+WORKDIR /go/src/soko
+COPY . /go/src/soko
+
+CMD tail -f /dev/null

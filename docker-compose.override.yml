@@ -2,11 +2,16 @@ version: '3.2'
 
 services:
   http-serving:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     volumes:
       - type: "bind"
         source: "/var/log/soko"
         target: "/var/log/soko"
+      - type: "bind"
+        source: "."
+        target: "/go/src/soko"
     environment:
       SOKO_LOG_FILE: '/var/log/soko/web.log'
 #      SOKO_DEBUG: 'true'
@@ -14,11 +19,10 @@ services:
       - 127.0.0.1:5000:5000
     depends_on:
       - db
-    image: http-serving
   updater:
     build:
       context: .
-      dockerfile: Dockerfile.updater
+      dockerfile: Dockerfile.updater.dev
     volumes:
       - type: "bind"
         source: "/mnt/packages-tree"
@@ -26,9 +30,9 @@ services:
       - type: "bind"
         source: "/var/cache/pgo-egencache"
         target: "/var/cache/pgo-egencache"
-#      - type: "bind"
-#        source: "."
-#        target: "/go/src/soko"
+      - type: "bind"
+        source: "."
+        target: "/go/src/soko"
       - type: "bind"
         source: "/var/log/soko"
         target: "/var/log/soko"
@@ -37,7 +41,6 @@ services:
 #      SOKO_DEBUG: 'true'
     depends_on:
       - db
-    image: updater
   db:
     image: postgres:12
     restart: always
