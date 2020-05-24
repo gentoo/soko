@@ -1,6 +1,6 @@
 {{define "useflag"}}
     {{ if .LocalUseflags }}
-        <span class="kk-useflag-group">Local Use Flgas</span>
+        <span class="kk-useflag-group">Local Use Flags</span>
         <ul class="kk-useflag-container {{ if ge (len .LocalUseflags) 10 }}kk-useflag-container-many{{else}}kk-useflag-container-few{{end}}">
         {{range .LocalUseflags}}
             <li class="kk-useflag">
@@ -14,7 +14,7 @@
 
 
     {{ if .GlobalUseflags }}
-        <span class="kk-useflag-group">Global Use Flgas</span>
+        <span class="kk-useflag-group">Global Use Flags</span>
         <ul class="kk-useflag-container {{ if ge (len .GlobalUseflags) 10 }}kk-useflag-container-many{{else}}kk-useflag-container-few{{end}}">
             {{range .GlobalUseflags}}
                 <li class="kk-useflag">
