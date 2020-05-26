@@ -24,10 +24,10 @@ func renderAboutTemplate(w http.ResponseWriter, r *http.Request, page string) {
 // in all about templates
 func getPageData() interface{} {
 	return struct {
-		Header        models.Header
+		Header      models.Header
 		Application models.Application
 	}{
-		Header:         models.Header{Title: "About – ", Tab:   "about", },
+		Header:      models.Header{Title: "About – ", Tab: "about"},
 		Application: utils.GetApplicationData(),
 	}
 }

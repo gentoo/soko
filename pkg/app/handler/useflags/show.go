@@ -61,7 +61,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Packages      []string
 		Application   models.Application
 	}{
-		Header:         models.Header{Title: useflag.Name + " – ", Tab:   "useflags", },
+		Header:        models.Header{Title: useflag.Name + " – ", Tab: "useflags"},
 		Useflag:       useflag,
 		LocalUseflags: localuseflags,
 		Packages:      packages,
@@ -113,7 +113,7 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 		Packages        []string
 		Application     models.Application
 	}{
-		Header:         models.Header{Title: useExpand.Name + " – ", Tab:   "useflags", },
+		Header:          models.Header{Title: useExpand.Name + " – ", Tab: "useflags"},
 		Useflag:         useExpand,
 		OtherUseExpands: otheruseexpands,
 		Packages:        packages,

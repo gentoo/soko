@@ -37,7 +37,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		Useflags    []models.Useflag
 		Application models.Application
 	}{
-		Header:         models.Header{Title: param + " – ", Tab:   "useflags", },
+		Header:      models.Header{Title: param + " – ", Tab: "useflags"},
 		Search:      param,
 		Useflags:    useflags,
 		Application: utils2.GetApplicationData(),

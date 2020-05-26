@@ -20,7 +20,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	var packages []models.Package
 	var err error
 
-	if strings.Contains(searchTerm, "*"){
+	if strings.Contains(searchTerm, "*") {
 		// if the query contains wildcards
 		wildcardSearchTerm := strings.ReplaceAll(searchTerm, "*", "%")
 		err = database.DBCon.Model(&packages).
@@ -29,7 +29,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			Relation("Versions").
 			OrderExpr("name <-> '" + searchTerm + "'").
 			Select()
-	}else{
+	} else {
 		// if the query contains no wildcards do a fuzzy search
 		searchQuery := buildSearchQuery(searchTerm)
 		err = database.DBCon.Model(&packages).
@@ -78,9 +78,9 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 
 func buildSearchQuery(searchString string) string {
 	var searchClauses []string
-	for _, searchTerm := range strings.Split(searchString, " "){
+	for _, searchTerm := range strings.Split(searchString, " ") {
 		searchClauses = append(searchClauses,
-			"( (category % '" + searchTerm + "') OR (name % '" + searchTerm + "') OR (atom % '" + searchTerm + "') OR (maintainers @> '[{\"Name\": \"" + searchTerm + "\"}]' OR maintainers @> '[{\"Email\": \"" + searchTerm + "\"}]'))")
+			"( (category % '"+searchTerm+"') OR (name % '"+searchTerm+"') OR (atom % '"+searchTerm+"') OR (maintainers @> '[{\"Name\": \""+searchTerm+"\"}]' OR maintainers @> '[{\"Email\": \""+searchTerm+"\"}]'))")
 	}
 	return strings.Join(searchClauses, " AND ")
 }

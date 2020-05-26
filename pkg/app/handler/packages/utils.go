@@ -239,8 +239,13 @@ func getReverse(index int, versions []*models.Version) *models.Version {
 
 // getParameterValue returns the value of a given parameter
 func getParameterValue(parameterName string, r *http.Request) string {
-	results, ok := r.URL.Query()[parameterName]; if !ok { return "" }
-	if len(results) == 0 { return "" }
+	results, ok := r.URL.Query()[parameterName]
+	if !ok {
+		return ""
+	}
+	if len(results) == 0 {
+		return ""
+	}
 	return results[0]
 }
 
@@ -281,7 +286,7 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 
 	// Only add global useflags that are not present in the local useflags
 	for _, useflag := range allGlobalUseflags {
-		if !containsUseflag(useflag, localUseflags){
+		if !containsUseflag(useflag, localUseflags) {
 			filteredGlobalUseflags = append(filteredGlobalUseflags, useflag)
 		}
 	}

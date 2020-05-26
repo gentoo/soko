@@ -50,7 +50,7 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 	result := struct {
 		Packages []Package `json:"packages"`
 	}{
-		Packages: []Package{ jsonPackage },
+		Packages: []Package{jsonPackage},
 	}
 
 	b, err := json.Marshal(result)
@@ -64,7 +64,6 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)
 }
-
 
 func getParam(r *http.Request, q string) string {
 	keys, ok := r.URL.Query()[q]

@@ -30,7 +30,6 @@ type Version struct {
 	Masks       []*Mask   `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
 }
 
-
 // Compare two versions strings - compliant to the 'Version Comparison'
 // described in the Package Manager Specification (PMS)
 func (v *Version) CompareTo(other Version) bool {
@@ -71,20 +70,18 @@ func (v *Version) CompareTo(other Version) bool {
 	return true
 }
 
-
-
 // utils
 
 type VersionIdentifier struct {
-	NumericPart        string
-	Letter             string
-	Suffixes           []*VersionSuffix
-	Revision           int
+	NumericPart string
+	Letter      string
+	Suffixes    []*VersionSuffix
+	Revision    int
 }
 
 type VersionSuffix struct {
-	Name        string
-	Number      int
+	Name   string
+	Number int
 }
 
 // get the minimum of the two given ints
@@ -146,7 +143,7 @@ func getSuffix(str string) *VersionSuffix {
 			parsedSuffix, err := strconv.Atoi(strings.ReplaceAll(str, allowedSuffix, ""))
 			if err == nil {
 				return &VersionSuffix{
-					Name:  allowedSuffix,
+					Name:   allowedSuffix,
 					Number: parsedSuffix,
 				}
 			}

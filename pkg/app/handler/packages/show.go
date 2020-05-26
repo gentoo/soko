@@ -127,7 +127,7 @@ func changelogJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonData := Changes{
-			Changes: jsonChanges,
+		Changes: jsonChanges,
 	}
 
 	b, err := json.Marshal(jsonData)
@@ -142,20 +142,19 @@ func changelogJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-
 type Changes struct {
 	Changes []Change `json:"changes"`
 }
 
 type Change struct {
-	Id  string `json:"id"`
-	AuthorName string `json:"author_name"`
-	AuthorEmail string `json:"author_email"`
-	AuthorDate time.Time `json:"author_date"`
-	CommitterName string `json:"committer_name"`
-	CommitterEmail string `json:"committer_email"`
-	CommitterDate time.Time `json:"committer_date"`
-	Message string `json:"message"`
-	Files models.ChangedFiles `json:"files"`
-	Packages []string `json:"package"`
+	Id             string              `json:"id"`
+	AuthorName     string              `json:"author_name"`
+	AuthorEmail    string              `json:"author_email"`
+	AuthorDate     time.Time           `json:"author_date"`
+	CommitterName  string              `json:"committer_name"`
+	CommitterEmail string              `json:"committer_email"`
+	CommitterDate  time.Time           `json:"committer_date"`
+	Message        string              `json:"message"`
+	Files          models.ChangedFiles `json:"files"`
+	Packages       []string            `json:"package"`
 }

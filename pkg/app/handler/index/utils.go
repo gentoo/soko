@@ -69,7 +69,7 @@ func createPageData(packagecount int, addedPackages []models.Package, updatedVer
 		UpdatedPackages []*models.Version
 		Application     models.Application
 	}{
-		Header:         models.Header{Title: "", Tab:   "home", },
+		Header:          models.Header{Title: "", Tab: "home"},
 		Application:     utils.GetApplicationData(),
 		PackageCount:    formatPackageCount(packagecount),
 		AddedPackages:   addedPackages,
