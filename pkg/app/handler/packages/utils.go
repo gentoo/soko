@@ -239,9 +239,9 @@ func getReverse(index int, versions []*models.Version) *models.Version {
 
 // getParameterValue returns the value of a given parameter
 func getParameterValue(parameterName string, r *http.Request) string {
-	results, _ := r.URL.Query()[parameterName]
-	param := results[0]
-	return param
+	results, ok := r.URL.Query()[parameterName]; if !ok { return "" }
+	if len(results) == 0 { return "" }
+	return results[0]
 }
 
 // getPackageUseflags retrieves all local USE flags, global USE
