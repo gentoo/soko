@@ -18,7 +18,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	results, _ := r.URL.Query()["q"]
 
 	if len(results) == 0 {
-		http.Error(w, http.StatusText(http.Status.StatusBadRequest), http.StatusBadRequest)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 	param := results[0]
