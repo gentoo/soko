@@ -12,6 +12,7 @@ import (
 	"soko/pkg/models"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // getAddedPackages returns a list of a
@@ -96,6 +97,7 @@ func getFuncMap() template.FuncMap {
 		"contains":        strings.Contains,
 		"mkSlice":         mkSlice,
 		"formatRestricts": packages.FormatRestricts,
+		"rfc3339":         func(t time.Time) string { return t.Format(time.RFC3339) },
 	}
 }
 
