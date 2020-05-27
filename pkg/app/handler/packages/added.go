@@ -16,7 +16,7 @@ func Added(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddedFeed(w http.ResponseWriter, r *http.Request) {
-	addedVersions := getAddedVersions(10)
+	addedVersions := getAddedVersions(250)
 	feed := &feeds.Feed{
 		Title:       "Added packages in Gentoo.",
 		Description: "Added packages in Gentoo.",
