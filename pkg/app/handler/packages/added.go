@@ -25,8 +25,9 @@ func AddedFeed(w http.ResponseWriter, r *http.Request) {
 		Link:        &feeds.Link{Href: "https://packages.gentoo.org"},
 	}
 	for _, added := range addedVersions {
+		cpv := fmt.Sprintf("%s-%s", added.Atom, added.Version)
 		item := &feeds.Item{
-			Title:       fmt.Sprintf("%s-%s", added.Atom, added.Version),
+			Title:       cpv
 			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", added.Atom)},
 			Description: added.Description,
 			Author:      &feeds.Author{Name: "Unknown"},
@@ -37,7 +38,7 @@ func AddedFeed(w http.ResponseWriter, r *http.Request) {
 			item.Author = &feeds.Author{Name: lastCommit.CommitterName}
 			item.Created = lastCommit.CommitterDate
 			item.Content = fmt.Sprintf("%s is now available in Gentoo on these architectures: %s. See <a href='https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=%s'>Gitweb</a>",
-				added.Atom, added.Keywords, lastCommit.Id)
+				cpv, added.Keywords, lastCommit.Id)
 		}
 		feed.Add(item)
 	}
