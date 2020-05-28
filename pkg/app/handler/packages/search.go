@@ -79,8 +79,10 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 func buildSearchQuery(searchString string) string {
 	var searchClauses []string
 	for _, searchTerm := range strings.Split(searchString, " ") {
-		searchClauses = append(searchClauses,
-			"( (category % '"+searchTerm+"') OR (name % '"+searchTerm+"') OR (atom % '"+searchTerm+"') OR (maintainers @> '[{\"Name\": \""+searchTerm+"\"}]' OR maintainers @> '[{\"Email\": \""+searchTerm+"\"}]'))")
+		if searchTerm != "" {
+			searchClauses = append(searchClauses,
+				"( (category % '"+searchTerm+"') OR (name % '"+searchTerm+"') OR (atom % '"+searchTerm+"') OR (maintainers @> '[{\"Name\": \""+searchTerm+"\"}]' OR maintainers @> '[{\"Email\": \""+searchTerm+"\"}]'))")
+		}
 	}
 	return strings.Join(searchClauses, " AND ")
 }
