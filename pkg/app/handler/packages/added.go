@@ -27,7 +27,7 @@ func AddedFeed(w http.ResponseWriter, r *http.Request) {
 	for _, added := range addedVersions {
 		cpv := fmt.Sprintf("%s-%s", added.Atom, added.Version)
 		item := &feeds.Item{
-			Title:       cpv
+			Title:       cpv,
 			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", added.Atom)},
 			Description: added.Description,
 			Author:      &feeds.Author{Name: "Unknown"},
