@@ -3,7 +3,6 @@
 package packages
 
 import (
-	"fmt"
 	"github.com/gorilla/feeds"
 	"net/http"
 	"time"
@@ -24,23 +23,6 @@ func AddedFeed(w http.ResponseWriter, r *http.Request) {
 		Created:     time.Now(),
 		Link:        &feeds.Link{Href: "https://packages.gentoo.org"},
 	}
-	for _, added := range addedVersions {
-		cpv := fmt.Sprintf("%s-%s", added.Atom, added.Version)
-		item := &feeds.Item{
-			Title:       cpv,
-			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", added.Atom)},
-			Description: added.Description,
-			Author:      &feeds.Author{Name: "Unknown"},
-			Created:     time.Now(),
-		}
-		if len(added.Commits) > 0 {
-			lastCommit := added.Commits[0]
-			item.Author = &feeds.Author{Name: lastCommit.CommitterName}
-			item.Created = lastCommit.CommitterDate
-			item.Content = fmt.Sprintf("%s is now available in Gentoo on these architectures: %s. See <a href='https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=%s'>Gitweb</a>",
-				cpv, added.Keywords, lastCommit.Id)
-		}
-		feed.Add(item)
-	}
+	addFeedItems(feed, addedVersions)
 	feed.WriteAtom(w)
 }
