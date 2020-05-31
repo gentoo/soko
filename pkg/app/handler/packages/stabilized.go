@@ -15,6 +15,6 @@ func Stabilized(w http.ResponseWriter, r *http.Request) {
 }
 
 func StabilizedFeed(w http.ResponseWriter, r *http.Request) {
-	stabilizedVersions := GetStabilizedVersions(1000)
+	stabilizedVersions := GetStabilizedVersions(250)
 	feeds.Changes("Stabilized packages in Gentoo.", "Stabilized packages in Gentoo.", stabilizedVersions, w)
 }

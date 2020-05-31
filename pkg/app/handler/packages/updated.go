@@ -15,6 +15,6 @@ func Updated(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatedFeed(w http.ResponseWriter, r *http.Request) {
-	updatedVersions := GetUpdatedVersions(1000)
+	updatedVersions := GetUpdatedVersions(250)
 	feeds.Changes("Added packages in Gentoo.", "Added packages in Gentoo.", updatedVersions, w)
 }
