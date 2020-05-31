@@ -73,7 +73,7 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	feeds.Packages(nil, getSearchData(packages, searchTerm), w)
+	feeds.Packages(searchTerm, packages, w)
 }
 
 func buildSearchQuery(searchString string) string {
