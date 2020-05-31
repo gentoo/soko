@@ -16,5 +16,5 @@ func Keyworded(w http.ResponseWriter, r *http.Request) {
 
 func KeywordedFeed(w http.ResponseWriter, r *http.Request) {
 	keywordedVersions := GetKeywordedVersions(1000)
-	feeds.Changes(GetTextFuncMap(), CreateFeedData("Keyworded", keywordedVersions), w)
+	feeds.Changes("Keyworded packages in Gentoo.", "Keyworded packages in Gentoo.", keywordedVersions, w)
 }
