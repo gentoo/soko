@@ -24,7 +24,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 				http.NotFound(w, r)
 				return
 			}
-			feeds.Changes(packages.GetTextFuncMap(), createFeedData(urlParts[0], "Newly Stable", "stable", stabilizedVersions), w)
+			feedTitle :=  "Stabilized packages in Gentoo on " + urlParts[0]
+			feedDescription := feedTitle
+			feeds.Changes(feedTitle, feedDescription, stabilizedVersions, w)
 		} else if urlParts[1] == "keyworded" {
 			keywordedVersions, err := getKeywordedVersionsForArch(urlParts[0], 50)
 			if err != nil {
@@ -38,7 +40,10 @@ func Show(w http.ResponseWriter, r *http.Request) {
 				http.NotFound(w, r)
 				return
 			}
-			feeds.Changes(packages.GetTextFuncMap(), createFeedData(urlParts[0], "Keyworded", "keyworded", keywordedVersions), w)
+
+			feedTitle :=  "Keyworded packages in Gentoo on " + urlParts[0]
+			feedDescription := feedTitle
+			feeds.Changes(feedTitle, feedDescription, keywordedVersions, w)
 		}
 	}
 }
