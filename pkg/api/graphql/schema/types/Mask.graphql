@@ -1,0 +1,10 @@
+type Mask
+  @goModel(
+    model: "soko/pkg/models.Mask"
+  ) {
+  Versions: String!
+  Author: String!
+  AuthorEmail: String!
+  Date: Time!
+  Reason: String!
+}

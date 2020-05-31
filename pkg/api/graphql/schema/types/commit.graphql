@@ -1,0 +1,53 @@
+type Commit
+  @goModel(
+    model: "soko/pkg/models.Commit"
+  ) {
+  Id: String!
+  PrecedingCommits: Int!
+  AuthorName: String!
+  AuthorEmail: String!
+  AuthorDate: Time!
+  CommitterName: String!
+  CommitterEmail: String!
+  CommitterDate: Time!
+  Message: String!
+  ChangedFiles: ChangedFiles!
+  ChangedPackages: [Package!]!
+  ChangedVersions: [Version!]!
+  KeywordChanges: [KeywordChange!]!
+}
+
+type ChangedFiles
+@goModel(
+  model: "soko/pkg/models.ChangedFiles"
+) {
+  Added: [ChangedFile!]!
+  Modified: [ChangedFile!]!
+  Deleted: [ChangedFile!]!
+}
+
+
+type ChangedFile
+@goModel(
+  model: "soko/pkg/models.ChangedFile"
+) {
+  Path: String!
+  ChangeType: String!
+}
+
+
+type KeywordChange
+@goModel(
+  model: "soko/pkg/models.KeywordChange"
+) {
+  Id: String!
+  CommitId: String!
+  Commit: Commit!
+  VersionId: String!
+  Version: Version!
+  PackageId: String!
+  Package: Package!
+  Added: [String!]!
+  Stabilized: [String!]!
+  All: [String!]!
+}

@@ -1,0 +1,27 @@
+type Query {
+    category(Name: String, Description: String): Category
+    categories(Name: String, Description: String): [Category]
+
+    commit(Id: String, PrecedingCommits: Int, AuthorName: String, AuthorEmail: String, AuthorDate: Time, CommitterName: String, CommitterEmail: String, CommitterDate: Time, Message: String): Commit
+    commits(Id: String, PrecedingCommits: Int, AuthorName: String, AuthorEmail: String, AuthorDate: Time, CommitterName: String, CommitterEmail: String, CommitterDate: Time, Message: String): [Commit]
+
+    mask(Versions: String, Author: String, AuthorEmail: String, Date: Time, Reason: String): Mask
+    masks(Versions: String, Author: String, AuthorEmail: String, Date: Time, Reason: String): [Mask]
+
+    package(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): Package
+    packages(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): [Package]
+
+    useflag(Id: String, Name: String, Scope: String, Description: String, UseExpand: String, Package: String): Useflag
+    useflags(Id: String, Name: String, Scope: String, Description: String, UseExpand: String, Package: String): [Useflag]
+
+    version(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): Version
+    versions(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): [Version]
+
+    #
+    # Shortcuts for convenience and easy migration
+    #
+    addedPackages(Limit: Int): [Package]
+    updatedVersions(Limit: Int): [Version]
+    stabilizedVersions(Limit: Int, Arch: String): [Version]
+    keywordedVersions(Limit: Int, Arch: String): [Version]
+}

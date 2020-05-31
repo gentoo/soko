@@ -1,0 +1,8 @@
+type Category
+  @goModel(
+    model: "soko/pkg/models.Category"
+  ) {
+  Name: String!
+  Description: String!
+  Packages: [Package!]!
+}

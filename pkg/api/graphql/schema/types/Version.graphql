@@ -1,0 +1,22 @@
+type Version
+  @goModel(
+    model: "soko/pkg/models.Version"
+  ) {
+  Id: String!
+  Category: String!
+  Package: String!
+  Atom: String!
+  Version: String!
+  Slot: String!
+  Subslot: String!
+  EAPI: String!
+  Keywords: String!
+  Useflags: [String!]!
+  Restricts: [String!]!
+  Properties: [String!]!
+  Homepage: [String!]!
+  License: String!
+  Description: String!
+  Commits: [Commit!]!
+  Masks: [Mask!]!
+}

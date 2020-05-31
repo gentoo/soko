@@ -1,0 +1,16 @@
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+  - "pkg/api/graphql/schema/**/*.graphql"
+
+exec:
+  filename: pkg/api/graphql/generated/generated.go
+  package: generated
+
+resolver:
+  filename: pkg/api/graphql/resolvers/resolver.go
+  package: resolvers
+  type: Resolver
+
+autobind: []

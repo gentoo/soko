@@ -19,9 +19,9 @@ import (
 	textTemplate "text/template"
 )
 
-// getAddedPackages returns a list of recently added
+// GetAddedPackages returns a list of recently added
 // packages containing a given number of packages
-func getAddedPackages(n int) []*models.Package {
+func GetAddedPackages(n int) []*models.Package {
 	var addedPackages []*models.Package
 	err := database.DBCon.Model(&addedPackages).
 		Order("preceding_commits DESC").
@@ -36,10 +36,10 @@ func getAddedPackages(n int) []*models.Package {
 	return addedPackages
 }
 
-// getAddedVersions returns a list of recently added
+// GetAddedVersions returns a list of recently added
 // versions containing a given number of versions
-func getAddedVersions(n int) []*models.Version {
-	addedPackages := getAddedPackages(n)
+func GetAddedVersions(n int) []*models.Version {
+	addedPackages := GetAddedPackages(n)
 	var addedVersions []*models.Version
 	for _, addedPackage := range addedPackages {
 		addedVersions = append(addedVersions, addedPackage.Versions...)

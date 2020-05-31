@@ -1,0 +1,11 @@
+type Useflag
+  @goModel(
+    model: "soko/pkg/models.Useflag"
+  ) {
+  Id: ID!
+  Name: String!
+  Scope: String!
+  Description: String!
+  UseExpand: String!
+  Package: String!
+}

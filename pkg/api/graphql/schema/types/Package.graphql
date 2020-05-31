@@ -1,0 +1,23 @@
+type Package
+  @goModel(
+    model: "soko/pkg/models.Package"
+  ) {
+  Atom: String!
+  Category: String!
+  Name: String!
+  Versions: [Version!]!
+  Longdescription: String!
+  Maintainers: [Maintainer!]!
+  Commits: [Commit!]!
+  PrecedingCommits: Int!
+}
+
+type Maintainer
+  @goModel(
+    model: "soko/pkg/models.Maintainer"
+  ) {
+  Name: String!
+  Email: String!
+  Type: String!
+  Restrict: String!
+}
