@@ -18,7 +18,7 @@ type Resolver struct{}
 func (r *queryResolver) Category(ctx context.Context, name *string, description *string) (*models.Category, error) {
 	categories, err := r.Categories(ctx, name, description)
 	if err != nil || len(categories) != 1 {
-		return &models.Category{}, errors.New("your parameters do not uniquely match a category")
+		return nil, errors.New("your parameters do not uniquely match a category")
 	}
 	return categories[0], nil
 }
@@ -33,7 +33,7 @@ func (r *queryResolver) Categories(ctx context.Context, name *string, descriptio
 	query = addStringParams(query, params)
 	err := query.Relation("Packages").Select()
 	if err != nil {
-		return []*models.Category{}, errors.New("an error occurred while searching for the categories")
+		return nil, errors.New("an error occurred while searching for the categories")
 	}
 	return categories, nil
 }
@@ -41,7 +41,7 @@ func (r *queryResolver) Categories(ctx context.Context, name *string, descriptio
 func (r *queryResolver) Commit(ctx context.Context, id *string, precedingCommits *int, authorName *string, authorEmail *string, authorDate *time.Time, committerName *string, committerEmail *string, committerDate *time.Time, message *string) (*models.Commit, error) {
 	commits, err := r.Commits(ctx, id, precedingCommits, authorName, authorEmail, authorDate, committerName, committerName, committerDate, message)
 	if err != nil || len(commits) != 1 {
-		return &models.Commit{}, errors.New("your parameters do not uniquely match a commit")
+		return nil, errors.New("your parameters do not uniquely match a commit")
 	}
 	return commits[0], nil
 }
@@ -69,7 +69,7 @@ func (r *queryResolver) Commits(ctx context.Context, id *string, precedingCommit
 	query = addTimeParams(query, timeParams)
 	err := query.Relation("ChangedPackages").Relation("ChangedVersions").Relation("KeywordChanges").Select()
 	if err != nil {
-		return []*models.Commit{}, errors.New("an error occurred while searching for the commits")
+		return nil, errors.New("an error occurred while searching for the commits")
 	}
 	return commits, nil
 }
@@ -77,7 +77,7 @@ func (r *queryResolver) Commits(ctx context.Context, id *string, precedingCommit
 func (r *queryResolver) Mask(ctx context.Context, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) (*models.Mask, error) {
 	masks, err := r.Masks(ctx, versions, author, authorEmail, date, reason)
 	if err != nil || len(masks) != 1 {
-		return &models.Mask{}, errors.New("your parameters do not uniquely match a mask")
+		return nil, errors.New("your parameters do not uniquely match a mask")
 	}
 	return masks[0], nil
 }
@@ -98,7 +98,7 @@ func (r *queryResolver) Masks(ctx context.Context, versions *string, author *str
 	query = addTimeParams(query, timeParams)
 	err := query.Select()
 	if err != nil {
-		return []*models.Mask{}, errors.New("an error occurred while searching for the masks")
+		return nil, errors.New("an error occurred while searching for the masks")
 	}
 	return masks, nil
 }
@@ -106,7 +106,7 @@ func (r *queryResolver) Masks(ctx context.Context, versions *string, author *str
 func (r *queryResolver) OutdatedPackage(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) (*models.OutdatedPackages, error) {
 	outdatedPackages, err := r.OutdatedPackages(ctx, atom, gentooVersion, newestVersion)
 	if err != nil || len(outdatedPackages) != 1 {
-		return &models.OutdatedPackages{}, errors.New("your parameters do not uniquely match a outdated Version")
+		return nil, errors.New("your parameters do not uniquely match a outdated Version")
 	}
 	return outdatedPackages[0], nil
 }
@@ -122,7 +122,7 @@ func (r *queryResolver) OutdatedPackages(ctx context.Context, atom *string, gent
 	query = addStringParams(query, params)
 	err := query.Select()
 	if err != nil {
-		return []*models.OutdatedPackages{}, errors.New("an error occurred while searching for the outdated packages")
+		return nil, errors.New("an error occurred while searching for the outdated packages")
 	}
 	return outdatedPackages, nil
 }
@@ -130,7 +130,7 @@ func (r *queryResolver) OutdatedPackages(ctx context.Context, atom *string, gent
 func (r *queryResolver) PkgCheckResult(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) (*models.PkgCheckResult, error) {
 	pkgCheckResults, err := r.PkgCheckResults(ctx, atom, category, packageArg, version, cpv, class, message)
 	if err != nil || len(pkgCheckResults) != 1 {
-		return &models.PkgCheckResult{}, errors.New("your parameters do not uniquely match a pkgcheck result")
+		return nil, errors.New("your parameters do not uniquely match a pkgcheck result")
 	}
 	return pkgCheckResults[0], nil
 }
@@ -150,7 +150,7 @@ func (r *queryResolver) PkgCheckResults(ctx context.Context, atom *string, categ
 	query = addStringParams(query, params)
 	err := query.Select()
 	if err != nil {
-		return []*models.PkgCheckResult{}, errors.New("an error occurred while searching for the pkgcheck results")
+		return nil, errors.New("an error occurred while searching for the pkgcheck results")
 	}
 	return pkgCheckResults, nil
 }
@@ -158,7 +158,7 @@ func (r *queryResolver) PkgCheckResults(ctx context.Context, atom *string, categ
 func (r *queryResolver) Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error) {
 	gpackages, err := r.Packages(ctx, atom, category, name, longdescription, precedingCommits)
 	if err != nil || len(gpackages) != 1 {
-		return &models.Package{}, errors.New("your parameters do not uniquely match a package")
+		return nil, errors.New("your parameters do not uniquely match a package")
 	}
 	return gpackages[0], nil
 }
@@ -179,7 +179,7 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	query = addIntParams(query, intParams)
 	err := query.Relation("Commits").Relation("Versions").Relation("PkgCheckResults").Relation("Outdated").Select()
 	if err != nil {
-		return []*models.Package{}, errors.New("an error occurred while searching for the packages")
+		return nil, errors.New("an error occurred while searching for the packages")
 	}
 	return gpackages, nil
 }
@@ -187,7 +187,7 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 func (r *queryResolver) Version(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) (*models.Version, error) {
 	versions, err := r.Versions(ctx, id, category, packageArg, atom, version, slot, subslot, eapi, keywords, useflags, restricts, properties, homepage, license, description)
 	if err != nil || len(versions) != 1 {
-		return &models.Version{}, errors.New("your parameters do not uniquely match a version")
+		return nil, errors.New("your parameters do not uniquely match a version")
 	}
 	return versions[0], nil
 }
@@ -215,7 +215,7 @@ func (r *queryResolver) Versions(ctx context.Context, id *string, category *stri
 	query = addStringParams(query, params)
 	err := query.Relation("Commits").Relation("Masks").Relation("PkgCheckResults").Select()
 	if err != nil {
-		return []*models.Version{}, errors.New("an error occurred while searching for the versions")
+		return nil, errors.New("an error occurred while searching for the versions")
 	}
 	return versions, nil
 }
@@ -223,7 +223,7 @@ func (r *queryResolver) Versions(ctx context.Context, id *string, category *stri
 func (r *queryResolver) Useflag(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) (*models.Useflag, error) {
 	useflags, err := r.Useflags(ctx, id, name, scope, description, useExpand, packageArg)
 	if err != nil || len(useflags) != 1 {
-		return &models.Useflag{}, errors.New("your parameters do not uniquely match a useflag")
+		return nil, errors.New("your parameters do not uniquely match a useflag")
 	}
 	return useflags[0], nil
 }
@@ -242,7 +242,7 @@ func (r *queryResolver) Useflags(ctx context.Context, id *string, name *string, 
 	query = addStringParams(query, params)
 	err := query.Select()
 	if err != nil {
-		return []*models.Useflag{}, errors.New("an error occurred while searching for the useflags")
+		return nil, errors.New("an error occurred while searching for the useflags")
 	}
 	return useflags, nil
 }
