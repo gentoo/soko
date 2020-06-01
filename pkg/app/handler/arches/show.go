@@ -24,7 +24,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 				http.NotFound(w, r)
 				return
 			}
-			feedTitle :=  "Stabilized packages in Gentoo on " + urlParts[0]
+			feedTitle := "Stabilized packages in Gentoo on " + urlParts[0]
 			feedDescription := feedTitle
 			feeds.Changes(feedTitle, feedDescription, stabilizedVersions, w)
 		} else if urlParts[1] == "keyworded" {
@@ -41,7 +41,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			feedTitle :=  "Keyworded packages in Gentoo on " + urlParts[0]
+			feedTitle := "Keyworded packages in Gentoo on " + urlParts[0]
 			feedDescription := feedTitle
 			feeds.Changes(feedTitle, feedDescription, keywordedVersions, w)
 		}

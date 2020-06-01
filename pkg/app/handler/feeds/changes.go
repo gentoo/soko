@@ -22,17 +22,16 @@ func Changes(title string, description string, changedVersions []*models.Version
 
 }
 
-
 // addFeedItems is a helper to add items to a feed; most of the feeds use []*models.Version as the entity.
 func addFeedItems(f *feeds.Feed, versions []*models.Version) {
 	for _, version := range versions {
 		cpv := fmt.Sprintf("%s-%s", version.Atom, version.Version)
 		item := &feeds.Item{
-			Title:  cpv,
-			Link: &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", version.Atom)},
+			Title:       cpv,
+			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", version.Atom)},
 			Description: version.Description,
 			Author:      &feeds.Author{Name: "unknown"},
-			Created:  time.Now(),
+			Created:     time.Now(),
 		}
 		if len(version.Commits) > 0 {
 			lastCommit := version.Commits[0]

@@ -7,6 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"log"
 	"net/http"
+	"soko/pkg/api/graphql/generated"
 	"soko/pkg/api/graphql/resolvers"
 	"soko/pkg/app/handler/about"
 	"soko/pkg/app/handler/arches"
@@ -14,7 +15,6 @@ import (
 	"soko/pkg/app/handler/index"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/handler/useflags"
-	"soko/pkg/api/graphql/generated"
 	"soko/pkg/config"
 	"soko/pkg/database"
 )
@@ -64,7 +64,7 @@ func Serve() {
 
 	// api: graphql
 	schema := generated.NewExecutableSchema(generated.Config{
-		Resolvers: &resolvers.Resolver{},
+		Resolvers:  &resolvers.Resolver{},
 		Directives: generated.DirectiveRoot{},
 		Complexity: generated.ComplexityRoot{},
 	})

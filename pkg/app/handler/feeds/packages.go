@@ -25,11 +25,11 @@ func Packages(query string, gpackages []models.Package, w http.ResponseWriter) {
 func addPackageFeedItems(f *feeds.Feed, gpackages []models.Package) {
 	for _, gpackage := range gpackages {
 		item := &feeds.Item{
-			Title:  gpackage.Atom,
-			Link: &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", gpackage.Atom)},
+			Title:       gpackage.Atom,
+			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", gpackage.Atom)},
 			Description: gpackage.Longdescription,
 			Author:      &feeds.Author{Name: "unknown"},
-			Created:  time.Now(),
+			Created:     time.Now(),
 		}
 		f.Add(item)
 	}

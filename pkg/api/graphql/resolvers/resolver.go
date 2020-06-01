@@ -115,7 +115,7 @@ func (r *queryResolver) OutdatedPackages(ctx context.Context, atom *string, gent
 	var outdatedPackages []*models.OutdatedPackages
 	query := database.DBCon.Model(&outdatedPackages)
 	params := map[string]*string{
-		"atom":        atom,
+		"atom":           atom,
 		"gentoo_version": gentooVersion,
 		"newest_version": newestVersion,
 	}
