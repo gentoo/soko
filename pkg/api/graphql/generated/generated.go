@@ -103,6 +103,12 @@ type ComplexityRoot struct {
 		Versions    func(childComplexity int) int
 	}
 
+	OutdatedPackage struct {
+		Atom          func(childComplexity int) int
+		GentooVersion func(childComplexity int) int
+		NewestVersion func(childComplexity int) int
+	}
+
 	Package struct {
 		Atom             func(childComplexity int) int
 		Category         func(childComplexity int) int
@@ -123,6 +129,8 @@ type ComplexityRoot struct {
 		KeywordedVersions  func(childComplexity int, limit *int, arch *string) int
 		Mask               func(childComplexity int, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) int
 		Masks              func(childComplexity int, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) int
+		OutdatedPackage    func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
+		OutdatedPackages   func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
 		Package            func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
 		Packages           func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
 		StabilizedVersions func(childComplexity int, limit *int, arch *string) int
@@ -170,6 +178,8 @@ type QueryResolver interface {
 	Commits(ctx context.Context, id *string, precedingCommits *int, authorName *string, authorEmail *string, authorDate *time.Time, committerName *string, committerEmail *string, committerDate *time.Time, message *string) ([]*models.Commit, error)
 	Mask(ctx context.Context, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) (*models.Mask, error)
 	Masks(ctx context.Context, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) ([]*models.Mask, error)
+	OutdatedPackage(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) (*models.OutdatedPackages, error)
+	OutdatedPackages(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) ([]*models.OutdatedPackages, error)
 	Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error)
 	Packages(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) ([]*models.Package, error)
 	Useflag(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) (*models.Useflag, error)
@@ -477,6 +487,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mask.Versions(childComplexity), true
 
+	case "OutdatedPackage.Atom":
+		if e.complexity.OutdatedPackage.Atom == nil {
+			break
+		}
+
+		return e.complexity.OutdatedPackage.Atom(childComplexity), true
+
+	case "OutdatedPackage.GentooVersion":
+		if e.complexity.OutdatedPackage.GentooVersion == nil {
+			break
+		}
+
+		return e.complexity.OutdatedPackage.GentooVersion(childComplexity), true
+
+	case "OutdatedPackage.NewestVersion":
+		if e.complexity.OutdatedPackage.NewestVersion == nil {
+			break
+		}
+
+		return e.complexity.OutdatedPackage.NewestVersion(childComplexity), true
+
 	case "Package.Atom":
 		if e.complexity.Package.Atom == nil {
 			break
@@ -628,6 +659,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Masks(childComplexity, args["Versions"].(*string), args["Author"].(*string), args["AuthorEmail"].(*string), args["Date"].(*time.Time), args["Reason"].(*string)), true
+
+	case "Query.outdatedPackage":
+		if e.complexity.Query.OutdatedPackage == nil {
+			break
+		}
+
+		args, err := ec.field_Query_outdatedPackage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.OutdatedPackage(childComplexity, args["Atom"].(*string), args["GentooVersion"].(*string), args["NewestVersion"].(*string)), true
+
+	case "Query.outdatedPackages":
+		if e.complexity.Query.OutdatedPackages == nil {
+			break
+		}
+
+		args, err := ec.field_Query_outdatedPackages_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.OutdatedPackages(childComplexity, args["Atom"].(*string), args["GentooVersion"].(*string), args["NewestVersion"].(*string)), true
 
 	case "Query.package":
 		if e.complexity.Query.Package == nil {
@@ -958,6 +1013,9 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     mask(Versions: String, Author: String, AuthorEmail: String, Date: Time, Reason: String): Mask
     masks(Versions: String, Author: String, AuthorEmail: String, Date: Time, Reason: String): [Mask]
 
+    outdatedPackage(Atom: String, GentooVersion: String, NewestVersion: String): OutdatedPackage
+    outdatedPackages(Atom: String, GentooVersion: String, NewestVersion: String): [OutdatedPackage]
+
     package(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): Package
     packages(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): [Package]
 
@@ -1000,6 +1058,15 @@ scalar Any
   AuthorEmail: String!
   Date: Time!
   Reason: String!
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/OutdatedPackage.graphql", Input: `type OutdatedPackage
+  @goModel(
+    model: "soko/pkg/models.OutdatedPackages"
+  ) {
+  Atom: String!
+  GentooVersion: String!
+  NewestVersion: String!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/types/Package.graphql", Input: `type Package
@@ -1469,6 +1536,66 @@ func (ec *executionContext) field_Query_masks_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["Reason"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_outdatedPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["Atom"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Atom"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["GentooVersion"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["GentooVersion"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["NewestVersion"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["NewestVersion"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_outdatedPackages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["Atom"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Atom"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["GentooVersion"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["GentooVersion"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["NewestVersion"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["NewestVersion"] = arg2
 	return args, nil
 }
 
@@ -3356,6 +3483,108 @@ func (ec *executionContext) _Mask_Reason(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _OutdatedPackage_Atom(ctx context.Context, field graphql.CollectedField, obj *models.OutdatedPackages) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OutdatedPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Atom, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OutdatedPackage_GentooVersion(ctx context.Context, field graphql.CollectedField, obj *models.OutdatedPackages) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OutdatedPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GentooVersion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OutdatedPackage_NewestVersion(ctx context.Context, field graphql.CollectedField, obj *models.OutdatedPackages) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OutdatedPackage",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NewestVersion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Package_Atom(ctx context.Context, field graphql.CollectedField, obj *models.Package) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3854,6 +4083,82 @@ func (ec *executionContext) _Query_masks(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*models.Mask)
 	fc.Result = res
 	return ec.marshalOMask2ᚕᚖsokoᚋpkgᚋmodelsᚐMask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_outdatedPackage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_outdatedPackage_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().OutdatedPackage(rctx, args["Atom"].(*string), args["GentooVersion"].(*string), args["NewestVersion"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.OutdatedPackages)
+	fc.Result = res
+	return ec.marshalOOutdatedPackage2ᚖsokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_outdatedPackages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_outdatedPackages_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().OutdatedPackages(rctx, args["Atom"].(*string), args["GentooVersion"].(*string), args["NewestVersion"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.OutdatedPackages)
+	fc.Result = res
+	return ec.marshalOOutdatedPackage2ᚕᚖsokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_package(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6504,6 +6809,43 @@ func (ec *executionContext) _Mask(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var outdatedPackageImplementors = []string{"OutdatedPackage"}
+
+func (ec *executionContext) _OutdatedPackage(ctx context.Context, sel ast.SelectionSet, obj *models.OutdatedPackages) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, outdatedPackageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OutdatedPackage")
+		case "Atom":
+			out.Values[i] = ec._OutdatedPackage_Atom(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "GentooVersion":
+			out.Values[i] = ec._OutdatedPackage_GentooVersion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "NewestVersion":
+			out.Values[i] = ec._OutdatedPackage_NewestVersion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var packageImplementors = []string{"Package"}
 
 func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, obj *models.Package) graphql.Marshaler {
@@ -6645,6 +6987,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_masks(ctx, field)
+				return res
+			})
+		case "outdatedPackage":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_outdatedPackage(ctx, field)
+				return res
+			})
+		case "outdatedPackages":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_outdatedPackages(ctx, field)
 				return res
 			})
 		case "package":
@@ -8069,6 +8433,57 @@ func (ec *executionContext) marshalOMask2ᚖsokoᚋpkgᚋmodelsᚐMask(ctx conte
 		return graphql.Null
 	}
 	return ec._Mask(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOOutdatedPackage2sokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx context.Context, sel ast.SelectionSet, v models.OutdatedPackages) graphql.Marshaler {
+	return ec._OutdatedPackage(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOOutdatedPackage2ᚕᚖsokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx context.Context, sel ast.SelectionSet, v []*models.OutdatedPackages) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOOutdatedPackage2ᚖsokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOOutdatedPackage2ᚖsokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx context.Context, sel ast.SelectionSet, v *models.OutdatedPackages) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OutdatedPackage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOPackage2sokoᚋpkgᚋmodelsᚐPackage(ctx context.Context, sel ast.SelectionSet, v models.Package) graphql.Marshaler {

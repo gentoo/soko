@@ -1,0 +1,8 @@
+type OutdatedPackage
+  @goModel(
+    model: "soko/pkg/models.OutdatedPackages"
+  ) {
+  Atom: String!
+  GentooVersion: String!
+  NewestVersion: String!
+}

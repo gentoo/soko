@@ -103,6 +103,30 @@ func (r *queryResolver) Masks(ctx context.Context, versions *string, author *str
 	return masks, nil
 }
 
+func (r *queryResolver) OutdatedPackage(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) (*models.OutdatedPackages, error) {
+	outdatedPackages, err := r.OutdatedPackages(ctx, atom, gentooVersion, newestVersion)
+	if err != nil || len(outdatedPackages) != 1 {
+		return &models.OutdatedPackages{}, errors.New("your parameters do not uniquely match a outdated Version")
+	}
+	return outdatedPackages[0], nil
+}
+
+func (r *queryResolver) OutdatedPackages(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) ([]*models.OutdatedPackages, error) {
+	var outdatedPackages []*models.OutdatedPackages
+	query := database.DBCon.Model(&outdatedPackages)
+	params := map[string]*string{
+		"atom":        atom,
+		"gentoo_version": gentooVersion,
+		"newest_version": newestVersion,
+	}
+	query = addStringParams(query, params)
+	err := query.Select()
+	if err != nil {
+		return []*models.OutdatedPackages{}, errors.New("an error occurred while searching for the outdated packages")
+	}
+	return outdatedPackages, nil
+}
+
 func (r *queryResolver) Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error) {
 	gpackages, err := r.Packages(ctx, atom, category, name, longdescription, precedingCommits)
 	if err != nil || len(gpackages) != 1 {
