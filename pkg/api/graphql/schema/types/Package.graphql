@@ -10,6 +10,8 @@ type Package
   Maintainers: [Maintainer!]!
   Commits: [Commit!]!
   PrecedingCommits: Int!
+  PkgCheckResults: [PkgCheckResult!]!
+  Outdated: [OutdatedPackage!]!
 }
 
 type Maintainer

@@ -177,7 +177,7 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	}
 	query = addStringParams(query, stringParams)
 	query = addIntParams(query, intParams)
-	err := query.Relation("Commits").Relation("Versions").Select()
+	err := query.Relation("Commits").Relation("Versions").Relation("PkgCheckResults").Relation("Outdated").Select()
 	if err != nil {
 		return []*models.Package{}, errors.New("an error occurred while searching for the packages")
 	}
@@ -213,7 +213,7 @@ func (r *queryResolver) Versions(ctx context.Context, id *string, category *stri
 		"description": description,
 	}
 	query = addStringParams(query, params)
-	err := query.Relation("Commits").Relation("Masks").Select()
+	err := query.Relation("Commits").Relation("Masks").Relation("PkgCheckResults").Select()
 	if err != nil {
 		return []*models.Version{}, errors.New("an error occurred while searching for the versions")
 	}

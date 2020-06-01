@@ -11,23 +11,24 @@ import (
 )
 
 type Version struct {
-	Id          string `pg:",pk"`
-	Category    string
-	Package     string
-	Atom        string
-	Version     string
-	Slot        string
-	Subslot     string
-	EAPI        string
-	Keywords    string
-	Useflags    []string
-	Restricts   []string
-	Properties  []string
-	Homepage    []string
-	License     string
-	Description string
-	Commits     []*Commit `pg:"many2many:commit_to_versions,joinFK:commit_id"`
-	Masks       []*Mask   `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
+	Id              string `pg:",pk"`
+	Category        string
+	Package         string
+	Atom            string
+	Version         string
+	Slot            string
+	Subslot         string
+	EAPI            string
+	Keywords        string
+	Useflags        []string
+	Restricts       []string
+	Properties      []string
+	Homepage        []string
+	License         string
+	Description     string
+	Commits         []*Commit         `pg:"many2many:commit_to_versions,joinFK:commit_id"`
+	Masks           []*Mask           `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
+	PkgCheckResults []*PkgCheckResult `pg:",fk:cpv"`
 }
 
 // Compare two versions strings - compliant to the 'Version Comparison'

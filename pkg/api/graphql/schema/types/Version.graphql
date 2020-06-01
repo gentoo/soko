@@ -19,4 +19,5 @@ type Version
   Description: String!
   Commits: [Commit!]!
   Masks: [Mask!]!
+  PkgCheckResults: [PkgCheckResult!]!
 }

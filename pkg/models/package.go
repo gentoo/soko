@@ -11,6 +11,8 @@ type Package struct {
 	Maintainers      []*Maintainer
 	Commits          []*Commit `pg:"many2many:commit_to_packages,joinFK:commit_id"`
 	PrecedingCommits int       `pg:",use_zero"`
+	PkgCheckResults  []*PkgCheckResult `pg:",fk:atom"`
+	Outdated         []*OutdatedPackages `pg:",fk:atom"`
 }
 
 type Maintainer struct {
