@@ -9,14 +9,16 @@ import (
 	"soko/pkg/config"
 	"soko/pkg/logger"
 	"soko/pkg/portage"
+	"soko/pkg/portage/repology"
 	"time"
 )
 
 func printHelp() {
 	fmt.Println("Please specific one of the following options:")
-	fmt.Println("  soko update     -- incrementally update the database")
-	fmt.Println("  soko fullupdate -- update the database ")
-	fmt.Println("  soko serve      -- serve the application")
+	fmt.Println("  soko update                   -- incrementally update the database")
+	fmt.Println("  soko fullupdate               -- update the database ")
+	fmt.Println("  soko update-outdated-packages -- update the database containing all outdated gentoo packages")
+	fmt.Println("  soko serve                    -- serve the application")
 }
 
 func isCommand(command string) bool {
@@ -37,6 +39,8 @@ func main() {
 		portage.Update()
 	} else if isCommand("fullupdate") {
 		portage.FullUpdate()
+	} else if isCommand("update-outdated-packages") {
+		repology.UpdateOutdated()
 	} else {
 		printHelp()
 	}

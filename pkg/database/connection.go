@@ -31,6 +31,7 @@ func CreateSchema() error {
 		(*models.Useflag)(nil),
 		(*models.Mask)(nil),
 		(*models.MaskToVersion)(nil),
+		(*models.OutdatedPackages)(nil),
 		(*models.Application)(nil)} {
 
 		err := DBCon.CreateTable(model, &orm.CreateTableOptions{
