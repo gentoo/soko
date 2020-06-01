@@ -127,6 +127,34 @@ func (r *queryResolver) OutdatedPackages(ctx context.Context, atom *string, gent
 	return outdatedPackages, nil
 }
 
+func (r *queryResolver) PkgCheckResult(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) (*models.PkgCheckResult, error) {
+	pkgCheckResults, err := r.PkgCheckResults(ctx, atom, category, packageArg, version, cpv, class, message)
+	if err != nil || len(pkgCheckResults) != 1 {
+		return &models.PkgCheckResult{}, errors.New("your parameters do not uniquely match a pkgcheck result")
+	}
+	return pkgCheckResults[0], nil
+}
+
+func (r *queryResolver) PkgCheckResults(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) ([]*models.PkgCheckResult, error) {
+	var pkgCheckResults []*models.PkgCheckResult
+	query := database.DBCon.Model(&pkgCheckResults)
+	params := map[string]*string{
+		"atom":     atom,
+		"category": category,
+		"package":  packageArg,
+		"version":  version,
+		"cpv":      cpv,
+		"class":    class,
+		"message":  message,
+	}
+	query = addStringParams(query, params)
+	err := query.Select()
+	if err != nil {
+		return []*models.PkgCheckResult{}, errors.New("an error occurred while searching for the pkgcheck results")
+	}
+	return pkgCheckResults, nil
+}
+
 func (r *queryResolver) Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error) {
 	gpackages, err := r.Packages(ctx, atom, category, name, longdescription, precedingCommits)
 	if err != nil || len(gpackages) != 1 {

@@ -11,6 +11,9 @@ type Query {
     outdatedPackage(Atom: String, GentooVersion: String, NewestVersion: String): OutdatedPackage
     outdatedPackages(Atom: String, GentooVersion: String, NewestVersion: String): [OutdatedPackage]
 
+    pkgCheckResult(Atom: String, Category: String, Package: String, Version: String, CPV: String, Class: String, Message: String): PkgCheckResult
+    pkgCheckResults(Atom: String, Category: String, Package: String, Version: String, CPV: String, Class: String, Message: String): [PkgCheckResult]
+
     package(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): Package
     packages(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): [Package]
 

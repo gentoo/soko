@@ -120,6 +120,16 @@ type ComplexityRoot struct {
 		Versions         func(childComplexity int) int
 	}
 
+	PkgCheckResult struct {
+		Atom     func(childComplexity int) int
+		CPV      func(childComplexity int) int
+		Category func(childComplexity int) int
+		Class    func(childComplexity int) int
+		Message  func(childComplexity int) int
+		Package  func(childComplexity int) int
+		Version  func(childComplexity int) int
+	}
+
 	Query struct {
 		AddedPackages      func(childComplexity int, limit *int) int
 		Categories         func(childComplexity int, name *string, description *string) int
@@ -133,6 +143,8 @@ type ComplexityRoot struct {
 		OutdatedPackages   func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
 		Package            func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
 		Packages           func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
+		PkgCheckResult     func(childComplexity int, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) int
+		PkgCheckResults    func(childComplexity int, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) int
 		StabilizedVersions func(childComplexity int, limit *int, arch *string) int
 		UpdatedVersions    func(childComplexity int, limit *int) int
 		Useflag            func(childComplexity int, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) int
@@ -180,6 +192,8 @@ type QueryResolver interface {
 	Masks(ctx context.Context, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) ([]*models.Mask, error)
 	OutdatedPackage(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) (*models.OutdatedPackages, error)
 	OutdatedPackages(ctx context.Context, atom *string, gentooVersion *string, newestVersion *string) ([]*models.OutdatedPackages, error)
+	PkgCheckResult(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) (*models.PkgCheckResult, error)
+	PkgCheckResults(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) ([]*models.PkgCheckResult, error)
 	Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error)
 	Packages(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) ([]*models.Package, error)
 	Useflag(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) (*models.Useflag, error)
@@ -564,6 +578,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Package.Versions(childComplexity), true
 
+	case "PkgCheckResult.Atom":
+		if e.complexity.PkgCheckResult.Atom == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.Atom(childComplexity), true
+
+	case "PkgCheckResult.CPV":
+		if e.complexity.PkgCheckResult.CPV == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.CPV(childComplexity), true
+
+	case "PkgCheckResult.Category":
+		if e.complexity.PkgCheckResult.Category == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.Category(childComplexity), true
+
+	case "PkgCheckResult.Class":
+		if e.complexity.PkgCheckResult.Class == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.Class(childComplexity), true
+
+	case "PkgCheckResult.Message":
+		if e.complexity.PkgCheckResult.Message == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.Message(childComplexity), true
+
+	case "PkgCheckResult.Package":
+		if e.complexity.PkgCheckResult.Package == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.Package(childComplexity), true
+
+	case "PkgCheckResult.Version":
+		if e.complexity.PkgCheckResult.Version == nil {
+			break
+		}
+
+		return e.complexity.PkgCheckResult.Version(childComplexity), true
+
 	case "Query.addedPackages":
 		if e.complexity.Query.AddedPackages == nil {
 			break
@@ -707,6 +770,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Packages(childComplexity, args["Atom"].(*string), args["Category"].(*string), args["Name"].(*string), args["Longdescription"].(*string), args["PrecedingCommits"].(*int)), true
+
+	case "Query.pkgCheckResult":
+		if e.complexity.Query.PkgCheckResult == nil {
+			break
+		}
+
+		args, err := ec.field_Query_pkgCheckResult_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PkgCheckResult(childComplexity, args["Atom"].(*string), args["Category"].(*string), args["Package"].(*string), args["Version"].(*string), args["CPV"].(*string), args["Class"].(*string), args["Message"].(*string)), true
+
+	case "Query.pkgCheckResults":
+		if e.complexity.Query.PkgCheckResults == nil {
+			break
+		}
+
+		args, err := ec.field_Query_pkgCheckResults_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PkgCheckResults(childComplexity, args["Atom"].(*string), args["Category"].(*string), args["Package"].(*string), args["Version"].(*string), args["CPV"].(*string), args["Class"].(*string), args["Message"].(*string)), true
 
 	case "Query.stabilizedVersions":
 		if e.complexity.Query.StabilizedVersions == nil {
@@ -1016,6 +1103,9 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     outdatedPackage(Atom: String, GentooVersion: String, NewestVersion: String): OutdatedPackage
     outdatedPackages(Atom: String, GentooVersion: String, NewestVersion: String): [OutdatedPackage]
 
+    pkgCheckResult(Atom: String, Category: String, Package: String, Version: String, CPV: String, Class: String, Message: String): PkgCheckResult
+    pkgCheckResults(Atom: String, Category: String, Package: String, Version: String, CPV: String, Class: String, Message: String): [PkgCheckResult]
+
     package(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): Package
     packages(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): [Package]
 
@@ -1092,6 +1182,20 @@ type Maintainer
   Type: String!
   Restrict: String!
 }
+`, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/PkgCheckResult.graphql", Input: `type PkgCheckResult
+  @goModel(
+    model: "soko/pkg/models.PkgCheckResult"
+  ) {
+  Atom: String!
+  Category: String!
+  Package: String!
+  Version: String!
+  CPV: String!
+  Class: String!
+  Message: String!
+}
+
 `, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/types/Version.graphql", Input: `type Version
   @goModel(
@@ -1688,6 +1792,130 @@ func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawAr
 		}
 	}
 	args["PrecedingCommits"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_pkgCheckResult_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["Atom"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Atom"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["Category"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Category"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["Package"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Package"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["Version"]; ok {
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Version"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["CPV"]; ok {
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["CPV"] = arg4
+	var arg5 *string
+	if tmp, ok := rawArgs["Class"]; ok {
+		arg5, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Class"] = arg5
+	var arg6 *string
+	if tmp, ok := rawArgs["Message"]; ok {
+		arg6, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Message"] = arg6
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_pkgCheckResults_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["Atom"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Atom"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["Category"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Category"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["Package"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Package"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["Version"]; ok {
+		arg3, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Version"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["CPV"]; ok {
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["CPV"] = arg4
+	var arg5 *string
+	if tmp, ok := rawArgs["Class"]; ok {
+		arg5, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Class"] = arg5
+	var arg6 *string
+	if tmp, ok := rawArgs["Message"]; ok {
+		arg6, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Message"] = arg6
 	return args, nil
 }
 
@@ -3857,6 +4085,244 @@ func (ec *executionContext) _Package_PrecedingCommits(ctx context.Context, field
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PkgCheckResult_Atom(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Atom, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PkgCheckResult_Category(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Category, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PkgCheckResult_Package(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Package, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PkgCheckResult_Version(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PkgCheckResult_CPV(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CPV, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PkgCheckResult_Class(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Class, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PkgCheckResult_Message(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PkgCheckResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_category(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4159,6 +4625,82 @@ func (ec *executionContext) _Query_outdatedPackages(ctx context.Context, field g
 	res := resTmp.([]*models.OutdatedPackages)
 	fc.Result = res
 	return ec.marshalOOutdatedPackage2ᚕᚖsokoᚋpkgᚋmodelsᚐOutdatedPackages(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_pkgCheckResult(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_pkgCheckResult_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PkgCheckResult(rctx, args["Atom"].(*string), args["Category"].(*string), args["Package"].(*string), args["Version"].(*string), args["CPV"].(*string), args["Class"].(*string), args["Message"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.PkgCheckResult)
+	fc.Result = res
+	return ec.marshalOPkgCheckResult2ᚖsokoᚋpkgᚋmodelsᚐPkgCheckResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_pkgCheckResults(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_pkgCheckResults_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PkgCheckResults(rctx, args["Atom"].(*string), args["Category"].(*string), args["Package"].(*string), args["Version"].(*string), args["CPV"].(*string), args["Class"].(*string), args["Message"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.PkgCheckResult)
+	fc.Result = res
+	return ec.marshalOPkgCheckResult2ᚕᚖsokoᚋpkgᚋmodelsᚐPkgCheckResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_package(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -6908,6 +7450,63 @@ func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var pkgCheckResultImplementors = []string{"PkgCheckResult"}
+
+func (ec *executionContext) _PkgCheckResult(ctx context.Context, sel ast.SelectionSet, obj *models.PkgCheckResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pkgCheckResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PkgCheckResult")
+		case "Atom":
+			out.Values[i] = ec._PkgCheckResult_Atom(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Category":
+			out.Values[i] = ec._PkgCheckResult_Category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Package":
+			out.Values[i] = ec._PkgCheckResult_Package(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Version":
+			out.Values[i] = ec._PkgCheckResult_Version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CPV":
+			out.Values[i] = ec._PkgCheckResult_CPV(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Class":
+			out.Values[i] = ec._PkgCheckResult_Class(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Message":
+			out.Values[i] = ec._PkgCheckResult_Message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -7009,6 +7608,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_outdatedPackages(ctx, field)
+				return res
+			})
+		case "pkgCheckResult":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_pkgCheckResult(ctx, field)
+				return res
+			})
+		case "pkgCheckResults":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_pkgCheckResults(ctx, field)
 				return res
 			})
 		case "package":
@@ -8535,6 +9156,57 @@ func (ec *executionContext) marshalOPackage2ᚖsokoᚋpkgᚋmodelsᚐPackage(ctx
 		return graphql.Null
 	}
 	return ec._Package(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPkgCheckResult2sokoᚋpkgᚋmodelsᚐPkgCheckResult(ctx context.Context, sel ast.SelectionSet, v models.PkgCheckResult) graphql.Marshaler {
+	return ec._PkgCheckResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOPkgCheckResult2ᚕᚖsokoᚋpkgᚋmodelsᚐPkgCheckResult(ctx context.Context, sel ast.SelectionSet, v []*models.PkgCheckResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOPkgCheckResult2ᚖsokoᚋpkgᚋmodelsᚐPkgCheckResult(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOPkgCheckResult2ᚖsokoᚋpkgᚋmodelsᚐPkgCheckResult(ctx context.Context, sel ast.SelectionSet, v *models.PkgCheckResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PkgCheckResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

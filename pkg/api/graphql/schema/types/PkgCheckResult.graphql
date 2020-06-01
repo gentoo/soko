@@ -1,0 +1,13 @@
+type PkgCheckResult
+  @goModel(
+    model: "soko/pkg/models.PkgCheckResult"
+  ) {
+  Atom: String!
+  Category: String!
+  Package: String!
+  Version: String!
+  CPV: String!
+  Class: String!
+  Message: String!
+}
+
