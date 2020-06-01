@@ -9,6 +9,7 @@ import (
 	"soko/pkg/config"
 	"soko/pkg/logger"
 	"soko/pkg/portage"
+	"soko/pkg/portage/pkgcheck"
 	"soko/pkg/portage/repology"
 	"time"
 )
@@ -18,6 +19,7 @@ func printHelp() {
 	fmt.Println("  soko update                   -- incrementally update the database")
 	fmt.Println("  soko fullupdate               -- update the database ")
 	fmt.Println("  soko update-outdated-packages -- update the database containing all outdated gentoo packages")
+	fmt.Println("  soko update-pgkcheck-results  -- update the database containing all pkgcheck results")
 	fmt.Println("  soko serve                    -- serve the application")
 }
 
@@ -41,6 +43,8 @@ func main() {
 		portage.FullUpdate()
 	} else if isCommand("update-outdated-packages") {
 		repology.UpdateOutdated()
+	} else if isCommand("update-pgkcheck-results") {
+		pkgcheck.UpdatePkgCheckResults()
 	} else {
 		printHelp()
 	}
