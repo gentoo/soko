@@ -15,6 +15,13 @@
             <div class="row">
                 <div class="col-md-9">
 
+                    {{ if .Package.Outdated }}
+                        <div class="alert alert-warning dev-mode d-none">
+                            <strong><span class="fa fa-fw fa-exclamation-triangle"></span> Version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream. Please consider updating!</strong><br>
+                            It seems that version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream, while the latest version in the Gentoo tree is {{ (index .Package.Outdated 0).GentooVersion }}.
+                        </div>
+                    {{ end }}
+
                     {{template "versions" .}}
 
                     {{ if isMasked .Versions }}

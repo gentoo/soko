@@ -33,8 +33,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	gpackage := new(models.Package)
 	err := database.DBCon.Model(gpackage).
 		Where("atom = ?", atom).
+		Relation("Outdated").
+		Relation("PkgCheckResults").
 		Relation("Versions").
 		Relation("Versions.Masks").
+		Relation("Versions.PkgCheckResults").
 		Select()
 
 	if err != nil {

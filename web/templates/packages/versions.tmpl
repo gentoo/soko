@@ -11,7 +11,7 @@
             </h4>
         </div>
         <div class="table-responsive">
-            <table class="table table-bordered kk-versions-table mb-0">
+            <table class="table table-bordered kk-versions-table mb-0 overflow-hidden">
                 <thead>
                 <tr>
                     <th class="kk-version kk-cell-sep-right">Version</th>
@@ -28,6 +28,25 @@
                 </tr>
                 </thead>
                 <tbody>
+
+                    <tr>
+                        <td colspan="11" class="kk-version kk-cell-sep-right dev-mode d-none">
+                            <strong><a class="kk-ebuild-link">Warnings For All Versions</a></strong>
+                        </td>
+                    </tr>
+
+                    {{ if .Package.PkgCheckResults }}
+                         <tr class="text-muted dev-mode d-none">
+                             <td colspan="11" class="kk-version kk-cell-sep-right">
+                                {{ range $.Package.PkgCheckResults }}
+                                    {{ if not .Version }}
+                                        <strong>{{ .Class }}:</strong> {{ .Message }} <br/>
+                                   {{end}}
+                                {{end}}
+                            </td>
+                        </tr>
+                    {{end}}
+
                     {{range $index, $element := .Package.Versions}}
                         {{template "versionrow" $element}}
                     {{end}}
