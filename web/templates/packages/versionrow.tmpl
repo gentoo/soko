@@ -68,13 +68,18 @@
     </tr>
 
     {{ if .PkgCheckResults }}
-        <tr class="text-muted dev-mode d-none">
-            <td colspan="11" class="kk-version kk-cell-sep-right">
-                {{ range .PkgCheckResults }}
-                    <strong>{{ .Class }}:</strong> {{ .Message }} <br/>
-                {{end}}
-            </td>
-        </tr>
+        {{ range .PkgCheckResults }}
+            <tr class="text-muted dev-mode d-none">
+                <td colspan="1" class="kk-version kk-cell-sep-right">
+                    <strong>{{ .Class }}</strong>
+                </td>
+                <td colspan="10" class="kk-version kk-cell-sep-right">
+
+                        {{ .Message }}
+
+                </td>
+            </tr>
+        {{end}}
     {{end}}
 
 {{end}}

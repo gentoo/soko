@@ -36,15 +36,18 @@
                     </tr>
 
                     {{ if .Package.PkgCheckResults }}
-                         <tr class="text-muted dev-mode d-none">
-                             <td colspan="11" class="kk-version kk-cell-sep-right">
-                                {{ range $.Package.PkgCheckResults }}
-                                    {{ if not .Version }}
-                                        <strong>{{ .Class }}:</strong> {{ .Message }} <br/>
-                                   {{end}}
-                                {{end}}
-                            </td>
-                        </tr>
+                         {{ range $.Package.PkgCheckResults }}
+                             {{ if not .Version }}
+                                 <tr class="text-muted dev-mode d-none">
+                                     <td colspan="1" class="kk-version kk-cell-sep-right">
+                                        <strong>{{ .Class }}</strong>
+                                     </td>
+                                     <td colspan="10" class="kk-version kk-cell-sep-right">
+                                         {{ .Message }}
+                                     </td>
+                                </tr>
+                             {{end}}
+                         {{end}}
                     {{end}}
 
                     {{range $index, $element := .Package.Versions}}
@@ -55,3 +58,4 @@
         </div>
     </div>
 {{end}}
+<
