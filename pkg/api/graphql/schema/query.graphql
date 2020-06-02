@@ -23,6 +23,8 @@ type Query {
     version(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): Version
     versions(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): [Version]
 
+    application: Application
+
     #
     # Shortcuts for convenience and easy migration
     #

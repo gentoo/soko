@@ -8,12 +8,19 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"soko/pkg/api/graphql/generated"
 	"soko/pkg/app/handler/packages"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"time"
 )
 
 type Resolver struct{}
+
+func (r *queryResolver) Application(ctx context.Context) (*models.Application, error) {
+	// GetApplicationData will return some static struct if the DB is down.
+	data := utils.GetApplicationData()
+	return &data, nil
+}
 
 func (r *queryResolver) Category(ctx context.Context, name *string, description *string) (*models.Category, error) {
 	categories, err := r.Categories(ctx, name, description)

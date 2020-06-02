@@ -1,0 +1,8 @@
+type Application
+  @goModel(
+    model: "soko/pkg/models.Application"
+  ) {
+	Version: String!
+  LastUpdate: Time!
+  LastCommit: String!
+}

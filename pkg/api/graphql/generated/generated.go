@@ -42,6 +42,12 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Application struct {
+		LastCommit func(childComplexity int) int
+		LastUpdate func(childComplexity int) int
+		Version    func(childComplexity int) int
+	}
+
 	Category struct {
 		Description func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -134,6 +140,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		AddedPackages      func(childComplexity int, limit *int) int
+		Application        func(childComplexity int) int
 		Categories         func(childComplexity int, name *string, description *string) int
 		Category           func(childComplexity int, name *string, description *string) int
 		Commit             func(childComplexity int, id *string, precedingCommits *int, authorName *string, authorEmail *string, authorDate *time.Time, committerName *string, committerEmail *string, committerDate *time.Time, message *string) int
@@ -203,6 +210,7 @@ type QueryResolver interface {
 	Useflags(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) ([]*models.Useflag, error)
 	Version(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) (*models.Version, error)
 	Versions(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) ([]*models.Version, error)
+	Application(ctx context.Context) (*models.Application, error)
 	AddedPackages(ctx context.Context, limit *int) ([]*models.Package, error)
 	UpdatedVersions(ctx context.Context, limit *int) ([]*models.Version, error)
 	StabilizedVersions(ctx context.Context, limit *int, arch *string) ([]*models.Version, error)
@@ -223,6 +231,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Application.LastCommit":
+		if e.complexity.Application.LastCommit == nil {
+			break
+		}
+
+		return e.complexity.Application.LastCommit(childComplexity), true
+
+	case "Application.LastUpdate":
+		if e.complexity.Application.LastUpdate == nil {
+			break
+		}
+
+		return e.complexity.Application.LastUpdate(childComplexity), true
+
+	case "Application.Version":
+		if e.complexity.Application.Version == nil {
+			break
+		}
+
+		return e.complexity.Application.Version(childComplexity), true
 
 	case "Category.Description":
 		if e.complexity.Category.Description == nil {
@@ -655,6 +684,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.AddedPackages(childComplexity, args["Limit"].(*int)), true
+
+	case "Query.application":
+		if e.complexity.Query.Application == nil {
+			break
+		}
+
+		return e.complexity.Query.Application(childComplexity), true
 
 	case "Query.categories":
 		if e.complexity.Query.Categories == nil {
@@ -1139,6 +1175,8 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     version(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): Version
     versions(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): [Version]
 
+		application: Application
+
     #
     # Shortcuts for convenience and easy migration
     #
@@ -1245,6 +1283,15 @@ type Maintainer
   Commits: [Commit!]!
   Masks: [Mask!]!
   PkgCheckResults: [PkgCheckResult!]!
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/application.graphql", Input: `type Application
+  @goModel(
+    model: "soko/pkg/models.Application"
+  ) {
+	Version: String!
+  LastUpdate: Time!
+  LastCommit: String!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/types/category.graphql", Input: `type Category
@@ -2377,6 +2424,108 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Application_Version(ctx context.Context, field graphql.CollectedField, obj *models.Application) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Application",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Application_LastUpdate(ctx context.Context, field graphql.CollectedField, obj *models.Application) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Application",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastUpdate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Application_LastCommit(ctx context.Context, field graphql.CollectedField, obj *models.Application) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Application",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastCommit, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _Category_Name(ctx context.Context, field graphql.CollectedField, obj *models.Category) (ret graphql.Marshaler) {
 	defer func() {
@@ -5026,6 +5175,37 @@ func (ec *executionContext) _Query_versions(ctx context.Context, field graphql.C
 	return ec.marshalOVersion2ᚕᚖsokoᚋpkgᚋmodelsᚐVersion(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_application(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Application(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.Application)
+	fc.Result = res
+	return ec.marshalOApplication2ᚖsokoᚋpkgᚋmodelsᚐApplication(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_addedPackages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7126,6 +7306,43 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** object.gotpl ****************************
 
+var applicationImplementors = []string{"Application"}
+
+func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionSet, obj *models.Application) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Application")
+		case "Version":
+			out.Values[i] = ec._Application_Version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "LastUpdate":
+			out.Values[i] = ec._Application_LastUpdate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "LastCommit":
+			out.Values[i] = ec._Application_LastCommit(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var categoryImplementors = []string{"Category"}
 
 func (ec *executionContext) _Category(ctx context.Context, sel ast.SelectionSet, obj *models.Category) graphql.Marshaler {
@@ -7835,6 +8052,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_versions(ctx, field)
+				return res
+			})
+		case "application":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_application(ctx, field)
 				return res
 			})
 		case "addedPackages":
@@ -9101,6 +9329,17 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalOApplication2sokoᚋpkgᚋmodelsᚐApplication(ctx context.Context, sel ast.SelectionSet, v models.Application) graphql.Marshaler {
+	return ec._Application(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOApplication2ᚖsokoᚋpkgᚋmodelsᚐApplication(ctx context.Context, sel ast.SelectionSet, v *models.Application) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Application(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
