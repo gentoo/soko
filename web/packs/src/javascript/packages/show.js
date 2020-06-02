@@ -12,22 +12,45 @@ $(function() {
 });
 
 
-window.devMode = false;
+var devMode = window.localStorage.getItem('devMode');
 
-$( "#activate-dev-mode" ).removeClass("d-none");
+if(devMode == null){
+  devMode = 'false';
+  window.localStorage.setItem('devMode', devMode);
+}
 
+// update current page
+if(devMode == 'true'){
+  var cols = document.getElementsByClassName('dev-mode');
+  for(i = 0; i < cols.length; i++) {
+    cols[i].classList.remove("d-none");
+  }
+  document.getElementById("activate-dev-mode").innerHTML = "Switch to Standard Mode";
+}else{
+  var cols = document.getElementsByClassName('dev-mode');
+  for(i = 0; i < cols.length; i++) {
+    cols[i].classList.add("d-none");
+  }
+  document.getElementById("activate-dev-mode").innerHTML = "Switch to Developer Mode";
+}
+
+// register listener for future changes
 $( "#activate-dev-mode" ).click(function() {
-  if(window.devMode){
+  if(devMode == 'true'){
     var cols = document.getElementsByClassName('dev-mode');
     for(i = 0; i < cols.length; i++) {
       cols[i].classList.add("d-none");
     }
-    window.devMode = false;
+    devMode = 'false';
+    window.localStorage.setItem('devMode', devMode);
+    document.getElementById("activate-dev-mode").innerHTML = "Switch to Developer Mode";
   }else{
     var cols = document.getElementsByClassName('dev-mode');
     for(i = 0; i < cols.length; i++) {
       cols[i].classList.remove("d-none");
     }
-    window.devMode = true;
+    devMode = 'true';
+    window.localStorage.setItem('devMode', devMode);
+    document.getElementById("activate-dev-mode").innerHTML = "Switch to Standard Mode";
   }
 });
