@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"soko/pkg/api/graphql/generated"
+	"soko/pkg/api/graphql/graphiql"
 	"soko/pkg/api/graphql/resolvers"
 	"soko/pkg/app/handler/about"
 	"soko/pkg/app/handler/arches"
@@ -71,6 +72,9 @@ func Serve() {
 	srv := handler.NewDefaultServer(schema)
 	srv.Use(extension.FixedComplexityLimit(300))
 	http.Handle("/api/graphql/", cors(srv))
+
+	// graphiql: api explorer
+	setRoute("/api/explore/", graphiql.Show)
 
 	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
 

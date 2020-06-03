@@ -46,6 +46,10 @@ func Port() string {
 	return getEnv("SOKO_PORT", "5000")
 }
 
+func GraphiqlEndpoint() string {
+	return getEnv("GRAPHIQL_ENDPOINT", "https://packages.gentoo.org/api/graphql/")
+}
+
 func CacheControl() string {
 	return getEnv("SOKO_CACHE_CONTROL", "max-age=300")
 }

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>GraphiQL - Gentoo Packages</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#54487a">
+        <meta name="description" content="Gentoo Packages GraphiQL GraphQL API Explorer">
+        <link rel="icon" href="https://packages.gentoo.org/favicon.ico" type="image/x-icon">
+        <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+    </head>
+
+    <body>
+        <div id="graphiql">
+            Loading...
+        </div>
+        <script src="https://unpkg.com/graphiql@0.17.5/graphiql.min.js" type="application/javascript"></script>
+        <script>
+            window.graphqlEndpoint = '{{ . }}';
+        </script>
+        <script src="/assets/graphiql.js" type="application/javascript"></script>
+    </body>
+</html>
