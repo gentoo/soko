@@ -7,5 +7,6 @@ import './src/vendor/javascripts/moment.min';
 
 import './src/javascript/arches';
 import './src/javascript/kkuleomi';
+import './src/javascript/devMode';
 
 import 'bootstrap';
