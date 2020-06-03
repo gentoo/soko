@@ -70,7 +70,7 @@ func Serve() {
 	})
 	srv := handler.NewDefaultServer(schema)
 	srv.Use(extension.FixedComplexityLimit(300))
-	http.Handle("/api/graphql/", srv)
+	http.Handle("/api/graphql/", cors(srv))
 
 	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
 
@@ -92,4 +92,13 @@ func mw(handler http.HandlerFunc) http.HandlerFunc {
 // setDefaultHeaders sets the default headers that apply for all pages
 func setDefaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Cache-Control", config.CacheControl())
+}
+
+func cors(h http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		h.ServeHTTP(w, r)
+	}
 }
