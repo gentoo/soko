@@ -57,8 +57,18 @@ func (v *Version) CompareTo(other Version) bool {
 			return getSuffixOrder(versionIdentifierA.Suffixes[i].Name) > getSuffixOrder(versionIdentifierB.Suffixes[i].Name)
 		}
 	}
-	if len(versionIdentifierA.Suffixes) != len(versionIdentifierB.Suffixes) {
-		return len(versionIdentifierA.Suffixes) > len(versionIdentifierB.Suffixes)
+	if len(versionIdentifierA.Suffixes) > len(versionIdentifierB.Suffixes) {
+		if versionIdentifierA.Suffixes[len(versionIdentifierB.Suffixes)].Name == "p" {
+			return true
+		} else {
+			return false
+		}
+	}else if len(versionIdentifierA.Suffixes) < len(versionIdentifierB.Suffixes) {
+		if versionIdentifierB.Suffixes[len(versionIdentifierA.Suffixes)].Name == "p" {
+			return false
+		} else {
+			return true
+		}
 	}
 
 	// compare the revision
