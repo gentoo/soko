@@ -13,7 +13,6 @@ package repository
 
 import (
 	"github.com/go-pg/pg/v9"
-	"github.com/mcuadros/go-version"
 	"regexp"
 	"soko/pkg/database"
 	"soko/pkg/logger"
@@ -162,7 +161,8 @@ func getMasks(path string) []string {
 // masked and update the MaskToVersion Table
 func CalculateMaskedVersions() {
 
-	// TODO clear whole table before starting
+	// clean up all masked versions before recalculating them
+	deleteAllMasksToVersion()
 
 	var masks []*models.Mask
 	err := database.DBCon.Model(&masks).Select()
@@ -211,8 +211,22 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 		Select()
 
 	for _, v := range versions {
-		if version.Compare(version.Normalize(v.Version), version.Normalize(versionSpecifier), operator) {
-			results = append(results, v)
+		if operator == ">" {
+			if v.Version != versionSpecifier && v.CompareTo(models.Version{ Version: versionSpecifier }){
+				results = append(results, v)
+			}
+		}else if operator == ">=" {
+			if v.Version == versionSpecifier || v.CompareTo(models.Version{ Version: versionSpecifier }){
+				results = append(results, v)
+			}
+		}else if operator == "<" {
+			if v.Version != versionSpecifier && (&models.Version{ Version: versionSpecifier }).CompareTo(*v){
+				results = append(results, v)
+			}
+		}else if operator == "<=" {
+			if v.Version == versionSpecifier || (&models.Version{ Version: versionSpecifier }).CompareTo(*v) {
+				results = append(results, v)
+			}
 		}
 	}
 	return results
@@ -278,6 +292,15 @@ func maskVersions(versionSpecifier string, versions []*models.Version) {
 
 		logger.Error.Println("Error while inserting mask to version entry")
 		logger.Error.Println(err)
+	}
+}
+
+// deleteAllMasks deletes all entries in the mask table
+func deleteAllMasksToVersion() {
+	var masks []*models.MaskToVersion
+	database.DBCon.Model(&masks).Select()
+	for _, mask := range masks {
+		database.DBCon.Model(mask).WherePK().Delete()
 	}
 }
 
