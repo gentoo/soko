@@ -31,9 +31,9 @@ type Version struct {
 	PkgCheckResults []*PkgCheckResult `pg:",fk:cpv"`
 }
 
-// Compare two versions strings - compliant to the 'Version Comparison'
-// described in the Package Manager Specification (PMS)
-func (v *Version) CompareTo(other Version) bool {
+// GreaterThan returns true if the version is greater than the given version
+// compliant to the 'Version Comparison' described in the Package Manager Specification (PMS)
+func (v *Version) GreaterThan(other Version) bool {
 	versionIdentifierA := v.computeVersionIdentifier()
 	versionIdentifierB := other.computeVersionIdentifier()
 
@@ -76,9 +76,20 @@ func (v *Version) CompareTo(other Version) bool {
 		return versionIdentifierA.Revision > versionIdentifierB.Revision
 	}
 
-	// the versions are equal based on the PMS specification but
-	// we have to return a bool, that's why we return true here
-	return true
+	// the versions are equal based on the PMS specification
+	return false
+}
+
+// SmallerThan returns true if the version is smaller than the given version
+// compliant to the 'Version Comparison' described in the Package Manager Specification (PMS)
+func (v *Version) SmallerThan(other Version) bool {
+	return other.GreaterThan(*v)
+}
+
+// EqualTo returns true if the version is equal to the given version
+// compliant to the 'Version Comparison' described in the Package Manager Specification (PMS)
+func (v *Version) EqualTo(other Version) bool {
+	return !v.GreaterThan(other) && !v.SmallerThan(other)
 }
 
 // utils

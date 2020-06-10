@@ -51,8 +51,7 @@ func TestVersionCompare(t *testing.T) {
 		t.Run(testname, func(t *testing.T) {
 			left := Version{Version: tt.left}
 			right := Version{Version: tt.right}
-			// CompareTo is really >=, not Equality Comparison.
-			ret := left.CompareTo(right)
+			ret := left.GreaterThan(right)
 			if ret != tt.want {
 				t.Errorf("got %t, want %t", ret, tt.want)
 			}

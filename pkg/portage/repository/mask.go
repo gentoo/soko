@@ -211,20 +211,21 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 		Select()
 
 	for _, v := range versions {
+		givenVersion := models.Version{ Version: versionSpecifier }
 		if operator == ">" {
-			if v.Version != versionSpecifier && v.CompareTo(models.Version{ Version: versionSpecifier }){
+			if v.GreaterThan(givenVersion){
 				results = append(results, v)
 			}
 		}else if operator == ">=" {
-			if v.Version == versionSpecifier || v.CompareTo(models.Version{ Version: versionSpecifier }){
+			if v.GreaterThan(givenVersion) == v.EqualTo(givenVersion) {
 				results = append(results, v)
 			}
 		}else if operator == "<" {
-			if v.Version != versionSpecifier && (&models.Version{ Version: versionSpecifier }).CompareTo(*v){
+			if (&givenVersion).SmallerThan(*v){
 				results = append(results, v)
 			}
 		}else if operator == "<=" {
-			if v.Version == versionSpecifier || (&models.Version{ Version: versionSpecifier }).CompareTo(*v) {
+			if (&givenVersion).SmallerThan(*v) || (&givenVersion).EqualTo(*v) {
 				results = append(results, v)
 			}
 		}

@@ -379,14 +379,14 @@ func showRemovalNotice(versions []*models.Version) bool {
 // sort the versions in ascending order
 func sortVersionsAsc(versions []*models.Version) {
 	sort.Slice(versions, func(i, j int) bool {
-		return !versions[i].CompareTo(*versions[j])
+		return versions[i].SmallerThan(*versions[j])
 	})
 }
 
 // sort the versions in descending order
 func sortVersionsDesc(versions []*models.Version) {
 	sort.Slice(versions, func(i, j int) bool {
-		return versions[i].CompareTo(*versions[j])
+		return versions[i].GreaterThan(*versions[j])
 	})
 }
 
