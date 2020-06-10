@@ -5,11 +5,12 @@ import (
 	"testing"
 )
 
-func TestVersionCompare(t *testing.T) {
+func TestVersion_GreaterThan(t *testing.T) {
 	var tests = []struct {
 		left, right string
 		want        bool
 	}{
+		// left version should be greater than the right version
 		{"6.0", "5.0", true},
 		{"5.0", "5", true},
 		{"1.0-r1", "1.0-r0", true},
@@ -52,7 +53,7 @@ func TestVersionCompare(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s.compare(%s)", tt.left, tt.right)
+		testname := fmt.Sprintf("%s.greaterThan(%s)", tt.left, tt.right)
 		t.Run(testname, func(t *testing.T) {
 			left := Version{Version: tt.left}
 			right := Version{Version: tt.right}
@@ -112,7 +113,7 @@ func TestVersion_SmallerThan(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s.compare(%s)", tt.left, tt.right)
+		testname := fmt.Sprintf("%s.lessThan(%s)", tt.left, tt.right)
 		t.Run(testname, func(t *testing.T) {
 			left := Version{Version: tt.left}
 			right := Version{Version: tt.right}
@@ -172,7 +173,7 @@ func TestVersion_EqualTo(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s.compare(%s)", tt.left, tt.right)
+		testname := fmt.Sprintf("%s.equalTo(%s)", tt.left, tt.right)
 		t.Run(testname, func(t *testing.T) {
 			left := Version{Version: tt.left}
 			right := Version{Version: tt.right}
