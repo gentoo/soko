@@ -40,9 +40,9 @@ func (v *Version) GreaterThan(other Version) bool {
 	// compare the numeric part
 	numericPartsA := strings.Split(versionIdentifierA.NumericPart, ".")
 	numericPartsB := strings.Split(versionIdentifierB.NumericPart, ".")
-	if numberGreaterThan(numericPartsA[0],numericPartsB[0]){
+	if numberGreaterThan(numericPartsA[0], numericPartsB[0]) {
 		return true
-	}else if numberGreaterThan(numericPartsB[0],numericPartsA[0]){
+	} else if numberGreaterThan(numericPartsB[0], numericPartsA[0]) {
 		return false
 	}
 	for i := 1; i < min(len(numericPartsA), len(numericPartsB)); i++ {
@@ -59,12 +59,12 @@ func (v *Version) GreaterThan(other Version) bool {
 
 			if numberGreaterThan(numericPartsA[i], numericPartsB[i]) {
 				return true
-			} else if  numberGreaterThan(numericPartsB[i], numericPartsA[i]) {
+			} else if numberGreaterThan(numericPartsB[i], numericPartsA[i]) {
 				return false
 			}
 		}
 	}
-	if len(numericPartsA) > len(numericPartsB){
+	if len(numericPartsA) > len(numericPartsB) {
 		return true
 	} else if len(numericPartsA) < len(numericPartsB) {
 		return false
@@ -89,7 +89,7 @@ func (v *Version) GreaterThan(other Version) bool {
 		} else {
 			return false
 		}
-	}else if len(versionIdentifierA.Suffixes) < len(versionIdentifierB.Suffixes) {
+	} else if len(versionIdentifierA.Suffixes) < len(versionIdentifierB.Suffixes) {
 		if versionIdentifierB.Suffixes[len(versionIdentifierA.Suffixes)].Name == "p" {
 			return false
 		} else {
