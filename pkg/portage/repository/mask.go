@@ -221,11 +221,11 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 				results = append(results, v)
 			}
 		} else if operator == "<" {
-			if (&givenVersion).SmallerThan(*v) {
+			if v.SmallerThan(givenVersion) {
 				results = append(results, v)
 			}
 		} else if operator == "<=" {
-			if (&givenVersion).SmallerThan(*v) || (&givenVersion).EqualTo(*v) {
+			if v.SmallerThan(givenVersion) || v.EqualTo(givenVersion) {
 				results = append(results, v)
 			}
 		}
