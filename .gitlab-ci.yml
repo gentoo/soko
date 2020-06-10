@@ -32,6 +32,11 @@ build:
     - docker push $UPDATER_IMAGE_TAG
     - docker push $LATEST_UPDATER_IMAGE_TAG
 
+test:
+  stage: test
+  script:
+    - go test -v ./pkg/models/...
+
 include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: Container-Scanning.gitlab-ci.yml  
