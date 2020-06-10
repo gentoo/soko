@@ -3,7 +3,7 @@
 package models
 
 import (
-	"github.com/mcuadros/go-version"
+	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
@@ -38,10 +38,36 @@ func (v *Version) GreaterThan(other Version) bool {
 	versionIdentifierB := other.computeVersionIdentifier()
 
 	// compare the numeric part
-	numericPartA := version.Normalize(versionIdentifierA.NumericPart)
-	numericPartB := version.Normalize(versionIdentifierB.NumericPart)
-	if !version.Compare(numericPartA, numericPartB, "=") {
-		return version.Compare(numericPartA, numericPartB, ">")
+	numericPartsA := strings.Split(versionIdentifierA.NumericPart, ".")
+	numericPartsB := strings.Split(versionIdentifierB.NumericPart, ".")
+	if numberGreaterThan(numericPartsA[0],numericPartsB[0]){
+		return true
+	}else if numberGreaterThan(numericPartsB[0],numericPartsA[0]){
+		return false
+	}
+	for i := 1; i < min(len(numericPartsA), len(numericPartsB)); i++ {
+		// Version comparison logic for each numeric component after the first
+		if strings.HasPrefix(numericPartsA[i], "0") || strings.HasPrefix(numericPartsB[i], "0") {
+			NumericPartA := strings.TrimRight(numericPartsA[i], "0")
+			NumericPartB := strings.TrimRight(numericPartsB[i], "0")
+			if NumericPartA > NumericPartB {
+				return true
+			} else if NumericPartA < NumericPartB {
+				return false
+			}
+		} else {
+
+			if numberGreaterThan(numericPartsA[i], numericPartsB[i]) {
+				return true
+			} else if  numberGreaterThan(numericPartsB[i], numericPartsA[i]) {
+				return false
+			}
+		}
+	}
+	if len(numericPartsA) > len(numericPartsB){
+		return true
+	} else if len(numericPartsA) < len(numericPartsB) {
+		return false
 	}
 
 	// compare the letter
@@ -51,7 +77,7 @@ func (v *Version) GreaterThan(other Version) bool {
 
 	// compare the suffixes
 	for i := 0; i < min(len(versionIdentifierA.Suffixes), len(versionIdentifierB.Suffixes)); i++ {
-		if versionIdentifierA.Suffixes[i] == versionIdentifierA.Suffixes[i] {
+		if versionIdentifierA.Suffixes[i].Name == versionIdentifierB.Suffixes[i].Name {
 			return versionIdentifierA.Suffixes[i].Number > versionIdentifierB.Suffixes[i].Number
 		} else {
 			return getSuffixOrder(versionIdentifierA.Suffixes[i].Name) > getSuffixOrder(versionIdentifierB.Suffixes[i].Name)
@@ -114,6 +140,24 @@ func min(a, b int) int {
 	return b
 }
 
+// numberGreaterThan takes two strings and returns true if the
+// first strings is greater than the second one using integer
+// comparison. - In case of an error during the string to int
+// conversion false will be returned
+func numberGreaterThan(a, b string) bool {
+
+	aInt := new(big.Int)
+	aInt, aOK := aInt.SetString(a, 10)
+	bInt := new(big.Int)
+	bInt, bOK := bInt.SetString(b, 10)
+
+	if !aOK || !bOK {
+		return false
+	}
+
+	return aInt.Cmp(bInt) == 1
+}
+
 // computeVersionIdentifier is parsing the Version string of a
 // version and is computing a VersionIdentifier based on this
 // string.
@@ -159,7 +203,7 @@ func getNumericPart(str string) (string, string) {
 // for instance. The suffix named as well as the following number
 // will be parsed and returned as VersionSuffix
 func getSuffix(str string) *VersionSuffix {
-	allowedSuffixes := []string{"alpha", " beta", "pre", "rc", "p"}
+	allowedSuffixes := []string{"alpha", "beta", "pre", "rc", "p"}
 	for _, allowedSuffix := range allowedSuffixes {
 		if regexp.MustCompile(allowedSuffix + `\d+`).MatchString(str) {
 			parsedSuffix, err := strconv.Atoi(strings.ReplaceAll(str, allowedSuffix, ""))
