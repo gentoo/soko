@@ -1,4 +1,5 @@
 stages:
+  - go-test
   - build
   - test
   - dast
@@ -32,8 +33,9 @@ build:
     - docker push $UPDATER_IMAGE_TAG
     - docker push $LATEST_UPDATER_IMAGE_TAG
 
-test:
-  stage: test
+go-test:
+  stage: go-test
+  image: golang:1.14.0
   script:
     - go test -v ./pkg/models/...
 
