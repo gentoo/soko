@@ -4,11 +4,6 @@ stages:
   - test
   - dast
 
-info:
-  stage: .pre
-  script:
-    - docker info
-  
 build:
   stage: build
   except:
@@ -23,6 +18,7 @@ build:
     - echo $UPDATER_IMAGE_TAG
     - echo $LATEST_IMAGE_TAG
     - echo $LATEST_UPDATER_IMAGE_TAG
+    - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
     - docker pull gentoo/portage:latest
     - docker pull gentoo/stage3-amd64
@@ -45,6 +41,7 @@ build-tag:
   script:
     - echo $IMAGE_TAG
     - echo $UPDATER_IMAGE_TAG
+    - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
     - docker pull gentoo/portage:latest
     - docker pull gentoo/stage3-amd64
