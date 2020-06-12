@@ -58,6 +58,8 @@ func Serve() {
 	setRoute("/packages/updated.atom", packages.UpdatedFeed)
 	setRoute("/packages/keyworded.atom", packages.KeywordedFeed)
 	setRoute("/packages/stable.atom", packages.StabilizedFeed)
+	// Added for backwards compability
+	redirect("/packages/stabilized.atom", "/packages/stable.atom")
 	setRoute("/packages/search.atom", packages.SearchFeed)
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
@@ -83,6 +85,12 @@ func Serve() {
 // define a route using the default middleware and the given handler
 func setRoute(path string, handler http.HandlerFunc) {
 	http.HandleFunc(path, mw(handler))
+}
+
+func redirect(from, to string){
+	http.HandleFunc(from, func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, to, 301)
+	})
 }
 
 // mw is used as default middleware to set the default headers
