@@ -11,6 +11,7 @@ import (
 	"soko/pkg/models"
 	"soko/pkg/portage/repository"
 	"soko/pkg/portage/utils"
+	"strings"
 	"time"
 )
 
@@ -97,6 +98,11 @@ func updateHistory() {
 	logger.Info.Println("Start updating the history")
 
 	latestCommit := repository.UpdateCommits()
+
+	if strings.TrimSpace(latestCommit) == "" {
+		currentApplicationData := getApplicationData()
+		latestCommit = currentApplicationData.LastCommit
+	}
 
 	application := &models.Application{
 		Id:         "latest",
@@ -248,4 +254,22 @@ func fixPrecedingCommitsOfPackages() {
 			database.DBCon.Model(gpackage).WherePK().Update()
 		}
 	}
+}
+
+// GetApplicationData is used to retrieve the
+// application data from the database
+func getApplicationData() models.Application {
+	// Select user by primary key.
+	applicationData := &models.Application{Id: "latest"}
+	err := database.DBCon.Select(applicationData)
+	if err != nil {
+		logger.Error.Println("Error fetching application data")
+		return models.Application{
+			Id:         "latest",
+			LastUpdate: time.Now(),
+			LastCommit: "unknown",
+			Version:    "unknown",
+		}
+	}
+	return *applicationData
 }
