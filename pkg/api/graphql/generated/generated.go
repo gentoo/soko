@@ -146,6 +146,7 @@ type ComplexityRoot struct {
 		Commit             func(childComplexity int, id *string, precedingCommits *int, authorName *string, authorEmail *string, authorDate *time.Time, committerName *string, committerEmail *string, committerDate *time.Time, message *string) int
 		Commits            func(childComplexity int, id *string, precedingCommits *int, authorName *string, authorEmail *string, authorDate *time.Time, committerName *string, committerEmail *string, committerDate *time.Time, message *string) int
 		KeywordedVersions  func(childComplexity int, limit *int, arch *string) int
+		LastCommitTime     func(childComplexity int) int
 		Mask               func(childComplexity int, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) int
 		Masks              func(childComplexity int, versions *string, author *string, authorEmail *string, date *time.Time, reason *string) int
 		OutdatedPackage    func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
@@ -211,6 +212,7 @@ type QueryResolver interface {
 	Version(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) (*models.Version, error)
 	Versions(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) ([]*models.Version, error)
 	Application(ctx context.Context) (*models.Application, error)
+	LastCommitTime(ctx context.Context) (*time.Time, error)
 	AddedPackages(ctx context.Context, limit *int) ([]*models.Package, error)
 	UpdatedVersions(ctx context.Context, limit *int) ([]*models.Version, error)
 	StabilizedVersions(ctx context.Context, limit *int, arch *string) ([]*models.Version, error)
@@ -752,6 +754,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.KeywordedVersions(childComplexity, args["Limit"].(*int), args["Arch"].(*string)), true
 
+	case "Query.lastCommitTime":
+		if e.complexity.Query.LastCommitTime == nil {
+			break
+		}
+
+		return e.complexity.Query.LastCommitTime(childComplexity), true
+
 	case "Query.mask":
 		if e.complexity.Query.Mask == nil {
 			break
@@ -1175,7 +1184,8 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     version(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): Version
     versions(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): [Version]
 
-		application: Application
+    application: Application
+    lastCommitTime: Time
 
     #
     # Shortcuts for convenience and easy migration
@@ -5206,6 +5216,37 @@ func (ec *executionContext) _Query_application(ctx context.Context, field graphq
 	return ec.marshalOApplication2ᚖsokoᚋpkgᚋmodelsᚐApplication(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_lastCommitTime(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().LastCommitTime(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_addedPackages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8063,6 +8104,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_application(ctx, field)
+				return res
+			})
+		case "lastCommitTime":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_lastCommitTime(ctx, field)
 				return res
 			})
 		case "addedPackages":

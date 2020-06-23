@@ -22,6 +22,16 @@ func (r *queryResolver) Application(ctx context.Context) (*models.Application, e
 	return &data, nil
 }
 
+func (r *queryResolver) LastCommitTime(ctx context.Context) (*time.Time, error) {
+	data := utils.GetApplicationData()
+	lastCommit := &models.Commit{Id: data.LastCommit}
+	err := database.DBCon.Select(lastCommit)
+	if err != nil {
+		return nil, err
+	}
+	return &lastCommit.CommitterDate, nil
+}
+
 func (r *queryResolver) Category(ctx context.Context, name *string, description *string) (*models.Category, error) {
 	categories, err := r.Categories(ctx, name, description)
 	if err != nil || len(categories) != 1 {
