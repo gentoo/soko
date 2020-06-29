@@ -1159,41 +1159,325 @@ directive @goModel(model: String, models: [String!]) on OBJECT
 
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION`, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/query.graphql", Input: `type Query {
-    category(Name: String, Description: String): Category
-    categories(Name: String, Description: String): [Category]
+	&ast.Source{Name: "pkg/api/graphql/schema/query.graphql", Input: `"Different queries that can be used to get packages data"
+type Query {
 
-    commit(Id: String, PrecedingCommits: Int, AuthorName: String, AuthorEmail: String, AuthorDate: Time, CommitterName: String, CommitterEmail: String, CommitterDate: Time, Message: String): Commit
-    commits(Id: String, PrecedingCommits: Int, AuthorName: String, AuthorEmail: String, AuthorDate: Time, CommitterName: String, CommitterEmail: String, CommitterDate: Time, Message: String): [Commit]
+    "A query to get a single category by any of the given parameters. Multiple parameters can be used. In case the category can not identified uniquely by the given parameters, an error is returned."
+    category(
+        "Search by the name of the category"
+        Name: String,
+        "Search by the description of the category"
+        Description: String
+    ): Category
 
-    mask(Versions: String, Author: String, AuthorEmail: String, Date: Time, Reason: String): Mask
-    masks(Versions: String, Author: String, AuthorEmail: String, Date: Time, Reason: String): [Mask]
+    "A query to get a list of categories filtered by the given parameters. The returned list may be empty."
+    categories(
+        "Search by the name of the category"
+        Name: String,
+        "Search by the description of the category"
+        Description: String
+    ): [Category]
 
-    outdatedPackage(Atom: String, GentooVersion: String, NewestVersion: String): OutdatedPackage
-    outdatedPackages(Atom: String, GentooVersion: String, NewestVersion: String): [OutdatedPackage]
 
-    pkgCheckResult(Atom: String, Category: String, Package: String, Version: String, CPV: String, Class: String, Message: String): PkgCheckResult
-    pkgCheckResults(Atom: String, Category: String, Package: String, Version: String, CPV: String, Class: String, Message: String): [PkgCheckResult]
+    "A query to get a single commit by any of the given parameters. Multiple parameters can be used. In case the commit can not identified uniquely by the given parameters, an error is returned."
+    commit(
+        "Search by the id that is the hash of the commit"
+        Id: String,
+        "Search by the number of preceding that were submitted prior to this commit"
+        PrecedingCommits: Int,
+        "Search by the full name of the author"
+        AuthorName: String,
+        "Search by the email address of the author"
+        AuthorEmail: String,
+        "Search by the date of the author"
+        AuthorDate: Time,
+        "Search by the full name of the committer"
+        CommitterName: String,
+        "Search by the email address of the committer"
+        CommitterEmail: String,
+        "Search by the date of the committer"
+        CommitterDate: Time,
+        "Search by the commit message"
+        Message: String
+    ): Commit
 
-    package(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): Package
-    packages(Atom: String, Category: String, Name: String, Longdescription: String, PrecedingCommits: Int): [Package]
+    "A query to get a list of commits filtered by the given parameters. The returned list may be empty."
+    commits(
+        "Search by the id that is the hash of the commit"
+        Id: String,
+        "Search by the number of preceding that were submitted prior to this commit"
+        PrecedingCommits: Int,
+        "Search by the full name of the author"
+        AuthorName: String,
+        "Search by the email address of the author"
+        AuthorEmail: String,
+        "Search by the date of the author"
+        AuthorDate: Time,
+        "Search by the full name of the committer"
+        CommitterName: String,
+        "Search by the email address of the committer"
+        CommitterEmail: String,
+        "Search by the date of the committer"
+        CommitterDate: Time,
+        "Search by the commit message"
+        Message: String
+    ): [Commit]
 
-    useflag(Id: String, Name: String, Scope: String, Description: String, UseExpand: String, Package: String): Useflag
-    useflags(Id: String, Name: String, Scope: String, Description: String, UseExpand: String, Package: String): [Useflag]
 
-    version(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): Version
-    versions(Id: String, Category: String, Package: String, Atom: String, Version: String, Slot: String, Subslot: String, EAPI: String, Keywords: String, Useflags: String, Restricts: String, Properties: String, Homepage: String, License: String, Description: String): [Version]
+    "A query to get a single mask entry by any of the given parameters. Multiple parameters can be used. In case the mask entry can not identified uniquely by the given parameters, an error is returned."
+    mask(
+        "Search by the version identifier that has been used to select the masked versions"
+        Versions: String,
+        "Search by full name of the author of the mask entry"
+        Author: String,
+        "Search by the email address of the author of the mask entry"
+        AuthorEmail: String,
+        "Search by the date of the mask entry"
+        Date: Time,
+        "Search by the specified reason of the mask entry"
+        Reason: String
+    ): Mask
 
+    "A query to get a list of mask entries filtered by the given parameters. The returned list may be empty."
+    masks(
+        "Search by the version identifier that has been used to select the masked versions"
+        Versions: String,
+        "Search by full name of the author of the mask entry"
+        Author: String,
+        "Search by the email address of the author of the mask entry"
+        AuthorEmail: String,
+        "Search by the date of the mask entry"
+        Date: Time,
+        "Search by the specified reason of the mask entry"
+        Reason: String
+    ): [Mask]
+
+
+    "A query to get a single outdatedPackage by any of the given parameters. Multiple parameters can be used. In case the outdatedPackage can not identified uniquely by the given parameters, an error is returned."
+    outdatedPackage(
+        "Search by the atom of the package that is outdated"
+        Atom: String,
+        "Search by the latest version of the package in Gentoo tree"
+        GentooVersion: String,
+        "Search by the latest version of the package upstream"
+        NewestVersion: String
+    ): OutdatedPackage
+
+    "A query to get a list of outdatedPackages filtered by the given parameters. The returned list may be empty."
+    outdatedPackages(
+        "Search by the atom of the package that is outdated"
+        Atom: String,
+        "Search by the latest version of the package in Gentoo tree"
+        GentooVersion: String,
+        "Search by the latest version of the package upstream"
+        NewestVersion: String
+    ): [OutdatedPackage]
+
+
+    "A query to get a single pkgCheckResult by any of the given parameters. Multiple parameters can be used. In case the pkgCheckResult can not identified uniquely by the given parameters, an error is returned."
+    pkgCheckResult(
+        "Search by the package atom of the version that is affected by the pkgcheck result"
+        Atom: String,
+        "Search by the package category of the version that is affected by the pkgcheck result"
+        Category: String,
+        "Search by the package name of the version that is affected by the pkgcheck result"
+        Package: String,
+        "Search by the version identifier of the version that is affected by the pkgcheck result"
+        Version: String,
+        "Search by the CPV of the version that is affected by the pkgcheck result"
+        CPV: String,
+        "Search by the class of the pkgcheck warning, e.g. DeprecatedEapi"
+        Class: String,
+        "Search by the message of the pkgcheck warning, e.g. 'uses deprecated EAPI 5'"
+        Message: String
+    ): PkgCheckResult
+
+    "A query to get a list of pkgCheckResults filtered by the given parameters. The returned list may be empty."
+    pkgCheckResults(
+        "Search by the package atom of the version that is affected by the pkgcheck result"
+        Atom: String,
+        "Search by the package category of the version that is affected by the pkgcheck result"
+        Category: String,
+        "Search by the package name of the version that is affected by the pkgcheck result"
+        Package: String,
+        "Search by the version identifier of the version that is affected by the pkgcheck result"
+        Version: String,
+        "Search by the CPV of the version that is affected by the pkgcheck result"
+        CPV: String,
+        "Search by the class of the pkgcheck warning, e.g. DeprecatedEapi"
+        Class: String,
+        "Search by the message of the pkgcheck warning, e.g. 'uses deprecated EAPI 5'"
+        Message: String
+    ): [PkgCheckResult]
+
+
+    "A query to get a single package by any of the given parameters. Multiple parameters can be used. In case the package can not identified uniquely by the given parameters, an error is returned."
+    package(
+        "Search by the atom of the package"
+        Atom: String,
+        "Search by the category of the package"
+        Category: String,
+        "Search by the package name of the package"
+        Name: String,
+        "Search by the long description of the package"
+        Longdescription: String,
+        "Search by the number of preceding commits before the package was added"
+        PrecedingCommits: Int
+    ): Package
+
+    "A query to get a list of packages filtered by the given parameters. The returned list may be empty."
+    packages(
+        "Search by the atom of the package"
+        Atom: String,
+        "Search by the category of the package"
+        Category: String,
+        "Search by the package name of the package"
+        Name: String,
+        "Search by the long description of the package"
+        Longdescription: String,
+        "Search by the number of preceding commits before the package was added"
+        PrecedingCommits: Int
+    ): [Package]
+
+
+    "A query to get a single useflag by any of the given parameters. Multiple parameters can be used. In case the useflag can not identified uniquely by the given parameters, an error is returned."
+    useflag(
+        "Search by the id of the useflag"
+        Id: String,
+        "Search by the name of the useflag"
+        Name: String,
+        "Search by the scope of the useflag, e.g. local or global"
+        Scope: String,
+        "Search by the description of the useflag"
+        Description: String,
+        "Search by the use expand"
+        UseExpand: String,
+        "Search by the package that belongs to the useflag in case it is a local useflag"
+        Package: String
+    ): Useflag
+
+    "A query to get a list of useflags filtered by the given parameters. The returned list may be empty."
+    useflags(
+        "Search by the id of the useflag"
+        Id: String,
+        "Search by the name of the useflag"
+        Name: String,
+        "Search by the scope of the useflag, e.g. local or global"
+        Scope: String,
+        "Search by the description of the useflag"
+        Description: String,
+        "Search by the use expand"
+        UseExpand: String,
+        "Search by the package that belongs to the useflag in case it is a local useflag"
+        Package: String
+    ): [Useflag]
+
+
+    "A query to get a single version by any of the given parameters. Multiple parameters can be used. In case the version can not identified uniquely by the given parameters, an error is returned."
+    version(
+        "Search by the id of the version"
+        Id: String,
+        "Search by the category of the package of the version"
+        Category: String,
+        "Search by the package name of the version"
+        Package: String,
+        "Search by the atom of the package of the version"
+        Atom: String,
+        "Search by the version identifier of the version"
+        Version: String,
+        "Search by the slot of the version"
+        Slot: String,
+        "Search by the subslot of the version"
+        Subslot: String,
+        "Search by the EAPI of the ebuild of the version"
+        EAPI: String,
+        "Search by the keywords of the version"
+        Keywords: String,
+        "Search by the useflags of the version"
+        Useflags: String,
+        "Search by the restricts information of the version"
+        Restricts: String,
+        "Search by the properties of the version"
+        Properties: String,
+        "Search by the homepage of the version"
+        Homepage: String,
+        "Search by the license of the version"
+        License: String,
+        "Search by the description of the version"
+        Description: String
+    ): Version
+
+    "A query to get a list of versions filtered by the given parameters. The returned list may be empty."
+    versions(
+        "Search by the id of the version"
+        Id: String,
+        "Search by the category of the package of the version"
+        Category: String,
+        "Search by the package name of the version"
+        Package: String,
+        "Search by the atom of the package of the version"
+        Atom: String,
+        "Search by the version identifier of the version"
+        Version: String,
+        "Search by the slot of the version"
+        Slot: String,
+        "Search by the subslot of the version"
+        Subslot: String,
+        "Search by the EAPI of the ebuild of the version"
+        EAPI: String,
+        "Search by the keywords of the version"
+        Keywords: String,
+        "Search by the useflags of the version"
+        Useflags: String,
+        "Search by the restricts information of the version"
+        Restricts: String,
+        "Search by the properties of the version"
+        Properties: String,
+        "Search by the homepage of the version"
+        Homepage: String,
+        "Search by the license of the version"
+        License: String,
+        "Search by the description of the version"
+        Description: String
+    ): [Version]
+
+
+    "A query to get the application information."
     application: Application
+
+    "A query to get the last commit time."
     lastCommitTime: Time
 
     #
     # Shortcuts for convenience and easy migration
     #
-    addedPackages(Limit: Int): [Package]
-    updatedVersions(Limit: Int): [Version]
-    stabilizedVersions(Limit: Int, Arch: String): [Version]
-    keywordedVersions(Limit: Int, Arch: String): [Version]
+    "A query to get the latest added packages. You have to specify the number of added packages that should be returned."
+    addedPackages(
+        "The number of added packages that should be returned"
+        Limit: Int
+    ): [Package]
+
+    "A query to get the latest updated versions. You have to specify the number of updated versions that should be returned."
+    updatedVersions(
+        "The number of updated versions that should be returned"
+        Limit: Int
+    ): [Version]
+
+    "A query to get the latest stabilized versions. You have to specify the number of stabilized versions that should be returned."
+    stabilizedVersions(
+        "The number of stabilized versions that should be returned"
+        Limit: Int,
+        "The arch that should be used to filter the results"
+        Arch: String
+    ): [Version]
+
+    "A query to get the latest keyworded versions. You have to specify the number of keyworded versions that should be returned."
+    keywordedVersions(
+        "The number of keyworded versions that should be returned"
+        Limit: Int,
+        "The arch that should be used to filter the results"
+        Arch: String
+    ): [Version]
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/scalar.graphql", Input: `# gqlgen supports some custom scalars out of the box
@@ -1210,174 +1494,353 @@ scalar Any
 `, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/schema.graphql", Input: `schema {
     query: Query
-}`, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/Mask.graphql", Input: `type Mask
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/Mask.graphql", Input: `"A package's mask entry"
+type Mask
   @goModel(
     model: "soko/pkg/models.Mask"
   ) {
+
+  "A string that describes all versions that are affected by this mask entry"
   Versions: String!
+
+  "The autor of this mask entry"
   Author: String!
+
+  "The email of the author of this mask entry"
   AuthorEmail: String!
+
+  "The date of this mask entry"
   Date: Time!
+
+  "The reason for masking this packages"
   Reason: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/OutdatedPackage.graphql", Input: `type OutdatedPackage
+	&ast.Source{Name: "pkg/api/graphql/schema/types/OutdatedPackage.graphql", Input: `"Information from repology about outdated packages in the Gentoo tree."
+type OutdatedPackage
   @goModel(
     model: "soko/pkg/models.OutdatedPackages"
   ) {
+
+  "The atom of the affected package"
   Atom: String!
+
+  "The latest version of the package that is present in the Gentoo tree"
   GentooVersion: String!
+
+  "The latest version of the package that is present upstream. This version is greater than the latest version in the Gentoo tree."
   NewestVersion: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/Package.graphql", Input: `type Package
+	&ast.Source{Name: "pkg/api/graphql/schema/types/Package.graphql", Input: `"A Gentoo package"
+type Package
   @goModel(
     model: "soko/pkg/models.Package"
   ) {
+
+  "The Atom of the package (category/package_name)"
   Atom: String!
+
+  "The category of the package"
   Category: String!
+
+  "The name of the package"
   Name: String!
+
+  "An array containing all versions of package that are present"
   Versions: [Version!]!
+
+  "The Longdescription of the package"
   Longdescription: String!
+
+  "An array containing all maintainers of the package"
   Maintainers: [Maintainer!]!
+
+  "An array containing all commits that have changed files containing to this package"
   Commits: [Commit!]!
+
+  "The number of commits in the tree before the package has been added to the tree - this can be used to sort"
   PrecedingCommits: Int!
+
+  "An array containing all pkgcheck warnings for this package"
   PkgCheckResults: [PkgCheckResult!]!
+
+  "An array containing all repology warnings about new versions for this package"
   Outdated: [OutdatedPackage!]!
 }
 
+"Information about a maintainer of packages"
 type Maintainer
   @goModel(
     model: "soko/pkg/models.Maintainer"
   ) {
+
+  "The full name of the maintainer"
   Name: String!
+
+  "The email address of the maintainer"
   Email: String!
+
+  "The type of the maintainer, e.g. project or person"
   Type: String!
+
+  "The restrict information for this maintainer"
   Restrict: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/PkgCheckResult.graphql", Input: `type PkgCheckResult
+	&ast.Source{Name: "pkg/api/graphql/schema/types/PkgCheckResult.graphql", Input: `"A warning from pkgcheck for a version of a package"
+type PkgCheckResult
   @goModel(
     model: "soko/pkg/models.PkgCheckResult"
   ) {
+
+  "The atom of the package that is affected by this pkgcheck warning"
   Atom: String!
+
+  "The category of the package that is affected by this pkgcheck warning"
   Category: String!
+
+  "The package name of the package that is affected by this pkgcheck warning"
   Package: String!
+
+  "The version of the package that is affected by this pkgcheck warning"
   Version: String!
+
+  "The CPV of the package that is affected by this pkgcheck warning"
   CPV: String!
+
+  "The class of this warning, e.g. DeprecatedEapi"
   Class: String!
+
+  "The message of this warning, e.g. 'uses deprecated EAPI 5'"
   Message: String!
 }
 
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/Version.graphql", Input: `type Version
+	&ast.Source{Name: "pkg/api/graphql/schema/types/Version.graphql", Input: `"A version of a gentoo package"
+type Version
   @goModel(
     model: "soko/pkg/models.Version"
   ) {
+  "The id i.e. CPV of a version to uniquely identify it"
   Id: String!
+
+  "The category of the package of the version"
   Category: String!
+
+  "The package name of the package of the version"
   Package: String!
+
+  "The atom of the package of the version"
   Atom: String!
+
+  "The version identifier of the version"
   Version: String!
+
+  "The slot of the version"
   Slot: String!
+
+  "The subslot of the version"
   Subslot: String!
+
+  "The EAPI of the ebuild of the version"
   EAPI: String!
+
+  "A string containing all keywords of the version"
   Keywords: String!
+
+  "A list of all useflags of the version"
   Useflags: [String!]!
+
+  "An array of restrict information for this version"
   Restricts: [String!]!
+
+  "All properties of this version"
   Properties: [String!]!
+
+  "An array of homepages of the package of this version"
   Homepage: [String!]!
+
+  "The license of this version of the package"
   License: String!
+
+  "The description of the version of this package"
   Description: String!
+
+  "All commit objects that have affected this version"
   Commits: [Commit!]!
+
+  "All mask entries that affect this version"
   Masks: [Mask!]!
+
+  "An array of all pkgcheck results that affect this version"
   PkgCheckResults: [PkgCheckResult!]!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/application.graphql", Input: `type Application
+	&ast.Source{Name: "pkg/api/graphql/schema/types/application.graphql", Input: `"Contains general information about the application"
+type Application
   @goModel(
     model: "soko/pkg/models.Application"
   ) {
-	Version: String!
+  "The version of the currently running application"
+  Version: String!
+
+  "The time of the last update of the application data"
   LastUpdate: Time!
+
+  "The id / hash of the last commit that has been imported"
   LastCommit: String!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/category.graphql", Input: `type Category
+	&ast.Source{Name: "pkg/api/graphql/schema/types/category.graphql", Input: `"Describes a Gentoo package category"
+type Category
   @goModel(
     model: "soko/pkg/models.Category"
   ) {
+  "The name of the category"
   Name: String!
+
+  "The description of the category"
   Description: String!
+
+  "An array of all packages in this category"
   Packages: [Package!]!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/commit.graphql", Input: `type Commit
+	&ast.Source{Name: "pkg/api/graphql/schema/types/commit.graphql", Input: `"A commit in the gentoo.git repository"
+type Commit
   @goModel(
     model: "soko/pkg/models.Commit"
   ) {
+  "The hash of the commit, that is used to uniquely identify it"
   Id: String!
+
+  "The number of preceding commits before this commit - this can be used to sort commits"
   PrecedingCommits: Int!
+
+  "The full name of the author"
   AuthorName: String!
+
+  "The email name of the author"
   AuthorEmail: String!
+
+  "The date of the author"
   AuthorDate: Time!
+
+  "The name of the committer"
   CommitterName: String!
+
+  "The email name of the committer"
   CommitterEmail: String!
+
+  "The date name of the committer"
   CommitterDate: Time!
+  "The message of the commit"
   Message: String!
+
+  "The changed files"
   ChangedFiles: ChangedFiles!
+
+  "An array of packages that are affected by this commit"
   ChangedPackages: [Package!]!
+
+  "An array of versions that are affected by this commit"
   ChangedVersions: [Version!]!
+
+  "An array of KeywordChange objects that are affected by this commit"
   KeywordChanges: [KeywordChange!]!
 }
 
+"Describes all files that have been changed by a commit"
 type ChangedFiles
 @goModel(
   model: "soko/pkg/models.ChangedFiles"
 ) {
+  "All files that have been added by this commit"
   Added: [ChangedFile!]!
+
+  "All files that have been modified by this commit"
   Modified: [ChangedFile!]!
+
+  "All files that have been deleted by this commit"
   Deleted: [ChangedFile!]!
 }
 
-
+"Describes a changed file by a commit"
 type ChangedFile
 @goModel(
   model: "soko/pkg/models.ChangedFile"
 ) {
+  "The path to the changed file"
   Path: String!
+
+  "The type of the change, e.g. A for added, M for modified or D for deleted"
   ChangeType: String!
 }
 
-
+"A keyword change of a commit"
 type KeywordChange
 @goModel(
   model: "soko/pkg/models.KeywordChange"
 ) {
+  "The id of the keyword change to uniquely identify the keyword change"
   Id: String!
+
+  "The id / hash of the commit that triggered the keyword change"
   CommitId: String!
+
+  "The commit object of the commit that triggered the keyword change"
   Commit: Commit!
+
+  "The id of the version that is affected by this keyword change"
   VersionId: String!
+
+  "The version object of the version that is affected by this keyword change"
   Version: Version!
+
+  "The id of the package that is affected by this keyword change"
   PackageId: String!
+
+  "The package object of the package that is affected by this keyword change"
   Package: Package!
+
+  "An array of added keywords"
   Added: [String!]!
+
+  "An array of stabilized keywords"
   Stabilized: [String!]!
+
+  "An array of all keywords of the affected version"
   All: [String!]!
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "pkg/api/graphql/schema/types/useflag.graphql", Input: `type Useflag
+	&ast.Source{Name: "pkg/api/graphql/schema/types/useflag.graphql", Input: `"A useflag"
+type Useflag
   @goModel(
     model: "soko/pkg/models.Useflag"
   ) {
+
+  "The id of the useflag to uniquely identify the useflag"
   Id: ID!
+
+  "The name of the useflag"
   Name: String!
+
+  "The scope of the useflag, e.g. local or global useflag"
   Scope: String!
+
+  "The description of the useflag"
   Description: String!
+
+  "UseExpand, in case it's use expand flag"
   UseExpand: String!
+
+  "The package this useflag belongs to, in case it's a local useflag"
   Package: String!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
