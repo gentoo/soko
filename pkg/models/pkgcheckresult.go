@@ -3,6 +3,7 @@
 package models
 
 type PkgCheckResult struct {
+	Id       string `pg:",pk"`
 	Atom     string
 	Category string
 	Package  string

@@ -49,6 +49,7 @@ func UpdatePkgCheckResults() {
 	// update the database with the new results
 	for _, pkgCheckResult := range pkgCheckResults.Results {
 		database.DBCon.Insert(&models.PkgCheckResult{
+			Id:       pkgCheckResult.Category + "/" + pkgCheckResult.Package + "-" + pkgCheckResult.Version + "-" + pkgCheckResult.Class + "-" + pkgCheckResult.Message,
 			Atom:     pkgCheckResult.Category + "/" + pkgCheckResult.Package,
 			Category: pkgCheckResult.Category,
 			Package:  pkgCheckResult.Package,
