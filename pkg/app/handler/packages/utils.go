@@ -130,9 +130,11 @@ func GetKeywordedVersions(n int) []*models.Version {
 func renderPackageTemplate(page string, templatepattern string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
 	templates := template.Must(
 		template.Must(
-			template.New(page).
-				Funcs(funcMap).
-				ParseGlob("web/templates/layout/*.tmpl")).
+			template.Must(
+				template.New(page).
+					Funcs(funcMap).
+					ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/packages/components/*.tmpl")).
 			ParseGlob("web/templates/packages/" + templatepattern + ".tmpl"))
 	templates.ExecuteTemplate(w, page+".tmpl", data)
 }
@@ -154,8 +156,8 @@ func RenderPackageTemplates(page string, templatepattern1 string, templatepatter
 // getAtom returns the atom of the package from the given url
 func getAtom(r *http.Request) string {
 	atom := r.URL.Path[len("/packages/"):]
-	atom = strings.Replace(atom, "/changelog.html", "", 1)
-	atom = strings.Replace(atom, "/changelog.json", "", 1)
+	atom = strings.Replace(atom, "/changelog", "", 1)
+	atom = strings.Replace(atom, ".html", "", 1)
 	atom = strings.Replace(atom, ".json", "", 1)
 	return atom
 }
@@ -199,6 +201,9 @@ func GetFuncMap() template.FuncMap {
 		"isMasked":          isMasked,
 		"getMask":           getMask,
 		"showRemovalNotice": showRemovalNotice,
+		"add": func(a, b int) int {
+			return a + b
+		},
 	}
 }
 
@@ -295,8 +300,9 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 }
 
 // createPackageData creates the data used in the show package template
-func createPackageData(gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag) interface{} {
+func createPackageData(pageName string, gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag) interface{} {
 	return struct {
+		PageName       string
 		Header         models.Header
 		Package        models.Package
 		Versions       []*models.Version
@@ -306,6 +312,7 @@ func createPackageData(gpackage *models.Package, localUseflags []models.Useflag,
 		UseExpands     map[string][]models.Useflag
 		Application    models.Application
 	}{
+		PageName:       pageName,
 		Header:         models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
 		Package:        *gpackage,
 		Versions:       gpackage.Versions,

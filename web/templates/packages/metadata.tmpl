@@ -1,8 +1,8 @@
 {{define "metadata"}}
-<div class="card mb-3">
-    <div class="card-header">
-        <h4 class="mb-0">Package Metadata</h4>
-    </div>
+
+<h3 class="pt-3 mb-2">Package Metadata</h3>
+
+<div class="card border-0 mb-3">
     <ul class="list-group kk-metadata-list">
 
         <!-- TODO -->
@@ -89,7 +89,7 @@
                         {{if (ne .Name (index $.Package.Maintainers 0).Name)}}
                             ,&nbsp;
                         {{end}}
-                        <a title="{{.Email}}" href="mailto:{{.Email}}">{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}</a>
+                        <a title="{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}" href="/maintainer/{{.Email}}">{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}</a>
                     {{end}}
                 </div>
             </div>

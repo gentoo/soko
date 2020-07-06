@@ -26,9 +26,24 @@ type Version struct {
 	Homepage        []string
 	License         string
 	Description     string
-	Commits         []*Commit         `pg:"many2many:commit_to_versions,joinFK:commit_id"`
-	Masks           []*Mask           `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
-	PkgCheckResults []*PkgCheckResult `pg:",fk:cpv"`
+	Commits         []*Commit            `pg:"many2many:commit_to_versions,joinFK:commit_id"`
+	Masks           []*Mask              `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
+	PkgCheckResults []*PkgCheckResult    `pg:",fk:cpv"`
+	Dependencies    []*ReverseDependency `pg:",fk:reverse_dependency_version"`
+}
+
+func (v Version) BuildDepMap() map[string]map[string]string {
+	var data = map[string]map[string]string{}
+
+	for _, dep := range v.Dependencies {
+		if data[dep.Atom] == nil {
+			data[dep.Atom] = map[string]string{}
+			data[dep.Atom]["Atom"] = dep.Atom
+		}
+		data[dep.Atom][dep.Type] = "true"
+	}
+
+	return data
 }
 
 // GreaterThan returns true if the version is greater than the given version

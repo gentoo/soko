@@ -1,6 +1,6 @@
 {{define "versionrow"}}
     <tr>
-        <td class="kk-version kk-cell-sep-right"><strong><a class="kk-ebuild-link" href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Atom}}/{{.Package}}-{{.Version}}.ebuild">{{.Version}}</a></strong><span class="kk-slot" title="subslot {{ .Subslot }}"> : {{ .Slot }}</span>
+        <td class="kk-version "><strong><a class="kk-ebuild-link" href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Atom}}/{{.Package}}-{{.Version}}.ebuild">{{.Version}}</a></strong><span class="kk-slot" title="subslot {{ .Subslot }}"> : {{ .Slot }}</span>
 
 
             {{ if .Restricts }}
@@ -66,20 +66,5 @@
         {{end}}
 
     </tr>
-
-    {{ if .PkgCheckResults }}
-        {{ range .PkgCheckResults }}
-            <tr class="text-muted dev-mode d-none">
-                <td colspan="1" class="kk-version kk-cell-sep-right">
-                    <strong>{{ .Class }}</strong>
-                </td>
-                <td colspan="10" class="kk-version kk-cell-sep-right">
-
-                        {{ .Message }}
-
-                </td>
-            </tr>
-        {{end}}
-    {{end}}
 
 {{end}}

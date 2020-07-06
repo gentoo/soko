@@ -14,6 +14,7 @@ import (
 	"soko/pkg/app/handler/arches"
 	"soko/pkg/app/handler/categories"
 	"soko/pkg/app/handler/index"
+	"soko/pkg/app/handler/maintainer"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/handler/useflags"
 	"soko/pkg/config"
@@ -43,6 +44,10 @@ func Serve() {
 	setRoute("/about/help", about.Help)
 	setRoute("/about/feedback", about.Feedback)
 	setRoute("/about/feeds", about.Feeds)
+
+	setRoute("/maintainers", maintainer.Browse)
+	setRoute("/maintainers/", maintainer.Browse)
+	setRoute("/maintainer/", maintainer.Show)
 
 	setRoute("/packages/search", packages.Search)
 	setRoute("/packages/suggest.json", packages.Suggest)
@@ -87,7 +92,7 @@ func setRoute(path string, handler http.HandlerFunc) {
 	http.HandleFunc(path, mw(handler))
 }
 
-func redirect(from, to string){
+func redirect(from, to string) {
 	http.HandleFunc(from, func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, to, 301)
 	})

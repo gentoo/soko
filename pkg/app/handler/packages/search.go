@@ -4,7 +4,6 @@ package packages
 
 import (
 	"github.com/go-pg/pg"
-	"html/template"
 	"net/http"
 	"soko/pkg/app/handler/feeds"
 	"soko/pkg/database"
@@ -48,7 +47,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	renderPackageTemplate("search",
 		"search",
-		template.FuncMap{},
+		GetFuncMap(),
 		getSearchData(packages, searchTerm),
 		w)
 }

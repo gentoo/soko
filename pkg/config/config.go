@@ -39,11 +39,15 @@ func LogFile() string {
 }
 
 func Version() string {
-	return getEnv("SOKO_VERSION", "v0.2.6")
+	return getEnv("SOKO_VERSION", "v1.0.0")
 }
 
 func Port() string {
 	return getEnv("SOKO_PORT", "5000")
+}
+
+func GithubAPIToken() string {
+	return getEnv("SOKO_GITHUB_TOKEN", "")
 }
 
 func GraphiqlEndpoint() string {

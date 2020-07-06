@@ -1,0 +1,57 @@
+{{define "dependencies"}}
+    <div class="row">
+        <div class="col-md-9">
+                <h3><a class="text-dark"><i class="fa fa-level-down" aria-hidden="true"></i> Dependencies</a> <a href="/packages/{{.Package.Atom}}/reverse-dependencies" class="ml-3 text-muted"><i class="fa fa-level-up" aria-hidden="true"></i>  Reverse-Dependencies</a></h3>
+
+                <ul class="timeline">
+
+                    {{range $index, $element := .Package.Versions}}
+                        <li>
+                            <span class="text-muted">{{.Version}}</span>
+
+                            {{$depMap := $element.BuildDepMap}}
+
+                            {{if len $depMap}}
+                                <div class="card mt-4">
+                                    <div class="table-responsive border-0">
+                                        <table class="table mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th scope="col">Version</th>
+                                                <th scope="col">RDEPEND</th>
+                                                <th scope="col">DEPEND</th>
+                                                <th scope="col">BDEPEND</th>
+                                                <th scope="col">PDEPEND</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+
+                                            {{ range $key, $value := $depMap }}
+                                                <tr>
+                                                    <th scope="row"><a class="text-dark" href="/packages/{{$value.Atom}}">{{$key}}</a></th>
+                                                    <td>{{if $value.rdepend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.depend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.bdepend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.pdepend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                </tr>
+                                            {{end}}
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            {{end}}
+
+                        </li>
+                    {{end}}
+                </ul>
+
+        </div>
+        <div class="col-md-3 pt-5">
+            <h4 class="">Description</h4>
+            <span class="text-muted">
+                The dependencies are regularly computed based on the <a href="https://qa-reports.gentoo.org/">qa-reports</a>.
+            </span>
+        </div>
+    </div>
+{{end}}

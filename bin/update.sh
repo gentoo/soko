@@ -26,7 +26,7 @@ update_md5cache(){
 
 update_database(){
   cd /mnt/packages-tree/gentoo/ || exit 1
-  /go/src/soko/bin/soko update
+  /go/src/soko/bin/soko --update
 }
 
 

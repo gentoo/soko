@@ -1,0 +1,39 @@
+{{define "packages"}}
+    <div class="row">
+        <div class="col-md-9">
+            {{if .Packages}}
+                <h3 class="mb-4">Packages</h3>
+                <ul class="list-group">
+                    {{range .Packages}}
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <a href="/packages/{{.Atom}}" class="text-dark"><b>{{.Atom}}</b></a>
+                                </div>
+                                <div class="col-md-8 text-muted">
+                                    {{.Description}}
+                                </div>
+                            </div>
+                        </li>
+                    {{end}}
+                </ul>
+
+            {{else}}
+                <div class="row">
+                    <div class="col-md-8">
+                    </div>
+                    <div class="col-md-4">
+                        <img style="width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"/>
+                    </div>
+                </div>
+            {{end}}
+        </div>
+        <div class="col-md-3 pt-5">
+            <h4 class="">Description</h4>
+            <span class="text-muted">
+                All packages maintained by {{.Maintainer.Name}}. That is, {{.Maintainer.Name}} is mentioned as maintainer of the project in the <a href="https://devmanual.gentoo.org/ebuild-writing/misc-files/metadata/">metadata.xml</a> file
+            </span>
+        </div>
+    </div>
+{{end}}
+

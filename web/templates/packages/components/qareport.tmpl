@@ -1,0 +1,53 @@
+{{define "qa-report"}}
+    <div class="row">
+        <div class="col-md-9">
+
+                <h3>Pkgcheck Warnings</h3>
+                <ul class="timeline">
+                    <li>
+                        <span class="text-muted">All Versions</span>
+                        <ul class="list-group">
+
+                            {{ if .Package.PkgCheckResults }}
+                                {{ range $.Package.PkgCheckResults }}
+                                    {{if not .Version}}
+                                        <li class="list-group-item">
+                                            <strong>{{ .Class }}</strong><br/>
+                                            <span class="kk-version kk-cell-sep-right text-muted">
+                                        {{ .Message }}
+                                    </span>
+                                        </li>
+                                    {{end}}
+                                {{end}}
+                            {{end}}
+                        </ul>
+                    </li>
+
+                    {{range $index, $element := .Package.Versions}}
+                        <li>
+                            <span class="text-muted">{{.Version}}</span>
+                            <ul class="list-group">
+
+                                {{ if .PkgCheckResults }}
+                                    {{ range .PkgCheckResults }}
+                                        <li class="list-group-item">
+                                            <strong>{{ .Class }}</strong><br/>
+                                            <span class="kk-version kk-cell-sep-right text-muted">
+                                        {{ .Message }}
+                                    </span>
+                                        </li>
+                                    {{end}}
+                                {{end}}
+                            </ul>
+                        </li>
+                    {{end}}
+                </ul>
+        </div>
+        <div class="col-md-3 pt-5">
+            <h4 class="">Description</h4>
+            <span class="text-muted">
+                Pkgcheck is used regularly to generate QA reports. Pkgcheck is a pkgcore-based QA utility for ebuild repos.
+            </span>
+        </div>
+    </div>
+{{end}}

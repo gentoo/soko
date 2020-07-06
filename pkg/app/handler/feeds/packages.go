@@ -69,4 +69,3 @@ func addAddedPackageFeedItems(f *feeds.Feed, packages []*models.Package) {
 		f.Add(item)
 	}
 }
-

@@ -1,0 +1,107 @@
+{{define "bugs"}}
+    <div class="row">
+        <div class="col-md-9">
+            {{if .Package.Bugs}}
+                {{$general_bugs := 0}}
+                {{$stabilization_bugs := 0}}
+                {{$keywording_bugs := 0}}
+                {{range .Package.Bugs}}
+                    {{if eq .Component "Current packages"}}
+                        {{$general_bugs = (add $general_bugs 1)}}
+                    {{else if eq .Component "Stabilization"}}
+                        {{$stabilization_bugs = (add $stabilization_bugs 1)}}
+                    {{else if eq .Component "Keywording"}}
+                        {{$keywording_bugs = (add $keywording_bugs 1)}}
+                    {{end}}
+                {{end}}
+
+
+                {{if $general_bugs}}
+                    <h3 class="mb-4">Bug Reports</h3>
+                    <ul class="list-group">
+                        {{range .Package.Bugs}}
+                            {{if eq .Component "Current packages"}}
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <i class="fa fa-bug" aria-hidden="true"></i>
+                                            <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
+                                        </div>
+                                        <div class="col-md-12 text-muted">
+                                            {{.Id}} - Assigned to {{.Assignee}}
+                                        </div>
+                                    </div>
+                                </li>
+                            {{end}}
+                        {{end}}
+                    </ul>
+                {{end}}
+
+                {{if $stabilization_bugs}}
+                    <h3 class="my-4">Stabilization Bug Reports</h3>
+                    <ul class="list-group">
+                        {{range .Package.Bugs}}
+                            {{if eq .Component "Stabilization"}}
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <i class="fa fa-bug" aria-hidden="true"></i>
+                                            <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
+                                        </div>
+                                        <div class="col-md-12 text-muted">
+                                            {{.Id}} - Assigned to {{.Assignee}}
+                                        </div>
+                                    </div>
+                                </li>
+                            {{end}}
+                        {{end}}
+                    </ul>
+                {{end}}
+
+                {{if $keywording_bugs}}
+                    <h3 class="my-4">Keywording Bug Reports</h3>
+                    <ul class="list-group">
+                        {{range .Package.Bugs}}
+                            {{if eq .Component "Keywording"}}
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <i class="fa fa-bug" aria-hidden="true"></i>
+                                            <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
+                                        </div>
+                                        <div class="col-md-12 text-muted">
+                                            {{.Id}} - Assigned to {{.Assignee}}
+                                        </div>
+                                    </div>
+                                </li>
+                            {{end}}
+                        {{end}}
+                    </ul>
+                {{end}}
+            {{else}}
+                <div class="row pt-5">
+                    <div class="col-md-4">
+                        <img style="width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"/>
+                    </div>
+                    <div class="col-md-8 pt-3">
+                        <h2>Good job! There are no bugs.</h2>
+                        <span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/enter_bug.cgi">new bug</a>.</span>
+                    </div>
+                </div>
+            {{end}}
+        </div>
+        <div class="col-md-3 pt-5">
+            <h4 class="">Description</h4>
+            <span class="text-muted">
+                Gentoo Bugzilla is where we track bugs of Gentoo and its packages; you are welcome to report, confirm and resolve bugs:
+                <ul>
+                    <li><a href="https://bugs.gentoo.org/enter_bug.cgi">File a new Bug</a></li>
+                    <li><a href="https://bugs.gentoo.org/">Confirm a bug</a></li>
+                    <li><a href="https://sites.google.com/site/yacoset/Home/how-to-fix-bugs-step-by-step">Offer solutions for open bugs</a></li>
+                    <li><a href="https://wiki.gentoo.org/wiki/Bugday">Participate in our monthly Bugday</a></li>
+                </ul>
+            </span>
+        </div>
+    </div>
+{{end}}
+

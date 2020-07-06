@@ -1,0 +1,157 @@
+{{define "changelog"}}
+<div class="row">
+    <div class="col-md-9">
+        {{ if .Package.Commits }}
+
+            <div class="col-md-12">
+                <h3>Latest Commits</h3>
+                <ul class="timeline">
+                    <li>
+                        <span class="text-muted">Commits on Jul 2, 2020</span>
+                        <ul class="list-group">
+                            {{$last_date := (index .Package.Commits 0).CommitterDate}}
+                            {{range .Package.Commits}}
+                            {{if eq ($last_date.Format "Jan 02, 2006") (.CommitterDate.Format "Jan 02, 2006")}}
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-8"><b style="color:#424242!important;">{{.Message}}</b></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
+                                    <div class="col-md-12" style="color:#424242!important;">
+                                        {{ if (ne .AuthorName .CommitterName)}}
+                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
+                                    <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
+                                        {{end}}
+                                        <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
+                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2 Jan 2006 15:04:05" }}
+                                    </div>
+                                    <div class="col-md-12">
+                                        {{$commit := .}}
+                                        {{range .ChangedFiles.Added }}
+                                            {{ if contains .Path (print $.Package.Atom "/")}}
+                                                <style>
+                                                    .kk-added-file-badge {
+                                                        background-color: #dff0d8;
+                                                        font-weight: normal;
+                                                    }
+                                                    .kk-added-file-badge > a {
+                                                        color: #424242!important;
+                                                    }
+                                                </style>
+                                                <span class="badge badge-pill kk-added-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Package.Atom }}/{{replaceall .Path (print $.Package.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Package.Atom "/") ""}}</a></span>
+                                            {{end}}
+                                        {{end}}
+                                        {{range .ChangedFiles.Modified }}
+                                            {{ if contains .Path (print $.Package.Atom "/")}}
+                                                <style>
+                                                    .kk-modified-file-badge {
+                                                        background-color: #fcf8e3;
+                                                        font-weight: normal;
+                                                    }
+                                                    .kk-modified-file-badge > a {
+                                                        color: #424242!important;
+                                                    }
+                                                </style>
+                                                <span class="badge badge-pill kk-modified-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Package.Atom }}/{{replaceall .Path (print $.Package.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Package.Atom "/") ""}}</a></span>
+                                            {{end}}
+                                        {{end}}
+                                        {{range .ChangedFiles.Deleted }}
+                                            {{ if contains .Path (print $.Package.Atom "/")}}
+                                                <style>
+                                                    .kk-deleted-file-badge {
+                                                        background-color: #f2dede;
+                                                        font-weight: normal;
+                                                    }
+                                                    .kk-deleted-file-badge > a {
+                                                        color: #424242!important;
+                                                    }
+                                                </style>
+                                                <span class="badge badge-pill kk-deleted-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Package.Atom }}/{{replaceall .Path (print $.Package.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Package.Atom "/") ""}}</a></span>
+                                            {{end}}
+                                        {{end}}
+                                    </div>
+                                </div>
+                            </li>
+                            {{else}}
+                        </ul>
+                    </li>
+                    <li>
+                        <span class="text-muted">Commits on {{.CommitterDate.Format "Jan 02, 2006"}}</span>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-8"><b>{{.Message}}</b></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
+                                    <div class="col-md-12">
+                                        {{ if (ne .AuthorName .CommitterName)}}
+                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
+                                    <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
+                                        {{end}}
+                                        <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
+                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2 Jan 2006 15:04:05" }}
+                                    </div>
+                                    <div class="col-md-12">
+                                        {{$commit := .}}
+                                        {{range .ChangedFiles.Added }}
+                                            {{ if contains .Path (print $.Package.Atom "/")}}
+                                                <style>
+                                                    .kk-added-file-badge {
+                                                        background-color: #dff0d8;
+                                                        font-weight: normal;
+                                                    }
+                                                    .kk-added-file-badge > a {
+                                                        color: #424242!important;
+                                                    }
+                                                </style>
+                                                <span class="badge badge-pill kk-added-file-badge badge-light"><a title="{{replaceall .Path (print $.Package.Atom "/") ""}} has been added" class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Package.Atom }}/{{replaceall .Path (print $.Package.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Package.Atom "/") ""}}</a></span>
+                                            {{end}}
+                                        {{end}}
+                                        {{range .ChangedFiles.Modified }}
+                                            {{ if contains .Path (print $.Package.Atom "/")}}
+                                                <style>
+                                                    .kk-modified-file-badge {
+                                                        background-color: #fcf8e3;
+                                                        font-weight: normal;
+                                                    }
+                                                    .kk-modified-file-badge > a {
+                                                        color: #424242!important;
+                                                    }
+                                                </style>
+                                                <span class="badge badge-pill kk-modified-file-badge badge-light"><a title="{{replaceall .Path (print $.Package.Atom "/") ""}} has been modified" class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Package.Atom }}/{{replaceall .Path (print $.Package.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Package.Atom "/") ""}}</a></span>
+                                            {{end}}
+                                        {{end}}
+                                        {{range .ChangedFiles.Deleted }}
+                                            {{ if contains .Path (print $.Package.Atom "/")}}
+                                                <style>
+                                                    .kk-deleted-file-badge {
+                                                        background-color: #f2dede;
+                                                        font-weight: normal;
+                                                    }
+                                                    .kk-deleted-file-badge > a {
+                                                        color: #424242!important;
+                                                    }
+                                                </style>
+                                                <span class="badge badge-pill kk-deleted-file-badge badge-light"><a title="{{replaceall .Path (print $.Package.Atom "/") ""}} has been deleted" class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ $.Package.Atom }}/{{replaceall .Path (print $.Package.Atom "/") ""}}?id={{ $commit.Id }}">{{replaceall .Path (print $.Package.Atom "/") ""}}</a></span>
+                                            {{end}}
+                                        {{end}}
+                                    </div>
+                                </div>
+                            </li>
+                            {{end}}
+                            {{$last_date = .CommitterDate}}
+                            {{end}}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+        {{else}}
+            <li class="list-group-item kk-panel-content-sorry">
+                This package has not been changed since our repository has moved to Git.
+                <br><br>
+                <a href="https://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/<%= @package.atom %>/ChangeLog?view=markup" class="btn btn-default">
+                    <span class="fa fa-fw fa-history"></span>
+                    View old CVS Changelog
+                </a>
+            </li>
+        {{end}}
+    </div>
+</div>
+{{end}}

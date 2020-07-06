@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"io"
 	"io/ioutil"
 	"os"
@@ -9,23 +9,14 @@ import (
 	"soko/pkg/config"
 	"soko/pkg/logger"
 	"soko/pkg/portage"
+	"soko/pkg/portage/bugs"
+	"soko/pkg/portage/dependencies"
+	"soko/pkg/portage/github"
+	"soko/pkg/portage/maintainers"
 	"soko/pkg/portage/pkgcheck"
 	"soko/pkg/portage/repology"
 	"time"
 )
-
-func printHelp() {
-	fmt.Println("Please specific one of the following options:")
-	fmt.Println("  soko update                   -- incrementally update the database")
-	fmt.Println("  soko fullupdate               -- update the database ")
-	fmt.Println("  soko update-outdated-packages -- update the database containing all outdated gentoo packages")
-	fmt.Println("  soko update-pgkcheck-results  -- update the database containing all pkgcheck results")
-	fmt.Println("  soko serve                    -- serve the application")
-}
-
-func isCommand(command string) bool {
-	return len(os.Args) > 1 && os.Args[1] == command
-}
 
 func main() {
 
@@ -35,18 +26,65 @@ func main() {
 	defer errorLogFile.Close()
 	initLoggers(os.Stdout, errorLogFile)
 
-	if isCommand("serve") {
-		app.Serve()
-	} else if isCommand("update") {
+	serve := flag.Bool("serve", false, "Start serving the application")
+	update := flag.Bool("update", false, "Perform an incremental update of the package data")
+	fullupdate := flag.Bool("fullupdate", false, "Perform a full update of the package data")
+	updateOutdatedPackages := flag.Bool("update-outdated-packages", false, "Update the repology.org data of outdated packages")
+	updatePgkcheckResults := flag.Bool("update-pgkcheck-results", false, "Update the qa-reports that is the pkgcheck results")
+	updatePullrequests := flag.Bool("update-pullrequests", false, "Update the pull requests")
+	initBugs := flag.Bool("init-bugs", false, "Import all bugs, including the old ones. This is usually just done once.")
+	updateBugs := flag.Bool("update-bugs", false, "Update the bugs belonging to the packages")
+	updateDependencies := flag.Bool("update-dependencies", false, "Update the dependencies and reverse dependencies of the packages")
+	updateMaintainers := flag.Bool("update-maintainers", false, "Update the maintainer information")
+
+	help := flag.Bool("help", false, "Print the usage of this application")
+
+	flag.Parse()
+
+	if *update {
+		logger.Info.Println("Updating package data")
 		portage.Update()
-	} else if isCommand("fullupdate") {
+	}
+	if *fullupdate {
+		logger.Info.Println("Performing full update of the package data")
 		portage.FullUpdate()
-	} else if isCommand("update-outdated-packages") {
+	}
+	if *updateOutdatedPackages {
+		logger.Info.Println("Updating the repology data")
 		repology.UpdateOutdated()
-	} else if isCommand("update-pgkcheck-results") {
+	}
+	if *updatePgkcheckResults {
+		logger.Info.Println("Updating the qa-reports that is the pkgcheck data")
 		pkgcheck.UpdatePkgCheckResults()
-	} else {
-		printHelp()
+	}
+	if *updatePullrequests {
+		logger.Info.Println("Updating the pull requests data")
+		github.FullUpdatePullRequests()
+	}
+	if *initBugs {
+		bugs.UpdateBugs(true)
+	}
+	if *updateBugs {
+		logger.Info.Println("Updating the bugs data")
+		bugs.UpdateBugs(false)
+	}
+	if *updateDependencies {
+		logger.Info.Println("Updating the dependencies data")
+		dependencies.FullPackageDependenciesUpdate()
+	}
+	// updateMaintainers should always be executed last, as it is using
+	// the updated bugs, pullrequests and and outdated packages
+	if *updateMaintainers {
+		logger.Info.Println("Updating the maintainers data")
+		maintainers.FullImport()
+	}
+
+	if *serve {
+		app.Serve()
+	}
+
+	if *help {
+		flag.PrintDefaults()
 	}
 
 }

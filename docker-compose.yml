@@ -32,6 +32,7 @@ services:
       com.centurylinklabs.watchtower.enable: "true"
     environment:
       SOKO_LOG_FILE: '/var/log/soko/updater.log'
+      SOKO_GITHUB_TOKEN: '${SOKO_GITHUB_TOKEN}'
     depends_on:
       - db
   db:
