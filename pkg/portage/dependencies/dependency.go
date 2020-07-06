@@ -1,6 +1,7 @@
 package dependencies
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -83,6 +84,10 @@ func FullPackageDependenciesUpdate() {
 
 	logger.Info.Println("---")
 
+	// finally delete all outdated dependencies
+	// TODO in future we want a better incremental update here
+	deleteAllDependencies()
+
 	counter := 0
 	length := len(Dependencies)
 	for _, dependency := range Dependencies {
@@ -95,9 +100,6 @@ func FullPackageDependenciesUpdate() {
 		counter++
 	}
 
-	// finally delete all outdated dependencies
-	// TODO in future we want a better incremental update here
-	deleteOutdatedDependencies(Dependencies)
 }
 
 func UpdatePackageDependencies(atom string) {
@@ -200,7 +202,12 @@ func deleteOutdatedDependencies(newDependencies []*models.ReverseDependency) {
 	var oldDependencies []*models.ReverseDependency
 	database.DBCon.Model(&oldDependencies).Select()
 
-	for _, oldDependency := range oldDependencies {
+	for index, oldDependency := range oldDependencies {
+
+		if index % 10000 == 0 {
+			fmt.Println(time.Now().Format(time.Kitchen) + ": " + strconv.Itoa(index) + " / " + strconv.Itoa(len(oldDependencies)))
+		}
+
 		found := false
 		for _, newDependency := range newDependencies {
 			if oldDependency.Id == newDependency.Id {
