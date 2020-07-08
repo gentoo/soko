@@ -1,0 +1,34 @@
+{{define "browsepackagesheader"}}
+    <div class="kk-header-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="row mt-3  pt-2">
+                        <div class="col-md-5">
+                            <h1 class="stick-top kk-package-title" id="package-title">
+                                <div>
+                                    <div class="kk-package-name" style="margin-left: 0px!important;"><span class="fa fa-fw fa-cubes"></span><span class="ml-2">Packages</span></div>
+                                </div>
+                            </h1>
+                        </div>
+                        <div class="col-md-7">
+
+                        </div>
+
+                        <div class="col-md-12 pt-4 mt-1">
+                            <nav class="nav kk-package-nav">
+                                <a class="nav-link {{if eq .Name "Categories"}}active{{end}}" href="/categories"><i class="fa fa-list-ul mr-1" aria-hidden="true"></i>Categories</a>
+                                <a class="nav-link {{if eq .Name "Added"}}active{{end}}" href="/packages/added"><i class="fa fa-history mr-1" aria-hidden="true"></i> Added</a>
+                                <a class="nav-link {{if eq .Name "Updated"}}active{{end}}" href="/packages/updated"><i class="fa fa-asterisk mr-1" aria-hidden="true"></i> Updated</a>
+                                <a class="nav-link {{if eq .Name "Stabilized"}}active{{end}}" href="/packages/stable"><i class="fa fa-check-circle-o mr-1" aria-hidden="true"></i> Newly Stable</a>
+                                <a class="nav-link {{if eq .Name "Keyworded"}}active{{end}}" href="/packages/keyworded"><i class="fa fa-circle-o mr-1" aria-hidden="true"></i> Keyworded</a>
+
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}

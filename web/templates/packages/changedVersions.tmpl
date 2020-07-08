@@ -4,24 +4,18 @@
 <body>
 {{template "header" .Header}}
 
+{{template "browsepackagesheader" .}}
+
+
+<div class="tab-content" id="myTabContent">
 
 
 <div class="container mb-5">
     <div class="row">
         <div class="col-12">
+            <h3 class="mb-2">{{.Name}} Packages <a title="Atom feed" href="/packages/{{tolower .Name}}.atom" class="kk-feed-icon"><span class="fa fa-fw fa-rss-square"></span></a></h3>
 
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/categories">Packages</a></li>
-                <li class="breadcrumb-item active">{{.Name}} Packages</li>
-            </ol>
-
-            <h1>
-                {{.Name}} Packages
-                <a title="Atom feed" href="/packages/{{tolower .Name}}.atom" class="kk-feed-icon"><span class="fa fa-fw fa-rss-square"></span></a>
-            </h1>
-
-            <li class="list-group">
+            <li class="list-group rounded">
                 {{range .Versions}}
                     {{template "changedversion" .}}
                 {{end}}
@@ -31,6 +25,9 @@
 
         </div>
     </div>
+</div>
+
+
 </div>
 
 
