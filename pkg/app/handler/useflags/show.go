@@ -56,12 +56,14 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Header        models.Header
+		Page          string
 		Useflag       models.Useflag
 		LocalUseflags []models.Useflag
 		Packages      []string
 		Application   models.Application
 	}{
 		Header:        models.Header{Title: useflag.Name + " – ", Tab: "useflags"},
+		Page:          "show",
 		Useflag:       useflag,
 		LocalUseflags: localuseflags,
 		Packages:      packages,
@@ -70,7 +72,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	templates := template.Must(
 		template.Must(
-			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
+		template.Must(
+			template.New("Show").Funcs(template.FuncMap{
+				"replaceall": strings.ReplaceAll,
+			}).ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/useflags/useflagsheader.tmpl")).
 			ParseGlob("web/templates/useflags/show.tmpl"))
 
 	templates.ExecuteTemplate(w, "show.tmpl", data)
@@ -108,12 +114,14 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 
 	data := struct {
 		Header          models.Header
+		Page            string
 		Useflag         models.Useflag
 		OtherUseExpands []models.Useflag
 		Packages        []string
 		Application     models.Application
 	}{
 		Header:          models.Header{Title: useExpand.Name + " – ", Tab: "useflags"},
+		Page:            "show",
 		Useflag:         useExpand,
 		OtherUseExpands: otheruseexpands,
 		Packages:        packages,
@@ -122,7 +130,9 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 
 	templates := template.Must(
 		template.Must(
+		template.Must(
 			template.New("Show").Funcs(funcMap).ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/useflags/useflagsheader.tmpl")).
 			ParseGlob("web/templates/useflags/showexpand.tmpl"))
 
 	templates.ExecuteTemplate(w, "showexpand.tmpl", data)

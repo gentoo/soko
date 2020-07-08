@@ -1,0 +1,33 @@
+{{define "browseuseflagsheader"}}
+    <div class="kk-header-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="row mt-3  pt-2">
+                        <div class="col-md-5">
+                            <h1 class="stick-top kk-package-title" id="package-title">
+                                <div>
+                                    <div class="kk-package-name" style="margin-left: 0px!important;"><span class="fa fa-fw fa-sliders"></span><span class="ml-2">USE flags</span></div>
+                                </div>
+                            </h1>
+                        </div>
+                        <div class="col-md-7">
+
+                        </div>
+
+                        <div class="col-md-12 pt-4 mt-1">
+                            <nav class="nav kk-package-nav">
+                                <a class="nav-link {{if eq .Page "browse"}}active{{end}}" href="/useflags"><i class="fa fa-line-chart mr-1" aria-hidden="true"></i> Widely used</a>
+                                <a class="nav-link {{if eq .Page "search"}}active{{end}}" href="/useflags/search"><i class="fa fa-search mr-1" aria-hidden="true"></i> Search</a>
+                                <a class="nav-link {{if eq .Page "global"}}active{{end}}" href="/useflags/global"><i class="fa fa-globe mr-1" aria-hidden="true"></i> Global</a>
+                                <a class="nav-link {{if eq .Page "local"}}active{{end}}" href="/useflags/local"><i class="fa fa-map-marker mr-1" aria-hidden="true"></i> Local</a>
+
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}

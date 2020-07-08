@@ -6,43 +6,18 @@
 
 
 
+{{template "useflagsheader" .}}
+
+
+<div class="tab-content" id="myTabContent">
+
 <div class="container mb-5">
     <div class="row">
         <div class="col-12">
 
-
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/useflags">USE flags</a></li>
-                <li class="breadcrumb-item active">{{.Useflag.Name}}</li>
-            </ol>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <h1 class="stick-top">
-                        <span class="fa fa-fw fa-sliders"></span>
-                        {{ replaceall .Useflag.Name (print .Useflag.UseExpand "_") ""}}
-                    </h1>
-                </div>
-                <div class="col-md-8">
-                    <div class="kk-useflag-group">{{.Useflag.UseExpand}} USE_Expand flag</div>
-                    <p class="lead" style="margin: 0;">
-                        {{.Useflag.Description}}
-                    </p>
-                    <!-- TODO
-                    <div class="kk-useflag-group">Local USE flag</div>
-                    -->
-                </div>
-            </div>
-
-            <hr>
-
-
             {{ if .OtherUseExpands }}
+                <h3 class="mb-2">Other “{{.Useflag.UseExpand}}” USE_EXPAND flag values</h3>
                 <div class="card">
-                    <h4 class="card-header">
-                        Other “{{.Useflag.UseExpand}}” USE_EXPAND flag values
-                    </h4>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
@@ -63,10 +38,8 @@
             {{end}}
 
             {{ if .Packages }}
-            <div class="card mt-4">
-                <h4 class="card-header">
-                    All packages providing a “{{.Useflag.Name}}” USE flag ({{len .Packages}})
-                </h4>
+            <h3 class="mb-2 mt-4">All packages providing a “{{.Useflag.Name}}” USE flag ({{len .Packages}})</h3>
+            <div class="card">
                 <div class="card-body">
                     <ul class="kk-col-list kk-3col-list kk-useflag-listing">
                         {{range .Packages}}
@@ -79,6 +52,8 @@
 
         </div>
     </div>
+</div>
+
 </div>
 
 

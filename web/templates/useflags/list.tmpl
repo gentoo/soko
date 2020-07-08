@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head" .Header}}
+<body>
+{{template "header" .Header}}
+
+{{template "browseuseflagsheader" .}}
+
+
+<div class="tab-content" id="myTabContent">
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+
+            {{if .Useflags}}
+                <h3><span class="text-capitalize">{{.Page}}</span> USE flags</h3>
+
+                <div class="card border-0">
+                    <div class="list-group">
+                        {{ range .Useflags }}
+                        <a class="list-group-item list-group-item-action text-dark" href="/useflags/{{.Name}}">
+                            <h3 class="kk-search-result-header">{{.Name}}</h3>
+                            {{.Description}}
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+            {{end}}
+
+
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+{{template "footer" .Application }}
+
+
+</body>
+</html>

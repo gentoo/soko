@@ -15,15 +15,19 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Header      models.Header
+		Page        string
 		Application models.Application
 	}{
 		Header:      models.Header{Title: "Useflags – ", Tab: "useflags"},
+		Page:        "browse",
 		Application: utils2.GetApplicationData(),
 	}
 
 	templates := template.Must(
 		template.Must(
+		template.Must(
 			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
+			ParseGlob("web/templates/useflags/browseuseflagsheader.tmpl")).
 			ParseGlob("web/templates/useflags/index.tmpl"))
 
 	templates.ExecuteTemplate(w, "index.tmpl", data)

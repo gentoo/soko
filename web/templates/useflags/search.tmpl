@@ -4,37 +4,58 @@
 <body>
 {{template "header" .Header}}
 
+{{template "browseuseflagsheader" .}}
+
+
+<div class="tab-content" id="myTabContent">
 
 
 <div class="container mb-5">
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 {{if not .Useflags}}mt-5 pt-5{{end}}">
 
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/useflags">USE flags</a></li>
-                <li class="breadcrumb-item active">Search</li>
-            </ol>
-
-            <h1>USE Flag Search Results <small>for {{ .Search }}</small></h1>
-
-            <div class="card">
-                <div class="card-header">
-                    Results
-                </div>
-                <div class="list-group">
-                    {{ range .Useflags }}
-                    <a class="list-group-item list-group-item-action text-dark" href="/useflags/{{.Name}}">
-                        <h3 class="kk-search-result-header">{{.Name}}</h3>
-                        {{.Description}}
-                    </a>
-                    {{end}}
-                </div>
+            <div class="col-12 mt-3 text-center">
+                <h2>Find USE flags</h2>
             </div>
+
+            <div class="col-12">
+                <form action="/useflags/search" method="get" class="useflag-search mt-3 mb-5 mx-5 px-5">
+                    <div class="typeahead-container mx-5 px-5">
+                        <div class="typeahead-field">
+                            <span class="typeahead-query" style="font-size: 1.1em; height: 2.3em;">
+                                <input id="q" name="q" class="rounded-left" style="font-size: 1.1em; height: 2.3em;border-right: 0px;" type="search" autocomplete="off" placeholder="Find USE flags">
+                            </span>
+                            <span class="typeahead-button" style="font-size: 1.1em!important; height: 2.3em!important;border-left: 0px;">
+                                <button style="border-top-right-radius: 0.25rem !important; border-bottom-right-radius: 0.25rem !important; font-size: 1.1em!important; height: 2.3em!important;border-left: 0px;box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);!important;" type="submit">
+                                  <span class="typeahead-search-icon"></span>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {{if .Useflags}}
+                <h2>USE Flag Search Results <small>for {{ .Search }}</small></h2>
+
+                <div class="card border-0">
+                    <div class="list-group">
+                        {{ range .Useflags }}
+                        <a class="list-group-item list-group-item-action text-dark" href="/useflags/{{.Name}}">
+                            <h3 class="kk-search-result-header">{{.Name}}</h3>
+                            {{.Description}}
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+            {{end}}
 
 
         </div>
     </div>
+</div>
+
+
 </div>
 
 

@@ -9,36 +9,37 @@ import (
 	utils2 "soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"sort"
 )
 
 // Search renders a template containing a list of search results
 // for a given query of USE flags
-func Search(w http.ResponseWriter, r *http.Request) {
+func Local(w http.ResponseWriter, r *http.Request) {
 
-	results, _ := r.URL.Query()["q"]
-
-	param := ""
 	var useflags []models.Useflag
-	if len(results) != 0 {
-		param = results[0]
-		err := database.DBCon.Model(&useflags).Where("name LIKE ? ", (param + "%")).Select()
-		if err != nil && err != pg.ErrNoRows {
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
+	err := database.DBCon.Model(&useflags).Where("scope = 'local'").Select()
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
+
+	sort.Slice(useflags, func(i, j int) bool {
+		if useflags[i].Package != useflags[j].Package {
+			return useflags[i].Package < useflags[j].Package
+		} else {
+			return useflags[i].Name < useflags[j].Name
+		}
+	})
 
 	data := struct {
 		Header      models.Header
 		Page        string
-		Search      string
 		Useflags    []models.Useflag
 		Application models.Application
 	}{
-		Header:      models.Header{Title: param + " – ", Tab: "useflags"},
-		Page:        "search",
-		Search:      param,
+		Header:      models.Header{Title: "Local" + " – ", Tab: "useflags"},
+		Page:        "local",
 		Useflags:    useflags,
 		Application: utils2.GetApplicationData(),
 	}
@@ -48,7 +49,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		template.Must(
 			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/useflags/browseuseflagsheader.tmpl")).
-			ParseGlob("web/templates/useflags/search.tmpl"))
+			ParseGlob("web/templates/useflags/listlocal.tmpl"))
 
-	templates.ExecuteTemplate(w, "search.tmpl", data)
+	templates.ExecuteTemplate(w, "listlocal.tmpl", data)
 }
