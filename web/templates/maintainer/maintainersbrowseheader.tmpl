@@ -1,0 +1,31 @@
+{{define "maintainersbrowseheader"}}
+    <div class="kk-header-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="row mt-3">
+                        <div class="col-md-5 pt-2">
+                            <h1 class="stick-top kk-package-title" id="package-title">
+                                <div>
+                                    <div class="kk-package-name" style="margin-left: 0px!important;"><span class="fa fa-fw fa-users"></span><span class="ml-2">Maintainers</span></div>
+                                </div>
+                            </h1>
+                        </div>
+                        <div class="col-md-7">
+
+                        </div>
+
+                        <div class="col-md-12 pt-4 mt-1">
+                            <nav class="nav kk-package-nav">
+                                <a class="nav-link {{if eq .TabName "projects"}}active{{end}}" href="/maintainers/gentoo-projects"><i class="fa fa-users mr-1" aria-hidden="true"></i>Gentoo Projects</a>
+                                <a class="nav-link {{if eq .TabName "gentoo-developers"}}active{{end}}" href="/maintainers/gentoo-developers"><i class="fa fa-user mr-1" aria-hidden="true"></i>Gentoo Developers</a>
+                                <a class="nav-link {{if eq .TabName "proxied-maintainers"}}active{{end}}" href="/maintainers/proxied-maintainers"><i class="fa fa-user-o mr-1" aria-hidden="true"></i>Proxied Maintainers</a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}

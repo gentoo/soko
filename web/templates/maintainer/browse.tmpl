@@ -4,33 +4,18 @@
 <body>
 {{template "header" .Header}}
 
+{{template "maintainersbrowseheader" .}}
 
+<div class="tab-content" id="myTabContent">
 
 <div class="container mb-5">
     <div class="row">
         <div class="col-12">
 
-<ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item active">Maintainers</li>
-</ol>
-
-
-            <h1>Maintainers</h1>
-
-            <p>In this section, you can find Gentoo Projects, Developers and Proxied Maintainers.</p>
-
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-md-12">
                     {{if eq .TabName "projects"}}
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="mb-0"><a class="text-dark"><i class="fa fa-users" aria-hidden="true"></i> Gentoo Projects</a>
-                                    <a href="/maintainers/gentoo-developers" class="ml-3 text-muted"><i class="fa fa-user" aria-hidden="true"></i> Gentoo Developers</a>
-                                    <a href="/maintainers/proxied-maintainers" class="ml-3 text-muted"><i class="fa fa-user-o" aria-hidden="true"></i> Proxied Maintainers</a></h4>
-                            </div>
-                            <div class="card-body">
-                                <ul class="kk-col-list kk-4col-list kk-category-listing">
+                                <ul class="kk-col-list kk-6col-list kk-category-listing">
                                     {{ $prevletter := "z"}}
                                     {{range .Maintainers}}
                                         {{ if eq .Type "project"}}
@@ -45,17 +30,8 @@
                                         {{end}}
                                     {{end}}
                                 </ul>
-                            </div>
-                        </div>
                     {{else if eq .TabName "gentoo-developers"}}
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="mb-0"><a href="/maintainers/gentoo-projects" class="text-muted"><i class="fa fa-users" aria-hidden="true"></i> Gentoo Projects</a>
-                                    <a class="ml-3 text-dark"><i class="fa fa-user" aria-hidden="true"></i> Gentoo Developers</a>
-                                    <a href="/maintainers/proxied-maintainers" class="ml-3 text-muted"><i class="fa fa-user-o" aria-hidden="true"></i> Proxied Maintainers</a></h4>
-                            </div>
-                            <div class="card-body">
-                                <ul class="kk-col-list kk-4col-list kk-category-listing">
+                                <ul class="kk-col-list kk-6col-list kk-category-listing">
                                     {{ $prevletter := "z"}}
                                     {{range .Maintainers}}
                                         {{ if eq .Type "gentoo-developer"}}
@@ -70,17 +46,8 @@
                                         {{end}}
                                     {{end}}
                                 </ul>
-                            </div>
-                        </div>
                     {{else if eq .TabName "proxied-maintainers"}}
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="mb-0"><a href="/maintainers/gentoo-projects"  class="text-muted"><i class="fa fa-users" aria-hidden="true"></i> Gentoo Projects</a>
-                                    <a href="/maintainers/gentoo-developers" class="ml-3 text-muted"><i class="fa fa-user" aria-hidden="true"></i> Gentoo Developers</a>
-                                    <a class="ml-3 text-dark"><i class="fa fa-user-o" aria-hidden="true"></i> Proxied Maintainers</a></h4>
-                            </div>
-                            <div class="card-body">
-                                <ul class="kk-col-list kk-4col-list kk-category-listing">
+                                <ul class="kk-col-list kk-6col-list kk-category-listing">
                                     {{ $prevletter := "z"}}
                                     {{range .Maintainers}}
                                         {{ if eq .Type "proxied-maintainer"}}
@@ -95,13 +62,11 @@
                                         {{end}}
                                     {{end}}
                                 </ul>
-                            </div>
-                        </div>
                     {{end}}
 
 
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 d-none">
                     <h4 class="">Description</h4>
                     {{if eq .TabName "projects"}}
                         <span class="text-muted">
@@ -126,6 +91,9 @@
 
         </div>
     </div>
+</div>
+
+
 </div>
 
 
