@@ -3,6 +3,7 @@ package maintainers
 import (
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"soko/pkg/utils"
 	"strings"
 )
 
@@ -41,8 +42,8 @@ func FullImport() {
 
 	for _, maintainer := range maintainers {
 		outdated := 0
-		pullRequests := 0
 		securityBugs := 0
+		pullrequestIds := []string{}
 		nonSecurityBugs := 0
 
 		for _, gpackage := range gpackages {
@@ -55,7 +56,11 @@ func FullImport() {
 
 			if found {
 				outdated = outdated + len(gpackage.Outdated)
-				pullRequests = pullRequests + len(gpackage.PullRequests)
+
+				for _, pullRequest := range gpackage.PullRequests {
+					pullrequestIds = append(pullrequestIds, string(pullRequest.Id))
+				}
+
 				for _, bug := range gpackage.Bugs {
 					if bug.Component == "Vulnerabilities" {
 						securityBugs++
@@ -69,7 +74,7 @@ func FullImport() {
 
 		maintainer.PackagesInformation = models.MaintainerPackagesInformation{
 			Outdated:     outdated,
-			PullRequests: pullRequests,
+			PullRequests: len(utils.Deduplicate(pullrequestIds)),
 			Bugs:         nonSecurityBugs,
 			SecurityBugs: securityBugs,
 		}
@@ -102,4 +107,13 @@ func deleteAllMaintainers() {
 	for _, maintainer := range maintainers {
 		database.DBCon.Model(maintainer).WherePK().Delete()
 	}
+}
+
+func contains(element string, elements []string) bool {
+	for _, el := range elements {
+		if element == el {
+			return true
+		}
+	}
+	return false
 }

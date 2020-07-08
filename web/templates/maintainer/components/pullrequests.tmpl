@@ -8,38 +8,36 @@
                 <h3 class="mb-4">Pull Requests</h3>
                 <ul class="list-group">
 
-                    {{range .Packages}}
-                        {{range .PullRequests}}
+                    {{range getPullRequests .Packages}}
 
-                            <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-md-11">
-                                        <span class="octicon octicon-git-pull-request opticon-resource-icon ml-1" style="color:SeaGreen;"></span>
-                                        <a href="https://github.com/gentoo/gentoo/pull/{{.Id}}" class="text-dark"><b>{{.Title}}</b></a>
-                                        {{if eq .CiState "SUCCESS"}}
-                                            <a href="{{.CiStateLink}}"><i class="fa fa-check mx-1" aria-hidden="true" style="color: SeaGreen;"></i></a>
-                                        {{else}}
-                                            <a href="{{.CiStateLink}}"><i class="fa fa-times mx-1" aria-hidden="true" style="color: #b60205;"></i></a>
-                                        {{end}}
-                                        {{range .Labels}}
-                                            <span class="badge badge-pill badge-light p-1" style="font-weight: normal; {{if eq .Color "5319e7" "0052cc" "b60205"}}color:#FFF;{{end}} background-color: #{{.Color}}!important;">{{.Name}}</span>
-                                        {{end}}
-                                    </div>
-                                    <div class="col-md-1 text-right">
-                                        <a href="https://github.com/gentoo/gentoo/pull/{{.Id}}" class="text-muted">
-                                            <i class="fa fa-comment-o" aria-hidden="true"></i>
-                                            {{.Comments}}
-                                        </a>
-                                    </div>
-                                    <div class="col-md-12 text-muted">
-                                            <span style="font-size: 90%;">
-                                            #{{.Id}} opened {{.CreatedAt}} by {{.Author}}
-                                            </span>
-                                    </div>
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <span class="octicon octicon-git-pull-request opticon-resource-icon ml-1" style="color:SeaGreen;"></span>
+                                    <a href="https://github.com/gentoo/gentoo/pull/{{.Id}}" class="text-dark"><b>{{.Title}}</b></a>
+                                    {{if eq .CiState "SUCCESS"}}
+                                        <a href="{{.CiStateLink}}"><i class="fa fa-check mx-1" aria-hidden="true" style="color: SeaGreen;"></i></a>
+                                    {{else}}
+                                        <a href="{{.CiStateLink}}"><i class="fa fa-times mx-1" aria-hidden="true" style="color: #b60205;"></i></a>
+                                    {{end}}
+                                    {{range .Labels}}
+                                        <span class="badge badge-pill badge-light p-1" style="font-weight: normal; {{if eq .Color "5319e7" "0052cc" "b60205"}}color:#FFF;{{end}} background-color: #{{.Color}}!important;">{{.Name}}</span>
+                                    {{end}}
                                 </div>
-                            </li>
+                                <div class="col-md-1 text-right">
+                                    <a href="https://github.com/gentoo/gentoo/pull/{{.Id}}" class="text-muted">
+                                        <i class="fa fa-comment-o" aria-hidden="true"></i>
+                                        {{.Comments}}
+                                    </a>
+                                </div>
+                                <div class="col-md-12 text-muted">
+                                        <span style="font-size: 90%;">
+                                        #{{.Id}} opened {{.CreatedAt}} by {{.Author}}
+                                        </span>
+                                </div>
+                            </div>
+                        </li>
 
-                        {{end}}
                     {{end}}
                 </ul>
 
