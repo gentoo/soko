@@ -80,11 +80,11 @@ func renderPackageTemplates(page string, funcMap template.FuncMap, data interfac
 	templates := template.Must(
 		template.Must(
 			template.Must(
-			template.Must(
-				template.New(page).
-					Funcs(funcMap).
-					ParseGlob("web/templates/layout/*.tmpl")).
-				ParseGlob("web/templates/arches/archesheader.tmpl")).
+				template.Must(
+					template.New(page).
+						Funcs(funcMap).
+						ParseGlob("web/templates/layout/*.tmpl")).
+					ParseGlob("web/templates/arches/archesheader.tmpl")).
 				ParseGlob("web/templates/packages/changedVersionRow.tmpl")).
 			ParseGlob("web/templates/arches/changedVersions.tmpl"))
 

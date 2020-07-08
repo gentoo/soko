@@ -204,7 +204,7 @@ func deleteOutdatedDependencies(newDependencies []*models.ReverseDependency) {
 
 	for index, oldDependency := range oldDependencies {
 
-		if index % 10000 == 0 {
+		if index%10000 == 0 {
 			fmt.Println(time.Now().Format(time.Kitchen) + ": " + strconv.Itoa(index) + " / " + strconv.Itoa(len(oldDependencies)))
 		}
 

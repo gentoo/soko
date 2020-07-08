@@ -45,9 +45,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	templates := template.Must(
 		template.Must(
-		template.Must(
-			template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/useflags/browseuseflagsheader.tmpl")).
+			template.Must(
+				template.New("Show").ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/useflags/browseuseflagsheader.tmpl")).
 			ParseGlob("web/templates/useflags/search.tmpl"))
 
 	templates.ExecuteTemplate(w, "search.tmpl", data)

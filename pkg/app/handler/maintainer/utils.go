@@ -30,9 +30,9 @@ func renderMaintainerTemplate(page string, templatepattern string, funcMap templ
 func renderBrowseTemplate(data interface{}, w http.ResponseWriter) {
 	templates := template.Must(
 		template.Must(
-		template.Must(
-			template.New("browse").
-				ParseGlob("web/templates/layout/*.tmpl")).
+			template.Must(
+				template.New("browse").
+					ParseGlob("web/templates/layout/*.tmpl")).
 				ParseGlob("web/templates/maintainer/maintainersbrowseheader.tmpl")).
 			ParseGlob("web/templates/maintainer/browse.tmpl"))
 

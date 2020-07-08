@@ -145,11 +145,11 @@ func RenderPackageTemplates(page string, templatepattern1 string, templatepatter
 	templates := template.Must(
 		template.Must(
 			template.Must(
-			template.Must(
-				template.New(page).
-					Funcs(funcMap).
-					ParseGlob("web/templates/layout/*.tmpl")).
-				ParseGlob("web/templates/packages/browsepackagesheader.tmpl")).
+				template.Must(
+					template.New(page).
+						Funcs(funcMap).
+						ParseGlob("web/templates/layout/*.tmpl")).
+					ParseGlob("web/templates/packages/browsepackagesheader.tmpl")).
 				ParseGlob("web/templates/packages/" + templatepattern1 + ".tmpl")).
 			ParseGlob("web/templates/packages/" + templatepattern2 + ".tmpl"))
 	templates.ExecuteTemplate(w, page+".tmpl", data)

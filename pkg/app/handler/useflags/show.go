@@ -72,11 +72,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	templates := template.Must(
 		template.Must(
-		template.Must(
-			template.New("Show").Funcs(template.FuncMap{
-				"replaceall": strings.ReplaceAll,
-			}).ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/useflags/useflagsheader.tmpl")).
+			template.Must(
+				template.New("Show").Funcs(template.FuncMap{
+					"replaceall": strings.ReplaceAll,
+				}).ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/useflags/useflagsheader.tmpl")).
 			ParseGlob("web/templates/useflags/show.tmpl"))
 
 	templates.ExecuteTemplate(w, "show.tmpl", data)
@@ -130,9 +130,9 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 
 	templates := template.Must(
 		template.Must(
-		template.Must(
-			template.New("Show").Funcs(funcMap).ParseGlob("web/templates/layout/*.tmpl")).
-			ParseGlob("web/templates/useflags/useflagsheader.tmpl")).
+			template.Must(
+				template.New("Show").Funcs(funcMap).ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/useflags/useflagsheader.tmpl")).
 			ParseGlob("web/templates/useflags/showexpand.tmpl"))
 
 	templates.ExecuteTemplate(w, "showexpand.tmpl", data)
