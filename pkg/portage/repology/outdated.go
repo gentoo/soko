@@ -67,6 +67,10 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 			if v.Status == "newest" {
 				newest = v.Version
 			}
+			if v.Repo == "gentoo" && v.Status == "newest" {
+				outdated = false
+				break
+			}
 			if v.Repo == "gentoo" && v.Status == "outdated" {
 				atom = v.VisibleName
 				outdated = true
