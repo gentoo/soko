@@ -34,6 +34,8 @@ func Serve() {
 	setRoute("/useflags/popular.json", useflags.Popular)
 	setRoute("/useflags/suggest.json", useflags.Suggest)
 	setRoute("/useflags/search", useflags.Search)
+	setRoute("/useflags/global", useflags.Global)
+	setRoute("/useflags/local", useflags.Local)
 	setRoute("/useflags/", useflags.Show)
 	setRoute("/useflags", useflags.Index)
 

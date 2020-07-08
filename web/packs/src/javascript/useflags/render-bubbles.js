@@ -13,8 +13,25 @@ var checkD3 = setInterval(function() {
     }
 }, 100);
 
+// TODO this is a workaround for now
+// as we do get duplicate charts from
+// time to time. This is probably related
+// to turbolinks.
+function deleteDuplicate() {
+    var bubbles = document.querySelectorAll(".bubble");
+    while(bubbles.length > 1){
+        bubbles[1].remove();
+        bubbles = document.querySelectorAll(".bubble");
+    }
+}
+
+setTimeout(deleteDuplicate, 100);
+setTimeout(deleteDuplicate, 200);
+setTimeout(deleteDuplicate, 500);
+setTimeout(deleteDuplicate, 1000);
+
 function createUseflagChart() {
-    
+
     if(!useflagChartCreated) {
 
         $('#bubble-placeholder').show();
