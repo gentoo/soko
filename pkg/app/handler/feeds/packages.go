@@ -55,7 +55,7 @@ func addAddedPackageFeedItems(f *feeds.Feed, packages []*models.Package) {
 		item := &feeds.Item{
 			Title:       gpackage.Atom,
 			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", gpackage.Atom)},
-			Description: gpackage.Longdescription,
+			Description: gpackage.Description(),
 			Author:      &feeds.Author{Name: "unknown"},
 			Created:     time.Now(),
 		}

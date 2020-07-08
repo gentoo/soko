@@ -53,5 +53,5 @@ func (p Package) Description() string {
 			return version.Description
 		}
 	}
-	return ""
+	return p.Longdescription
 }
