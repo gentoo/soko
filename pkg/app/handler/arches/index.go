@@ -9,8 +9,10 @@ import (
 func Index(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.Must(
+		template.Must(
 			template.New("index").
 				ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/arches/archesheader.tmpl")).
 			ParseGlob("web/templates/arches/index.tmpl"))
 
 	templates.ExecuteTemplate(w, "index.tmpl", getPageData())
