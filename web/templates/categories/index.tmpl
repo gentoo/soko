@@ -5,28 +5,21 @@
 {{template "header" .Header}}
 
 
+{{template "browsecategoriesheader" .}}
+
+
+<div class="tab-content" id="myTabContent">
 
 <div class="container mb-5">
     <div class="row">
         <div class="col-12">
 
-<ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item active">Packages</li>
-</ol>
-
-
-<h1>Packages</h1>
-
-
             <div class="row">
-                <div class="col-md-9">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="mb-0">Browse Categories</h4>
-                        </div>
+                <div class="col-md-12">
+                    <h3 class="d-none mb-2">Browse all Categories</h3>
+                    <div class="card rounded" style="background: none;border: none;">
                         <div class="card-body">
-                            <ul class="kk-col-list kk-4col-list kk-category-listing">
+                            <ul class="kk-col-list kk-6col-list kk-category-listing">
                                 {{ $prevletter := "z"}}
                                 {{range .Categories}}
                                     {{ if (ne (printf "%.1s" .Name) $prevletter)}}
@@ -42,34 +35,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card">
-                        <h4 class="card-header">Update Feeds</h4>
-                        <div class="list-group">
-                            <a href="/packages/added" class="list-group-item list-group-item-action text-dark">
-                                <span class="fa fa-fw fa-history"></span>
-                                Added Packages
-                            </a>
-                            <a href="/packages/updated" class="list-group-item list-group-item-action text-dark">
-                                <span class="fa fa-fw fa-asterisk"></span>
-                                Updated Packages
-                            </a>
-                            <a href="/packages/stable" class="list-group-item list-group-item-action text-dark">
-                                <span class="fa fa-fw fa-check-circle-o"></span>
-                                Newly Stable Packages
-                            </a>
-                            <a href="/packages/keyworded" class="list-group-item list-group-item-action text-dark">
-                                <span class="fa fa-fw fa-circle-o"></span>
-                                Keyworded Packages
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </div>
 
 
         </div>
     </div>
+</div>
+
 </div>
 
 

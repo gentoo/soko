@@ -21,10 +21,12 @@ func getCategoryName(r *http.Request) string {
 func createCategoriesData(categories []*models.Category) interface{} {
 	return struct {
 		Header      models.Header
+		Name        string
 		Categories  []*models.Category
 		Application models.Application
 	}{
 		Header:      models.Header{Title: "Categories – ", Tab: "packages"},
+		Name:        "Categories",
 		Categories:  categories,
 		Application: utils.GetApplicationData(),
 	}
