@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"sort"
 	"strings"
 )
 
@@ -76,6 +77,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+
+	sort.Slice(gpackages, func(i, j int) bool {
+		if gpackages[i].Category != gpackages[j].Category {
+			return gpackages[i].Category < gpackages[j].Category
+		}
+		return gpackages[i].Name < gpackages[j].Name
+	})
 
 	renderMaintainerTemplate("show",
 		"*",

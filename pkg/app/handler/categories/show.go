@@ -4,6 +4,7 @@ package categories
 
 import (
 	"encoding/json"
+	"github.com/go-pg/pg/v9/orm"
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -21,7 +22,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	category := new(models.Category)
 	err := database.DBCon.Model(category).
 		Where("name = ?", getCategoryName(r)).
-		Relation("Packages").
+		Relation("Packages", func(q *orm.Query) (*orm.Query, error) {
+		return q.Order("name ASC"), nil
+	}).
 		Relation("Packages.Versions").
 		Select()
 	if err != nil {

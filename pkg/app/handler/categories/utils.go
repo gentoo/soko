@@ -51,7 +51,12 @@ func renderCategoryTemplate(page string, data interface{}, w http.ResponseWriter
 	templates := template.Must(
 		template.Must(
 			template.New(page).
-				ParseGlob("web/templates/layout/*.tmpl")).
+				Funcs(template.FuncMap{
+					"add" : func(a, b int) int {
+						return a + b
+					},
+			}).
+			ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/categories/*.tmpl"))
 
 	templates.ExecuteTemplate(w, page+".tmpl", data)
