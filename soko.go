@@ -30,7 +30,7 @@ func main() {
 	update := flag.Bool("update", false, "Perform an incremental update of the package data")
 	fullupdate := flag.Bool("fullupdate", false, "Perform a full update of the package data")
 	updateOutdatedPackages := flag.Bool("update-outdated-packages", false, "Update the repology.org data of outdated packages")
-	updatePgkcheckResults := flag.Bool("update-pgkcheck-results", false, "Update the qa-reports that is the pkgcheck results")
+	updatePkgcheckResults := flag.Bool("update-pkgcheck-results", false, "Update the qa-reports that is the pkgcheck results")
 	updatePullrequests := flag.Bool("update-pullrequests", false, "Update the pull requests")
 	initBugs := flag.Bool("init-bugs", false, "Import all bugs, including the old ones. This is usually just done once.")
 	updateBugs := flag.Bool("update-bugs", false, "Update the bugs belonging to the packages")
@@ -53,7 +53,7 @@ func main() {
 		logger.Info.Println("Updating the repology data")
 		repology.UpdateOutdated()
 	}
-	if *updatePgkcheckResults {
+	if *updatePkgcheckResults {
 		logger.Info.Println("Updating the qa-reports that is the pkgcheck data")
 		pkgcheck.UpdatePkgCheckResults()
 	}
