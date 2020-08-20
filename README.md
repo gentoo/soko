@@ -1,7 +1,6 @@
 <p align="center"><img width=15% src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"></p>
-<!--
-<p align="center"><img width=60% src="https://packages.gentoo.org/assets/pgo-label.png"></p>
--->
+<p align="center"><img width=60% src="https://gitweb.gentoo.org/sites/soko.git/plain/web/packs/src/vendor/tyrian/pgo-label.png"></p>
+
 <p align="center">
 <a href="https://gitlab.com/gentoo/soko/-/pipelines"> <img src="https://gitlab.com/gentoo/soko/badges/master/pipeline.svg"></a>
 <a href="https://blog.golang.org/go1.14" ><img src="https://img.shields.io/badge/Go-v1.14-blue"></a>
