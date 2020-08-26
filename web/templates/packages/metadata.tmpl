@@ -89,7 +89,7 @@
                         {{if (ne .Name (index $.Package.Maintainers 0).Name)}}
                             ,&nbsp;
                         {{end}}
-                        <a title="{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}" href="/maintainer/{{.Email}}">{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}</a>
+                        <a title="{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}" href="/maintainer/{{.Email}}">{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}</a> <a href="mailto:{{.Email}}"><i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i></a>
                     {{end}}
                 </div>
             </div>
