@@ -68,10 +68,16 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 		newest := ""
 		version := ""
 		outdated := false
+		// get the gentoo atom name first
+		for _, v := range repoPackages[packagename] {
+			if v.Repo == "gentoo" {
+				atom = v.VisibleName
+			}
+		}
 		for _, v := range repoPackages[packagename] {
 			if v.Status == "newest" &&
 				!contains(blockedRepos, v.Repo) &&
-				!contains(blockedPackages, v.VisibleName + "::" + v.Repo){
+				!contains(blockedPackages, atom + "::" + v.Repo){
 				newest = v.Version
 			}
 			if v.Repo == "gentoo" && v.Status == "newest" {
