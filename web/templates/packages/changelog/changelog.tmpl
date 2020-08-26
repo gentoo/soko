@@ -8,7 +8,7 @@
         <h3>Latest Commits</h3>
         <ul class="timeline">
             <li>
-                <span class="text-muted">Commits on Jul 2, 2020</span>
+                <span class="text-muted">Commits on {{(index .Commits 0).CommitterDate.Format "Jan 02, 2006"}}</span>
                 <ul class="list-group">
                     {{$last_date := (index .Commits 0).CommitterDate}}
                     {{range .Commits}}
