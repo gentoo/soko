@@ -1,6 +1,7 @@
 package repology
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -57,6 +58,10 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 		return []*models.OutdatedPackages{}
 	}
 
+	blockedRepos := readBlocklist("ignored-repositories")
+	blockedCategories := readBlocklist("ignored-categories")
+	blockedPackages := readBlocklist("ignored-packages")
+
 	var outdatedVersions []*models.OutdatedPackages
 	for packagename, _ := range repoPackages {
 		atom := ""
@@ -64,21 +69,25 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 		version := ""
 		outdated := false
 		for _, v := range repoPackages[packagename] {
-			if v.Status == "newest" {
+			if v.Status == "newest" && !contains(blockedRepos, v.Repo) {
 				newest = v.Version
 			}
 			if v.Repo == "gentoo" && v.Status == "newest" {
 				outdated = false
 				break
 			}
-			if v.Repo == "gentoo" && v.Status == "outdated" {
+			if v.Repo == "gentoo" &&
+				v.Status == "outdated" &&
+				!contains(blockedCategories, strings.Split(v.VisibleName, "/")[0]) &&
+				!contains(blockedPackages, v.VisibleName) {
+
 				atom = v.VisibleName
 				outdated = true
 				version = v.Version
 			}
 		}
 
-		if outdated && strings.HasPrefix(packagename, string(letter)) {
+		if outdated && newest != "" && strings.HasPrefix(packagename, string(letter)) {
 			outdatedVersions = append(outdatedVersions, &models.OutdatedPackages{
 				Atom:          atom,
 				GentooVersion: version,
@@ -110,4 +119,37 @@ func deleteAllOutdated() {
 	for _, outdated := range allOutdated {
 		database.DBCon.Model(outdated).WherePK().Delete()
 	}
+}
+
+// readBlocklist parses a block list and returns a list of
+// lines whereas comments as well as empty lines are ignored
+func readBlocklist(file string) []string {
+	var blocklist []string
+	resp, err := http.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
+	if err != nil {
+		return []string{}
+	}
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	rawBlocklist := buf.String()
+
+	for _, line := range strings.Split(rawBlocklist, "\n") {
+		if !strings.HasPrefix(line, "#") && strings.TrimSpace(line) != "" {
+			blocklist = append(blocklist, line)
+		}
+	}
+	return blocklist
+}
+
+// contains returns true if the given list includes
+// the given string. Otherwise false is returned.
+func contains(list []string, item string) bool {
+	for _, i := range list {
+		if i == item {
+			return true
+		}
+	}
+	return false
 }
