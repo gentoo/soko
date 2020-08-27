@@ -178,6 +178,11 @@ type Query {
         PrecedingCommits: Int
     ): [Package]
 
+    "A query to get a list of packages filtered by the given search query. The returned list my be empty."
+    packageSearch(
+        "Search by the given query"
+        searchTerm: String
+    ): [Package]
 
     "A query to get a single useflag by any of the given parameters. Multiple parameters can be used. In case the useflag can not identified uniquely by the given parameters, an error is returned."
     useflag(

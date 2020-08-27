@@ -40,7 +40,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			Select()
 	} else {
 		// if the query contains no wildcards do a fuzzy search
-		searchQuery := buildSearchQuery(searchTerm)
+		searchQuery := BuildSearchQuery(searchTerm)
 		err = database.DBCon.Model(&packages).
 			Where(searchQuery).
 			WhereOr("atom LIKE ? ", ("%" + searchTerm + "%")).
@@ -68,7 +68,7 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 
 	searchTerm := getParameterValue("q", r)
 	searchTerm = strings.ReplaceAll(searchTerm, "*", "")
-	searchQuery := buildSearchQuery(searchTerm)
+	searchQuery := BuildSearchQuery(searchTerm)
 
 	var packages []models.Package
 	err := database.DBCon.Model(&packages).
@@ -85,7 +85,7 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 	feeds.Packages(searchTerm, packages, w)
 }
 
-func buildSearchQuery(searchString string) string {
+func BuildSearchQuery(searchString string) string {
 	var searchClauses []string
 	for _, searchTerm := range strings.Split(searchString, " ") {
 		if searchTerm != "" {

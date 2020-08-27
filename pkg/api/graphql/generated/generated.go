@@ -190,6 +190,7 @@ type ComplexityRoot struct {
 		OutdatedPackage    func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
 		OutdatedPackages   func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
 		Package            func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
+		PackageSearch      func(childComplexity int, searchTerm *string) int
 		Packages           func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
 		PkgCheckResult     func(childComplexity int, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) int
 		PkgCheckResults    func(childComplexity int, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) int
@@ -255,6 +256,7 @@ type QueryResolver interface {
 	PkgCheckResults(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) ([]*models.PkgCheckResult, error)
 	Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error)
 	Packages(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) ([]*models.Package, error)
+	PackageSearch(ctx context.Context, searchTerm *string) ([]*models.Package, error)
 	Useflag(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) (*models.Useflag, error)
 	Useflags(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) ([]*models.Useflag, error)
 	Version(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) (*models.Version, error)
@@ -1051,6 +1053,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Package(childComplexity, args["Atom"].(*string), args["Category"].(*string), args["Name"].(*string), args["Longdescription"].(*string), args["PrecedingCommits"].(*int)), true
 
+	case "Query.packageSearch":
+		if e.complexity.Query.PackageSearch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_packageSearch_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PackageSearch(childComplexity, args["searchTerm"].(*string)), true
+
 	case "Query.packages":
 		if e.complexity.Query.Packages == nil {
 			break
@@ -1618,6 +1632,11 @@ type Query {
         PrecedingCommits: Int
     ): [Package]
 
+    "A query to get a list of packages filtered by the given search query. The returned list my be empty."
+    packageSearch(
+        "Search by the given query"
+        searchTerm: String
+    ): [Package]
 
     "A query to get a single useflag by any of the given parameters. Multiple parameters can be used. In case the useflag can not identified uniquely by the given parameters, an error is returned."
     useflag(
@@ -2663,6 +2682,20 @@ func (ec *executionContext) field_Query_outdatedPackages_args(ctx context.Contex
 		}
 	}
 	args["NewestVersion"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_packageSearch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["searchTerm"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["searchTerm"] = arg0
 	return args, nil
 }
 
@@ -6796,6 +6829,44 @@ func (ec *executionContext) _Query_packages(ctx context.Context, field graphql.C
 	return ec.marshalOPackage2ᚕᚖsokoᚋpkgᚋmodelsᚐPackage(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_packageSearch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_packageSearch_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PackageSearch(rctx, args["searchTerm"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Package)
+	fc.Result = res
+	return ec.marshalOPackage2ᚕᚖsokoᚋpkgᚋmodelsᚐPackage(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_useflag(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -10265,6 +10336,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_packages(ctx, field)
+				return res
+			})
+		case "packageSearch":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_packageSearch(ctx, field)
 				return res
 			})
 		case "useflag":

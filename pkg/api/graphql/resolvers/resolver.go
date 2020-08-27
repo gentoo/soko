@@ -11,6 +11,7 @@ import (
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"strings"
 	"time"
 )
 
@@ -198,6 +199,41 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	if err != nil {
 		return nil, errors.New("an error occurred while searching for the packages")
 	}
+	return gpackages, nil
+}
+
+func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string) ([]*models.Package, error) {
+	var gpackages []*models.Package
+
+	var err error
+	if strings.Contains(*searchTerm, "*") {
+		// if the query contains wildcards
+		wildcardSearchTerm := strings.ReplaceAll(*searchTerm, "*", "%")
+		err = database.DBCon.Model(&gpackages).
+			WhereOr("atom LIKE ? ", wildcardSearchTerm).
+			WhereOr("name LIKE ? ", wildcardSearchTerm).
+			Relation("Versions").
+			OrderExpr("name <-> '" + *searchTerm + "'").
+			Select()
+	} else {
+		// if the query contains no wildcards do a fuzzy search
+		searchQuery := packages.BuildSearchQuery(*searchTerm)
+		err = database.DBCon.Model(&gpackages).
+			Where(searchQuery).
+			WhereOr("atom LIKE ? ", ("%" + *searchTerm + "%")).
+			Relation("Versions").
+			OrderExpr("name <-> '" + *searchTerm + "'").
+			Select()
+	}
+
+	if err != nil {
+		return nil, errors.New("an error occurred while searching for the packages")
+	}
+
+	if len(gpackages) == 1 {
+		return r.Packages(ctx, &gpackages[0].Atom, &gpackages[0].Category, &gpackages[0].Name, &gpackages[0].Longdescription, &gpackages[0].PrecedingCommits)
+	}
+
 	return gpackages, nil
 }
 
