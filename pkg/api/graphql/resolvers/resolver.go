@@ -195,7 +195,7 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	}
 	query = addStringParams(query, stringParams)
 	query = addIntParams(query, intParams)
-	err := query.Relation("Outdated").Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").Select()
+	err := query.Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").Select()
 	if err != nil {
 		return nil, errors.New("an error occurred while searching for the packages")
 	}
@@ -212,7 +212,7 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, f
 		err = database.DBCon.Model(&gpackages).
 			WhereOr("atom LIKE ? ", wildcardSearchTerm).
 			WhereOr("name LIKE ? ", wildcardSearchTerm).
-			Relation("Versions").
+			Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").
 			OrderExpr("name <-> '" + *searchTerm + "'").
 			Select()
 	} else {
@@ -221,7 +221,7 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, f
 		err = database.DBCon.Model(&gpackages).
 			Where(searchQuery).
 			WhereOr("atom LIKE ? ", ("%" + *searchTerm + "%")).
-			Relation("Versions").
+			Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").
 			OrderExpr("name <-> '" + *searchTerm + "'").
 			Select()
 	}
@@ -230,8 +230,8 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, f
 		return nil, errors.New("an error occurred while searching for the packages")
 	}
 
-	if len(gpackages) == 1 || *firstOnly {
-		return r.Packages(ctx, &gpackages[0].Atom, &gpackages[0].Category, &gpackages[0].Name, &gpackages[0].Longdescription, &gpackages[0].PrecedingCommits)
+	if firstOnly != nil && *firstOnly {
+		return gpackages[:1], nil
 	}
 
 	return gpackages, nil
