@@ -42,6 +42,7 @@ func UpdatePackagesBugs(init bool) {
 }
 
 func UpdateClosedBugs() {
+	logger.Error.Println("UpdateClosedBugs")
 	//
 	// Security
 	//
@@ -85,7 +86,10 @@ func deleteBugs(source string) {
 		//
 		// Delete bug
 		//
-		database.DBCon.Model(&bug).WherePK().Delete()
+		_, err = database.DBCon.Model(&bug).WherePK().Delete()
+		if err != nil {
+			logger.Error.Println(err)
+		}
 
 		//
 		// Delete Package To Bug
@@ -95,11 +99,14 @@ func deleteBugs(source string) {
 		summary = strings.Split(summary, " ")[0]
 		affectedPackage := versionSpecifierToPackageAtom(summary)
 
-		database.DBCon.Model(&models.PackageToBug{
+		_, err = database.DBCon.Model(&models.PackageToBug{
 			Id:          affectedPackage + "-" + bugId,
 			PackageAtom: affectedPackage,
 			BugId:       bugId,
 		}).Where("bug_id = ?bug_id").Delete()
+		if err != nil {
+			logger.Error.Println(err)
+		}
 	}
 }
 
