@@ -190,7 +190,7 @@ type ComplexityRoot struct {
 		OutdatedPackage    func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
 		OutdatedPackages   func(childComplexity int, atom *string, gentooVersion *string, newestVersion *string) int
 		Package            func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
-		PackageSearch      func(childComplexity int, searchTerm *string) int
+		PackageSearch      func(childComplexity int, searchTerm *string, firstOnly *bool) int
 		Packages           func(childComplexity int, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) int
 		PkgCheckResult     func(childComplexity int, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) int
 		PkgCheckResults    func(childComplexity int, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) int
@@ -256,7 +256,7 @@ type QueryResolver interface {
 	PkgCheckResults(ctx context.Context, atom *string, category *string, packageArg *string, version *string, cpv *string, class *string, message *string) ([]*models.PkgCheckResult, error)
 	Package(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) (*models.Package, error)
 	Packages(ctx context.Context, atom *string, category *string, name *string, longdescription *string, precedingCommits *int) ([]*models.Package, error)
-	PackageSearch(ctx context.Context, searchTerm *string) ([]*models.Package, error)
+	PackageSearch(ctx context.Context, searchTerm *string, firstOnly *bool) ([]*models.Package, error)
 	Useflag(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) (*models.Useflag, error)
 	Useflags(ctx context.Context, id *string, name *string, scope *string, description *string, useExpand *string, packageArg *string) ([]*models.Useflag, error)
 	Version(ctx context.Context, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) (*models.Version, error)
@@ -1063,7 +1063,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.PackageSearch(childComplexity, args["searchTerm"].(*string)), true
+		return e.complexity.Query.PackageSearch(childComplexity, args["searchTerm"].(*string), args["firstOnly"].(*bool)), true
 
 	case "Query.packages":
 		if e.complexity.Query.Packages == nil {
@@ -1636,6 +1636,8 @@ type Query {
     packageSearch(
         "Search by the given query"
         searchTerm: String
+        "Return the first result only"
+        firstOnly: Boolean
     ): [Package]
 
     "A query to get a single useflag by any of the given parameters. Multiple parameters can be used. In case the useflag can not identified uniquely by the given parameters, an error is returned."
@@ -2696,6 +2698,14 @@ func (ec *executionContext) field_Query_packageSearch_args(ctx context.Context, 
 		}
 	}
 	args["searchTerm"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["firstOnly"]; ok {
+		arg1, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["firstOnly"] = arg1
 	return args, nil
 }
 
@@ -6853,7 +6863,7 @@ func (ec *executionContext) _Query_packageSearch(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().PackageSearch(rctx, args["searchTerm"].(*string))
+		return ec.resolvers.Query().PackageSearch(rctx, args["searchTerm"].(*string), args["firstOnly"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

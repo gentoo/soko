@@ -202,7 +202,7 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	return gpackages, nil
 }
 
-func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string) ([]*models.Package, error) {
+func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, firstOnly *bool) ([]*models.Package, error) {
 	var gpackages []*models.Package
 
 	var err error
@@ -230,7 +230,7 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string) (
 		return nil, errors.New("an error occurred while searching for the packages")
 	}
 
-	if len(gpackages) == 1 {
+	if len(gpackages) == 1 || *firstOnly {
 		return r.Packages(ctx, &gpackages[0].Atom, &gpackages[0].Category, &gpackages[0].Name, &gpackages[0].Longdescription, &gpackages[0].PrecedingCommits)
 	}
 
