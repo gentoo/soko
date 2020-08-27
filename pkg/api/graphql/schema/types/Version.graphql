@@ -56,4 +56,7 @@ type Version
 
   "An array of all pkgcheck results that affect this version"
   PkgCheckResults: [PkgCheckResult!]!
+
+  "An array containing all dependencies of the version"
+  Dependencies: [ReverseDependency!]!
 }

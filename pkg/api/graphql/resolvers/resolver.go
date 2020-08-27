@@ -194,7 +194,7 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	}
 	query = addStringParams(query, stringParams)
 	query = addIntParams(query, intParams)
-	err := query.Relation("Commits").Relation("Versions").Relation("PkgCheckResults").Relation("Outdated").Select()
+	err := query.Relation("Outdated").Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").Select()
 	if err != nil {
 		return nil, errors.New("an error occurred while searching for the packages")
 	}

@@ -48,6 +48,15 @@ type ComplexityRoot struct {
 		Version    func(childComplexity int) int
 	}
 
+	Bug struct {
+		Assignee  func(childComplexity int) int
+		Component func(childComplexity int) int
+		Id        func(childComplexity int) int
+		Product   func(childComplexity int) int
+		Status    func(childComplexity int) int
+		Summary   func(childComplexity int) int
+	}
+
 	Category struct {
 		Description func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -79,6 +88,32 @@ type ComplexityRoot struct {
 		KeywordChanges   func(childComplexity int) int
 		Message          func(childComplexity int) int
 		PrecedingCommits func(childComplexity int) int
+	}
+
+	GitHubPullRequestFileNode struct {
+		Additions func(childComplexity int) int
+		Deletions func(childComplexity int) int
+		Path      func(childComplexity int) int
+	}
+
+	GitHubPullRequestLabelNode struct {
+		Color func(childComplexity int) int
+		Name  func(childComplexity int) int
+	}
+
+	GithubPullRequest struct {
+		Author      func(childComplexity int) int
+		CiState     func(childComplexity int) int
+		CiStateLink func(childComplexity int) int
+		Closed      func(childComplexity int) int
+		Comments    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Files       func(childComplexity int) int
+		Id          func(childComplexity int) int
+		Labels      func(childComplexity int) int
+		Title       func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		Url         func(childComplexity int) int
 	}
 
 	KeywordChange struct {
@@ -116,16 +151,19 @@ type ComplexityRoot struct {
 	}
 
 	Package struct {
-		Atom             func(childComplexity int) int
-		Category         func(childComplexity int) int
-		Commits          func(childComplexity int) int
-		Longdescription  func(childComplexity int) int
-		Maintainers      func(childComplexity int) int
-		Name             func(childComplexity int) int
-		Outdated         func(childComplexity int) int
-		PkgCheckResults  func(childComplexity int) int
-		PrecedingCommits func(childComplexity int) int
-		Versions         func(childComplexity int) int
+		Atom                func(childComplexity int) int
+		Bugs                func(childComplexity int) int
+		Category            func(childComplexity int) int
+		Commits             func(childComplexity int) int
+		Longdescription     func(childComplexity int) int
+		Maintainers         func(childComplexity int) int
+		Name                func(childComplexity int) int
+		Outdated            func(childComplexity int) int
+		PkgCheckResults     func(childComplexity int) int
+		PrecedingCommits    func(childComplexity int) int
+		PullRequests        func(childComplexity int) int
+		ReverseDependencies func(childComplexity int) int
+		Versions            func(childComplexity int) int
 	}
 
 	PkgCheckResult struct {
@@ -163,6 +201,15 @@ type ComplexityRoot struct {
 		Versions           func(childComplexity int, id *string, category *string, packageArg *string, atom *string, version *string, slot *string, subslot *string, eapi *string, keywords *string, useflags *string, restricts *string, properties *string, homepage *string, license *string, description *string) int
 	}
 
+	ReverseDependency struct {
+		Atom                     func(childComplexity int) int
+		Condition                func(childComplexity int) int
+		Id                       func(childComplexity int) int
+		ReverseDependencyAtom    func(childComplexity int) int
+		ReverseDependencyVersion func(childComplexity int) int
+		Type                     func(childComplexity int) int
+	}
+
 	Useflag struct {
 		Description func(childComplexity int) int
 		Id          func(childComplexity int) int
@@ -176,6 +223,7 @@ type ComplexityRoot struct {
 		Atom            func(childComplexity int) int
 		Category        func(childComplexity int) int
 		Commits         func(childComplexity int) int
+		Dependencies    func(childComplexity int) int
 		Description     func(childComplexity int) int
 		EAPI            func(childComplexity int) int
 		Homepage        func(childComplexity int) int
@@ -254,6 +302,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Application.Version(childComplexity), true
+
+	case "Bug.Assignee":
+		if e.complexity.Bug.Assignee == nil {
+			break
+		}
+
+		return e.complexity.Bug.Assignee(childComplexity), true
+
+	case "Bug.Component":
+		if e.complexity.Bug.Component == nil {
+			break
+		}
+
+		return e.complexity.Bug.Component(childComplexity), true
+
+	case "Bug.Id":
+		if e.complexity.Bug.Id == nil {
+			break
+		}
+
+		return e.complexity.Bug.Id(childComplexity), true
+
+	case "Bug.Product":
+		if e.complexity.Bug.Product == nil {
+			break
+		}
+
+		return e.complexity.Bug.Product(childComplexity), true
+
+	case "Bug.Status":
+		if e.complexity.Bug.Status == nil {
+			break
+		}
+
+		return e.complexity.Bug.Status(childComplexity), true
+
+	case "Bug.Summary":
+		if e.complexity.Bug.Summary == nil {
+			break
+		}
+
+		return e.complexity.Bug.Summary(childComplexity), true
 
 	case "Category.Description":
 		if e.complexity.Category.Description == nil {
@@ -401,6 +491,125 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Commit.PrecedingCommits(childComplexity), true
+
+	case "GitHubPullRequestFileNode.Additions":
+		if e.complexity.GitHubPullRequestFileNode.Additions == nil {
+			break
+		}
+
+		return e.complexity.GitHubPullRequestFileNode.Additions(childComplexity), true
+
+	case "GitHubPullRequestFileNode.Deletions":
+		if e.complexity.GitHubPullRequestFileNode.Deletions == nil {
+			break
+		}
+
+		return e.complexity.GitHubPullRequestFileNode.Deletions(childComplexity), true
+
+	case "GitHubPullRequestFileNode.Path":
+		if e.complexity.GitHubPullRequestFileNode.Path == nil {
+			break
+		}
+
+		return e.complexity.GitHubPullRequestFileNode.Path(childComplexity), true
+
+	case "GitHubPullRequestLabelNode.Color":
+		if e.complexity.GitHubPullRequestLabelNode.Color == nil {
+			break
+		}
+
+		return e.complexity.GitHubPullRequestLabelNode.Color(childComplexity), true
+
+	case "GitHubPullRequestLabelNode.Name":
+		if e.complexity.GitHubPullRequestLabelNode.Name == nil {
+			break
+		}
+
+		return e.complexity.GitHubPullRequestLabelNode.Name(childComplexity), true
+
+	case "GithubPullRequest.Author":
+		if e.complexity.GithubPullRequest.Author == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Author(childComplexity), true
+
+	case "GithubPullRequest.CiState":
+		if e.complexity.GithubPullRequest.CiState == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.CiState(childComplexity), true
+
+	case "GithubPullRequest.CiStateLink":
+		if e.complexity.GithubPullRequest.CiStateLink == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.CiStateLink(childComplexity), true
+
+	case "GithubPullRequest.Closed":
+		if e.complexity.GithubPullRequest.Closed == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Closed(childComplexity), true
+
+	case "GithubPullRequest.Comments":
+		if e.complexity.GithubPullRequest.Comments == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Comments(childComplexity), true
+
+	case "GithubPullRequest.CreatedAt":
+		if e.complexity.GithubPullRequest.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.CreatedAt(childComplexity), true
+
+	case "GithubPullRequest.Files":
+		if e.complexity.GithubPullRequest.Files == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Files(childComplexity), true
+
+	case "GithubPullRequest.Id":
+		if e.complexity.GithubPullRequest.Id == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Id(childComplexity), true
+
+	case "GithubPullRequest.Labels":
+		if e.complexity.GithubPullRequest.Labels == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Labels(childComplexity), true
+
+	case "GithubPullRequest.Title":
+		if e.complexity.GithubPullRequest.Title == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Title(childComplexity), true
+
+	case "GithubPullRequest.UpdatedAt":
+		if e.complexity.GithubPullRequest.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.UpdatedAt(childComplexity), true
+
+	case "GithubPullRequest.Url":
+		if e.complexity.GithubPullRequest.Url == nil {
+			break
+		}
+
+		return e.complexity.GithubPullRequest.Url(childComplexity), true
 
 	case "KeywordChange.Added":
 		if e.complexity.KeywordChange.Added == nil {
@@ -563,6 +772,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Package.Atom(childComplexity), true
 
+	case "Package.Bugs":
+		if e.complexity.Package.Bugs == nil {
+			break
+		}
+
+		return e.complexity.Package.Bugs(childComplexity), true
+
 	case "Package.Category":
 		if e.complexity.Package.Category == nil {
 			break
@@ -618,6 +834,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Package.PrecedingCommits(childComplexity), true
+
+	case "Package.PullRequests":
+		if e.complexity.Package.PullRequests == nil {
+			break
+		}
+
+		return e.complexity.Package.PullRequests(childComplexity), true
+
+	case "Package.ReverseDependencies":
+		if e.complexity.Package.ReverseDependencies == nil {
+			break
+		}
+
+		return e.complexity.Package.ReverseDependencies(childComplexity), true
 
 	case "Package.Versions":
 		if e.complexity.Package.Versions == nil {
@@ -929,6 +1159,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Versions(childComplexity, args["Id"].(*string), args["Category"].(*string), args["Package"].(*string), args["Atom"].(*string), args["Version"].(*string), args["Slot"].(*string), args["Subslot"].(*string), args["EAPI"].(*string), args["Keywords"].(*string), args["Useflags"].(*string), args["Restricts"].(*string), args["Properties"].(*string), args["Homepage"].(*string), args["License"].(*string), args["Description"].(*string)), true
 
+	case "ReverseDependency.Atom":
+		if e.complexity.ReverseDependency.Atom == nil {
+			break
+		}
+
+		return e.complexity.ReverseDependency.Atom(childComplexity), true
+
+	case "ReverseDependency.Condition":
+		if e.complexity.ReverseDependency.Condition == nil {
+			break
+		}
+
+		return e.complexity.ReverseDependency.Condition(childComplexity), true
+
+	case "ReverseDependency.Id":
+		if e.complexity.ReverseDependency.Id == nil {
+			break
+		}
+
+		return e.complexity.ReverseDependency.Id(childComplexity), true
+
+	case "ReverseDependency.ReverseDependencyAtom":
+		if e.complexity.ReverseDependency.ReverseDependencyAtom == nil {
+			break
+		}
+
+		return e.complexity.ReverseDependency.ReverseDependencyAtom(childComplexity), true
+
+	case "ReverseDependency.ReverseDependencyVersion":
+		if e.complexity.ReverseDependency.ReverseDependencyVersion == nil {
+			break
+		}
+
+		return e.complexity.ReverseDependency.ReverseDependencyVersion(childComplexity), true
+
+	case "ReverseDependency.Type":
+		if e.complexity.ReverseDependency.Type == nil {
+			break
+		}
+
+		return e.complexity.ReverseDependency.Type(childComplexity), true
+
 	case "Useflag.Description":
 		if e.complexity.Useflag.Description == nil {
 			break
@@ -991,6 +1263,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Version.Commits(childComplexity), true
+
+	case "Version.Dependencies":
+		if e.complexity.Version.Dependencies == nil {
+			break
+		}
+
+		return e.complexity.Version.Dependencies(childComplexity), true
 
 	case "Version.Description":
 		if e.complexity.Version.Description == nil {
@@ -1496,6 +1775,107 @@ scalar Any
     query: Query
 }
 `, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/Bug.graphql", Input: `"Information about Bugs"
+type Bug
+  @goModel(
+    model: "soko/pkg/models.Bug"
+  ) {
+
+  "The id of the bug."
+  Id: String!
+
+  "The product of the bug."
+  Product: String!
+
+  "The component of the bug."
+  Component: String!
+
+  "The assignee of the bug."
+  Assignee: String!
+
+  "The status of the bug."
+  Status: String!
+
+  "The summary of the bug."
+  Summary: String!
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/GithubPullRequest.graphql", Input: `"Information about Github PullRequest"
+type GithubPullRequest
+  @goModel(
+    model: "soko/pkg/models.GithubPullRequest"
+  ) {
+
+  "The id of the pull request."
+  Id: String!
+
+  "True if the pull request is closed."
+  Closed: Boolean!
+
+  "The url of the pull request."
+  Url: String!
+
+  "The title of the pull request."
+  Title: String!
+
+  "The date of the creation of the pull request."
+  CreatedAt: String!
+
+  "The date of the last update of the pull request."
+  UpdatedAt: String!
+
+  "The CI state of the pull request."
+  CiState: String!
+
+  "The link to the CI state of the pull request."
+  CiStateLink: String!
+
+  "The labels of the pull request."
+  Labels: [GitHubPullRequestLabelNode!]!
+
+  "The number of comments."
+  Comments: Int!
+
+  "The changed files in the pull request11."
+  Files: [GitHubPullRequestFileNode!]!
+
+  "The author of the pull request."
+  Author: String!
+}
+
+
+"Information about Github PullRequest Labels"
+type GitHubPullRequestLabelNode
+@goModel(
+  model: "soko/pkg/models.GitHubPullRequestLabelNode"
+) {
+
+  "The content / name of the label."
+  Name: String!
+
+  "The color of the label."
+  Color: String!
+
+}
+
+
+
+"Information about Github PullRequest changed Files"
+type GitHubPullRequestFileNode
+@goModel(
+  model: "soko/pkg/models.GitHubPullRequestFileNode"
+) {
+
+  "The path of the changed file."
+  Path: String!
+
+  "The number of additions."
+  Additions: Int!
+
+  "The number of deletions."
+  Deletions: Int!
+
+}`, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/types/Mask.graphql", Input: `"A package's mask entry"
 type Mask
   @goModel(
@@ -1569,6 +1949,15 @@ type Package
 
   "An array containing all repology warnings about new versions for this package"
   Outdated: [OutdatedPackage!]!
+
+  "An array containing all bugs for this package"
+  Bugs: [Bug!]!
+
+  "An array containing all pull requests for this package"
+  PullRequests: [GithubPullRequest!]!
+
+  "An array containing all reverse dependencies for this package"
+  ReverseDependencies: [ReverseDependency!]!
 }
 
 "Information about a maintainer of packages"
@@ -1619,6 +2008,30 @@ type PkgCheckResult
 }
 
 `, BuiltIn: false},
+	&ast.Source{Name: "pkg/api/graphql/schema/types/ReverseDependency.graphql", Input: `"Information about Reverse Dependencies"
+type ReverseDependency
+  @goModel(
+    model: "soko/pkg/models.ReverseDependency"
+  ) {
+
+  "The id."
+  Id: String!
+
+  "The atom of the package."
+  Atom: String!
+
+  "The type of the dependency."
+  Type: String!
+
+  "The atom of the reverse dependency."
+  ReverseDependencyAtom: String!
+
+  "The version of the reverse depedency."
+  ReverseDependencyVersion: String!
+
+  "The condition for the dependency"
+  Condition: String
+}`, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/types/Version.graphql", Input: `"A version of a gentoo package"
 type Version
   @goModel(
@@ -1677,6 +2090,9 @@ type Version
 
   "An array of all pkgcheck results that affect this version"
   PkgCheckResults: [PkgCheckResult!]!
+
+  "An array containing all dependencies of the version"
+  Dependencies: [ReverseDependency!]!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "pkg/api/graphql/schema/types/application.graphql", Input: `"Contains general information about the application"
@@ -3000,6 +3416,210 @@ func (ec *executionContext) _Application_LastCommit(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Bug_Id(ctx context.Context, field graphql.CollectedField, obj *models.Bug) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bug",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Id, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bug_Product(ctx context.Context, field graphql.CollectedField, obj *models.Bug) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bug",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Product, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bug_Component(ctx context.Context, field graphql.CollectedField, obj *models.Bug) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bug",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Component, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bug_Assignee(ctx context.Context, field graphql.CollectedField, obj *models.Bug) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bug",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Assignee, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bug_Status(ctx context.Context, field graphql.CollectedField, obj *models.Bug) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bug",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bug_Summary(ctx context.Context, field graphql.CollectedField, obj *models.Bug) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bug",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Summary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Category_Name(ctx context.Context, field graphql.CollectedField, obj *models.Category) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3712,6 +4332,584 @@ func (ec *executionContext) _Commit_KeywordChanges(ctx context.Context, field gr
 	res := resTmp.([]*models.KeywordChange)
 	fc.Result = res
 	return ec.marshalNKeywordChange2ᚕᚖsokoᚋpkgᚋmodelsᚐKeywordChangeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitHubPullRequestFileNode_Path(ctx context.Context, field graphql.CollectedField, obj *models.GitHubPullRequestFileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitHubPullRequestFileNode",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Path, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitHubPullRequestFileNode_Additions(ctx context.Context, field graphql.CollectedField, obj *models.GitHubPullRequestFileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitHubPullRequestFileNode",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Additions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitHubPullRequestFileNode_Deletions(ctx context.Context, field graphql.CollectedField, obj *models.GitHubPullRequestFileNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitHubPullRequestFileNode",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Deletions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitHubPullRequestLabelNode_Name(ctx context.Context, field graphql.CollectedField, obj *models.GitHubPullRequestLabelNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitHubPullRequestLabelNode",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitHubPullRequestLabelNode_Color(ctx context.Context, field graphql.CollectedField, obj *models.GitHubPullRequestLabelNode) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitHubPullRequestLabelNode",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Color, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Id(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Id, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Closed(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Closed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Url(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Url, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Title(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_CreatedAt(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_UpdatedAt(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_CiState(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CiState, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_CiStateLink(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CiStateLink, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Labels(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]models.GitHubPullRequestLabelNode)
+	fc.Result = res
+	return ec.marshalNGitHubPullRequestLabelNode2ᚕsokoᚋpkgᚋmodelsᚐGitHubPullRequestLabelNodeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Comments(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Comments, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Files(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Files, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]models.GitHubPullRequestFileNode)
+	fc.Result = res
+	return ec.marshalNGitHubPullRequestFileNode2ᚕsokoᚋpkgᚋmodelsᚐGitHubPullRequestFileNodeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GithubPullRequest_Author(ctx context.Context, field graphql.CollectedField, obj *models.GithubPullRequest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GithubPullRequest",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Author, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KeywordChange_Id(ctx context.Context, field graphql.CollectedField, obj *models.KeywordChange) (ret graphql.Marshaler) {
@@ -4800,6 +5998,108 @@ func (ec *executionContext) _Package_Outdated(ctx context.Context, field graphql
 	res := resTmp.([]*models.OutdatedPackages)
 	fc.Result = res
 	return ec.marshalNOutdatedPackage2ᚕᚖsokoᚋpkgᚋmodelsᚐOutdatedPackagesᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Package_Bugs(ctx context.Context, field graphql.CollectedField, obj *models.Package) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Package",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bugs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Bug)
+	fc.Result = res
+	return ec.marshalNBug2ᚕᚖsokoᚋpkgᚋmodelsᚐBugᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Package_PullRequests(ctx context.Context, field graphql.CollectedField, obj *models.Package) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Package",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PullRequests, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.GithubPullRequest)
+	fc.Result = res
+	return ec.marshalNGithubPullRequest2ᚕᚖsokoᚋpkgᚋmodelsᚐGithubPullRequestᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Package_ReverseDependencies(ctx context.Context, field graphql.CollectedField, obj *models.Package) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Package",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReverseDependencies, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.ReverseDependency)
+	fc.Result = res
+	return ec.marshalNReverseDependency2ᚕᚖsokoᚋpkgᚋmodelsᚐReverseDependencyᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PkgCheckResult_Atom(ctx context.Context, field graphql.CollectedField, obj *models.PkgCheckResult) (ret graphql.Marshaler) {
@@ -5931,6 +7231,207 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ReverseDependency_Id(ctx context.Context, field graphql.CollectedField, obj *models.ReverseDependency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ReverseDependency",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Id, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReverseDependency_Atom(ctx context.Context, field graphql.CollectedField, obj *models.ReverseDependency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ReverseDependency",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Atom, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReverseDependency_Type(ctx context.Context, field graphql.CollectedField, obj *models.ReverseDependency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ReverseDependency",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReverseDependency_ReverseDependencyAtom(ctx context.Context, field graphql.CollectedField, obj *models.ReverseDependency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ReverseDependency",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReverseDependencyAtom, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReverseDependency_ReverseDependencyVersion(ctx context.Context, field graphql.CollectedField, obj *models.ReverseDependency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ReverseDependency",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReverseDependencyVersion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReverseDependency_Condition(ctx context.Context, field graphql.CollectedField, obj *models.ReverseDependency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ReverseDependency",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Condition, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Useflag_Id(ctx context.Context, field graphql.CollectedField, obj *models.Useflag) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6745,6 +8246,40 @@ func (ec *executionContext) _Version_PkgCheckResults(ctx context.Context, field 
 	res := resTmp.([]*models.PkgCheckResult)
 	fc.Result = res
 	return ec.marshalNPkgCheckResult2ᚕᚖsokoᚋpkgᚋmodelsᚐPkgCheckResultᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Version_Dependencies(ctx context.Context, field graphql.CollectedField, obj *models.Version) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Version",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dependencies, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.ReverseDependency)
+	fc.Result = res
+	return ec.marshalNReverseDependency2ᚕᚖsokoᚋpkgᚋmodelsᚐReverseDependencyᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -7847,6 +9382,58 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var bugImplementors = []string{"Bug"}
+
+func (ec *executionContext) _Bug(ctx context.Context, sel ast.SelectionSet, obj *models.Bug) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bugImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Bug")
+		case "Id":
+			out.Values[i] = ec._Bug_Id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Product":
+			out.Values[i] = ec._Bug_Product(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Component":
+			out.Values[i] = ec._Bug_Component(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Assignee":
+			out.Values[i] = ec._Bug_Assignee(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Status":
+			out.Values[i] = ec._Bug_Status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Summary":
+			out.Values[i] = ec._Bug_Summary(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var categoryImplementors = []string{"Category"}
 
 func (ec *executionContext) _Category(ctx context.Context, sel ast.SelectionSet, obj *models.Category) graphql.Marshaler {
@@ -8026,6 +9613,157 @@ func (ec *executionContext) _Commit(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "KeywordChanges":
 			out.Values[i] = ec._Commit_KeywordChanges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var gitHubPullRequestFileNodeImplementors = []string{"GitHubPullRequestFileNode"}
+
+func (ec *executionContext) _GitHubPullRequestFileNode(ctx context.Context, sel ast.SelectionSet, obj *models.GitHubPullRequestFileNode) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gitHubPullRequestFileNodeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GitHubPullRequestFileNode")
+		case "Path":
+			out.Values[i] = ec._GitHubPullRequestFileNode_Path(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Additions":
+			out.Values[i] = ec._GitHubPullRequestFileNode_Additions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Deletions":
+			out.Values[i] = ec._GitHubPullRequestFileNode_Deletions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var gitHubPullRequestLabelNodeImplementors = []string{"GitHubPullRequestLabelNode"}
+
+func (ec *executionContext) _GitHubPullRequestLabelNode(ctx context.Context, sel ast.SelectionSet, obj *models.GitHubPullRequestLabelNode) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gitHubPullRequestLabelNodeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GitHubPullRequestLabelNode")
+		case "Name":
+			out.Values[i] = ec._GitHubPullRequestLabelNode_Name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Color":
+			out.Values[i] = ec._GitHubPullRequestLabelNode_Color(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var githubPullRequestImplementors = []string{"GithubPullRequest"}
+
+func (ec *executionContext) _GithubPullRequest(ctx context.Context, sel ast.SelectionSet, obj *models.GithubPullRequest) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, githubPullRequestImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GithubPullRequest")
+		case "Id":
+			out.Values[i] = ec._GithubPullRequest_Id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Closed":
+			out.Values[i] = ec._GithubPullRequest_Closed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Url":
+			out.Values[i] = ec._GithubPullRequest_Url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Title":
+			out.Values[i] = ec._GithubPullRequest_Title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CreatedAt":
+			out.Values[i] = ec._GithubPullRequest_CreatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UpdatedAt":
+			out.Values[i] = ec._GithubPullRequest_UpdatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CiState":
+			out.Values[i] = ec._GithubPullRequest_CiState(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CiStateLink":
+			out.Values[i] = ec._GithubPullRequest_CiStateLink(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Labels":
+			out.Values[i] = ec._GithubPullRequest_Labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Comments":
+			out.Values[i] = ec._GithubPullRequest_Comments(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Files":
+			out.Values[i] = ec._GithubPullRequest_Files(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Author":
+			out.Values[i] = ec._GithubPullRequest_Author(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8296,6 +10034,21 @@ func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "Outdated":
 			out.Values[i] = ec._Package_Outdated(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Bugs":
+			out.Values[i] = ec._Package_Bugs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "PullRequests":
+			out.Values[i] = ec._Package_PullRequests(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ReverseDependencies":
+			out.Values[i] = ec._Package_ReverseDependencies(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8639,6 +10392,55 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var reverseDependencyImplementors = []string{"ReverseDependency"}
+
+func (ec *executionContext) _ReverseDependency(ctx context.Context, sel ast.SelectionSet, obj *models.ReverseDependency) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, reverseDependencyImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReverseDependency")
+		case "Id":
+			out.Values[i] = ec._ReverseDependency_Id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Atom":
+			out.Values[i] = ec._ReverseDependency_Atom(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Type":
+			out.Values[i] = ec._ReverseDependency_Type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ReverseDependencyAtom":
+			out.Values[i] = ec._ReverseDependency_ReverseDependencyAtom(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ReverseDependencyVersion":
+			out.Values[i] = ec._ReverseDependency_ReverseDependencyVersion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Condition":
+			out.Values[i] = ec._ReverseDependency_Condition(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var useflagImplementors = []string{"Useflag"}
 
 func (ec *executionContext) _Useflag(ctx context.Context, sel ast.SelectionSet, obj *models.Useflag) graphql.Marshaler {
@@ -8789,6 +10591,11 @@ func (ec *executionContext) _Version(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "PkgCheckResults":
 			out.Values[i] = ec._Version_PkgCheckResults(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Dependencies":
+			out.Values[i] = ec._Version_Dependencies(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -9062,6 +10869,57 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNBug2sokoᚋpkgᚋmodelsᚐBug(ctx context.Context, sel ast.SelectionSet, v models.Bug) graphql.Marshaler {
+	return ec._Bug(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBug2ᚕᚖsokoᚋpkgᚋmodelsᚐBugᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Bug) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBug2ᚖsokoᚋpkgᚋmodelsᚐBug(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNBug2ᚖsokoᚋpkgᚋmodelsᚐBug(ctx context.Context, sel ast.SelectionSet, v *models.Bug) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Bug(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNChangedFile2sokoᚋpkgᚋmodelsᚐChangedFile(ctx context.Context, sel ast.SelectionSet, v models.ChangedFile) graphql.Marshaler {
 	return ec._ChangedFile(ctx, sel, &v)
 }
@@ -9176,6 +11034,139 @@ func (ec *executionContext) marshalNCommit2ᚖsokoᚋpkgᚋmodelsᚐCommit(ctx c
 		return graphql.Null
 	}
 	return ec._Commit(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNGitHubPullRequestFileNode2sokoᚋpkgᚋmodelsᚐGitHubPullRequestFileNode(ctx context.Context, sel ast.SelectionSet, v models.GitHubPullRequestFileNode) graphql.Marshaler {
+	return ec._GitHubPullRequestFileNode(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGitHubPullRequestFileNode2ᚕsokoᚋpkgᚋmodelsᚐGitHubPullRequestFileNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []models.GitHubPullRequestFileNode) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNGitHubPullRequestFileNode2sokoᚋpkgᚋmodelsᚐGitHubPullRequestFileNode(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNGitHubPullRequestLabelNode2sokoᚋpkgᚋmodelsᚐGitHubPullRequestLabelNode(ctx context.Context, sel ast.SelectionSet, v models.GitHubPullRequestLabelNode) graphql.Marshaler {
+	return ec._GitHubPullRequestLabelNode(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGitHubPullRequestLabelNode2ᚕsokoᚋpkgᚋmodelsᚐGitHubPullRequestLabelNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []models.GitHubPullRequestLabelNode) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNGitHubPullRequestLabelNode2sokoᚋpkgᚋmodelsᚐGitHubPullRequestLabelNode(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNGithubPullRequest2sokoᚋpkgᚋmodelsᚐGithubPullRequest(ctx context.Context, sel ast.SelectionSet, v models.GithubPullRequest) graphql.Marshaler {
+	return ec._GithubPullRequest(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGithubPullRequest2ᚕᚖsokoᚋpkgᚋmodelsᚐGithubPullRequestᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.GithubPullRequest) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNGithubPullRequest2ᚖsokoᚋpkgᚋmodelsᚐGithubPullRequest(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNGithubPullRequest2ᚖsokoᚋpkgᚋmodelsᚐGithubPullRequest(ctx context.Context, sel ast.SelectionSet, v *models.GithubPullRequest) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._GithubPullRequest(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -9510,6 +11501,57 @@ func (ec *executionContext) marshalNPkgCheckResult2ᚖsokoᚋpkgᚋmodelsᚐPkgC
 		return graphql.Null
 	}
 	return ec._PkgCheckResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNReverseDependency2sokoᚋpkgᚋmodelsᚐReverseDependency(ctx context.Context, sel ast.SelectionSet, v models.ReverseDependency) graphql.Marshaler {
+	return ec._ReverseDependency(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNReverseDependency2ᚕᚖsokoᚋpkgᚋmodelsᚐReverseDependencyᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ReverseDependency) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNReverseDependency2ᚖsokoᚋpkgᚋmodelsᚐReverseDependency(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNReverseDependency2ᚖsokoᚋpkgᚋmodelsᚐReverseDependency(ctx context.Context, sel ast.SelectionSet, v *models.ReverseDependency) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ReverseDependency(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

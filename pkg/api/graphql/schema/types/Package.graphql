@@ -33,6 +33,15 @@ type Package
 
   "An array containing all repology warnings about new versions for this package"
   Outdated: [OutdatedPackage!]!
+
+  "An array containing all bugs for this package"
+  Bugs: [Bug!]!
+
+  "An array containing all pull requests for this package"
+  PullRequests: [GithubPullRequest!]!
+
+  "An array containing all reverse dependencies for this package"
+  ReverseDependencies: [ReverseDependency!]!
 }
 
 "Information about a maintainer of packages"
