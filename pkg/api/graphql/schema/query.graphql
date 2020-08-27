@@ -183,7 +183,7 @@ type Query {
         "Search by the given query"
         searchTerm: String
         "Return the first result only"
-        firstOnly: Boolean
+        resultSize: Int
     ): [Package]
 
     "A query to get a single useflag by any of the given parameters. Multiple parameters can be used. In case the useflag can not identified uniquely by the given parameters, an error is returned."

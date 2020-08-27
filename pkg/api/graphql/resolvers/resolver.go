@@ -202,8 +202,13 @@ func (r *queryResolver) Packages(ctx context.Context, atom *string, category *st
 	return gpackages, nil
 }
 
-func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, firstOnly *bool) ([]*models.Package, error) {
+func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, resultSize *int) ([]*models.Package, error) {
 	var gpackages []*models.Package
+
+	limit := 100
+	if resultSize != nil {
+		limit = *resultSize
+	}
 
 	var err error
 	if strings.Contains(*searchTerm, "*") {
@@ -214,6 +219,7 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, f
 			WhereOr("name LIKE ? ", wildcardSearchTerm).
 			Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").
 			OrderExpr("name <-> '" + *searchTerm + "'").
+			Limit(limit).
 			Select()
 	} else {
 		// if the query contains no wildcards do a fuzzy search
@@ -223,15 +229,12 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, f
 			WhereOr("atom LIKE ? ", ("%" + *searchTerm + "%")).
 			Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").
 			OrderExpr("name <-> '" + *searchTerm + "'").
+			Limit(limit).
 			Select()
 	}
 
 	if err != nil {
 		return nil, errors.New("an error occurred while searching for the packages")
-	}
-
-	if firstOnly != nil && *firstOnly {
-		return gpackages[:1], nil
 	}
 
 	return gpackages, nil
