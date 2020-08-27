@@ -10,8 +10,8 @@
                 {{end}}
             {{end}}
             {{if not $outdatedFound}}
-                <div class="alert alert-warning">
-                    <strong><span class="fa fa-fw fa-exclamation-triangle"></span> Version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream. Please consider updating!</strong><br>
+                <div class="alert alert-info">
+                    <strong><span class="fa fa-fw fa-lightbulb-o"></span> Version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream. Please consider updating!</strong><br>
                     It seems that version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream, while the latest version in the Gentoo tree is {{ (index .Package.Outdated 0).GentooVersion }}.
                 </div>
             {{end}}
