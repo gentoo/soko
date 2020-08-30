@@ -233,6 +233,10 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, r
 			Select()
 	}
 
+	if len(gpackages) > 1 && (gpackages[0].Atom == *searchTerm || (gpackages[0].Name == *searchTerm && gpackages[1].Name != *searchTerm)) {
+		return gpackages[:1], nil
+	}
+
 	if err != nil {
 		return nil, errors.New("an error occurred while searching for the packages")
 	}
