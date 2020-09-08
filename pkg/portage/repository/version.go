@@ -98,7 +98,7 @@ func updateModifiedVersion(changedFile string) {
 			useflags = strings.Split(strings.ReplaceAll(metadata, "IUSE=", ""), " ")
 
 		case strings.HasPrefix(metadata, "RESTRICT="):
-			restricts = strings.Split(strings.ReplaceAll(metadata, "RESTRICT=", ""), " ")
+			restricts = strings.Split(strings.ReplaceAll(strings.ReplaceAll(metadata, "RESTRICT=", ""), "!test? ( test )", ""), " ")
 
 		case strings.HasPrefix(metadata, "PROPERTIES="):
 			properties = strings.Split(strings.ReplaceAll(metadata, "PROPERTIES=", ""), " ")
