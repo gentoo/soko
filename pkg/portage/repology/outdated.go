@@ -86,8 +86,8 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 			}
 			if v.Repo == "gentoo" &&
 				v.Status == "outdated" &&
-				!contains(blockedCategories, strings.Split(v.VisibleName, "/")[0]) &&
-				!contains(blockedPackages, v.VisibleName) {
+				!containsPrefix(blockedCategories, strings.Split(v.VisibleName, "/")[0]) &&
+				!containsPrefix(blockedPackages, v.VisibleName) {
 
 				atom = v.VisibleName
 				outdated = true
@@ -156,6 +156,17 @@ func readBlocklist(file string) []string {
 func contains(list []string, item string) bool {
 	for _, i := range list {
 		if i == item {
+			return true
+		}
+	}
+	return false
+}
+
+// contains returns true if the given string is a prefix
+// of an item in the given list. Otherwise false is returned.
+func containsPrefix(list []string, item string) bool {
+	for _, i := range list {
+		if strings.HasPrefix(i, item) {
 			return true
 		}
 	}
