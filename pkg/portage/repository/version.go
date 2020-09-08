@@ -99,6 +99,9 @@ func updateModifiedVersion(changedFile string) {
 
 		case strings.HasPrefix(metadata, "RESTRICT="):
 			restricts = strings.Split(strings.ReplaceAll(strings.ReplaceAll(metadata, "RESTRICT=", ""), "!test? ( test )", ""), " ")
+			if len(restricts) == 1 && restricts[0] == "" {
+				restricts = []string{}
+			}
 
 		case strings.HasPrefix(metadata, "PROPERTIES="):
 			properties = strings.Split(strings.ReplaceAll(metadata, "PROPERTIES=", ""), " ")
