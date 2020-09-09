@@ -20,6 +20,26 @@
         </li>
         {{end}}
 
+        {{ if .Package.Upstream }}
+            <li class="kk-metadata-item list-group-item">
+                <div class="row">
+                    <div class="col-xs-12 col-md-3 kk-metadata-key">
+                        <span class="fa fa-fw fa-code-fork"></span>
+                        Upstream
+                    </div>
+                    <div class="col-xs-12 col-md-9">
+                        {{range $k, $v := .Package.Upstream}}
+                          {{ $link := RemoteIdLink . }}
+                          {{if not (eq $link "")}}
+                              <a href="{{ $link}}">{{ $link }}</a>
+                              {{if not (eq $k (len $.Package.Upstream))}}<br/>{{end}}
+                          {{end}}
+                        {{end}}
+                    </div>
+                </div>
+            </li>
+        {{end}}
+
         {{ if .Package.Longdescription }}
         <li class="kk-metadata-item list-group-item">
             <div class="row">

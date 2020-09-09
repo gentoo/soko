@@ -9,6 +9,7 @@ type Package struct {
 	Versions            []*Version `pg:",fk:atom"`
 	Longdescription     string
 	Maintainers         []*Maintainer
+	Upstream            []RemoteId
 	Commits             []*Commit            `pg:"many2many:commit_to_packages,joinFK:commit_id"`
 	PrecedingCommits    int                  `pg:",use_zero"`
 	PkgCheckResults     []*PkgCheckResult    `pg:",fk:atom"`
@@ -31,6 +32,11 @@ type MaintainerPackagesInformation struct {
 	PullRequests int
 	Bugs         int
 	SecurityBugs int
+}
+
+type RemoteId struct {
+	Type          string
+	Id            string
 }
 
 func (p Package) BuildRevDepMap() map[string]map[string]string {

@@ -200,6 +200,7 @@ func GetFuncMap() template.FuncMap {
 		"getReverse":        getReverse,
 		"tolower":           strings.ToLower,
 		"formatRestricts":   FormatRestricts,
+		"RemoteIdLink":      RemoteIdLink,
 		"isMasked":          isMasked,
 		"getMask":           getMask,
 		"showRemovalNotice": showRemovalNotice,
@@ -352,6 +353,42 @@ func FormatRestricts(restricts []string) string {
 	}
 	result = utils2.Deduplicate(result)
 	return strings.Join(result, ", ")
+}
+
+// RemoteIdLink returns a link to the homepage of a given remote id
+func RemoteIdLink(remoteId models.RemoteId) string {
+	switch remoteId.Type {
+	case "cpan-module":
+		return "https://metacpan.org/pod/" + remoteId.Id
+	case "cpan":
+		return "https://metacpan.org/release/" + remoteId.Id
+	case "github":
+		return "https://github.com/" + remoteId.Id
+	case "sourceforge":
+		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
+	case "google-code":
+		return "https://code.google.com/archive/p/" + remoteId.Id + "/"
+	case "bitbucket":
+		return "https://bitbucket.org/" + remoteId.Id
+	case "pypi":
+		return "https://pypi.org/project/" + remoteId.Id + "/"
+	case "launchpad":
+		return "https://launchpad.net/" + remoteId.Id
+	case "cpe":
+		return "https://nvd.nist.gov/products/cpe/search/results?keyword=" + remoteId.Id
+	case "sourceforge-jp":
+		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
+	case "rubygems":
+		return "https://rubygems.org/gems/" + remoteId.Id + "/"
+	case "pear":
+		return "https://pear.php.net/package/" + remoteId.Id
+	case "freshmeat":
+		return "http://freshmeat.sourceforge.net/projects/" + remoteId.Id
+	case "gitlab":
+		return "https://gitlab.com/" + remoteId.Id
+	default:
+		return ""
+	}
 }
 
 // isMasked returns true if any version is masked

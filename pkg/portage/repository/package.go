@@ -88,12 +88,21 @@ func updateModifiedPackage(changedFile string) {
 		}
 	}
 
+	remoteIds := []models.RemoteId{}
+	for _, r := range pkgmetadata.Upstream.RemoteIds {
+		remoteIds = append(remoteIds, models.RemoteId{
+			Type: r.Type,
+			Id: r.Content,
+		})
+	}
+
 	gpackage := &models.Package{
 		Atom:            atom,
 		Category:        category,
 		Name:            packagename,
 		Longdescription: longDescription,
 		Maintainers:     maintainers,
+		Upstream:        remoteIds,
 	}
 
 	_, err := database.DBCon.Model(gpackage).OnConflict("(atom) DO UPDATE").
@@ -131,6 +140,7 @@ type Pkgmetadata struct {
 	XMLName             xml.Name              `xml:"pkgmetadata"`
 	MaintainerList      []Maintainer          `xml:"maintainer"`
 	LongdescriptionList []LongdescriptionItem `xml:"longdescription"`
+	Upstream            Upstream              `xml:"upstream"`
 }
 
 type Maintainer struct {
@@ -145,4 +155,15 @@ type LongdescriptionItem struct {
 	XMLName  xml.Name `xml:"longdescription"`
 	Content  string   `xml:",chardata"`
 	Language string   `xml:"lang,attr"`
+}
+
+type Upstream struct {
+	XMLName   xml.Name   `xml:"upstream"`
+	RemoteIds []RemoteId `xml:"remote-id"`
+}
+
+type RemoteId struct {
+	XMLName   xml.Name   `xml:"remote-id"`
+	Type      string     `xml:"type,attr"`
+	Content   string     `xml:",chardata"`
 }
