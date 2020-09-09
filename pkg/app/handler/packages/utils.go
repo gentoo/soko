@@ -346,7 +346,7 @@ func CreateFeedData(name string, versions []*models.Version) interface{} {
 func FormatRestricts(restricts []string) string {
 	var result []string
 	for _, restrict := range restricts {
-		if restrict != "(" && restrict != ")" && !strings.HasSuffix(restrict, "?") {
+		if restrict != "" && restrict != "(" && restrict != ")" && !strings.HasSuffix(restrict, "?") {
 			result = append(result, strings.ToUpper(string(restrict[0])))
 		}
 	}
