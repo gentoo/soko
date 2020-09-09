@@ -9,7 +9,7 @@ type Package struct {
 	Versions            []*Version `pg:",fk:atom"`
 	Longdescription     string
 	Maintainers         []*Maintainer
-	Upstream            []RemoteId
+	Upstream            Upstream
 	Commits             []*Commit            `pg:"many2many:commit_to_packages,joinFK:commit_id"`
 	PrecedingCommits    int                  `pg:",use_zero"`
 	PkgCheckResults     []*PkgCheckResult    `pg:",fk:atom"`
@@ -32,6 +32,13 @@ type MaintainerPackagesInformation struct {
 	PullRequests int
 	Bugs         int
 	SecurityBugs int
+}
+
+type Upstream struct {
+	RemoteIds []RemoteId
+	BugsTo    []string
+	Doc       []string
+	Changelog []string
 }
 
 type RemoteId struct {

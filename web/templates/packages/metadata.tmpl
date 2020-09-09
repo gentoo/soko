@@ -28,13 +28,49 @@
                         Upstream
                     </div>
                     <div class="col-xs-12 col-md-9">
-                        {{range $k, $v := .Package.Upstream}}
-                          {{ $link := RemoteIdLink . }}
-                          {{if not (eq $link "")}}
-                              <a href="{{ $link}}">{{ $link }}</a>
-                              {{if not (eq $k (len $.Package.Upstream))}}<br/>{{end}}
-                          {{end}}
-                        {{end}}
+                        <table>
+                            {{if .Package.Upstream.Doc}}
+                                {{range $k, $v := .Package.Upstream.Doc}}
+                                    <tr>
+                                        <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Documentation </span>{{end}}</td>
+                                        {{if not (eq $v "")}}
+                                            <td><a href="{{ $v}}">{{ $v }}</a></td>
+                                        {{end}}
+                                    </tr>
+                                {{end}}
+                            {{end}}
+                            {{if .Package.Upstream.Changelog}}
+                                    {{range $k, $v := .Package.Upstream.Changelog}}
+                                        <tr>
+                                            <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Changelog</span>{{end}}</td>
+                                            {{if not (eq $v "")}}
+                                                <td><a href="{{ $v}}">{{ $v }}</a></td>
+                                            {{end}}
+                                        </tr>
+                                    {{end}}
+                            {{end}}
+                            {{if .Package.Upstream.BugsTo}}
+                                    {{range $k, $v := .Package.Upstream.BugsTo}}
+                                        <tr>
+                                            <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Bugs-To</span>{{end}}</td>
+                                            {{if not (eq $v "")}}
+                                                <td><a href="{{ $v}}">{{ $v }}</a></td>
+                                            {{end}}
+                                        </tr>
+                                    {{end}}
+                            {{end}}
+                            {{if .Package.Upstream.RemoteIds}}
+                                    {{range $k, $v := .Package.Upstream.RemoteIds}}
+                                      {{ $link := RemoteIdLink . }}
+                                      {{if not (eq $link "")}}
+                                        <tr>
+                                          <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Remote-Id</span>{{end}}</td>
+                                          <td><a href="{{ $link}}">{{ $link }}</a></td>
+                                        </tr>
+                                      {{end}}
+                                    {{end}}
+                            {{end}}
+                        </table>
                     </div>
                 </div>
             </li>

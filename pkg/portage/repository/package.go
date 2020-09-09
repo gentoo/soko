@@ -96,13 +96,20 @@ func updateModifiedPackage(changedFile string) {
 		})
 	}
 
+	upstream := models.Upstream{
+		RemoteIds: remoteIds,
+		Doc: pkgmetadata.Upstream.Doc,
+		BugsTo: pkgmetadata.Upstream.BugsTo,
+		Changelog: pkgmetadata.Upstream.Changelog,
+	}
+
 	gpackage := &models.Package{
 		Atom:            atom,
 		Category:        category,
 		Name:            packagename,
 		Longdescription: longDescription,
 		Maintainers:     maintainers,
-		Upstream:        remoteIds,
+		Upstream:        upstream,
 	}
 
 	_, err := database.DBCon.Model(gpackage).OnConflict("(atom) DO UPDATE").
@@ -160,6 +167,9 @@ type LongdescriptionItem struct {
 type Upstream struct {
 	XMLName   xml.Name   `xml:"upstream"`
 	RemoteIds []RemoteId `xml:"remote-id"`
+	BugsTo    []string `xml:"bugs-to"`
+	Doc       []string `xml:"doc"`
+	Changelog []string `xml:"changelog"`
 }
 
 type RemoteId struct {
