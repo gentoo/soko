@@ -374,8 +374,6 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://pypi.org/project/" + remoteId.Id + "/"
 	case "launchpad":
 		return "https://launchpad.net/" + remoteId.Id
-	case "cpe":
-		return "https://nvd.nist.gov/products/cpe/search/results?keyword=" + remoteId.Id
 	case "sourceforge-jp":
 		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
 	case "rubygems":
