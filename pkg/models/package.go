@@ -28,10 +28,11 @@ type Maintainer struct {
 }
 
 type MaintainerPackagesInformation struct {
-	Outdated     int
-	PullRequests int
-	Bugs         int
-	SecurityBugs int
+	Outdated       int
+	PullRequests   int
+	Bugs           int
+	SecurityBugs   int
+	StableRequests int
 }
 
 type Upstream struct {

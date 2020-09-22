@@ -1,0 +1,96 @@
+{{define "stabilization"}}
+    <div class="row">
+        <div class="col-md-9">
+
+            <h3>Stable Requests</h3>
+            <ul class="timeline">
+                {{$stable_requests := 0}}
+                {{range .Packages}}
+                    {{range $index, $element := .Versions}}
+                        {{ if .PkgCheckResults }}
+                            {{ range .PkgCheckResults }}
+                                {{if eq .Class "StableRequest"}}
+                                    {{$stable_requests = (add $stable_requests 1)}}
+                                    <li>
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <a href="/packages/{{.Category}}/{{.Package}}" class="text-dark"><strong>{{.Category}}/{{.Package}}-{{.Version}}</strong></a><br/>
+                                                <span class="kk-version kk-cell-sep-right text-muted">
+                                                {{ .Message }}
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                {{end}}
+                            {{end}}
+                        {{end}}
+                    {{end}}
+                {{end}}
+            </ul>
+            {{if eq $stable_requests 0}}
+                <div class="text-center w-100"><i>- No Stable Requests found -</i></div>
+            {{end}}
+
+
+            {{$security_bugs := 0}}
+            {{$non_security_bugs := 0}}
+            {{range .Packages}}
+                {{range .Bugs}}
+                    {{if eq .Component "Vulnerabilities"}}
+                        {{$security_bugs = (add $security_bugs 1)}}
+                    {{else}}
+                        {{$non_security_bugs = (add $non_security_bugs 1)}}
+                    {{end}}
+                {{end}}
+            {{end}}
+
+            {{$general_bugs := 0}}
+            {{$stabilization_bugs := 0}}
+            {{$keywording_bugs := 0}}
+            {{range .Packages}}
+                {{range .Bugs}}
+                    {{if eq .Component "Current packages"}}
+                        {{$general_bugs = (add $general_bugs 1)}}
+                    {{else if eq .Component "Stabilization"}}
+                        {{$stabilization_bugs = (add $stabilization_bugs 1)}}
+                    {{else if eq .Component "Keywording"}}
+                        {{$keywording_bugs = (add $keywording_bugs 1)}}
+                    {{end}}
+                {{end}}
+            {{end}}
+
+
+            {{if $non_security_bugs}}
+                {{if $stabilization_bugs}}
+                    <h3 id="stabilization" class="my-4">Stabilization Bug Reports</h3>
+                    <ul class="list-group">
+                        {{range .Packages}}
+                            {{range .Bugs}}
+                                {{if eq .Component "Stabilization"}}
+                                    <li class="list-group-item">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <i class="fa fa-bug" aria-hidden="true"></i>
+                                                <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
+                                            </div>
+                                            <div class="col-md-12 text-muted">
+                                                {{.Id}} - Assigned to {{.Assignee}}
+                                            </div>
+                                        </div>
+                                    </li>
+                                {{end}}
+                            {{end}}
+                        {{end}}
+                    </ul>
+                {{end}}
+            {{end}}
+        </div>
+        <div class="col-md-3 pt-5">
+            <h4 class="">Description</h4>
+            <span class="text-muted">
+                This page lists potential stabilization candidates. Please have a look at the <a href="https://wiki.gentoo.org/wiki/Stable_request">wiki page</a> for more information.
+            </span>
+        </div>
+    </div>
+{{end}}
+

@@ -14,6 +14,8 @@
             {{template "outdated" .}}
         {{else if eq .PageName "pull-requests"}}
             {{template "pull-requests" .}}
+        {{else if eq .PageName "stabilization"}}
+            {{template "stabilization" .}}
         {{else if eq .PageName "bugs"}}
             {{template "bugs" .}}
         {{else if eq .PageName "security"}}

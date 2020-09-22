@@ -55,6 +55,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		query = query.
 			Relation("Versions").
 			Relation("PullRequests")
+	} else if strings.HasSuffix(r.URL.Path, "/stabilization") {
+		pageName = "stabilization"
+		query = query.
+			Relation("Versions").
+			Relation("PkgCheckResults").
+			Relation("Versions.PkgCheckResults").
+			Relation("Bugs")
 	} else if strings.HasSuffix(r.URL.Path, "/bugs") {
 		pageName = "bugs"
 		query = query.

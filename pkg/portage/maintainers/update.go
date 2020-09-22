@@ -33,6 +33,8 @@ func FullImport() {
 		Relation("Outdated").
 		Relation("PullRequests").
 		Relation("Bugs").
+		Relation("Versions").
+		Relation("Versions.PkgCheckResults").
 		Select()
 
 	// TODO in future we want an incremental update here
@@ -45,6 +47,7 @@ func FullImport() {
 		securityBugs := 0
 		pullrequestIds := []string{}
 		nonSecurityBugs := 0
+		stableRequests := 0
 
 		for _, gpackage := range gpackages {
 			found := false
@@ -69,14 +72,24 @@ func FullImport() {
 					}
 				}
 
+				// Find Stable Requests
+				for _, version := range gpackage.Versions {
+					for _, pkgcheckWarning := range version.PkgCheckResults {
+						if pkgcheckWarning.Class == "StableRequest" {
+							stableRequests++
+						}
+					}
+				}
+
 			}
 		}
 
 		maintainer.PackagesInformation = models.MaintainerPackagesInformation{
-			Outdated:     outdated,
-			PullRequests: len(utils.Deduplicate(pullrequestIds)),
-			Bugs:         nonSecurityBugs,
-			SecurityBugs: securityBugs,
+			Outdated:       outdated,
+			PullRequests:   len(utils.Deduplicate(pullrequestIds)),
+			Bugs:           nonSecurityBugs,
+			SecurityBugs:   securityBugs,
+			StableRequests: stableRequests,
 		}
 
 		if maintainer.Name == "" {
