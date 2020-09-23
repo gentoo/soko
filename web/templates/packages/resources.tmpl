@@ -11,15 +11,8 @@
         </dd>
         <dd>
             <span class="fa fa-fw fa-chain-broken"></span>
-            <a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg={{.Package.Category}}:{{.Package.Name}}" target="_blank">
-                CI Report
-            </a>
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-chain-broken"></span>
-            <a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg={{.Package.Category}}:{{.Package.Name}}" target="_blank">
-                CI Report (verbose)
-            </a>
+            <a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg={{.Package.Category}}:{{.Package.Name}}" title="CI report" target="_blank">CI Report</a>
+            (<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg={{.Package.Category}}:{{.Package.Name}}" title="Verbose CI report" target="_blank">verbose</a>)
         </dd>
         <dd>
             <span class="fa fa-fw fa-sort-numeric-desc"></span>
@@ -53,9 +46,8 @@
         </dd>
         <dd>
             <span class="fa fa-fw fa-history"></span>
-            <a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}?showmsg=1" target="_blank">
-                Git log
-            </a>
+            <a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}?showmsg=1" title="Git log" target="_blank">Git log</a>
+            (<a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}" title="Short git log" target="_blank">short</a>)
         </dd>
         <dd>
             <span class="fa fa-fw fa-rss"></span>
