@@ -14,6 +14,7 @@ import (
 	"soko/pkg/portage/github"
 	"soko/pkg/portage/maintainers"
 	"soko/pkg/portage/pkgcheck"
+	"soko/pkg/portage/projects"
 	"soko/pkg/portage/repology"
 	"time"
 )
@@ -35,6 +36,7 @@ func main() {
 	initBugs := flag.Bool("init-bugs", false, "Import all bugs, including the old ones. This is usually just done once.")
 	updateBugs := flag.Bool("update-bugs", false, "Update the bugs belonging to the packages")
 	updateDependencies := flag.Bool("update-dependencies", false, "Update the dependencies and reverse dependencies of the packages")
+	updateProjects := flag.Bool("update-projects", false, "Update the project information")
 	updateMaintainers := flag.Bool("update-maintainers", false, "Update the maintainer information")
 
 	help := flag.Bool("help", false, "Print the usage of this application")
@@ -71,6 +73,9 @@ func main() {
 	if *updateDependencies {
 		logger.Info.Println("Updating the dependencies data")
 		dependencies.FullPackageDependenciesUpdate()
+	}
+	if *updateProjects {
+		projects.UpdateProjects()
 	}
 	// updateMaintainers should always be executed last, as it is using
 	// the updated bugs, pullrequests and and outdated packages
