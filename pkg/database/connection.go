@@ -33,6 +33,7 @@ func CreateSchema() error {
 		(*models.MaskToVersion)(nil),
 		(*models.OutdatedPackages)(nil),
 		(*models.Project)(nil),
+		(*models.MaintainerToProject)(nil),
 		(*models.PkgCheckResult)(nil),
 		(*models.GithubPullRequest)(nil),
 		(*models.PackageToGithubPullRequest)(nil),

@@ -2,7 +2,6 @@ package projects
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,11 +31,16 @@ func UpdateProjects() {
 	deleteAllProjects()
 
 	// insert new project list
-	insertErr := database.DBCon.Insert(&projectList.Projects)
-	fmt.Println("--")
-	fmt.Println(insertErr)
-
-	//fmt.Println(projectList)
+	for _, project := range projectList.Projects {
+		database.DBCon.Insert(&project)
+		for _, member := range project.Members {
+			database.DBCon.Insert(&models.MaintainerToProject{
+				Id: member.Email + "-" + project.Email,
+				MaintainerEmail: member.Email,
+				ProjectEmail:    project.Email,
+			})
+		}
+	}
 
 }
 
@@ -62,5 +66,11 @@ func deleteAllProjects() {
 	database.DBCon.Model(&allProjects).Select()
 	for _, project := range allProjects {
 		database.DBCon.Model(project).WherePK().Delete()
+	}
+
+	var allMaintainerToProjects []*models.MaintainerToProject
+	database.DBCon.Model(&allMaintainerToProjects).Select()
+	for _, maintainerToProject := range allMaintainerToProjects {
+		database.DBCon.Model(maintainerToProject).WherePK().Delete()
 	}
 }

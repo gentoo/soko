@@ -25,6 +25,10 @@ type Maintainer struct {
 	Type                string
 	Restrict            string
 	PackagesInformation MaintainerPackagesInformation
+	// In case the maintainer type is "project", Project will point to the project
+	Project             Project `pg:",fk:email"`
+	// In case the maintainer type is not "project", Projects will point to the projects the maintainer is member of
+	Projects            []*Project `pg:"many2many:maintainer_to_projects,joinFK:project_email"`
 }
 
 type MaintainerPackagesInformation struct {

@@ -23,3 +23,9 @@ type Member struct {
 	Name    string   `xml:"name"`
 	Role    string   `xml:"role"`
 }
+
+type MaintainerToProject struct {
+	Id              string `pg:",pk"`
+	MaintainerEmail string
+	ProjectEmail    string
+}
