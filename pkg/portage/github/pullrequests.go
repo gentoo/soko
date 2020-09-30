@@ -117,6 +117,8 @@ func FullUpdatePullRequests() {
 
 	// year of the git migration
 	UpdatePullRequestsAfter(true, "2015-01-01", "")
+
+	updateStatus()
 }
 
 func IncrementalUpdatePullRequests() {
@@ -129,6 +131,8 @@ func IncrementalUpdatePullRequests() {
 	UpdatePullRequestsAfter(false, lastUpdate, "")
 	// TODO --> we need to update old ent
 	// TODO --> delete closed pull requests
+
+	updateStatus()
 }
 
 func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
@@ -202,4 +206,12 @@ func deleteAllPullrequests() {
 	for _, packageToGithubPullRequest := range packagesToGithubPullRequest {
 		database.DBCon.Model(packageToGithubPullRequest).WherePK().Delete()
 	}
+}
+
+func updateStatus(){
+	database.DBCon.Model(&models.Application{
+		Id:         "pullrequests",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
 }

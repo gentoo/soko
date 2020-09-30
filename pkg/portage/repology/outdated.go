@@ -11,6 +11,7 @@ import (
 	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
+	"time"
 )
 
 type Package struct {
@@ -47,6 +48,8 @@ func UpdateOutdated() {
 	for _, outdated := range outdatedVersions {
 		database.DBCon.Insert(outdated)
 	}
+
+	updateStatus()
 }
 
 // getOutdatedStartingWith gets all outdated packages starting with the given letter
@@ -171,4 +174,12 @@ func containsPrefix(list []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func updateStatus(){
+	database.DBCon.Model(&models.Application{
+		Id:         "repology",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
 }

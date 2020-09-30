@@ -9,6 +9,7 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
+	"time"
 )
 
 // UpdatePkgCheckResults will update the database table that contains all pkgcheck results
@@ -42,6 +43,7 @@ func UpdateProjects() {
 		}
 	}
 
+	updateStatus()
 }
 
 // parseQAReport gets the xml from qa-reports.gentoo.org and parses it
@@ -73,4 +75,12 @@ func deleteAllProjects() {
 	for _, maintainerToProject := range allMaintainerToProjects {
 		database.DBCon.Model(maintainerToProject).WherePK().Delete()
 	}
+}
+
+func updateStatus(){
+	database.DBCon.Model(&models.Application{
+		Id:         "projects",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
 }

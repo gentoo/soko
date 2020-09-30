@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
@@ -100,6 +101,7 @@ func FullPackageDependenciesUpdate() {
 		counter++
 	}
 
+	updateStatus()
 }
 
 func UpdatePackageDependencies(atom string) {
@@ -221,4 +223,12 @@ func deleteOutdatedDependencies(newDependencies []*models.ReverseDependency) {
 
 	}
 
+}
+
+func updateStatus(){
+	database.DBCon.Model(&models.Application{
+		Id:         "dependencies",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
 }

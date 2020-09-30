@@ -1,10 +1,12 @@
 package maintainers
 
 import (
+	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"soko/pkg/utils"
 	"strings"
+	"time"
 )
 
 func FullImport() {
@@ -111,6 +113,7 @@ func FullImport() {
 		database.DBCon.Model(maintainer).WherePK().OnConflict("(email) DO UPDATE").Insert()
 	}
 
+	updateStatus()
 }
 
 // deleteAllMaintainers deletes all entries in the maintainers table
@@ -129,4 +132,12 @@ func contains(element string, elements []string) bool {
 		}
 	}
 	return false
+}
+
+func updateStatus(){
+	database.DBCon.Model(&models.Application{
+		Id:         "maintainers",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
 }

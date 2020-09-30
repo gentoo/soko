@@ -9,6 +9,7 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
+	"time"
 )
 
 // Descriptions of the xml format of the pkgcheck reports
@@ -60,6 +61,7 @@ func UpdatePkgCheckResults() {
 		})
 	}
 
+	updateStatus()
 }
 
 // parseQAReport gets the xml from qa-reports.gentoo.org and parses it
@@ -85,4 +87,12 @@ func deleteAllPkgCheckResults() {
 	for _, pkgCheckResult := range allPkgCheckResults {
 		database.DBCon.Model(pkgCheckResult).WherePK().Delete()
 	}
+}
+
+func updateStatus(){
+	database.DBCon.Model(&models.Application{
+		Id:         "pkgcheck",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
 }

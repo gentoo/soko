@@ -2,12 +2,15 @@ package bugs
 
 import (
 	"encoding/csv"
+	"fmt"
 	"net/http"
 	"regexp"
+	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
+	"time"
 )
 
 func UpdateBugs(init bool) {
@@ -15,6 +18,8 @@ func UpdateBugs(init bool) {
 	UpdatePackagesBugs(init)
 
 	UpdateClosedBugs()
+
+	updateStatus()
 }
 
 func UpdateSecurityBugs() {
@@ -185,4 +190,20 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage = versionnumber.Split(gpackage, 2)[0]
 
 	return gpackage
+}
+
+func updateStatus(){
+
+	database.Connect()
+	defer database.DBCon.Close()
+
+	fmt.Println("UPDATE STATUS0")
+	_, err := database.DBCon.Model(&models.Application{
+		Id:         "bugs",
+		LastUpdate: time.Now(),
+		Version:    config.Version(),
+	}).OnConflict("(id) DO UPDATE").Insert()
+
+	logger.Error.Println(err)
+	fmt.Println(err)
 }
