@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+{{template "head" .Header}}
+<body>
+{{template "header" .Header}}
+
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12 text-center">
+
+            <h1 class="px-3 pt-5 pb-1" style="font-size: 3em;">About packages.gentoo.org</h1>
+            <span style="font-size: 90%;" class="text-muted">Feel free to <a href="/about/feedback">get in touch</a> if you have any questions that are not answered on this page.<br/>
+            And welcome to the new packages.gentoo.org!</span>
+
+        </div>
+
+        <div class="col-8 offset-md-2 mt-5 pt-4">
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Last Update</th>
+                    <th scope="col">Difference</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Applications}}
+                    <tr>
+                        <th scope="row" class="text-capitalize">{{.Id}}</th>
+                        <td>{{.LastUpdate.Format "2 Jan 2006 15:04:05"}} UTC</td>
+                        <td>{{timeSince .LastUpdate}}</td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+
+        </div>
+</div>
+</div>
+
+
+{{template "footer" .Application }}
+
+</body>
+</html>
