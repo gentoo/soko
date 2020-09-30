@@ -14,7 +14,7 @@
                             {{if eq ($last_date.Format "Jan 02, 2006") (.CommitterDate.Format "Jan 02, 2006")}}
                             <li class="list-group-item">
                                 <div class="row">
-                                    <div class="col-md-8"><b style="color:#424242!important;">{{.Message}}</b></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
+                                    <div class="col-md-8"><a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}"><b style="color:#424242!important;">{{.Message}}</b></a></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
                                     <div class="col-md-12" style="color:#424242!important;">
                                         {{ if (ne .AuthorName .CommitterName)}}
                                             <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
@@ -78,7 +78,7 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div class="row">
-                                    <div class="col-md-8"><b>{{.Message}}</b></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
+                                    <div class="col-md-8"><a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}"><b style="color:#424242!important;">{{.Message}}</b></a></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
                                     <div class="col-md-12">
                                         {{ if (ne .AuthorName .CommitterName)}}
                                             <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
