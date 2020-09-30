@@ -46,14 +46,26 @@
 
         </div>
         <div class="col-md-3 pt-5">
-            <h4>Contact Information</h4>
-            <span class="text-muted">
-                Please file new vulnerability reports on <a href="https://bugs.gentoo.org/">Gentoo Bugzilla</a> and assign them to the Gentoo Security product and Vulnerabilities component.
-            </span>
-            <h4 class="mt-4">External Resources</h4>
-            <ul>
-                <li><a href="https://bugs.gentoo.org/buglist.cgi?bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&bug_status=RESOLVED&bug_status=VERIFIED&email1=security%40gentoo.org&emailassigned_to1=1&emailtype1=equals&list_id=4699406&query_format=advanced&resolution=---&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&short_desc={{.Package.Category}}%2F{{.Package.Name}}&short_desc_type=allwordssubstr">All security bugs for this package</a></li>
-            </ul>
+            <h4>
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                    Contact Information
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseDescription">
+                <span class="text-muted">
+                    Please file new vulnerability reports on <a href="https://bugs.gentoo.org/">Gentoo Bugzilla</a> and assign them to the Gentoo Security product and Vulnerabilities component.
+                </span>
+            </div>
+            <h4 class="mt-4">
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseExternalResources" role="button" aria-expanded="false" aria-controls="collapseExternalResources">
+                    External Resources
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseExternalResources">
+                <ul>
+                    <li><a href="https://bugs.gentoo.org/buglist.cgi?bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&bug_status=RESOLVED&bug_status=VERIFIED&email1=security%40gentoo.org&emailassigned_to1=1&emailtype1=equals&list_id=4699406&query_format=advanced&resolution=---&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&short_desc={{.Package.Category}}%2F{{.Package.Name}}&short_desc_type=allwordssubstr">All security bugs for this package</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 {{end}}

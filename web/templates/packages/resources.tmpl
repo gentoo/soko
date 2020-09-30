@@ -1,59 +1,65 @@
 {{define "resources"}}
 
-    <h4 class="mb-2 ml-1">External Resources</h4>
+    <h4 class="mb-2 ml-1">
+        <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseExternalResources" role="button" aria-expanded="false" aria-controls="collapseExternalResources">
+        External Resources
+        </a>
+    </h4>
 
-    <dl class="ml-3">
-        <dd>
-            <span class="fa fa-fw fa-bug"></span>
-            <a href="https://bugs.gentoo.org/buglist.cgi?quicksearch={{.Package.Atom}}" class="" target="_blank">
-                Related bugs
-            </a>
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-chain-broken"></span>
-            <a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg={{.Package.Category}}:{{.Package.Name}}" title="CI report" target="_blank">CI Report</a>
-            (<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg={{.Package.Category}}:{{.Package.Name}}" title="Verbose CI report" target="_blank">verbose</a>)
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-sort-numeric-desc"></span>
-            <a href="https://repology.org/project/{{.Package.Name}}" target="_blank">
-                Repology
-            </a>
-        </dd>
-        <dd>
-            <span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span>
-            <a href="https://github.com/gentoo/gentoo/pulls?q=is%3Apr+is%3Aopen+in%3Atitle+{{.Package.Category}}%2F{{.Package.Name}}" target="_blank">
-                Open Pull Requests
-            </a>
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-book"></span>
-            <a href="https://wiki.gentoo.org/wiki/Special:Search/{{.Package.Name}}" target="_blank">
-                Documentation
-            </a>
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-comments-o"></span>
-            <a href="https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords={{.Package.Name}}&mode=results" target="_blank">
-                Forums posts
-            </a>
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-code-fork"></span>
-            <a href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Package.Atom}}" target="_blank">
-                Git repository browser
-            </a>
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-history"></span>
-            <a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}?showmsg=1" title="Git log" target="_blank">Git log</a>
-            (<a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}" title="Short git log" target="_blank">short</a>)
-        </dd>
-        <dd>
-            <span class="fa fa-fw fa-rss"></span>
-            <a href="https://gitweb.gentoo.org/repo/gentoo.git/atom/{{.Package.Atom}}?h=master" target="_blank">
-                Changes Feed
-            </a>
-        </dd>
-    </dl>
+    <div class="collapse show" id="collapseExternalResources">
+        <dl class="ml-3">
+            <dd>
+                <span class="fa fa-fw fa-bug"></span>
+                <a href="https://bugs.gentoo.org/buglist.cgi?quicksearch={{.Package.Atom}}" class="" target="_blank">
+                    Related bugs
+                </a>
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-chain-broken"></span>
+                <a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg={{.Package.Category}}:{{.Package.Name}}" title="CI report" target="_blank">CI Report</a>
+                (<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg={{.Package.Category}}:{{.Package.Name}}" title="Verbose CI report" target="_blank">verbose</a>)
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-sort-numeric-desc"></span>
+                <a href="https://repology.org/project/{{.Package.Name}}" target="_blank">
+                    Repology
+                </a>
+            </dd>
+            <dd>
+                <span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span>
+                <a href="https://github.com/gentoo/gentoo/pulls?q=is%3Apr+is%3Aopen+in%3Atitle+{{.Package.Category}}%2F{{.Package.Name}}" target="_blank">
+                    Open Pull Requests
+                </a>
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-book"></span>
+                <a href="https://wiki.gentoo.org/wiki/Special:Search/{{.Package.Name}}" target="_blank">
+                    Documentation
+                </a>
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-comments-o"></span>
+                <a href="https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords={{.Package.Name}}&mode=results" target="_blank">
+                    Forums posts
+                </a>
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-code-fork"></span>
+                <a href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Package.Atom}}" target="_blank">
+                    Git repository browser
+                </a>
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-history"></span>
+                <a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}?showmsg=1" title="Git log" target="_blank">Git log</a>
+                (<a href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Package.Atom}}" title="Short git log" target="_blank">short</a>)
+            </dd>
+            <dd>
+                <span class="fa fa-fw fa-rss"></span>
+                <a href="https://gitweb.gentoo.org/repo/gentoo.git/atom/{{.Package.Atom}}?h=master" target="_blank">
+                    Changes Feed
+                </a>
+            </dd>
+        </dl>
+    </div>
 {{end}}

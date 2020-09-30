@@ -38,7 +38,12 @@
 
         </div>
         <div class="col-md-3 pt-5">
-            <h4 class="">Description</h4>
+            <h4 class="">
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                    Description
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseDescription">
             <span class="text-muted">
                 The reverse dependencies are regularly parsed from the <a href="https://qa-reports.gentoo.org/">qa-reports</a>. The sources can be found at:
                 <ul>
@@ -48,6 +53,7 @@
                     <li><a href="https://qa-reports.gentoo.org/output/genrdeps/pindex/{{.Package.Atom}}">pdepend</a></li>
                 </ul>
             </span>
+            </div>
         </div>
     </div>
 {{end}}

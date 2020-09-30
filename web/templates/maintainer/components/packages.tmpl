@@ -52,26 +52,38 @@
                 </div>
             {{end}}
         </div>
-        <div class="col-md-3 pt-5">
-            <h4 class="">Description</h4>
-            <span class="text-muted">
-                All packages maintained by {{.Maintainer.Name}}. That is, {{.Maintainer.Name}} is mentioned as maintainer of the project in the <a href="https://devmanual.gentoo.org/ebuild-writing/misc-files/metadata/">metadata.xml</a> file
-            </span>
-            <h4 class="mt-4">Shortcuts</h4>
-            <dl>
-                {{$category := (index .Packages 0).Category}}
-                {{$packageCounter := 0}}
-                {{ range .Packages }}
-                    {{ if ne .Category $category}}
-                        <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
-                        {{$category = .Category}}
-                        {{$packageCounter = 1}}
-                    {{else}}
-                        {{$packageCounter = add $packageCounter 1}}
+        <div class="col-md-3 pt-4">
+            <h4 class="">
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                    Description
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseDescription">
+                <span class="text-muted">
+                    All packages maintained by {{.Maintainer.Name}}. That is, {{.Maintainer.Name}} is mentioned as maintainer of the project in the <a href="https://devmanual.gentoo.org/ebuild-writing/misc-files/metadata/">metadata.xml</a> file
+                </span>
+            </div>
+            <h4 class="mt-4">
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
+                    Shortcuts
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseShortcuts">
+                <dl>
+                    {{$category := (index .Packages 0).Category}}
+                    {{$packageCounter := 0}}
+                    {{ range .Packages }}
+                        {{ if ne .Category $category}}
+                            <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
+                            {{$category = .Category}}
+                            {{$packageCounter = 1}}
+                        {{else}}
+                            {{$packageCounter = add $packageCounter 1}}
+                        {{end}}
                     {{end}}
-                {{end}}
-                <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
-            </dl>
+                    <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
+                </dl>
+            </div>
         </div>
     </div>
 {{end}}

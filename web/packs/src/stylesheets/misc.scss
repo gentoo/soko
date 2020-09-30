@@ -193,3 +193,14 @@ a.kk-box-meta-link:hover {
   border-top: 1px solid #dddddd;
   padding-top: 30px;
 }
+
+.collapseLink:before {
+  font-family: 'FontAwesome';
+  content: "\f107";
+  float: left;
+  margin-right:4px;
+}
+
+.collapseLink.collapsed:before {
+  content: "\f105"!important;
+}

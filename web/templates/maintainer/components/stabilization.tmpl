@@ -85,11 +85,17 @@
                 {{end}}
             {{end}}
         </div>
-        <div class="col-md-3 pt-5">
-            <h4 class="">Description</h4>
+        <div class="col-md-3 pt-4">
+            <h4 class="">
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                Description
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseDescription">
             <span class="text-muted">
                 This page lists potential stabilization candidates. Please have a look at the <a href="https://wiki.gentoo.org/wiki/Stable_request">wiki page</a> for more information.
             </span>
+            </div>
         </div>
     </div>
 {{end}}
