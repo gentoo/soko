@@ -53,17 +53,48 @@
             {{end}}
         </div>
         <div class="col-md-3 pt-4">
-            <h4 class="">
-                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
-                    Description
-                </a>
-            </h4>
-            <div class="collapse show" id="collapseDescription">
-                <span class="text-muted">
-                    All packages maintained by {{.Maintainer.Name}}. That is, {{.Maintainer.Name}} is mentioned as maintainer of the project in the <a href="https://devmanual.gentoo.org/ebuild-writing/misc-files/metadata/">metadata.xml</a> file
-                </span>
-            </div>
-            <h4 class="mt-4">
+            {{if .Maintainer.Project.Description}}
+                <h4 class="">
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                        Description
+                    </a>
+                </h4>
+                <div class="collapse show" id="collapseDescription">
+                    <dl>
+                        <dd class="ml-3 mb-0 text-muted">
+                            {{.Maintainer.Project.Description}}
+                        </dd>
+                    </dl>
+                </div>
+
+                <h4 class="mt-4">
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseMembers" role="button" aria-expanded="false" aria-controls="collapseMembers">
+                        Members
+                    </a>
+                </h4>
+                <div class="collapse show" id="collapseMembers">
+                    <dl>
+                        {{range .Maintainer.Project.Members}}
+                            <dd class="ml-3 mb-0"><a href="/maintainer/{{.Email}}">{{.Name}}</a>{{if .IsLead}} (Lead){{end}}</dd>
+                        {{end}}
+                    </dl>
+                </div>
+            {{end}}
+            {{if .Maintainer.Projects}}
+                <h4 class="">
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseProjects" role="button" aria-expanded="false" aria-controls="collapseProjects">
+                        Projects
+                    </a>
+                </h4>
+                <div class="collapse show" id="collapseProjects">
+                    <dl>
+                        {{range .Maintainer.Projects}}
+                            <dd class="ml-3 mb-0"><a href="/maintainer/{{.Email}}">{{.Name}}</a></dd>
+                        {{end}}
+                    </dl>
+                </div>
+            {{end}}
+            <h4 class="{{if .Maintainer.Project.Description}}mt-4{{end}}">
                 <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
                     Shortcuts
                 </a>

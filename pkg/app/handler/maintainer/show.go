@@ -25,7 +25,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	maintainer := models.Maintainer{
 		Email: maintainerEmail,
 	}
-	database.DBCon.Model(&maintainer).WherePK().Select()
+	database.DBCon.Model(&maintainer).WherePK().Relation("Project").Relation("Projects").Select()
 
 	var gpackages []*models.Package
 	query := database.DBCon.Model(&gpackages).
