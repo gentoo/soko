@@ -2,7 +2,6 @@ package bugs
 
 import (
 	"encoding/csv"
-	"fmt"
 	"net/http"
 	"regexp"
 	"soko/pkg/config"
@@ -23,27 +22,27 @@ func UpdateBugs(init bool) {
 }
 
 func UpdateSecurityBugs() {
-	importBugs("https://bugs.gentoo.org/buglist.cgi?component=Vulnerabilities&list_id=4688108&product=Gentoo%20Security&query_format=advanced&resolution=---&ctype=csv&human=1")
+	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&component=Vulnerabilities&list_id=4688108&product=Gentoo%20Security&query_format=advanced&resolution=---&ctype=csv&human=1")
 }
 
 func UpdatePackagesBugs(init bool) {
 	//
 	// Keywording
 	//
-	importBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&component=Keywording&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
+	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&component=Keywording&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
 
 	//
 	// Stabilization
 	//
-	importBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&component=Stabilization&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
+	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&component=Stabilization&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
 
 	//
 	// Current Packages
 	//
 	if init {
-		importBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2000-01-01&chfieldto=2020-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
+		importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2000-01-01&chfieldto=2020-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
 	}
-	importBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2020-01-01&chfieldto=2021-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
+	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2020-01-01&chfieldto=2021-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
 }
 
 func UpdateClosedBugs() {
@@ -147,14 +146,28 @@ func importBugs(source string) {
 		//
 		bugId := row[0]
 		summary := row[6]
-		summary = strings.Split(summary, " ")[0]
-		affectedPackage := versionSpecifierToPackageAtom(summary)
+		if strings.TrimSpace(row[8]) != "" {
+			for _, gpackage := range strings.Split(row[8], "\n") {
+				affectedPackage := strings.Split(gpackage, " ")[0]
+				if strings.TrimSpace(affectedPackage) != "" {
+					affectedPackage = versionSpecifierToPackageAtom(affectedPackage)
+					database.DBCon.Model(&models.PackageToBug{
+						Id:          affectedPackage + "-" + bugId,
+						PackageAtom: affectedPackage,
+						BugId:       bugId,
+					}).WherePK().OnConflict("(id) DO UPDATE").Insert()
+				}
+			}
+		} else {
+			summary = strings.Split(summary, " ")[0]
+			affectedPackage := versionSpecifierToPackageAtom(summary)
 
-		database.DBCon.Model(&models.PackageToBug{
-			Id:          affectedPackage + "-" + bugId,
-			PackageAtom: affectedPackage,
-			BugId:       bugId,
-		}).WherePK().OnConflict("(id) DO UPDATE").Insert()
+			database.DBCon.Model(&models.PackageToBug{
+				Id:          affectedPackage + "-" + bugId,
+				PackageAtom: affectedPackage,
+				BugId:       bugId,
+			}).WherePK().OnConflict("(id) DO UPDATE").Insert()
+		}
 
 	}
 
@@ -197,13 +210,9 @@ func updateStatus(){
 	database.Connect()
 	defer database.DBCon.Close()
 
-	fmt.Println("UPDATE STATUS0")
-	_, err := database.DBCon.Model(&models.Application{
+	database.DBCon.Model(&models.Application{
 		Id:         "bugs",
 		LastUpdate: time.Now(),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
-
-	logger.Error.Println(err)
-	fmt.Println(err)
 }
