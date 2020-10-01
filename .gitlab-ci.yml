@@ -22,8 +22,8 @@ build:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
     - docker pull gentoo/portage:latest
     - docker pull gentoo/stage3-amd64
-    - docker build -t $IMAGE_TAG -t $LATEST_IMAGE_TAG .
-    - docker build -t $UPDATER_IMAGE_TAG -t $LATEST_UPDATER_IMAGE_TAG -f Dockerfile.updater .
+    - docker build --no-cache -t $IMAGE_TAG -t $LATEST_IMAGE_TAG .
+    - docker build --no-cache -t $UPDATER_IMAGE_TAG -t $LATEST_UPDATER_IMAGE_TAG -f Dockerfile.updater .
     - docker push $LATEST_IMAGE_TAG
     - docker push $IMAGE_TAG
     - docker push $UPDATER_IMAGE_TAG
