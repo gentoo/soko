@@ -36,6 +36,7 @@ func FullImport() {
 		Relation("PullRequests").
 		Relation("Bugs").
 		Relation("Versions").
+		Relation("Versions.Bugs").
 		Relation("Versions.PkgCheckResults").
 		Select()
 
@@ -66,7 +67,7 @@ func FullImport() {
 					pullrequestIds = append(pullrequestIds, string(pullRequest.Id))
 				}
 
-				for _, bug := range gpackage.Bugs {
+				for _, bug := range gpackage.AllBugs() {
 					if bug.Component == "Vulnerabilities" {
 						securityBugs++
 					} else {

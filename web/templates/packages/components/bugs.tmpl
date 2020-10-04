@@ -4,7 +4,7 @@
             {{$general_bugs := 0}}
             {{$stabilization_bugs := 0}}
             {{$keywording_bugs := 0}}
-            {{range .Package.Bugs}}
+            {{range .Package.AllBugs}}
                 {{if eq .Component "Current packages"}}
                     {{$general_bugs = (add $general_bugs 1)}}
                 {{else if eq .Component "Stabilization"}}
@@ -14,7 +14,7 @@
                 {{end}}
             {{end}}
 
-            {{if .Package.Bugs}}
+            {{if .Package.AllBugs}}
 
                 {{if $general_bugs}}
                     <h3 class="mb-4">Bug Reports</h3>
@@ -37,10 +37,12 @@
                     </ul>
                 {{end}}
 
+
+
                 {{if $stabilization_bugs}}
                     <h3 class="my-4">Stabilization Bug Reports</h3>
                     <ul class="list-group">
-                        {{range .Package.Bugs}}
+                        {{range .Package.AllBugs}}
                             {{if eq .Component "Stabilization"}}
                                 <li class="list-group-item">
                                     <div class="row">
@@ -61,7 +63,7 @@
                 {{if $keywording_bugs}}
                     <h3 class="my-4">Keywording Bug Reports</h3>
                     <ul class="list-group">
-                        {{range .Package.Bugs}}
+                        {{range .Package.AllBugs}}
                             {{if eq .Component "Keywording"}}
                                 <li class="list-group-item">
                                     <div class="row">

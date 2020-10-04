@@ -3,7 +3,7 @@
         <div class="col-md-9">
 
             {{$security_bugs := 0}}
-            {{range .Package.Bugs}}
+            {{range .Package.AllBugs}}
                 {{if eq .Component "Vulnerabilities"}}
                     {{$security_bugs = (add $security_bugs 1)}}
                 {{end}}
@@ -13,7 +13,7 @@
 
                 <h3 class="mb-4">Security Bug Reports</h3>
                 <ul class="list-group">
-                    {{range .Package.Bugs}}
+                    {{range .Package.AllBugs}}
                         {{if eq .Component "Vulnerabilities"}}
                             <li class="list-group-item">
                                 <div class="row">

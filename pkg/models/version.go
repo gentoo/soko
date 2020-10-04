@@ -30,6 +30,7 @@ type Version struct {
 	Masks           []*Mask              `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
 	PkgCheckResults []*PkgCheckResult    `pg:",fk:cpv"`
 	Dependencies    []*ReverseDependency `pg:",fk:reverse_dependency_version"`
+	Bugs            []*Bug           `pg:"many2many:version_to_bugs,joinFK:bug_id"`
 }
 
 func (v Version) BuildDepMap() map[string]map[string]string {

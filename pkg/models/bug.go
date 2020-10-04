@@ -14,3 +14,9 @@ type PackageToBug struct {
 	PackageAtom string
 	BugId       string
 }
+
+type VersionToBug struct {
+	Id          string `pg:",pk"`
+	VersionId   string
+	BugId       string
+}

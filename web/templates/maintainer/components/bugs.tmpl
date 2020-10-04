@@ -4,7 +4,7 @@
             {{$security_bugs := 0}}
             {{$non_security_bugs := 0}}
             {{range .Packages}}
-                {{range .Bugs}}
+                {{range .AllBugs}}
                     {{if eq .Component "Vulnerabilities"}}
                         {{$security_bugs = (add $security_bugs 1)}}
                     {{else}}
@@ -17,7 +17,7 @@
             {{$stabilization_bugs := 0}}
             {{$keywording_bugs := 0}}
             {{range .Packages}}
-                {{range .Bugs}}
+                {{range .AllBugs}}
                     {{if eq .Component "Current packages"}}
                         {{$general_bugs = (add $general_bugs 1)}}
                     {{else if eq .Component "Stabilization"}}
@@ -35,7 +35,7 @@
                     <h3 id="packages" class="mb-4">Bug Reports</h3>
                     <ul class="list-group">
                         {{range .Packages}}
-                            {{range .Bugs}}
+                            {{range .AllBugs}}
                                 {{if eq .Component "Current packages"}}
                                     <li class="list-group-item">
                                         <div class="row">
@@ -58,7 +58,7 @@
                     <h3 id="stabilization" class="my-4">Stabilization Bug Reports</h3>
                     <ul class="list-group">
                         {{range .Packages}}
-                            {{range .Bugs}}
+                            {{range .AllBugs}}
                                 {{if eq .Component "Stabilization"}}
                                     <li class="list-group-item">
                                         <div class="row">
@@ -81,7 +81,7 @@
                     <h3 id="keywording" class="my-4">Keywording Bug Reports</h3>
                     <ul class="list-group">
                         {{range .Packages}}
-                            {{range .Bugs}}
+                            {{range .AllBugs}}
                                 {{if eq .Component "Keywording"}}
                                     <li class="list-group-item">
                                         <div class="row">

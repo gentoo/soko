@@ -73,3 +73,25 @@ func (p Package) Description() string {
 	}
 	return p.Longdescription
 }
+
+func (p Package) AllBugs() []*Bug {
+	allBugs := make(map[string]*Bug)
+
+	for _, bug := range p.Bugs {
+		allBugs[bug.Id] = bug
+	}
+
+	for _, version := range p.Versions {
+		for _, bug := range version.Bugs {
+			allBugs[bug.Id] = bug
+		}
+	}
+
+	// convert to list
+	allBugsList := []*Bug{}
+	for _, bug := range allBugs {
+		allBugsList = append(allBugsList, bug)
+	}
+
+	return allBugsList
+}

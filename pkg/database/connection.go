@@ -39,6 +39,7 @@ func CreateSchema() error {
 		(*models.PackageToGithubPullRequest)(nil),
 		(*models.Bug)(nil),
 		(*models.PackageToBug)(nil),
+		(*models.VersionToBug)(nil),
 		(*models.ReverseDependency)(nil),
 		(*models.Maintainer)(nil),
 		(*models.Application)(nil)} {
