@@ -30,7 +30,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	userPreferences := utils.GetUserPreferences(r)
 	if userPreferences.Maintainers.IncludeProjectPackages && maintainer.Projects != nil && len(maintainer.Projects) > 0 {
-		var whereParts []string
+		whereParts := []string{"maintainers @> '[{\"Email\": \"" + maintainerEmail + "\"}]'"}
 		for _, proj := range maintainer.Projects {
 			if !strings.Contains(strings.Join(userPreferences.Maintainers.ExcludedProjects, ","), proj.Email) {
 				whereParts = append(whereParts, "maintainers @> '[{\"Email\": \""+proj.Email+"\"}]'")
