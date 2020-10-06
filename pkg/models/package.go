@@ -2,6 +2,8 @@
 
 package models
 
+import "sort"
+
 type Package struct {
 	Atom                string `pg:",pk"`
 	Category            string
@@ -92,6 +94,10 @@ func (p Package) AllBugs() []*Bug {
 	for _, bug := range allBugs {
 		allBugsList = append(allBugsList, bug)
 	}
+
+	sort.Slice(allBugsList, func(i, j int) bool {
+		return allBugsList[i].Id < allBugsList[j].Id
+	})
 
 	return allBugsList
 }

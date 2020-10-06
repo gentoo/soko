@@ -6,21 +6,22 @@
 
                 <h3 class="mb-4">Security Bug Reports</h3>
                 <ul class="list-group">
-                    {{range .Packages}}
-                        {{range .AllBugs}}
-                            {{if eq .Component "Vulnerabilities"}}
-                                <li class="list-group-item">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <i class="fa fa-bug" aria-hidden="true"></i>
-                                            <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
-                                        </div>
-                                        <div class="col-md-12 text-muted">
-                                            {{.Id}} - Assigned to {{.Assignee}}
-                                        </div>
+                    hi
+                    {{getAllBugs .Packages}}
+                    hoi2
+                    {{range (getAllBugs .Packages)}}
+                        {{if eq .Component "Vulnerabilities"}}
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <i class="fa fa-bug" aria-hidden="true"></i>
+                                        <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
                                     </div>
-                                </li>
-                            {{end}}
+                                    <div class="col-md-12 text-muted">
+                                        {{.Id}} - Assigned to {{.Assignee}}
+                                    </div>
+                                </div>
+                            </li>
                         {{end}}
                     {{end}}
                 </ul>

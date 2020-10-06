@@ -72,12 +72,34 @@ func createBrowseData(tabName string, data interface{}) interface{} {
 	}
 }
 
+func getAllBugs(packages []*models.Package) []*models.Bug {
+	allBugs := make(map[string]*models.Bug)
+
+	for _, gpackage := range packages {
+		for _, bug := range gpackage.AllBugs() {
+			allBugs[bug.Id] = bug
+		}
+	}
+
+	var allBugsList []*models.Bug
+	for _, bug := range allBugs {
+		allBugsList = append(allBugsList, bug)
+	}
+
+	sort.Slice(allBugsList, func(i, j int) bool {
+		return allBugsList[i].Id < allBugsList[j].Id
+	})
+
+	return allBugsList
+}
+
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"contains":        strings.Contains,
 		"replaceall":      strings.ReplaceAll,
 		"tolower":         strings.ToLower,
+		"getAllBugs":      getAllBugs,
 		"formatRestricts": packages.FormatRestricts,
 		"appendCommits": func(a []*models.Commit, b []*models.Commit) []*models.Commit {
 			return append(a, b...)
