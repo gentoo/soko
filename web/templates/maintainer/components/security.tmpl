@@ -6,9 +6,6 @@
 
                 <h3 class="mb-4">Security Bug Reports</h3>
                 <ul class="list-group">
-                    hi
-                    {{getAllBugs .Packages}}
-                    hoi2
                     {{range (getAllBugs .Packages)}}
                         {{if eq .Component "Vulnerabilities"}}
                             <li class="list-group-item">
