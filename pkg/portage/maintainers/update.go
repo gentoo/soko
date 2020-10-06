@@ -5,6 +5,7 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"soko/pkg/utils"
+	"sort"
 	"strings"
 	"time"
 )
@@ -51,6 +52,7 @@ func FullImport() {
 		pullrequestIds := []string{}
 		nonSecurityBugs := 0
 		stableRequests := 0
+		maintainerPackages := []*models.Package{}
 
 		for _, gpackage := range gpackages {
 			found := false
@@ -61,18 +63,12 @@ func FullImport() {
 			}
 
 			if found {
+				maintainerPackages = append(maintainerPackages, gpackage)
+
 				outdated = outdated + len(gpackage.Outdated)
 
 				for _, pullRequest := range gpackage.PullRequests {
 					pullrequestIds = append(pullrequestIds, string(pullRequest.Id))
-				}
-
-				for _, bug := range gpackage.AllBugs() {
-					if bug.Component == "Vulnerabilities" {
-						securityBugs++
-					} else {
-						nonSecurityBugs++
-					}
 				}
 
 				// Find Stable Requests
@@ -83,7 +79,14 @@ func FullImport() {
 						}
 					}
 				}
+			}
+		}
 
+		for _, bug := range getAllBugs(maintainerPackages) {
+			if bug.Component == "Vulnerabilities" {
+				securityBugs++
+			} else {
+				nonSecurityBugs++
 			}
 		}
 
@@ -115,6 +118,27 @@ func FullImport() {
 	}
 
 	updateStatus()
+}
+
+func getAllBugs(packages []*models.Package) []*models.Bug {
+	allBugs := make(map[string]*models.Bug)
+
+	for _, gpackage := range packages {
+		for _, bug := range gpackage.AllBugs() {
+			allBugs[bug.Id] = bug
+		}
+	}
+
+	var allBugsList []*models.Bug
+	for _, bug := range allBugs {
+		allBugsList = append(allBugsList, bug)
+	}
+
+	sort.Slice(allBugsList, func(i, j int) bool {
+		return allBugsList[i].Id < allBugsList[j].Id
+	})
+
+	return allBugsList
 }
 
 // deleteAllMaintainers deletes all entries in the maintainers table
