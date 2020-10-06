@@ -54,5 +54,7 @@ func GetUserPreferences(r *http.Request) models.UserPreferences {
 		}
 	}
 
+	userPreferences.Sanitize()
+
 	return userPreferences
 }
