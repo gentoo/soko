@@ -194,6 +194,7 @@ func getChangelogData(commits []*models.Commit, atom string) interface{} {
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"contains":          strings.Contains,
+		"listContains":      listContains,
 		"replaceall":        strings.ReplaceAll,
 		"gravatar":          gravatar,
 		"mkSlice":           mkSlice,
@@ -224,6 +225,10 @@ func GetTextFuncMap() textTemplate.FuncMap {
 		"getMask":           getMask,
 		"showRemovalNotice": showRemovalNotice,
 	}
+}
+
+func listContains(list []string, item string) bool {
+	return strings.Contains("  "+strings.Join(list, "  ")+"  ", "  "+item+"  ")
 }
 
 // gravatar creates a link to the gravatar
@@ -303,27 +308,29 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 }
 
 // createPackageData creates the data used in the show package template
-func createPackageData(pageName string, gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag) interface{} {
+func createPackageData(pageName string, gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag, userPreferences models.UserPreferences) interface{} {
 	return struct {
-		PageName       string
-		Header         models.Header
-		Package        models.Package
-		Versions       []*models.Version
-		Masks          []models.Mask
-		LocalUseflags  []models.Useflag
-		GlobalUseflags []models.Useflag
-		UseExpands     map[string][]models.Useflag
-		Application    models.Application
+		PageName        string
+		Header          models.Header
+		Package         models.Package
+		Versions        []*models.Version
+		Masks           []models.Mask
+		LocalUseflags   []models.Useflag
+		GlobalUseflags  []models.Useflag
+		UseExpands      map[string][]models.Useflag
+		Application     models.Application
+		UserPreferences models.UserPreferences
 	}{
-		PageName:       pageName,
-		Header:         models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
-		Package:        *gpackage,
-		Versions:       gpackage.Versions,
-		LocalUseflags:  localUseflags,
-		GlobalUseflags: globalUseflags,
-		UseExpands:     useExpands,
-		Masks:          nil,
-		Application:    utils.GetApplicationData(),
+		PageName:        pageName,
+		Header:          models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
+		Package:         *gpackage,
+		Versions:        gpackage.Versions,
+		LocalUseflags:   localUseflags,
+		GlobalUseflags:  globalUseflags,
+		UseExpands:      useExpands,
+		Masks:           nil,
+		Application:     utils.GetApplicationData(),
+		UserPreferences: userPreferences,
 	}
 }
 

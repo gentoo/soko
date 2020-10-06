@@ -92,14 +92,14 @@ func updateModifiedPackage(changedFile string) {
 	for _, r := range pkgmetadata.Upstream.RemoteIds {
 		remoteIds = append(remoteIds, models.RemoteId{
 			Type: r.Type,
-			Id: r.Content,
+			Id:   r.Content,
 		})
 	}
 
 	upstream := models.Upstream{
 		RemoteIds: remoteIds,
-		Doc: pkgmetadata.Upstream.Doc,
-		BugsTo: pkgmetadata.Upstream.BugsTo,
+		Doc:       pkgmetadata.Upstream.Doc,
+		BugsTo:    pkgmetadata.Upstream.BugsTo,
 		Changelog: pkgmetadata.Upstream.Changelog,
 	}
 
@@ -167,13 +167,13 @@ type LongdescriptionItem struct {
 type Upstream struct {
 	XMLName   xml.Name   `xml:"upstream"`
 	RemoteIds []RemoteId `xml:"remote-id"`
-	BugsTo    []string `xml:"bugs-to"`
-	Doc       []string `xml:"doc"`
-	Changelog []string `xml:"changelog"`
+	BugsTo    []string   `xml:"bugs-to"`
+	Doc       []string   `xml:"doc"`
+	Changelog []string   `xml:"changelog"`
 }
 
 type RemoteId struct {
-	XMLName   xml.Name   `xml:"remote-id"`
-	Type      string     `xml:"type,attr"`
-	Content   string     `xml:",chardata"`
+	XMLName xml.Name `xml:"remote-id"`
+	Type    string   `xml:"type,attr"`
+	Content string   `xml:",chardata"`
 }

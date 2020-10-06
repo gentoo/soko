@@ -80,7 +80,7 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 		for _, v := range repoPackages[packagename] {
 			if v.Status == "newest" &&
 				!contains(blockedRepos, v.Repo) &&
-				!contains(blockedPackages, atom + "::" + v.Repo){
+				!contains(blockedPackages, atom+"::"+v.Repo) {
 				newest = v.Version
 			}
 			if v.Repo == "gentoo" && v.Status == "newest" {
@@ -176,7 +176,7 @@ func containsPrefix(list []string, item string) bool {
 	return false
 }
 
-func updateStatus(){
+func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "repology",
 		LastUpdate: time.Now(),

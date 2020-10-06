@@ -23,8 +23,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	err := database.DBCon.Model(category).
 		Where("name = ?", getCategoryName(r)).
 		Relation("Packages", func(q *orm.Query) (*orm.Query, error) {
-		return q.Order("name ASC"), nil
-	}).
+			return q.Order("name ASC"), nil
+		}).
 		Relation("Packages.Versions").
 		Select()
 	if err != nil {

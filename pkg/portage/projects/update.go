@@ -36,7 +36,7 @@ func UpdateProjects() {
 		database.DBCon.Insert(&project)
 		for _, member := range project.Members {
 			database.DBCon.Insert(&models.MaintainerToProject{
-				Id: member.Email + "-" + project.Email,
+				Id:              member.Email + "-" + project.Email,
 				MaintainerEmail: member.Email,
 				ProjectEmail:    project.Email,
 			})
@@ -77,7 +77,7 @@ func deleteAllProjects() {
 	}
 }
 
-func updateStatus(){
+func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "projects",
 		LastUpdate: time.Now(),

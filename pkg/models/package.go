@@ -26,9 +26,9 @@ type Maintainer struct {
 	Restrict            string
 	PackagesInformation MaintainerPackagesInformation
 	// In case the maintainer type is "project", Project will point to the project
-	Project             Project `pg:",fk:email"`
+	Project Project `pg:",fk:email"`
 	// In case the maintainer type is not "project", Projects will point to the projects the maintainer is member of
-	Projects            []*Project `pg:"many2many:maintainer_to_projects,joinFK:project_email"`
+	Projects []*Project `pg:"many2many:maintainer_to_projects,joinFK:project_email"`
 }
 
 type MaintainerPackagesInformation struct {
@@ -47,8 +47,8 @@ type Upstream struct {
 }
 
 type RemoteId struct {
-	Type          string
-	Id            string
+	Type string
+	Id   string
 }
 
 func (p Package) BuildRevDepMap() map[string]map[string]string {

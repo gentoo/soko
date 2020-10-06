@@ -17,8 +17,10 @@ import (
 	"soko/pkg/app/handler/maintainer"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/handler/useflags"
+	"soko/pkg/app/handler/user"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 )
 
 // Serve is used to serve the web application
@@ -36,8 +38,9 @@ func Serve() {
 	setRoute("/useflags/search", useflags.Search)
 	setRoute("/useflags/global", useflags.Global)
 	setRoute("/useflags/local", useflags.Local)
+	setRoute("/useflags/popular", useflags.Index)
+	setRoute("/useflags", useflags.Default)
 	setRoute("/useflags/", useflags.Show)
-	setRoute("/useflags", useflags.Index)
 
 	setRoute("/arches", arches.Index)
 	setRoute("/arches/", arches.Show)
@@ -70,6 +73,25 @@ func Serve() {
 	redirect("/packages/stabilized.atom", "/packages/stable.atom")
 	setRoute("/packages/search.atom", packages.SearchFeed)
 
+	setRoute("/user", user.Preferences)
+	setRoute("/user/preferences", user.Preferences)
+	setRoute("/user/preferences/", user.Preferences)
+
+	setRoute("/user/preferences/general/layout", user.General)
+	setRoute("/user/preferences/general/reset", user.ResetGeneral)
+
+	setRoute("/user/preferences/arches/visible", user.Arches)
+	setRoute("/user/preferences/arches/reset", user.ResetArches)
+
+	setRoute("/user/preferences/packages/edit", user.EditPackagesPreferences)
+	setRoute("/user/preferences/packages/reset", user.ResetPackages)
+
+	setRoute("/user/preferences/useflags/edit", user.Useflags)
+	setRoute("/user/preferences/useflags/reset", user.ResetUseflags)
+
+	setRoute("/user/preferences/maintainers/edit", user.Maintainers)
+	setRoute("/user/preferences/maintainers/reset", user.ResetMaintainers)
+
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
 
@@ -86,6 +108,7 @@ func Serve() {
 	// graphiql: api explorer
 	setRoute("/api/explore/", graphiql.Show)
 
+	logger.Info.Println("Serving on port: " + config.Port())
 	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
 
 }

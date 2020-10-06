@@ -19,15 +19,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	var packages []models.Package
 	var err error
 
-	if strings.Contains(searchTerm, "@"){
+	if strings.Contains(searchTerm, "@") {
 		var maintainers []models.Maintainer
 		database.DBCon.Model(&maintainers).Where("email = ?", searchTerm).Select()
 		if len(maintainers) > 0 {
-			http.Redirect(w,r,"/maintainer/" + searchTerm,301)
+			http.Redirect(w, r, "/maintainer/"+searchTerm, 301)
 			return
 		}
 	}
-
 
 	if strings.Contains(searchTerm, "*") {
 		// if the query contains wildcards

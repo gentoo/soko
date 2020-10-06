@@ -225,7 +225,7 @@ func deleteOutdatedDependencies(newDependencies []*models.ReverseDependency) {
 
 }
 
-func updateStatus(){
+func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "dependencies",
 		LastUpdate: time.Now(),

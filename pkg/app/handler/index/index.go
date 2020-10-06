@@ -4,6 +4,7 @@ package index
 
 import (
 	"net/http"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 )
@@ -12,8 +13,14 @@ import (
 func Show(w http.ResponseWriter, r *http.Request) {
 	count, _ := database.DBCon.Model((*models.Package)(nil)).Count()
 
-	addedPackages := getAddedPackages(10)
+	var packagesList []models.Package
+	if utils.GetUserPreferences(r).General.LandingPageLayout == "classic" {
+		packagesList = getAddedPackages(10)
+	} else {
+		packagesList = getSearchHistoryPackages(r)
+	}
+
 	updatedVersions := getUpdatedVersions(10)
 
-	renderIndexTemplate(w, createPageData(count, addedPackages, updatedVersions))
+	renderIndexTemplate(w, createPageData(count, packagesList, updatedVersions, utils.GetUserPreferences(r)))
 }

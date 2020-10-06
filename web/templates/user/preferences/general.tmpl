@@ -1,0 +1,46 @@
+{{define "general"}}
+    <form method="post" action="/user/preferences/general/layout">
+        <div class="row">
+
+            <div class="col-5 offset-1 mt-1">
+                <div class="card" style="background: transparent;">
+                    <div class="card-body">
+                        <img id="img1" alt="Recently Added Packages (default)" src="/assets/pgo3.png" style="width: 100%;cursor: pointer;" />
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <div class="form-check text-center form-check-inline" style="text-overflow: ellipsis;overflow: hidden;">
+                        <input type="radio" id="classicLandingpageLayout" name="landingpage-layout" value="classic" {{if eq .UserPreferences.General.LandingPageLayout "classic"}}checked{{end}}>
+                        <label class="form-check-label ml-1" for="classicLandingpageLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Recently Added Packages (default)">Recently Added Packages <i>(default)</i></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-5 mt-1">
+                <div class="card" style="background: transparent;">
+                    <div class="card-body">
+                        <img id="img2" alt="Recently Visited Packages" src="/assets/pgo4.png" style="width: 100%;cursor: pointer;" />
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <div class="form-check text-center form-check-inline" style="text-overflow: ellipsis;overflow: hidden;">
+                        <input type="radio" id="fullLandingpageLayout" name="landingpage-layout" value="full" {{if eq .UserPreferences.General.LandingPageLayout "full"}}checked{{end}}>
+                        <label class="form-check-label ml-1" for="fullLandingpageLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Recently Visited Packages">Recently Visited Packages</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-10 offset-1 mt-4">
+                <button type="submit" class="float-right btn btn-sm btn-primary">Save</button>
+                <a class="float-right btn btn-sm btn-outline-danger mr-2" href="/user/preferences/general/reset">Reset to Defaults</a>
+            </div>
+
+        </div>
+    </form>
+
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+        <div id="caption"></div>
+    </div>
+{{end}}

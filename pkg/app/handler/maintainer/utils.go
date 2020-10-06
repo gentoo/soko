@@ -102,7 +102,7 @@ func GetFuncMap() template.FuncMap {
 			})
 			return commits
 		},
-		"getPullRequests": func(packages []*models.Package) []*models.GithubPullRequest{
+		"getPullRequests": func(packages []*models.Package) []*models.GithubPullRequest {
 			pullrequestsMap := map[string]*models.GithubPullRequest{}
 			for _, gpackage := range packages {
 				for _, pr := range gpackage.PullRequests {

@@ -1,9 +1,8 @@
 {{define "changelog"}}
-<div class="row">
-    <div class="col-md-9">
+
         {{ if .Package.Commits }}
 
-            <div class="col-md-12">
+
                 <h3>Latest Commits</h3>
                 <ul class="timeline">
                     <li>
@@ -140,7 +139,6 @@
                         </ul>
                     </li>
                 </ul>
-            </div>
 
         {{else}}
             <li class="list-group-item kk-panel-content-sorry">
@@ -152,6 +150,4 @@
                 </a>
             </li>
         {{end}}
-    </div>
-</div>
 {{end}}

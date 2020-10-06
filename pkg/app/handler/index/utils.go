@@ -3,9 +3,11 @@
 package index
 
 import (
+	b64 "encoding/base64"
 	"github.com/go-pg/pg/v9/orm"
 	"html/template"
 	"net/http"
+	"reflect"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -27,6 +29,64 @@ func getAddedPackages(n int) []models.Package {
 		return addedPackages
 	}
 	return addedPackages
+}
+
+func getSearchHistoryPackages(r *http.Request) []models.Package {
+	var cookie, err = r.Cookie("search_history")
+	var searchedPackages []models.Package
+	if err == nil {
+		packagesList := getSearchHistoryFromCookie(cookie)
+		err := database.DBCon.Model(&searchedPackages).
+			Where(getSearchHistoryQuery(packagesList)).
+			Relation("Versions").
+			Select()
+		return getSortedSearchHistory(packagesList, searchedPackages)
+		if err != nil {
+			return searchedPackages
+		}
+	}
+	return searchedPackages
+}
+
+func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.Package) []models.Package {
+	var result []models.Package
+	for _, gpackage := range sortedPackagesList {
+		for _, gpackageObject := range packagesList {
+			if gpackageObject.Atom == gpackage {
+				result = append(result, gpackageObject)
+			}
+		}
+	}
+	reverse(result)
+	return result
+}
+
+func reverse(s interface{}) {
+	n := reflect.ValueOf(s).Len()
+	swap := reflect.Swapper(s)
+	for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+		swap(i, j)
+	}
+}
+
+func getSearchHistoryFromCookie(cookie *http.Cookie) []string {
+	var packagesList []string
+	cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
+	if err == nil {
+		packagesList = strings.Split(string(cookieValue), ",")
+		if len(packagesList) > 10 {
+			packagesList = packagesList[len(packagesList)-10:]
+		}
+	}
+	return packagesList
+}
+
+func getSearchHistoryQuery(packagesList []string) string {
+	var queryParts []string
+	for _, gpackage := range packagesList {
+		queryParts = append(queryParts, "atom = '"+gpackage+"'")
+	}
+	return strings.Join(queryParts, " OR ")
 }
 
 // getUpdatedVersions returns a list of a
@@ -60,19 +120,21 @@ func getUpdatedVersions(n int) []*models.Version {
 }
 
 // createPageData creates the data used in the template of the landing page
-func createPageData(packagecount int, addedPackages []models.Package, updatedVersions []*models.Version) interface{} {
+func createPageData(packagecount int, addedPackages []models.Package, updatedVersions []*models.Version, userPreferences models.UserPreferences) interface{} {
 	return struct {
 		Header          models.Header
 		PackageCount    string
 		AddedPackages   []models.Package
 		UpdatedPackages []*models.Version
 		Application     models.Application
+		UserPreferences models.UserPreferences
 	}{
 		Header:          models.Header{Title: "", Tab: "home"},
 		Application:     utils.GetApplicationData(),
 		PackageCount:    formatPackageCount(packagecount),
 		AddedPackages:   addedPackages,
 		UpdatedPackages: updatedVersions,
+		UserPreferences: userPreferences,
 	}
 }
 

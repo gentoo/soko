@@ -208,7 +208,7 @@ func deleteAllPullrequests() {
 	}
 }
 
-func updateStatus(){
+func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "pullrequests",
 		LastUpdate: time.Now(),

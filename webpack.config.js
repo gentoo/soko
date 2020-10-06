@@ -9,6 +9,7 @@ module.exports = {
         index: './web/packs/index.js',
         packages: './web/packs/packages.js',
         useflags: './web/packs/useflags.js',
+        userpref: './web/packs/userpref.js',
     },
     output: {
         path: path.resolve(__dirname, 'assets'),

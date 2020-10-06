@@ -1,0 +1,77 @@
+{{define "changedversions"}}
+    {{range $index, $version := .Versions}}
+        <li class="list-group-item kk-package-detailed">
+            <div class="row">
+                <div class="col-xs-12 col-md-6">
+                    <h4 class="stick-top"><a href="/packages/{{.Atom}}">{{.Atom}}</a></h4>
+                    <div class="kk-package-detailed-toolbox">
+
+                        <button type="button" class="kk-btn-xs btn btn-outline-secondary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="fa fa-fw fa-navicon"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="https://bugs.gentoo.org/buglist.cgi?quicksearch={{.Category}}%2F{{.Package}}" target="_blank">
+                                <span class="fa fa-fw fa-bug"></span>
+                                Related bugs
+                            </a>
+                            <a class="dropdown-item" href="https://wiki.gentoo.org/index.php?title=Special%3ASearch&amp;fulltext=Search&amp;search={{.Package}}" target="_blank">
+                                <span class="fa fa-fw fa-book"></span>
+                                Documentation
+                            </a>
+                            <a class="dropdown-item" href="https://forums.gentoo.org/search.php?search_terms=all&amp;show_results=topics&amp;search_keywords={{.Package}}&amp;mode=results" target="_blank">
+                                <span class="fa fa-fw fa-comments-o"></span>
+                                Forums posts
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{.Atom}}" target="_blank">
+                                <span class="fa fa-fw fa-code-fork"></span>
+                                Git repository browser
+                            </a>
+                            <a class="dropdown-item" href="https://gitweb.gentoo.org/repo/gentoo.git/log/{{.Atom}}?showmsg=1" target="_blank">
+                                <span class="fa fa-fw fa-history"></span>
+                                Git log
+                            </a>
+                            <a class="dropdown-item" href="https://gitweb.gentoo.org/repo/gentoo.git/atom/{{.Atom}}?h=master" target="_blank">
+                                <span class="fa fa-fw fa-rss"></span>
+                                Changes feed
+                            </a>
+                        </div>
+
+                    </div>
+                    {{.Description}}
+                    <br>
+                    <small class="text-muted">
+                    </small>
+                    {{if ge (len .Commits) 1 }}
+                    <div class="kk-inline-changelog-entry">
+                        <a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{ (index .Commits 0).Id }}" title="Git commit">
+                            <span class="octicon octicon-git-pull-request"></span>
+                            <span class="kk-commit-message">{{ (index .Commits 0).Message }}</span>
+                        </a>
+                    </div>
+                    {{end}}
+                </div>
+                <div class="col-xs-12 col-md-6">
+                    <small class="text-muted pull-right">
+                        <span class="kk-i18n-date" title="{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate}}{{else}}unknown{{end}}">{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate}}{{else}}unknown{{end}}</span>
+                    </small>
+                    <div class="kk-version-card">
+                        <p class="mb-2"><strong>{{.Version}}</strong><span class="kk-slot"> : {{.Slot}}</span> {{if .Restricts}}<span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{range .Restricts}}{{.}} {{end}}">{{formatRestricts .Restricts}}</span>{{end}}</p>
+                        <p>
+                            {{ range $.UserPreferences.Arches.Visible }}
+                                {{if contains (print " " $version.Keywords " ") (print " " . " ")}}
+                                    <span class="label kk-keyword-stable" title="{{$version.Version}} is testing on {{.}}">{{.}}</span>
+                                {{else if contains (print " " $version.Keywords " ") (print "~" . " ")}}
+                                    <span class="label kk-keyword-testing" title="{{$version}} is stable on {{.}}">~{{.}}</span>
+                                {{else}}
+                                    <span class="label kk-keyword-unknown" title="{{$version.Version}} is unknown on {{.}}">?{{.}}</span>
+                                {{end}}
+                            {{end}}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </li>
+    {{end}}
+{{end}}

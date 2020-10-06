@@ -2,20 +2,22 @@
 <div class="row">
     <div class="col-md-9">
 
-        {{ if .Package.Outdated }}
-            {{$outdatedFound := false}}
-            {{range .Versions}}
-                {{if eq (index $.Package.Outdated 0).NewestVersion .Version}}
-                    {{$outdatedFound = true}}
+        {{ if .UserPreferences.Packages.Overview.ShowOutdated}}
+            {{ if .Package.Outdated }}
+                {{$outdatedFound := false}}
+                {{range .Versions}}
+                    {{if eq (index $.Package.Outdated 0).NewestVersion .Version}}
+                        {{$outdatedFound = true}}
+                    {{end}}
                 {{end}}
-            {{end}}
-            {{if not $outdatedFound}}
-                <div class="alert alert-info">
-                    <strong><span class="fa fa-fw fa-lightbulb-o"></span> Version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream. Please consider updating!</strong><br>
-                    It seems that version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream, while the latest version in the Gentoo tree is {{ (index .Package.Outdated 0).GentooVersion }}.<br/>
-                    <small><i>You think this warning is false? Read more about it <a href="https://archives.gentoo.org/gentoo-dev/message/b793f4da5a5b5e20a063ea431500a820">here</a>.</i></small>
-                </div>
-            {{end}}
+                {{if not $outdatedFound}}
+                    <div class="alert alert-info">
+                        <strong><span class="fa fa-fw fa-lightbulb-o"></span> Version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream. Please consider updating!</strong><br>
+                        It seems that version {{ (index .Package.Outdated 0).NewestVersion }} is available upstream, while the latest version in the Gentoo tree is {{ (index .Package.Outdated 0).GentooVersion }}.<br/>
+                        <small><i>You think this warning is false? Read more about it <a href="https://archives.gentoo.org/gentoo-dev/message/b793f4da5a5b5e20a063ea431500a820">here</a>.</i></small>
+                    </div>
+                {{end}}
+            {{ end }}
         {{ end }}
 
         {{template "versions" .}}
@@ -71,6 +73,10 @@
 
         {{template "metadata" .}}
 
+        {{ if eq .UserPreferences.Packages.Overview.Layout "full" }}
+            <div class="mt-4 pt-4"></div>
+            {{template "changelog" .}}
+        {{end}}
 
     </div>
     <div class="col-md-3 pl-4 pt-4 mt-2">

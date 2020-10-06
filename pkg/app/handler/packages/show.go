@@ -3,10 +3,12 @@
 package packages
 
 import (
+	b64 "encoding/base64"
 	"encoding/json"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/v9/orm"
 	"net/http"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
@@ -26,6 +28,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	atom := r.URL.Path[len("/packages/"):]
 	pageName := "overview"
+	userPreferences := utils.GetUserPreferences(r)
+
+	if userPreferences.General.LandingPageLayout == "full" {
+		updateSearchHistory(atom, w, r)
+	}
 
 	if strings.HasSuffix(r.URL.Path, "/changelog") {
 		atom = strings.ReplaceAll(atom, "/changelog", "")
@@ -64,7 +71,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Relation("Versions.Dependencies").
 		Relation("ReverseDependencies").
 		Relation("Commits", func(q *orm.Query) (*orm.Query, error) {
-			return q.Order("preceding_commits DESC").Limit(10), nil
+			return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
 		}).
 		Select()
 
@@ -80,8 +87,45 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	renderPackageTemplate("show",
 		"*",
 		GetFuncMap(),
-		createPackageData(pageName, gpackage, localUseflags, globalUseflags, useExpands),
+		createPackageData(pageName, gpackage, localUseflags, globalUseflags, useExpands, userPreferences),
 		w)
+}
+
+func updateSearchHistory(atom string, w http.ResponseWriter, r *http.Request) {
+	var cookie, err = r.Cookie("search_history")
+	var packages string
+	if err == nil {
+		cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
+		if err == nil {
+			packagesList := strings.Split(string(cookieValue), ",")
+			if strings.Contains(string(cookieValue), atom) {
+				newPackagesList := []string{}
+				for _, gpackage := range packagesList {
+					if gpackage != atom {
+						newPackagesList = append(newPackagesList, gpackage)
+					}
+				}
+				packagesList = newPackagesList
+			}
+			packagesList = append(packagesList, atom)
+			if len(packagesList) > 10 {
+				packagesList = packagesList[len(packagesList)-10:]
+			}
+			packages = strings.Join(packagesList, ",")
+		} else {
+			packages = atom
+		}
+	} else {
+		packages = atom
+	}
+
+	updatedCookie := http.Cookie{
+		Name:    "search_history",
+		Path:    "/",
+		Value:   b64.StdEncoding.EncodeToString([]byte(packages)),
+		Expires: time.Now().Add(365 * 24 * time.Hour),
+	}
+	http.SetCookie(w, &updatedCookie)
 }
 
 // changelog renders a json version of the changelog

@@ -32,3 +32,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	templates.ExecuteTemplate(w, "index.tmpl", data)
 }
+
+// Index renders a template to show the index page of the USE flags
+// section containing a bubble chart of popular USE flags
+func Default(w http.ResponseWriter, r *http.Request) {
+	userPreferences := utils2.GetUserPreferences(r)
+	if userPreferences.Useflags.Layout == "bubble" {
+		http.Redirect(w, r, "/useflags/popular", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/useflags/search", http.StatusSeeOther)
+	}
+}

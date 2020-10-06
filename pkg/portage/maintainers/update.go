@@ -135,7 +135,7 @@ func contains(element string, elements []string) bool {
 	return false
 }
 
-func updateStatus(){
+func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "maintainers",
 		LastUpdate: time.Now(),

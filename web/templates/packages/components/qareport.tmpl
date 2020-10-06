@@ -10,13 +10,15 @@
 
                             {{ if .Package.PkgCheckResults }}
                                 {{ range $.Package.PkgCheckResults }}
-                                    {{if not .Version}}
-                                        <li class="list-group-item">
-                                            <strong>{{ .Class }}</strong><br/>
-                                            <span class="kk-version kk-cell-sep-right text-muted">
-                                        {{ .Message }}
-                                    </span>
-                                        </li>
+                                    {{if $.UserPreferences.ContainsPkgcheckClass .Class}}
+                                        {{if not .Version}}
+                                            <li class="list-group-item">
+                                                <strong>{{ .Class }}</strong><br/>
+                                                <span class="kk-version kk-cell-sep-right text-muted">
+                                            {{ .Message }}
+                                        </span>
+                                            </li>
+                                        {{end}}
                                     {{end}}
                                 {{end}}
                             {{end}}
@@ -30,12 +32,14 @@
 
                                 {{ if .PkgCheckResults }}
                                     {{ range .PkgCheckResults }}
-                                        <li class="list-group-item">
-                                            <strong>{{ .Class }}</strong><br/>
-                                            <span class="kk-version kk-cell-sep-right text-muted">
-                                        {{ .Message }}
-                                    </span>
-                                        </li>
+                                        {{if $.UserPreferences.ContainsPkgcheckClass .Class}}
+                                            <li class="list-group-item">
+                                                <strong>{{ .Class }}</strong><br/>
+                                                <span class="kk-version kk-cell-sep-right text-muted">
+                                                {{ .Message }}
+                                                </span>
+                                            </li>
+                                        {{end}}
                                     {{end}}
                                 {{end}}
                             </ul>

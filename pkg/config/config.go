@@ -26,6 +26,10 @@ func PostgresPort() string {
 	return getEnv("SOKO_POSTGRES_PORT", "5432")
 }
 
+func DevMode() string {
+	return getEnv("SOKO_DEVMODE", "false")
+}
+
 func Debug() string {
 	return getEnv("SOKO_DEBUG", "false")
 }

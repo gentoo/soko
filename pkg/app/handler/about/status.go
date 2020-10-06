@@ -15,8 +15,8 @@ func Status(w http.ResponseWriter, r *http.Request) {
 		template.Must(
 			template.New("status").
 				Funcs(template.FuncMap{
-					"timeSince" : time.Since,
-			}).
+					"timeSince": time.Since,
+				}).
 				ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/about/status.tmpl"))
 
@@ -24,12 +24,12 @@ func Status(w http.ResponseWriter, r *http.Request) {
 	database.DBCon.Model(&applicationData).Select()
 
 	templates.ExecuteTemplate(w, "status.tmpl", struct {
-		Header      models.Header
-		Application models.Application
+		Header       models.Header
+		Application  models.Application
 		Applications []*models.Application
 	}{
-		Header:      models.Header{Title: "About – ", Tab: "about"},
-		Application: utils.GetApplicationData(),
+		Header:       models.Header{Title: "About – ", Tab: "about"},
+		Application:  utils.GetApplicationData(),
 		Applications: applicationData,
 	})
 }

@@ -32,10 +32,7 @@
         </div>
         <div class="col-12">
             <li class="list-group">
-                {{range .Versions}}
-                    {{template "changedversion" .}}
-                {{end}}
-
+                {{template "changedversions" .}}
             </li>
 
 

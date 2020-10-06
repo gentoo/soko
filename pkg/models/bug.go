@@ -16,7 +16,7 @@ type PackageToBug struct {
 }
 
 type VersionToBug struct {
-	Id          string `pg:",pk"`
-	VersionId   string
-	BugId       string
+	Id        string `pg:",pk"`
+	VersionId string
+	BugId     string
 }

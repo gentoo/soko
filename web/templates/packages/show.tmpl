@@ -23,7 +23,11 @@
         {{else if eq .PageName "reverse-dependencies"}}
             {{template "reverse-dependencies" .}}
         {{else if eq .PageName "changelog"}}
-            {{template "changelog" .}}
+            <div class="row">
+                <div class="col-md-9">
+                    {{template "changelog" .}}
+                </div>
+            </div>
         {{end}}
     </div>
 </div>

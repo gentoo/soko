@@ -18,17 +18,9 @@
 
                         <div class="col-md-12 pt-4 mt-1">
                             <nav class="nav kk-package-nav">
-                                <a class="nav-link {{if eq .Arch "alpha"}}active{{end}}" href="/arches/alpha/keyworded">alpha</a>
-                                <a class="nav-link {{if eq .Arch "amd64"}}active{{end}}" href="/arches/amd64/keyworded">amd64</a>
-                                <a class="nav-link {{if eq .Arch "arm"}}active{{end}}" href="/arches/arm/keyworded">arm</a>
-                                <a class="nav-link {{if eq .Arch "arm64"}}active{{end}}" href="/arches/arm64/keyworded">arm64</a>
-                                <a class="nav-link {{if eq .Arch "hppa"}}active{{end}}" href="/arches/hppa/keyworded">hppa</a>
-                                <a class="nav-link {{if eq .Arch "ia64"}}active{{end}}" href="/arches/ia64/keyworded">ia64</a>
-                                <a class="nav-link {{if eq .Arch "ppc"}}active{{end}}" href="/arches/ppc/keyworded">ppc</a>
-                                <a class="nav-link {{if eq .Arch "ppc64"}}active{{end}}" href="/arches/ppc64/keyworded">ppc64</a>
-                                <a class="nav-link {{if eq .Arch "sparc"}}active{{end}}" href="/arches/sparc/keyworded">sparc</a>
-                                <a class="nav-link {{if eq .Arch "x86"}}active{{end}}" href="/arches/x86/keyworded">x86</a>
-
+                                {{range $.UserPreferences.Arches.Visible}}
+                                    <a class="nav-link {{if eq $.Arch .}}active{{end}}" href="/arches/{{.}}/{{$.UserPreferences.Arches.DefaultPage}}">{{.}}</a>
+                                {{end}}
                             </nav>
                         </div>
                     </div>

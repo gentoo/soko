@@ -1,0 +1,44 @@
+{{define "maintainers"}}
+    <form method="post" action="/user/preferences/maintainers/edit">
+        <div class="row">
+            <div class="col-12">
+            <h3 class="mt-0" id="qa-report">Include Project Packages</h3>
+                <div class="form-check form-check-inline" style="text-overflow: ellipsis;overflow: hidden; width: 100%;">
+                    <input type="checkbox" id="include-packages" name="include-packages" value="true" {{if $.UserPreferences.Maintainers.IncludeProjectPackages }}checked{{end}} />
+                    <label class="form-check-label ml-1" for="include-packages" style="overflow:hidden;text-overflow: ellipsis;" title="">Include packages of projects the maintainer is part of</label>
+                </div>
+                <i>If this option is enabled, all packages, QA reports, pull requests and bugs of projects a maintainer is part of will be displayed as well on the maintainer page. That is, if <i>Larry</i> is part of the <i>Python</i> project, all packages, QA reports, pull requests and bugs of the Python project will be displayed as well on the maintainer page of <i>Larry</i>.<br/>Below you can furthermore specify projects that will be excluded on the maintainer page. E.g. if Larry is furthermore part of the proxy-maintainers project, and the project is marked below, packages of the proxy maintainers project won't be shown on Larry's maintainer page.</i>
+            </div>
+
+
+            <div class="col-12">
+                <h3 class="mt-4 pt-3" id="qa-report">Excluded Projects</h3>
+            </div>
+            <div class="col-3">
+                {{range $index, $project := .Projects}}
+                <ul class="list-group mb-2">
+                    <li class="list-group-item">
+                        <div class="form-check form-check-inline" style="text-overflow: ellipsis;overflow: hidden; width: 100%;height:21px;">
+                            <input type="checkbox" id="excluded-projects-{{$project.Email}}" name="excluded-projects" value="{{$project.Email}}" {{if (Contains $.UserPreferences.Maintainers.ExcludedProjects $project.Email) }}checked{{end}}/>
+                            <label class="form-check-label ml-1" for="excluded-projects-{{$project.Email}}" style="overflow:hidden;text-overflow: ellipsis;height:21px;" title="{{$project.Name}}">{{$project.Name}}</label>
+                        </div>
+                    </li>
+                </ul>
+                    {{if eq $index 40}}
+                        </div><div class="col-3">
+                    {{else if eq $index 81}}
+                        </div><div class="col-3">
+                    {{else if eq $index 122}}
+                        </div><div class="col-3">
+                    {{end}}
+                {{end}}
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="float-right btn btn-sm btn-primary">Save</button>
+                <a class="float-right btn btn-sm btn-outline-danger mr-2" href="/user/preferences/maintainers/reset">Reset to Defaults</a>
+            </div>
+
+        </div>
+    </form>
+{{end}}

@@ -3,6 +3,7 @@ package maintainer
 import (
 	"github.com/go-pg/pg/v9/orm"
 	"net/http"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"sort"
@@ -26,6 +27,17 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Email: maintainerEmail,
 	}
 	database.DBCon.Model(&maintainer).WherePK().Relation("Project").Relation("Projects").Select()
+
+	userPreferences := utils.GetUserPreferences(r)
+	if userPreferences.Maintainers.IncludeProjectPackages && maintainer.Projects != nil && len(maintainer.Projects) > 0 {
+		var whereParts []string
+		for _, proj := range maintainer.Projects {
+			if !strings.Contains(strings.Join(userPreferences.Maintainers.ExcludedProjects, ","), proj.Email) {
+				whereParts = append(whereParts, "maintainers @> '[{\"Email\": \""+proj.Email+"\"}]'")
+			}
+		}
+		whereClause = strings.Join(whereParts, " OR ")
+	}
 
 	var gpackages []*models.Package
 	query := database.DBCon.Model(&gpackages).

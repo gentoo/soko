@@ -168,7 +168,6 @@ func importBugs(source string) {
 
 }
 
-
 func CalculateAffectedVersions(bugId, versionSpecifier string) {
 
 	packageAtom := versionSpecifierToPackageAtom(versionSpecifier)
@@ -194,9 +193,9 @@ func CalculateAffectedVersions(bugId, versionSpecifier string) {
 
 	for _, version := range versions {
 		versionToBug := &models.VersionToBug{
-			Id:           version.Id + "-" + bugId,
-			VersionId:    version.Id,
-			BugId:        bugId,
+			Id:        version.Id + "-" + bugId,
+			VersionId: version.Id,
+			BugId:     bugId,
 		}
 
 		_, err := database.DBCon.Model(versionToBug).OnConflict("(id) DO UPDATE").Insert()
@@ -205,7 +204,6 @@ func CalculateAffectedVersions(bugId, versionSpecifier string) {
 		logger.Error.Println(err)
 	}
 }
-
 
 // comparedVersions computes and returns all versions that are >=, >, <= or < than then given version
 func comparedVersions(operator string, versionSpecifier string, packageAtom string) []*models.Version {
@@ -288,7 +286,6 @@ func allVersions(versionSpecifier string, packageAtom string) []*models.Version 
 	return versions
 }
 
-
 func readCSVFromUrl(url string) ([][]string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -321,7 +318,7 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	return gpackage
 }
 
-func updateStatus(){
+func updateStatus() {
 
 	database.Connect()
 	defer database.DBCon.Close()

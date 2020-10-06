@@ -35,13 +35,33 @@
                         {{end}}
                         <div class="col-md-12 pt-4 mt-1">
                             <nav class="nav kk-package-nav">
-                                <a class="nav-link {{if eq .PageName "overview"}}active{{end}}" href="/packages/{{.Package.Atom}}"><i class="fa fa-info mr-1" aria-hidden="true"></i> Overview</a>
-                                <a class="nav-link {{if eq .PageName "dependencies" "reverse-dependencies"}}active{{end}}" href="/packages/{{.Package.Atom}}/dependencies"><i class="fa fa-link"></i> Dependencies</a>
-                                <a class="nav-link {{if eq .PageName "qa-report"}}active{{end}}" href="/packages/{{.Package.Atom}}/qa-report"><i class="fa fa-fw fa-chain-broken"></i> QA report </a>
-                                <a class="nav-link {{if eq .PageName "pull-requests"}}active{{end}}" href="/packages/{{.Package.Atom}}/pull-requests"><span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span> Pull requests <span class="ml-1 badge badge-pill kk-misc-badge">{{len .Package.PullRequests}}</span></a>
-                                <a class="nav-link {{if eq .PageName "bugs"}}active{{end}}" href="/packages/{{.Package.Atom}}/bugs"><i class="fa fa-bug" aria-hidden="true"></i> Bugs <span class="ml-1 badge badge-pill kk-misc-badge">{{$non_security_bugs}}</span></a>
-                                <a class="nav-link {{if eq .PageName "security"}}active{{end}}" href="/packages/{{.Package.Atom}}/security"><i class="fa fa-shield" aria-hidden="true"></i> Security <span class="ml-1 badge badge-pill kk-misc-badge">{{$security_bugs}}</span></a>
-                                <a class="nav-link {{if eq .PageName "changelog"}}active{{end}}" href="/packages/{{.Package.Atom}}/changelog"><i class="fa fa-fw fa-history"></i> Changelog</a>
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Overview"}}
+                                    <a class="nav-link {{if eq .PageName "overview"}}active{{end}}" href="/packages/{{.Package.Atom}}"><i class="fa fa-info mr-1" aria-hidden="true"></i> Overview</a>
+                                {{end}}
+
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Dependencies"}}
+                                    <a class="nav-link {{if eq .PageName "dependencies" "reverse-dependencies"}}active{{end}}" href="/packages/{{.Package.Atom}}/{{.UserPreferences.Packages.Dependencies.Default}}"><i class="fa fa-link"></i> Dependencies</a>
+                                {{end}}
+
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "QA report"}}
+                                    <a class="nav-link {{if eq .PageName "qa-report"}}active{{end}}" href="/packages/{{.Package.Atom}}/qa-report"><i class="fa fa-fw fa-chain-broken"></i> QA report </a>
+                                {{end}}
+
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Pull requests"}}
+                                    <a class="nav-link {{if eq .PageName "pull-requests"}}active{{end}}" href="/packages/{{.Package.Atom}}/pull-requests"><span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span> Pull requests <span class="ml-1 badge badge-pill kk-misc-badge">{{len .Package.PullRequests}}</span></a>
+                                {{end}}
+
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Bugs"}}
+                                    <a class="nav-link {{if eq .PageName "bugs"}}active{{end}}" href="/packages/{{.Package.Atom}}/bugs"><i class="fa fa-bug" aria-hidden="true"></i> Bugs <span class="ml-1 badge badge-pill kk-misc-badge">{{$non_security_bugs}}</span></a>
+                                {{end}}
+
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Security"}}
+                                    <a class="nav-link {{if eq .PageName "security"}}active{{end}}" href="/packages/{{.Package.Atom}}/security"><i class="fa fa-shield" aria-hidden="true"></i> Security <span class="ml-1 badge badge-pill kk-misc-badge">{{$security_bugs}}</span></a>
+                                {{end}}
+
+                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Changelog"}}
+                                    <a class="nav-link {{if eq .PageName "changelog"}}active{{end}}" href="/packages/{{.Package.Atom}}/changelog"><i class="fa fa-fw fa-history"></i> Changelog</a>
+                                {{end}}
                             </nav>
                         </div>
                     </div>

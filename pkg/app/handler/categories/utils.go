@@ -52,11 +52,11 @@ func renderCategoryTemplate(page string, data interface{}, w http.ResponseWriter
 		template.Must(
 			template.New(page).
 				Funcs(template.FuncMap{
-					"add" : func(a, b int) int {
+					"add": func(a, b int) int {
 						return a + b
 					},
-			}).
-			ParseGlob("web/templates/layout/*.tmpl")).
+				}).
+				ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/categories/*.tmpl"))
 
 	templates.ExecuteTemplate(w, page+".tmpl", data)

@@ -85,27 +85,29 @@ func renderPackageTemplates(page string, funcMap template.FuncMap, data interfac
 						Funcs(funcMap).
 						ParseGlob("web/templates/layout/*.tmpl")).
 					ParseGlob("web/templates/arches/archesheader.tmpl")).
-				ParseGlob("web/templates/packages/changedVersionRow.tmpl")).
+				ParseGlob("web/templates/arches/changedVersionRows.tmpl")).
 			ParseGlob("web/templates/arches/changedVersions.tmpl"))
 
 	templates.ExecuteTemplate(w, page+".tmpl", data)
 }
 
 // CreateFeedData creates the data used in changedVersions template
-func createFeedData(arch string, name string, feedtype string, versions []*models.Version) interface{} {
+func createFeedData(arch string, name string, feedtype string, versions []*models.Version, userPreferences models.UserPreferences) interface{} {
 	return struct {
-		Header      models.Header
-		Arch        string
-		Name        string
-		FeedName    string
-		Versions    []*models.Version
-		Application models.Application
+		Header          models.Header
+		Arch            string
+		Name            string
+		FeedName        string
+		Versions        []*models.Version
+		Application     models.Application
+		UserPreferences models.UserPreferences
 	}{
-		Header:      models.Header{Title: "Architectures – ", Tab: "arches"},
-		Arch:        arch,
-		Name:        name,
-		FeedName:    feedtype,
-		Versions:    versions,
-		Application: utils.GetApplicationData(),
+		Header:          models.Header{Title: "Architectures – ", Tab: "arches"},
+		Arch:            arch,
+		Name:            name,
+		FeedName:        feedtype,
+		Versions:        versions,
+		Application:     utils.GetApplicationData(),
+		UserPreferences: userPreferences,
 	}
 }

@@ -89,7 +89,7 @@ func deleteAllPkgCheckResults() {
 	}
 }
 
-func updateStatus(){
+func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "pkgcheck",
 		LastUpdate: time.Now(),

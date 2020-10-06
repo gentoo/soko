@@ -6,28 +6,20 @@
         <div class="table-responsive border-0">
             <table class="table table-bordered kk-versions-table mb-0 overflow-hidden border-0">
                 <thead class="border-0">
-                <tr class="border-0">
-                    <th class="kk-version border-left-0 border-top-0">Version</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">amd64</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">x86</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">alpha</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">arm</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">arm64</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">hppa</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">ia64</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">ppc</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">ppc64</th>
-                    <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">sparc</th>
-                </tr>
+                    <tr class="border-0">
+                        <th class="kk-version border-left-0 border-top-0">Version</th>
+                        {{ if eq .UserPreferences.Packages.Overview.EAPI "column"}}
+                            <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">EAPI</th>
+                        {{end}}
+                        {{range .UserPreferences.Packages.Overview.Keywords}}
+                            <th class="kk-keyword-header kk-keyword border-left-0 border-top-0">{{.}}</th>
+                        {{end}}
+                    </tr>
                 </thead>
                 <tbody>
-
-                    {{range $index, $element := .Package.Versions}}
-                        {{template "versionrow" $element}}
-                    {{end}}
+                    {{template "versionrows" .}}
                 </tbody>
             </table>
         </div>
     </div>
 {{end}}
-<

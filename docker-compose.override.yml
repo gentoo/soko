@@ -14,6 +14,7 @@ services:
         target: "/go/src/soko"
     environment:
       SOKO_LOG_FILE: '/var/log/soko/web.log'
+      SOKO_DEVMODE: 'true'
 #      SOKO_DEBUG: 'true'
     ports:
       - 127.0.0.1:5000:5000
@@ -38,6 +39,7 @@ services:
         target: "/var/log/soko"
     environment:
       SOKO_LOG_FILE: '/var/log/soko/updater.log'
+      SOKO_DEVMODE: 'true'
 #      SOKO_DEBUG: 'true'
     depends_on:
       - db
