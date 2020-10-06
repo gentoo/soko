@@ -6,13 +6,13 @@
                 <span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{ $version.Restricts }}">{{ formatRestricts $version.Restricts }}</span>
             {{ end }}
             {{ if eq $.UserPreferences.Packages.Overview.EAPI "inline"}}
-                <span style="background-color: white;border:1px solid grey;color: grey;" class="badge badge-danger kk-restrict-label" title="The following features are restricted:">EAPI 5</span>
+                <span style="background-color: white;border:1px solid grey;color: grey;" class="badge badge-danger kk-restrict-label" title="The following features are restricted:">EAPI {{$version.EAPI}}</span>
             {{end}}
         </td>
 
         {{ if eq $.UserPreferences.Packages.Overview.EAPI "column"}}
             <td class="text-center">
-                6
+                {{$version.EAPI}}
             </td>
         {{end}}
 
