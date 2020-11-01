@@ -291,8 +291,10 @@ func maskVersions(versionSpecifier string, versions []*models.Version) {
 
 		_, err := database.DBCon.Model(maskToVersion).OnConflict("(id) DO UPDATE").Insert()
 
-		logger.Error.Println("Error while inserting mask to version entry")
-		logger.Error.Println(err)
+		if err != nil{
+			logger.Error.Println("Error while inserting mask to version entry")
+			logger.Error.Println(err)
+		}
 	}
 }
 
