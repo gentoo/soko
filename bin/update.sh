@@ -7,7 +7,7 @@ update_repository(){
       git clone https://anongit.gentoo.org/git/repo/gentoo.git
   else
       cd /mnt/packages-tree/gentoo/ || exit 1
-      git pull --rebase &>/dev/null
+      git pull origin master --rebase &>/dev/null
   fi
 }
 
