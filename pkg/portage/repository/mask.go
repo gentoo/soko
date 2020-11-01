@@ -250,7 +250,7 @@ func allRevisions(versionSpecifier string, packageAtom string) []*models.Version
 func exaktVersion(versionSpecifier string, packageAtom string) []*models.Version {
 	var versions []*models.Version
 	database.DBCon.Model(&versions).
-		Where("id = ?", versionSpecifier).
+		Where("id = ?", strings.Replace(versionSpecifier, "=", "", 1)).
 		Select()
 
 	return versions
