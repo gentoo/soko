@@ -391,6 +391,8 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "http://freshmeat.sourceforge.net/projects/" + remoteId.Id
 	case "gitlab":
 		return "https://gitlab.com/" + remoteId.Id
+	case "heptapod":
+		return "https://foss.heptapod.net/" + remoteId.Id
 	default:
 		return ""
 	}
