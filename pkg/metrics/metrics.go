@@ -52,6 +52,9 @@ var (
 
 func Update(){
 
+	database.Connect()
+	defer database.DBCon.Close()
+
 	var applicationData []*models.Application
 	database.DBCon.Model(&applicationData).Select()
 

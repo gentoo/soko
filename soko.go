@@ -46,11 +46,10 @@ func main() {
 
 	flag.Parse()
 
-	if *selfchecks && *serve {
+	if *selfchecks {
 		logger.Info.Println("Enabling periodical selfcheck")
 		go runSelfChecks()
-	} else if *selfchecks {
-		logger.Info.Println("Warning: selfchecks will only work if --serve is enabled as well.")
+		selfcheck.Serve()
 	}
 	if *update {
 		logger.Info.Println("Updating package data")
