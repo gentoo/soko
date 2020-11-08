@@ -35,6 +35,8 @@ func resetMetrics(){
 	for _, metric := range metrics.MissingVersions {
 		prometheus.Unregister(metric)
 	}
+	metrics.MissingPackages = map[string]prometheus.Gauge{}
+	metrics.MissingVersions = map[string]prometheus.Gauge{}
 }
 
 
