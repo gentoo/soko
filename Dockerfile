@@ -17,4 +17,4 @@ COPY --from=assetsbuilder /go/src/soko/assets /go/src/soko/assets
 COPY --from=builder /go/src/soko/bin /go/src/soko/bin
 COPY --from=builder /go/src/soko/pkg /go/src/soko/pkg
 COPY --from=builder /go/src/soko/web /go/src/soko/web
-ENTRYPOINT ["/go/src/soko/bin/soko", "--serve"]
+ENTRYPOINT ["/go/src/soko/bin/soko", "--enable-selfchecks", "--serve"]

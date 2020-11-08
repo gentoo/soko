@@ -6,6 +6,10 @@ func PortDir() string {
 	return getEnv("SOKO_PORT_DIR", "/mnt/packages-tree/gentoo")
 }
 
+func SelfCheckPortDir() string {
+	return getEnv("SOKO_SELFCHECK_PORT_DIR", "/mnt/selfcheck-packages-tree")
+}
+
 func PostgresUser() string {
 	return getEnv("SOKO_POSTGRES_USER", "root")
 }

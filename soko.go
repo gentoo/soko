@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/jasonlvhit/gocron"
 	"io"
 	"io/ioutil"
 	"os"
@@ -16,6 +17,7 @@ import (
 	"soko/pkg/portage/pkgcheck"
 	"soko/pkg/portage/projects"
 	"soko/pkg/portage/repology"
+	"soko/pkg/selfcheck"
 	"time"
 )
 
@@ -28,6 +30,7 @@ func main() {
 	initLoggers(os.Stdout, errorLogFile)
 
 	serve := flag.Bool("serve", false, "Start serving the application")
+	selfchecks := flag.Bool("enable-selfchecks", false, "Perform selfchecks periodicals to monitor the consistency of the data")
 	update := flag.Bool("update", false, "Perform an incremental update of the package data")
 	fullupdate := flag.Bool("fullupdate", false, "Perform a full update of the package data")
 	updateOutdatedPackages := flag.Bool("update-outdated-packages", false, "Update the repology.org data of outdated packages")
@@ -43,6 +46,12 @@ func main() {
 
 	flag.Parse()
 
+	if *selfchecks && *serve {
+		logger.Info.Println("Enabling periodical selfcheck")
+		go runSelfChecks()
+	} else if *selfchecks {
+		logger.Info.Println("Warning: selfchecks will only work if --serve is enabled as well.")
+	}
 	if *update {
 		logger.Info.Println("Updating package data")
 		portage.Update()
@@ -108,4 +117,9 @@ func initLoggers(infoHandler io.Writer, errorHandler io.Writer) {
 // wait for postgres to come up
 func waitForPostgres() {
 	time.Sleep(5 * time.Second)
+}
+
+func runSelfChecks() {
+	gocron.Every(1).Hour().From(gocron.NextTick()).Do(selfcheck.AllPackages)
+	<- gocron.Start()
 }
