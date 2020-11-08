@@ -43,6 +43,25 @@ services:
 #      SOKO_DEBUG: 'true'
     depends_on:
       - db
+  selfcheck:
+    image: ${SOKO_IMAGE:-gentoo/soko:latest}
+    volumes:
+      - type: "bind"
+        source: "/mnt/selfcheck-packages-tree"
+        target: "/mnt/selfcheck-packages-tree"
+      - type: "bind"
+        source: "/var/log/soko"
+        target: "/var/log/soko"
+    ports:
+      - 127.0.0.1:5001:5000
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    restart: always
+    environment:
+      SOKO_LOG_FILE: '/var/log/soko/selfcheck.log'
+    entrypoint: /go/src/soko/bin/soko --enable-selfchecks
+    depends_on:
+      - db
   db:
     image: postgres:12
     restart: always
