@@ -5,6 +5,9 @@ services:
     image: ${SOKO_IMAGE:-gentoo/soko:latest}
     volumes:
       - type: "bind"
+        source: "/mnt/selfcheck-packages-tree"
+        target: "/mnt/selfcheck-packages-tree"
+      - type: "bind"
         source: "/var/log/soko"
         target: "/var/log/soko"
     ports:
