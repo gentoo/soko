@@ -5,7 +5,6 @@ package repository
 import (
 	"regexp"
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"soko/pkg/selfcheck/storage"
@@ -40,14 +39,6 @@ func updateModifiedVersion(changedFile string) {
 
 	atom := category + "/" + packagename
 	id := atom + "-" + version
-
-
-	if(strings.Contains(changedFile, "postfix-3.6_pre20201104.ebuild")){
-		logger.Info.Println("=================================================================================")
-		logger.Info.Println("postfix-3.6_pre20201104.ebuild")
-		logger.Info.Println(id)
-		logger.Info.Println("=================================================================================")
-	}
 
 	version_metadata, _ := utils.ReadLines(config.PortDir() + "/metadata/md5-cache/" + id)
 
