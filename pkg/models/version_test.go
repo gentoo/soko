@@ -22,6 +22,7 @@ func TestVersion_GreaterThan(t *testing.T) {
 		{"1b_p1", "1_p1", true},
 		{"1.1b", "1.1", true},
 		{"12.2.5", "12.2b", true},
+		{"0.7.8_p0-r100", "0.7.8_p0-r2", true},
 
 		// left version should be equal to the right version
 		{"4.0", "4.0", false},
