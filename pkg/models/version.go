@@ -3,6 +3,7 @@
 package models
 
 import (
+	"fmt"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -53,6 +54,15 @@ func (v *Version) GreaterThan(other Version) bool {
 	versionIdentifierA := v.computeVersionIdentifier()
 	versionIdentifierB := other.computeVersionIdentifier()
 
+	if(v.Version == "0.7.8_p0-r100"){
+		fmt.Println("versionIdentifierA")
+		fmt.Println(versionIdentifierA)
+		fmt.Println("versionIdentifierB")
+		fmt.Println(versionIdentifierB)
+	}
+
+
+
 	// compare the numeric part
 	numericPartsA := strings.Split(versionIdentifierA.NumericPart, ".")
 	numericPartsB := strings.Split(versionIdentifierB.NumericPart, ".")
@@ -94,7 +104,9 @@ func (v *Version) GreaterThan(other Version) bool {
 	// compare the suffixes
 	for i := 0; i < min(len(versionIdentifierA.Suffixes), len(versionIdentifierB.Suffixes)); i++ {
 		if versionIdentifierA.Suffixes[i].Name == versionIdentifierB.Suffixes[i].Name {
-			return versionIdentifierA.Suffixes[i].Number > versionIdentifierB.Suffixes[i].Number
+			if versionIdentifierA.Suffixes[i].Number != versionIdentifierB.Suffixes[i].Number {
+				return versionIdentifierA.Suffixes[i].Number > versionIdentifierB.Suffixes[i].Number
+			}
 		} else {
 			return getSuffixOrder(versionIdentifierA.Suffixes[i].Name) > getSuffixOrder(versionIdentifierB.Suffixes[i].Name)
 		}
