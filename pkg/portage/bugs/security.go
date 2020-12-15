@@ -200,8 +200,9 @@ func CalculateAffectedVersions(bugId, versionSpecifier string) {
 
 		_, err := database.DBCon.Model(versionToBug).OnConflict("(id) DO UPDATE").Insert()
 
-		logger.Error.Println("Error while inserting version to bug entry")
-		logger.Error.Println(err)
+		if err != nil {
+			logger.Error.Printf("Error while inserting version to bug entry: %v", err)
+		}
 	}
 }
 
