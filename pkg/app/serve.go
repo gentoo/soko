@@ -7,6 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"soko/pkg/api/graphql/generated"
 	"soko/pkg/api/graphql/graphiql"
 	"soko/pkg/api/graphql/resolvers"
