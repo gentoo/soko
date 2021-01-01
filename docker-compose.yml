@@ -1,4 +1,4 @@
-version: '3.2'
+version: '2.4'
 
 services:
   http-serving:
@@ -16,6 +16,7 @@ services:
       SOKO_LOG_FILE: '/var/log/soko/web.log'
     depends_on:
       - db
+    mem_limit: 4G
   updater:
     image: ${SOKO_UPDATER_IMAGE:-gentoo/soko-updater:latest}
     volumes:
