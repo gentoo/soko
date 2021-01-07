@@ -3,6 +3,7 @@
 : "${GIT_URI:=https://anongit.gentoo.org/git/repo/gentoo.git}"
 : "${GIT_BRANCH:=master}"
 : "${GIT_REMOTE:=origin}"
+: "${JOBS:=6}"
 
 update_repository(){
   # This is the copy of the tree used to run gpackages against.
@@ -30,10 +31,10 @@ update_md5cache(){
 
   #echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
 
-  egencache -j 6 --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
+  egencache -j "${JOBS}" --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
   location = /mnt/packages-tree/gentoo' --update
 
-  egencache -j 6 --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
+  egencache -j "${JOBS}" --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
   location = /mnt/packages-tree/gentoo' --update-use-local-desc
 }
 
