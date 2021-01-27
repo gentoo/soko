@@ -35,7 +35,8 @@
                 </form>
             </div>
 
-            {{if .Useflags}}
+						{{if .Search}}
+	            {{if .Useflags}}
                 <h2>USE Flag Search Results <small>for {{ .Search }}</small></h2>
 
                 <div class="card border-0">
@@ -48,8 +49,9 @@
                         {{end}}
                     </div>
                 </div>
-            {{end}}
-
+		          {{else}}
+								<h2>No results found <small> for {{ .Search }}</small></h2>
+						{{end}}
 
         </div>
     </div>
