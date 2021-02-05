@@ -21,7 +21,7 @@ update_repository(){
           git remote set-url "${GIT_REMOTE}" "${GIT_URI}"
       fi
       git fetch --quiet --force "${GIT_REMOTE}" "${GIT_BRANCH}"
-      git reset --quiet --hard
+      git reset --quiet --hard "${GIT_REMOTE}"/"${GIT_BRANCH}"
   fi
 }
 
