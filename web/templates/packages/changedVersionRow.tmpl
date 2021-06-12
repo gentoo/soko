@@ -57,7 +57,7 @@
                 <div class="kk-version-card">
                     <p class="mb-2"><strong>{{.Version}}</strong><span class="kk-slot"> : {{.Slot}}</span> {{if .Restricts}}<span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{range .Restricts}}{{.}} {{end}}">{{formatRestricts .Restricts}}</span>{{end}}</p>
                     <p>
-                        {{ $arches := mkSlice "amd64" "x86" "alpha" "arm" "arm64" "hppa" "ia64" "ppc" "ppc64" "sparc" }}
+                        {{ $arches := mkSlice "amd64" "x86" "alpha" "arm" "arm64" "hppa" "ia64" "ppc" "ppc64" "riscv" "sparc" }}
                         {{ range $arches }}
                             {{if contains (print " " $.Keywords " ") (print " " . " ")}}
                                 <span class="label kk-keyword-stable" title="{{$.Version}} is testing on {{.}}">{{.}}</span>

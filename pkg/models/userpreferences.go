@@ -102,7 +102,7 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.General.LandingPageLayout = "classic"
 
 	userPreferences.Packages.Overview.Layout = "minimal"
-	userPreferences.Packages.Overview.Keywords = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "sparc"}
+	userPreferences.Packages.Overview.Keywords = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}
 	userPreferences.Packages.Overview.EAPI = "none"
 	userPreferences.Packages.Overview.ShowOutdated = true
 	userPreferences.Packages.Overview.MetadataFields = []string{"homepage", "upstream", "longdescription", "useflags", "license", "maintainers"}
@@ -126,7 +126,7 @@ func GetDefaultUserPreferences() UserPreferences {
 
 	userPreferences.Packages.Tabs.Visible = []string{"Overview", "Dependencies", "QA report", "Pull requests", "Bugs", "Security", "Changelog"}
 
-	userPreferences.Arches.Visible = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "sparc"}
+	userPreferences.Arches.Visible = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}
 	userPreferences.Arches.DefaultArch = "amd64"
 	userPreferences.Arches.DefaultPage = "keyworded"
 
