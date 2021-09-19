@@ -1,9 +1,8 @@
 #!/bin/bash
 
-: "${GIT_URI:=https://anongit.gentoo.org/git/repo/gentoo.git}"
+: "${GIT_URI:=https://anongit.gentoo.org/git/repo/sync/gentoo.git}"
 : "${GIT_BRANCH:=master}"
 : "${GIT_REMOTE:=origin}"
-: "${JOBS:=6}"
 
 update_repository(){
   # This is the copy of the tree used to run gpackages against.
@@ -25,19 +24,6 @@ update_repository(){
   fi
 }
 
-update_md5cache(){
-  mkdir -p /var/cache/pgo-egencache
-  cd /mnt/packages-tree/gentoo/ || exit 1
-
-  #echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
-
-  egencache -j "${JOBS}" --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
-  location = /mnt/packages-tree/gentoo' --update
-
-  egencache -j "${JOBS}" --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
-  location = /mnt/packages-tree/gentoo' --update-use-local-desc
-}
-
 fullupdate_database(){
   cd /mnt/packages-tree/gentoo/ || exit 1
   /go/src/soko/bin/soko --fullupdate
@@ -45,5 +31,4 @@ fullupdate_database(){
 
 
 update_repository
-update_md5cache
 fullupdate_database
