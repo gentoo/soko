@@ -6,7 +6,7 @@ RUN go get github.com/mcuadros/go-version
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
 
-FROM gentoo/stage3-amd64 as gentoobuilder
+FROM gentoo/stage3:amd64 as gentoobuilder
 # Need a portage tree to build, use last nights.
 COPY --from=gentoo/portage:latest /var/db/repos/gentoo /var/db/repos/gentoo
 # Sandbox doesn't work well in docker.

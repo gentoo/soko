@@ -42,7 +42,7 @@ build-tag:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
     - docker pull gentoo/portage:latest
-    - docker pull gentoo/stage3-amd64
+    - docker pull gentoo/stage3:amd64
     - docker build -t $IMAGE_TAG .
     - docker build -t $UPDATER_IMAGE_TAG -f Dockerfile.updater .
     - docker push $IMAGE_TAG
