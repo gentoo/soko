@@ -57,10 +57,6 @@ func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit s
 
 	commitLines = commitLines[7:]
 
-	if authorEmail == "repomirrorci@gentoo.org" || authorEmail == "repo-qa-checks@gentoo.org" {
-		return id
-	}
-
 	changedFiles := processChangedFiles(PrecedingCommits, PrecedingCommitsOffset, commitLines, id)
 
 	commit := &models.Commit{
