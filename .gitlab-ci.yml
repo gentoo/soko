@@ -53,15 +53,3 @@ go-test:
   image: golang:1.14.0
   script:
     - go test -v ./pkg/models/...
-
-include:
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: Container-Scanning.gitlab-ci.yml  
-  - template: SAST.gitlab-ci.yml
-  - template: DAST.gitlab-ci.yml
-
-variables:
-  DS_DISABLE_DIND: "true"
-  SAST_DISABLE_DIND: "true"
-  DAST_WEBSITE: https://packagestest.gentoo.org
-#  DAST_FULL_SCAN_ENABLED: "true"
