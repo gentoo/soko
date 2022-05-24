@@ -83,7 +83,7 @@ func updateModifiedPackage(changedFile string) {
 
 	longDescription := ""
 	for _, l := range pkgmetadata.LongdescriptionList {
-		if l.Language == "" {
+		if l.Language == "" || l.Language == "en" {
 			longDescription = l.Content
 		}
 	}
