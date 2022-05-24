@@ -368,31 +368,41 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 	case "bitbucket":
 		return "https://bitbucket.org/" + remoteId.Id
 	case "cpan":
-		return "https://metacpan.org/release/" + remoteId.Id
+		return "https://metacpan.org/dist/" + remoteId.Id
 	case "cpan-module":
 		return "https://metacpan.org/pod/" + remoteId.Id
-	case "freshmeat":
-		return "http://freshmeat.sourceforge.net/projects/" + remoteId.Id
+	case "cran":
+		return "https://cran.r-project.org/web/packages/" + remoteId.Id + "/"
+	case "ctan":
+		return "https://ctan.org/pkg/" + remoteId.Id
+	case "gentoo":
+		return "https://gitweb.gentoo.org/" + remoteId.Id + ".git/"
 	case "github":
 		return "https://github.com/" + remoteId.Id
 	case "gitlab":
 		return "https://gitlab.com/" + remoteId.Id
+	case "gitorious":
+		return "https://gitorious.org/" + remoteId.Id + "/"
 	case "google-code":
 		return "https://code.google.com/archive/p/" + remoteId.Id + "/"
 	case "heptapod":
 		return "https://foss.heptapod.net/" + remoteId.Id
 	case "launchpad":
 		return "https://launchpad.net/" + remoteId.Id
+	case "osdn":
+		return "https://osdn.net/projects/" + remoteId.Id + "/"
 	case "pear":
 		return "https://pear.php.net/package/" + remoteId.Id
+	case "pecl":
+		return "https://pecl.php.net/package/" + remoteId.Id
 	case "pypi":
 		return "https://pypi.org/project/" + remoteId.Id + "/"
 	case "rubygems":
 		return "https://rubygems.org/gems/" + remoteId.Id + "/"
 	case "sourceforge":
 		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
-	case "sourceforge-jp":
-		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
+	case "vim":
+		return "https://vim.org/scripts/script.php?script_id=" + remoteId.Id
 	default:
 		return ""
 	}
