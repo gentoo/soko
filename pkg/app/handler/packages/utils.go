@@ -257,7 +257,7 @@ func remoteIdLink(remoteId models.RemoteId) string {
 	case "sourcehut":
 		return "https://sr.ht/" + remoteId.Id + "/"
 	case "vim":
-		return "https://vim.org/scripts/script.php?script_id=" + remoteId.Id
+		return "https://www.vim.org/scripts/script.php?script_id=" + remoteId.Id
 	default:
 		return ""
 	}
