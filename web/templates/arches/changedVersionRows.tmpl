@@ -60,9 +60,9 @@
                         <p>
                             {{ range $.UserPreferences.Arches.Visible }}
                                 {{if contains (print " " $version.Keywords " ") (print " " . " ")}}
-                                    <span class="label kk-keyword-stable" title="{{$version.Version}} is testing on {{.}}">{{.}}</span>
+                                    <span class="label kk-keyword-stable" title="{{$version.Version}} is stable on {{.}}">{{.}}</span>
                                 {{else if contains (print " " $version.Keywords " ") (print "~" . " ")}}
-                                    <span class="label kk-keyword-testing" title="{{$version}} is stable on {{.}}">~{{.}}</span>
+                                    <span class="label kk-keyword-testing" title="{{$version}} is testing on {{.}}">~{{.}}</span>
                                 {{else}}
                                     <span class="label kk-keyword-unknown" title="{{$version.Version}} is unknown on {{.}}">?{{.}}</span>
                                 {{end}}
