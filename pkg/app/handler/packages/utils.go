@@ -375,6 +375,8 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://cran.r-project.org/web/packages/" + remoteId.Id + "/"
 	case "ctan":
 		return "https://ctan.org/pkg/" + remoteId.Id
+	case "freedesktop-gitlab":
+		return "https://gitlab.freedesktop.org/" + remoteId.Id + ".git/"
 	case "gentoo":
 		return "https://gitweb.gentoo.org/" + remoteId.Id + ".git/"
 	case "github":
@@ -383,6 +385,8 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://gitlab.com/" + remoteId.Id
 	case "gitorious":
 		return "https://gitorious.org/" + remoteId.Id + "/"
+	case "gnome-gitlab":
+		return "https://gitlab.gnome.org/" + remoteId.Id + ".git/"
 	case "google-code":
 		return "https://code.google.com/archive/p/" + remoteId.Id + "/"
 	case "heptapod":
