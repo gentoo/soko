@@ -383,12 +383,12 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://github.com/" + remoteId.Id
 	case "gitlab":
 		return "https://gitlab.com/" + remoteId.Id
-	case "gitorious":
-		return "https://gitorious.org/" + remoteId.Id + "/"
 	case "gnome-gitlab":
 		return "https://gitlab.gnome.org/" + remoteId.Id + ".git/"
 	case "google-code":
 		return "https://code.google.com/archive/p/" + remoteId.Id + "/"
+	case "hackage":
+		return "https://hackage.haskell.org/package/" + remoteId.Id
 	case "heptapod":
 		return "https://foss.heptapod.net/" + remoteId.Id
 	case "launchpad":
@@ -405,6 +405,8 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://rubygems.org/gems/" + remoteId.Id + "/"
 	case "sourceforge":
 		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
+	case "sourcehut":
+		return "https://sr.ht/" + remoteId.Id + "/"
 	case "vim":
 		return "https://vim.org/scripts/script.php?script_id=" + remoteId.Id
 	default:
