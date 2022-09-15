@@ -383,8 +383,6 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://github.com/" + remoteId.Id
 	case "gitlab":
 		return "https://gitlab.com/" + remoteId.Id
-	case "gitorious":
-		return "https://gitorious.org/" + remoteId.Id + "/"
 	case "gnome-gitlab":
 		return "https://gitlab.gnome.org/" + remoteId.Id + ".git/"
 	case "google-code":
