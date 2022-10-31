@@ -50,7 +50,10 @@ func CreateSchema() error {
 		if err != nil {
 			return err
 		}
-
+		err := DBCon.Exec("CREATE EXTENSION pg_trgm;")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
