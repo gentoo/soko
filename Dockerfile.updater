@@ -12,8 +12,9 @@ COPY --from=gentoo/portage:latest /var/db/repos/gentoo /var/db/repos/gentoo
 # Sandbox doesn't work well in docker.
 ENV FEATURES="-userpriv -usersandbox -sandbox"
 ENV USE="-bindist"
+ENV PORTAGE_BINHOST="https://gentoo.osuosl.org/experimental/amd64/binpkg/default/linux/17.1/x86-64/"
 RUN emerge -C openssh
-RUN emerge --quiet-build dev-vcs/git
+RUN emerge -v -g --quiet-build dev-vcs/git
 RUN echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
 RUN rm -rf /var/db/repos/gentoo
 
