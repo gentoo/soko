@@ -6,6 +6,9 @@ stages:
 
 build:
   stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.1-debug
+    entrypoint: [""]
   except:
     - tags
   variables:
@@ -13,21 +16,24 @@ build:
     UPDATER_IMAGE_TAG: $CI_REGISTRY_IMAGE/updater-$CI_COMMIT_BRANCH:$CI_COMMIT_SHA
     LATEST_IMAGE_TAG: $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest
     LATEST_UPDATER_IMAGE_TAG: $CI_REGISTRY_IMAGE/updater-$CI_COMMIT_BRANCH:latest
-  script:
+  before_script:
     - echo $IMAGE_TAG
     - echo $UPDATER_IMAGE_TAG
     - echo $LATEST_IMAGE_TAG
     - echo $LATEST_UPDATER_IMAGE_TAG
-    - docker info
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
-    - docker pull gentoo/portage:latest
-    - docker pull gentoo/stage3-amd64
-    - docker build --no-cache -t $IMAGE_TAG -t $LATEST_IMAGE_TAG .
-    - docker build --no-cache -t $UPDATER_IMAGE_TAG -t $LATEST_UPDATER_IMAGE_TAG -f Dockerfile.updater .
-    - docker push $LATEST_IMAGE_TAG
-    - docker push $IMAGE_TAG
-    - docker push $UPDATER_IMAGE_TAG
-    - docker push $LATEST_UPDATER_IMAGE_TAG
+  script:
+    - /kaniko/executor
+      --cache=true
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${IMAGE_TAG}"
+      --destination "${LATEST_IMAGE_TAG}"
+    - /kaniko/executor
+      --cache=true
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile.updater"
+      --destination "${UPDATER_IMAGE_TAG}"
+      --destination "${LATEST_UPDATER_IMAGE_TAG}"
 
 build-tag:
   stage: build
@@ -36,17 +42,20 @@ build-tag:
   variables:
     IMAGE_TAG: $CI_REGISTRY_IMAGE/web:$CI_COMMIT_TAG
     UPDATER_IMAGE_TAG: $CI_REGISTRY_IMAGE/updater:$CI_COMMIT_TAG
-  script:
+  before_script:
     - echo $IMAGE_TAG
     - echo $UPDATER_IMAGE_TAG
-    - docker info
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
-    - docker pull gentoo/portage:latest
-    - docker pull gentoo/stage3:amd64
-    - docker build -t $IMAGE_TAG .
-    - docker build -t $UPDATER_IMAGE_TAG -f Dockerfile.updater .
-    - docker push $IMAGE_TAG
-    - docker push $UPDATER_IMAGE_TAG
+  script:
+    - /kaniko/executor
+      --cache=true
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${IMAGE_TAG}"
+    - /kaniko/executor
+      --cache=true
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile.updater"
+      --destination "${UPDATER_IMAGE_TAG}"
 
 go-test:
   stage: go-test
