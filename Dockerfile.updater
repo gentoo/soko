@@ -17,9 +17,11 @@ RUN emerge --quiet-build dev-vcs/git
 RUN echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
 RUN rm -rf /var/db/repos/gentoo
 
+# We can't start from scratch and copy / due to:
+# https://github.com/GoogleContainerTools/kaniko/issues/2033
+# FROM scratch
+# COPY --from=gentoobuilder / /
 
-FROM scratch
-COPY --from=gentoobuilder / /
 COPY --from=builder /go/src/soko/assets /go/src/soko/assets
 COPY --from=builder /go/src/soko/bin /go/src/soko/bin
 COPY --from=builder /go/src/soko/pkg /go/src/soko/pkg
