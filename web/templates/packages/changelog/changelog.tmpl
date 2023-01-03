@@ -27,7 +27,7 @@
                             <div class="col-md-12">
                                 {{$commit := .}}
                                 {{range $key, $value := .ChangedFiles.Added }}
-                                    {{-if le $key 100 -}}
+                                    {{-if gt $key 100 -}} {{- break -}}
                                         {{ if contains .Path (print $.Atom "/")}}
                                             <style>
                                                 .kk-added-file-badge {
@@ -43,7 +43,7 @@
                                     {{end}}
                                 {{end}}
                                 {{range $key, $value := .ChangedFiles.Modified }}
-                                    {{- if le $key 100 -}}
+                                    {{- if gt $key 100 -}} {{- break -}}
                                         {{ if contains $value.Path (print $.Atom "/")}}
                                             <style>
                                                 .kk-modified-file-badge {
@@ -59,7 +59,7 @@
                                     {{end}}
                                 {{end}}
                                 {{range $key, $value := .ChangedFiles.Deleted }}
-                                    {{- if le $key 100 -}}
+                                    {{- if gt $key 100 -}} {{- break -}}
                                         {{ if contains .Path (print $.Atom "/")}}
                                             <style>
                                                 .kk-deleted-file-badge {
@@ -104,7 +104,7 @@
                                         <div class="col-md-12">
                                             {{$commit := .}}
                                             {{range $key, $value := .ChangedFiles.Added }}
-                                                {{- if le $key 50 -}}
+                                                {{- if gt $key 50 -}} {{- break -}}
                                                     {{ if contains $value.Path (print $.Atom "/")}}
                                                         <style>
                                                             .kk-added-file-badge {
@@ -120,7 +120,7 @@
                                                 {{end}}
                                             {{end}}
                                             {{range $key, $value := .ChangedFiles.Modified }}
-                                                {{- if le $key 50 -}}
+                                                {{- if gt $key 50 -}} {{- break -}}
                                                     {{ if contains $value.Path (print $.Atom "/")}}
                                                         <style>
                                                             .kk-modified-file-badge {
@@ -136,7 +136,7 @@
                                                 {{end}}
                                             {{end}}
                                             {{range $key, $value := .ChangedFiles.Deleted }}
-                                                {{- if le $key 50 -}}
+                                                {{- if gt $key 50 -}} {{- break -}}
                                                     {{ if contains .Path (print $.Atom "/")}}
                                                     <style>
                                                         .kk-deleted-file-badge {
