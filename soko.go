@@ -120,5 +120,5 @@ func waitForPostgres() {
 
 func runSelfChecks() {
 	gocron.Every(1).Hour().From(gocron.NextTick()).Do(selfcheck.AllPackages)
-	<- gocron.Start()
+	<-gocron.Start()
 }

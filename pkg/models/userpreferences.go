@@ -141,69 +141,69 @@ func GetDefaultUserPreferences() UserPreferences {
 func (u *UserPreferences) Sanitize() {
 	defaultUserPreferences := GetDefaultUserPreferences()
 
-	if !(u.General.LandingPageLayout == "classic" || u.General.LandingPageLayout == "full"){
+	if !(u.General.LandingPageLayout == "classic" || u.General.LandingPageLayout == "full") {
 		u.General.LandingPageLayout = defaultUserPreferences.General.LandingPageLayout
 	}
 
-	if !(u.Packages.Overview.Layout == "minimal" || u.Packages.Overview.Layout == "full"){
+	if !(u.Packages.Overview.Layout == "minimal" || u.Packages.Overview.Layout == "full") {
 		u.Packages.Overview.Layout = defaultUserPreferences.Packages.Overview.Layout
 	}
 
 	sanitizedKeywords := []string{}
 	for _, keyword := range u.Packages.Overview.Keywords {
-		if strings.Contains(strings.Join(u.GetAllKeywords(), ","), keyword){
+		if strings.Contains(strings.Join(u.GetAllKeywords(), ","), keyword) {
 			sanitizedKeywords = append(sanitizedKeywords, keyword)
 		}
 	}
 	u.Packages.Overview.Keywords = sanitizedKeywords
 
-	if !(u.Packages.Overview.EAPI == "none" || u.Packages.Overview.EAPI == "column" || u.Packages.Overview.EAPI == "inline"){
+	if !(u.Packages.Overview.EAPI == "none" || u.Packages.Overview.EAPI == "column" || u.Packages.Overview.EAPI == "inline") {
 		u.Packages.Overview.EAPI = defaultUserPreferences.Packages.Overview.EAPI
 	}
 
 	sanitizedMetadataFields := []string{}
 	for _, metadataField := range u.Packages.Overview.MetadataFields {
-		if strings.Contains(strings.Join(defaultUserPreferences.Packages.Overview.MetadataFields, ","), metadataField){
+		if strings.Contains(strings.Join(defaultUserPreferences.Packages.Overview.MetadataFields, ","), metadataField) {
 			sanitizedMetadataFields = append(sanitizedMetadataFields, metadataField)
 		}
 	}
 	u.Packages.Overview.MetadataFields = sanitizedMetadataFields
 
-	if !(u.Packages.Overview.ChangelogType == "compact"){
+	if !(u.Packages.Overview.ChangelogType == "compact") {
 		u.Packages.Overview.ChangelogType = defaultUserPreferences.Packages.Overview.ChangelogType
 	}
 
-	if !(u.Packages.Overview.ChangelogLength >= 100){
+	if !(u.Packages.Overview.ChangelogLength >= 100) {
 		u.Packages.Overview.ChangelogLength = 100
 	}
 
-	if !(u.Packages.Dependencies.Default == "dependencies" || u.Packages.Dependencies.Default == "reverse-dependencies"){
+	if !(u.Packages.Dependencies.Default == "dependencies" || u.Packages.Dependencies.Default == "reverse-dependencies") {
 		u.Packages.Dependencies.Default = defaultUserPreferences.Packages.Dependencies.Default
 	}
 
-	if !(u.Packages.PullRequests.Layout == "default"){
+	if !(u.Packages.PullRequests.Layout == "default") {
 		u.Packages.PullRequests.Layout = defaultUserPreferences.Packages.PullRequests.Layout
 	}
 
-	if !(u.Packages.Bugs.Layout == "default"){
+	if !(u.Packages.Bugs.Layout == "default") {
 		u.Packages.Bugs.Layout = defaultUserPreferences.Packages.Bugs.Layout
 	}
 
-	if !(u.Packages.Security.Layout == "default"){
+	if !(u.Packages.Security.Layout == "default") {
 		u.Packages.Security.Layout = defaultUserPreferences.Packages.Security.Layout
 	}
 
-	if !(u.Packages.Changelog.Layout == "default"){
+	if !(u.Packages.Changelog.Layout == "default") {
 		u.Packages.Changelog.Layout = defaultUserPreferences.Packages.Changelog.Layout
 	}
 
-	if !(u.Packages.Changelog.Size >= 100){
+	if !(u.Packages.Changelog.Size >= 100) {
 		u.Packages.Changelog.Size = 100
 	}
 
 	sanitizedTabs := []string{}
 	for _, tab := range u.Packages.Tabs.Visible {
-		if strings.Contains(strings.Join(defaultUserPreferences.Packages.Tabs.Visible, ","), tab){
+		if strings.Contains(strings.Join(defaultUserPreferences.Packages.Tabs.Visible, ","), tab) {
 			sanitizedTabs = append(sanitizedTabs, tab)
 		}
 	}
@@ -211,21 +211,21 @@ func (u *UserPreferences) Sanitize() {
 
 	sanitizedVisibleArches := []string{}
 	for _, keyword := range u.Arches.Visible {
-		if strings.Contains(strings.Join(u.GetAllKeywords(), ","), keyword){
+		if strings.Contains(strings.Join(u.GetAllKeywords(), ","), keyword) {
 			sanitizedVisibleArches = append(sanitizedVisibleArches, keyword)
 		}
 	}
 	u.Arches.Visible = sanitizedVisibleArches
 
-	if !strings.Contains(strings.Join(u.GetAllKeywords(), ","), u.Arches.DefaultArch){
+	if !strings.Contains(strings.Join(u.GetAllKeywords(), ","), u.Arches.DefaultArch) {
 		u.Arches.DefaultArch = defaultUserPreferences.Arches.DefaultArch
 	}
 
-	if !(u.Arches.DefaultPage == "keyworded" || u.Arches.DefaultPage == "stable"){
+	if !(u.Arches.DefaultPage == "keyworded" || u.Arches.DefaultPage == "stable") {
 		u.Arches.DefaultPage = defaultUserPreferences.Arches.DefaultPage
 	}
 
-	if !(u.Useflags.Layout == "bubble" || u.Useflags.Layout == "search"){
+	if !(u.Useflags.Layout == "bubble" || u.Useflags.Layout == "search") {
 		u.Useflags.Layout = defaultUserPreferences.Useflags.Layout
 	}
 }

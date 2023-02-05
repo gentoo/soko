@@ -54,14 +54,12 @@ func (v *Version) GreaterThan(other Version) bool {
 	versionIdentifierA := v.computeVersionIdentifier()
 	versionIdentifierB := other.computeVersionIdentifier()
 
-	if(v.Version == "0.7.8_p0-r100"){
+	if v.Version == "0.7.8_p0-r100" {
 		fmt.Println("versionIdentifierA")
 		fmt.Println(versionIdentifierA)
 		fmt.Println("versionIdentifierB")
 		fmt.Println(versionIdentifierB)
 	}
-
-
 
 	// compare the numeric part
 	numericPartsA := strings.Split(versionIdentifierA.NumericPart, ".")

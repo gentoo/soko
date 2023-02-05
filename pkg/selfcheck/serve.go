@@ -24,6 +24,6 @@ func Serve() {
 func metricsHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		metrics.Update()
-		promhttp.Handler().ServeHTTP(w,r)
+		promhttp.Handler().ServeHTTP(w, r)
 	})
 }

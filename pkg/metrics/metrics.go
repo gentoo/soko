@@ -10,35 +10,35 @@ import (
 )
 
 var (
-	UpdateAges = map[string]prometheus.Gauge {
+	UpdateAges = map[string]prometheus.Gauge{
 		"dependencies": promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "pgo_update_age",
-			Help: "The age of the last update",
+			Name:        "pgo_update_age",
+			Help:        "The age of the last update",
 			ConstLabels: prometheus.Labels{"type": "dependencies"},
 		}),
 		"pkgcheck": promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "pgo_update_age",
-			Help: "The age of the last update",
+			Name:        "pgo_update_age",
+			Help:        "The age of the last update",
 			ConstLabels: prometheus.Labels{"type": "pkgcheck"},
 		}),
 		"pullrequests": promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "pgo_update_age",
-			Help: "The age of the last update",
+			Name:        "pgo_update_age",
+			Help:        "The age of the last update",
 			ConstLabels: prometheus.Labels{"type": "pullrequests"},
 		}),
 		"bugs": promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "pgo_update_age",
-			Help: "The age of the last update",
+			Name:        "pgo_update_age",
+			Help:        "The age of the last update",
 			ConstLabels: prometheus.Labels{"type": "bugs"},
 		}),
 		"projects": promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "pgo_update_age",
-			Help: "The age of the last update",
+			Name:        "pgo_update_age",
+			Help:        "The age of the last update",
 			ConstLabels: prometheus.Labels{"type": "projects"},
 		}),
 		"maintainers": promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "pgo_update_age",
-			Help: "The age of the last update",
+			Name:        "pgo_update_age",
+			Help:        "The age of the last update",
 			ConstLabels: prometheus.Labels{"type": "maintainers"},
 		}),
 	}
@@ -49,8 +49,7 @@ var (
 	})
 )
 
-
-func Update(){
+func Update() {
 
 	database.Connect()
 	defer database.DBCon.Close()
@@ -69,6 +68,5 @@ func Update(){
 	if err == nil {
 		LastCommitAge.Set(time.Since(lastCommit.CommitterDate).Seconds())
 	}
-
 
 }
