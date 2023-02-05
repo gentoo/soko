@@ -403,6 +403,10 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://pypi.org/project/" + remoteId.Id + "/"
 	case "rubygems":
 		return "https://rubygems.org/gems/" + remoteId.Id + "/"
+	case "savannah":
+		return "https://savannah.gnu.org/projects/" + remoteId.Id
+	case "savannah-nongnu":
+		return "https://savannah.nongnu.org/projects/" + remoteId.Id
 	case "sourceforge":
 		return "https://sourceforge.net/projects/" + remoteId.Id + "/"
 	case "sourcehut":
