@@ -96,7 +96,7 @@ func checkVersions(remotePackage *models.Package) {
 			// search for local version in remote versions
 			versionFound := false
 			for _, remoteVersion := range remotePackage.Versions {
-				if localVersion.Id == remoteVersion.Id && localVersion.Id == remoteVersion.Id {
+				if localVersion.Id == remoteVersion.Id {
 					versionFound = true
 					break
 				}
