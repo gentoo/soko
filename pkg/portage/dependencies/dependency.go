@@ -1,7 +1,9 @@
 package dependencies
 
 import (
+	"archive/tar"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -13,143 +15,92 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ulikunitz/xz"
 )
 
-// TODO
-var WaitGroup sync.WaitGroup
-
 var Dependencies []*models.ReverseDependency
-
-var PackageCounter int
-var DependencyCounter int
-var ErrCounter int
-var NewCounter int
 
 var (
 	mu sync.RWMutex
 )
-
-func AddDependency(dependency *models.ReverseDependency) {
-	mu.Lock()
-	defer mu.Unlock()
-	Dependencies = append(Dependencies, dependency)
-}
-
-func AddtoErrorCounter(amount int) {
-	mu.Lock()
-	defer mu.Unlock()
-	ErrCounter = ErrCounter + amount
-}
-
-func GetErrorCounter() int {
-	mu.RLock() // readers lock
-	defer mu.RUnlock()
-	return ErrCounter
-}
 
 func FullPackageDependenciesUpdate() {
 
 	database.Connect()
 	defer database.DBCon.Close()
 
-	var packages []models.Package
-	database.DBCon.Model(&packages).Select()
-
-	PackageCounter = 0
-	NewCounter = 0
-
-	cc := 0
-
-	for _, gpackage := range packages {
-
-		if cc%100 == 0 {
-			logger.Info.Println(time.Now().Format(time.Kitchen) + ": " + strconv.Itoa(cc))
-			WaitGroup.Wait()
-		}
-
-		WaitGroup.Add(1)
-		go UpdatePackageDependencies(gpackage.Atom)
-
-		cc++
+	dependencyCounter, err := UpdateDependencies()
+	if err != nil {
+		return
 	}
 
-	logger.Info.Println("Waiting for go routines to finish")
+	logger.Info.Println("Got", dependencyCounter, "dependencies.")
 
-	WaitGroup.Wait()
-
-	logger.Info.Println()
-	logger.Info.Println("Processed " + strconv.Itoa(PackageCounter) + " packages.")
-	logger.Info.Println("Got " + strconv.Itoa(DependencyCounter) + " dependencies.")
-	logger.Info.Println("Start inserting dependencies into the database")
-	logger.Info.Println("Errors: " + strconv.Itoa(GetErrorCounter()))
-
-	logger.Info.Println("---")
-
-	// finally delete all outdated dependencies
 	// TODO in future we want a better incremental update here
 	deleteAllDependencies()
 
-	counter := 0
-	length := len(Dependencies)
-	for _, dependency := range Dependencies {
-
-		if counter%1000 == 0 {
-			logger.Info.Println(time.Now().Format(time.Kitchen) + ": " + strconv.Itoa(counter) + " / " + strconv.Itoa(length))
-		}
-
-		database.DBCon.Model(dependency).WherePK().OnConflict("(id) DO UPDATE").Insert()
-		counter++
-	}
+	logger.Info.Println("Start inserting dependencies into the database")
+	// because we removed all previous rows in table, we aren't concerned about
+	// duplicates, so we can use bulk insert
+	database.DBCon.Model(&Dependencies).Insert()
 
 	updateStatus()
 }
 
-func UpdatePackageDependencies(atom string) {
-
-	// reverse dependeny urls
-	rdepend := "https://qa-reports.gentoo.org/output/genrdeps/rindex/" + atom
-	parseDependencies(atom, rdepend, "rdepend")
-
-	depend := "https://qa-reports.gentoo.org/output/genrdeps/dindex/" + atom
-	parseDependencies(atom, depend, "depend")
-
-	pdepend := "https://qa-reports.gentoo.org/output/genrdeps/pindex/" + atom
-	parseDependencies(atom, pdepend, "pdepend")
-
-	bdepend := "https://qa-reports.gentoo.org/output/genrdeps/bindex/" + atom
-	parseDependencies(atom, bdepend, "bdepend")
-
-	WaitGroup.Done()
-}
-
-func parseDependencies(atom, url, kind string) {
-
+func UpdateDependencies() (int, error) {
 	client := http.Client{
 		Timeout: 600 * time.Second,
 	}
 
-	resp, err := client.Get(url)
-
+	resp, err := client.Get("https://qa-reports.gentoo.org/output/genrdeps/rdeps.tar.xz")
 	if err != nil {
 		logger.Error.Println(err)
-		return
+		return 0, err
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return
+		logger.Error.Printf("status code: %d", resp.StatusCode)
+		return 0, fmt.Errorf("status code: %d", resp.StatusCode)
 	}
 
-	PackageCounter++
-
-	rawResponse, err := ioutil.ReadAll(resp.Body)
-
+	xz, err := xz.NewReader(resp.Body)
 	if err != nil {
-		return
+		logger.Error.Println(err)
+		return 0, err
 	}
 
-	rawDependencies := strings.Split(string(rawResponse), "\n")
+	var dependencyCounter int
+	tr := tar.NewReader(xz)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break // end of tar archive
+		}
+		if err != nil {
+			logger.Error.Println(err)
+			return 0, err
+		}
+		switch hdr.Typeflag {
+		case tar.TypeReg, tar.TypeRegA:
+			nameParts := strings.SplitN(hdr.Name, "/", 2)
+
+			rawResponse, err := ioutil.ReadAll(tr)
+			if err != nil {
+				logger.Error.Println(err)
+				return 0, err
+			}
+
+			parseDependencies(string(rawResponse), nameParts[1], nameParts[0])
+			dependencyCounter++
+		}
+	}
+	return dependencyCounter, nil
+}
+
+func parseDependencies(rawResponse, atom, kind string) {
+	rawDependencies := strings.Split(rawResponse, "\n")
 
 	for _, rawDependency := range rawDependencies {
 
@@ -164,7 +115,7 @@ func parseDependencies(atom, url, kind string) {
 			condition = dependencyParts[1]
 		}
 
-		AddDependency(&models.ReverseDependency{
+		Dependencies = append(Dependencies, &models.ReverseDependency{
 			Id:                       atom + "-" + kind + "-" + rawDependency,
 			Atom:                     atom,
 			Type:                     kind,
@@ -191,13 +142,22 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	return gpackage
 }
 
-// deleteAllPullrequests deletes all entries in the pullrequests and package to pull request table
 func deleteAllDependencies() {
 	var reverseDependencies []*models.ReverseDependency
-	database.DBCon.Model(&reverseDependencies).Select()
-	for _, reverseDependency := range reverseDependencies {
-		database.DBCon.Model(reverseDependency).WherePK().Delete()
+	err := database.DBCon.Model(&reverseDependencies).Column("id").Select()
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	} else if len(reverseDependencies) == 0 {
+		return
 	}
+
+	res, err := database.DBCon.Model(&reverseDependencies).WherePK().Delete()
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	logger.Info.Println("Deleted", res.RowsAffected(), "dependencies from the database.")
 }
 
 func deleteOutdatedDependencies(newDependencies []*models.ReverseDependency) {

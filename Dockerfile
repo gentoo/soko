@@ -3,6 +3,7 @@ WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN go get github.com/go-pg/pg/v9
 RUN go get github.com/mcuadros/go-version
+RUN go get github.com/ulikunitz/xz
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
 FROM node:13 AS assetsbuilder

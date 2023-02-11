@@ -11,6 +11,7 @@ require (
 	github.com/jasonlvhit/gocron v0.0.1
 	github.com/prometheus/client_golang v1.8.0
 	github.com/vektah/gqlparser/v2 v2.0.1
+	github.com/ulikunitz/xz v0.5.11
 )
 
 require (
