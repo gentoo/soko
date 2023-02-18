@@ -29,7 +29,7 @@
                 {{range .Applications}}
                     <tr>
                         <th scope="row" class="text-capitalize">{{.Id}}</th>
-                        <td>{{.LastUpdate.Format "2 Jan 2006 15:04:05"}} UTC</td>
+                        <td>{{.LastUpdate.Format "2006-01-02 15:04:05"}} UTC</td>
                         <td>{{timeSince .LastUpdate}}</td>
                     </tr>
                 {{end}}

@@ -52,7 +52,7 @@
             </div>
             <div class="col-xs-12 col-md-6">
                 <small class="text-muted pull-right">
-                    <span class="kk-i18n-date" title="{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate}}{{else}}unknown{{end}}">{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate}}{{else}}unknown{{end}}</span>
+                    <span class="kk-i18n-date" title="{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate.Format "2006-01-02 15:04:05" }} UTC{{else}}unknown{{end}}">{{if ge (len .Commits) 1 }}{{(index .Commits 0).CommitterDate.Format "2006-01-02 15:04:05"}} UTC{{else}}unknown{{end}}</span>
                 </small>
                 <div class="kk-version-card">
                     <p class="mb-2"><strong>{{.Version}}</strong><span class="kk-slot"> : {{.Slot}}</span> {{if .Restricts}}<span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{range .Restricts}}{{.}} {{end}}">{{formatRestricts .Restricts}}</span>{{end}}</p>

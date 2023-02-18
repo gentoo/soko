@@ -6,21 +6,21 @@
                 <h3>Latest Commits</h3>
                 <ul class="timeline">
                     <li>
-                        <span class="text-muted">Commits on {{(index .Package.Commits 0).CommitterDate.Format "Jan 02, 2006"}}</span>
+                        <span class="text-muted">Commits on {{(index .Package.Commits 0).CommitterDate.Format "2006-01-02"}}</span>
                         <ul class="list-group">
                             {{$last_date := (index .Package.Commits 0).CommitterDate}}
                             {{range .Package.Commits}}
-                            {{if eq ($last_date.Format "Jan 02, 2006") (.CommitterDate.Format "Jan 02, 2006")}}
+                            {{if eq ($last_date.Format "2006-01-02") (.CommitterDate.Format "2006-01-02")}}
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-md-8"><a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}"><b style="color:#424242!important;">{{.Message}}</b></a></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
                                     <div class="col-md-12" style="color:#424242!important;">
                                         {{ if (ne .AuthorName .CommitterName)}}
-                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
+                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate.Format "2006-01-02 15:04:05" }} UTC"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
                                     <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
                                         {{end}}
                                         <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
-                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2 Jan 2006 15:04:05" }}
+                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2006-01-02 15:04:05" }} UTC
                                     </div>
                                     <div class="col-md-12">
                                         {{$commit := .}}
@@ -73,18 +73,18 @@
                         </ul>
                     </li>
                     <li>
-                        <span class="text-muted">Commits on {{.CommitterDate.Format "Jan 02, 2006"}}</span>
+                        <span class="text-muted">Commits on {{.CommitterDate.Format "2006-01-02"}}</span>
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-md-8"><a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}"><b style="color:#424242!important;">{{.Message}}</b></a></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
                                     <div class="col-md-12">
                                         {{ if (ne .AuthorName .CommitterName)}}
-                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate }}"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
+                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate.Format "2006-01-02 15:04:05" }} UTC"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
                                     <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
                                         {{end}}
                                         <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
-                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2 Jan 2006 15:04:05" }}
+                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2006-01-02 15:04:05" }} UTC
                                     </div>
                                     <div class="col-md-12">
                                         {{$commit := .}}
