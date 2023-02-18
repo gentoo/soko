@@ -29,10 +29,10 @@
                                             {{ range $key, $value := $depMap }}
                                                 <tr>
                                                     <th scope="row"><a class="text-dark" href="/packages/{{$value.Atom}}">{{$key}}</a></th>
-                                                    <td>{{if $value.rdepend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
-                                                    <td>{{if $value.depend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
-                                                    <td>{{if $value.bdepend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
-                                                    <td>{{if $value.pdepend}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.rindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.dindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.bindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                                    <td>{{if $value.pindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
                                                 </tr>
                                             {{end}}
 
