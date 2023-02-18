@@ -15,6 +15,7 @@
                                 <th scope="col">RDEPEND</th>
                                 <th scope="col">DEPEND</th>
                                 <th scope="col">BDEPEND</th>
+                                <th scope="col">IDEPEND</th>
                                 <th scope="col">PDEPEND</th>
                             </tr>
                             </thead>
@@ -26,6 +27,7 @@
                                     <td>{{if $value.rindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
                                     <td>{{if $value.dindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
                                     <td>{{if $value.bindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
+                                    <td>{{if $value.iindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
                                     <td>{{if $value.pindex}}<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>{{else}}<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>{{end}}</td>
                                 </tr>
                             {{end}}
@@ -50,6 +52,7 @@
                     <li><a href="https://qa-reports.gentoo.org/output/genrdeps/rindex/{{.Package.Atom}}">rdepend</a></li>
                     <li><a href="https://qa-reports.gentoo.org/output/genrdeps/dindex/{{.Package.Atom}}">depend</a></li>
                     <li><a href="https://qa-reports.gentoo.org/output/genrdeps/bindex/{{.Package.Atom}}">bdepend</a></li>
+                    <li><a href="https://qa-reports.gentoo.org/output/genrdeps/iindex/{{.Package.Atom}}">idepend</a></li>
                     <li><a href="https://qa-reports.gentoo.org/output/genrdeps/pindex/{{.Package.Atom}}">pdepend</a></li>
                 </ul>
             </span>
