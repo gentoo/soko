@@ -5,6 +5,7 @@ package about
 import (
 	"html/template"
 	"net/http"
+	"runtime/debug"
 	"soko/pkg/app/utils"
 	"soko/pkg/models"
 )
@@ -20,14 +21,27 @@ func renderAboutTemplate(w http.ResponseWriter, r *http.Request, page string) {
 	templates.ExecuteTemplate(w, page+".tmpl", getPageData())
 }
 
+func getCommitId() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				return setting.Value[:8]
+			}
+		}
+	}
+	return ""
+}
+
 // getPageData returns the data used
 // in all about templates
 func getPageData() interface{} {
 	return struct {
 		Header      models.Header
 		Application models.Application
+		CommitId    string
 	}{
 		Header:      models.Header{Title: "About – ", Tab: "about"},
 		Application: utils.GetApplicationData(),
+		CommitId:    getCommitId(),
 	}
 }

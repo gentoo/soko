@@ -23,7 +23,7 @@
             <dl>
                 <dt>Which version is currently running?</dt>
                 <dd>
-                    Currently {{.Application.Version}} is running.
+                    Currently {{.Application.Version}} is running{{if ne .CommitId ""}}, based on commit {{.CommitId}}{{end}}.
                 </dd>
                 <br>
                 <dt>How often is the site updated?</dt>
