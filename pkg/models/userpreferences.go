@@ -240,7 +240,7 @@ func (u UserPreferences) ContainsPkgcheckClass(class string) bool {
 }
 
 func (u UserPreferences) GetAllKeywords() []string {
-	return []string{"alpha", "amd64", "arm", "arm64", "hppa", "ia64", "m68k", "mips", "ppc", "ppc64", "riscv", "s390", "sparc", "x86", "ppc-aix", "amd64-linux", "arm-linux", "arm64-linux", "ppc64-linux", "x86-linux", "ppc-macos", "x86-macos", "x64-macos", "m68k-mint", "sparc-solaris", "sparc64-solaris", "x64-solaris", "x86-solaris", "x64-winnt", "x86-winnt", "x64-cygwin", "x86-cygwin"}
+	return []string{"alpha", "amd64", "arm", "arm64", "hppa", "ia64", "loong", "m68k", "mips", "ppc", "ppc64", "riscv", "s390", "sparc", "x86", "ppc-aix", "amd64-linux", "arm-linux", "arm64-linux", "ppc64-linux", "x86-linux", "ppc-macos", "x86-macos", "x64-macos", "m68k-mint", "sparc-solaris", "sparc64-solaris", "x64-solaris", "x86-solaris", "x64-winnt", "x86-winnt", "x64-cygwin", "x86-cygwin"}
 }
 
 func GetPkgcheckClass(number int) string {
