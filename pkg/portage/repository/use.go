@@ -3,12 +3,17 @@
 package repository
 
 import (
+	"errors"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
+)
+
+var (
+	errInvalidLine = errors.New("invalid line")
 )
 
 // UpdateUse reads all USE flags descriptions from the given file in
@@ -65,20 +70,24 @@ func UpdateUse(path string) {
 // createUseflag parses the description from the file,
 // creates a USE flag and imports it into the database
 func createUseflag(rawFlag string, scope string) error {
-	line := strings.Split(rawFlag, " - ")
-	splitted := strings.Split(line[0], ":")
-	gpackage := ""
+	pkguse, description, found := strings.Cut(rawFlag, " - ")
+	if !found {
+		return errInvalidLine
+	}
 
-	if scope == "local" {
-		gpackage = splitted[0]
+	pkg, use, found := strings.Cut(pkguse, ":")
+	if found != (scope == "local") {
+		return errInvalidLine
+	} else if !found {
+		use = pkguse
 	}
 
 	useflag := &models.Useflag{
-		Id:          line[0] + "-" + scope,
-		Package:     gpackage,
-		Name:        splitted[len(splitted)-1],
+		Id:          pkguse + "-" + scope,
+		Package:     pkg,
+		Name:        use,
 		Scope:       scope,
-		Description: strings.Join(line[1:], ""),
+		Description: description,
 	}
 
 	_, err := database.DBCon.Model(useflag).OnConflict("(id) DO UPDATE").Insert()
