@@ -5,14 +5,14 @@ package packages
 import (
 	b64 "encoding/base64"
 	"encoding/json"
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/v9/orm"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
 	"time"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // Show renders a template to show a given package
@@ -70,7 +70,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Relation("Versions.PkgCheckResults").
 		Relation("Versions.Dependencies").
 		Relation("ReverseDependencies").
-		Relation("Commits", func(q *orm.Query) (*orm.Query, error) {
+		Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
 		}).
 		Select()
@@ -135,7 +135,7 @@ func changelogJSON(w http.ResponseWriter, r *http.Request) {
 	gpackage := new(models.Package)
 	err := database.DBCon.Model(gpackage).
 		Where("atom = ?", atom).
-		Relation("Commits", func(q *orm.Query) (*orm.Query, error) {
+		Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("preceding_commits DESC").Limit(5), nil
 		}).
 		Select()

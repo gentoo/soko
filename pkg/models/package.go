@@ -8,17 +8,17 @@ type Package struct {
 	Atom                string `pg:",pk"`
 	Category            string
 	Name                string
-	Versions            []*Version `pg:",fk:atom"`
+	Versions            []*Version `pg:",fk:atom,rel:has-many"`
 	Longdescription     string
 	Maintainers         []*Maintainer
 	Upstream            Upstream
-	Commits             []*Commit            `pg:"many2many:commit_to_packages,joinFK:commit_id"`
+	Commits             []*Commit            `pg:"many2many:commit_to_packages,join_fk:commit_id"`
 	PrecedingCommits    int                  `pg:",use_zero"`
-	PkgCheckResults     []*PkgCheckResult    `pg:",fk:atom"`
-	Outdated            []*OutdatedPackages  `pg:",fk:atom"`
-	Bugs                []*Bug               `pg:"many2many:package_to_bugs,joinFK:bug_id"`
-	PullRequests        []*GithubPullRequest `pg:"many2many:package_to_github_pull_requests,joinFK:github_pull_request_id"`
-	ReverseDependencies []*ReverseDependency `pg:",fk:atom"`
+	PkgCheckResults     []*PkgCheckResult    `pg:",fk:atom,rel:has-many"`
+	Outdated            []*OutdatedPackages  `pg:",fk:atom,rel:has-many"`
+	Bugs                []*Bug               `pg:"many2many:package_to_bugs,join_fk:bug_id"`
+	PullRequests        []*GithubPullRequest `pg:"many2many:package_to_github_pull_requests,join_fk:github_pull_request_id"`
+	ReverseDependencies []*ReverseDependency `pg:",fk:atom,rel:has-many"`
 }
 
 type Maintainer struct {
@@ -27,10 +27,10 @@ type Maintainer struct {
 	Type                string
 	Restrict            string
 	PackagesInformation MaintainerPackagesInformation
-	// In case the maintainer type is "project", Project will point to the project
-	Project Project `pg:",fk:email"`
+	// In case the maintainer type is "project", Project will posokoint to the project
+	Project Project `pg:",fk:email,rel:has-one"`
 	// In case the maintainer type is not "project", Projects will point to the projects the maintainer is member of
-	Projects []*Project `pg:"many2many:maintainer_to_projects,joinFK:project_email"`
+	Projects []*Project `pg:"many2many:maintainer_to_projects,join_fk:project_email"`
 }
 
 type MaintainerPackagesInformation struct {

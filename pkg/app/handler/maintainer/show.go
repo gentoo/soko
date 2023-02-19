@@ -1,13 +1,14 @@
 package maintainer
 
 import (
-	"github.com/go-pg/pg/v9/orm"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"sort"
 	"strings"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // Show renders a template to show a given maintainer page
@@ -48,7 +49,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		pageName = "changelog"
 		query = query.
 			Relation("Versions").
-			Relation("Commits", func(q *orm.Query) (*orm.Query, error) {
+			Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
 				return q.Order("preceding_commits DESC").Limit(50), nil
 			})
 	} else if strings.HasSuffix(r.URL.Path, "/outdated") {

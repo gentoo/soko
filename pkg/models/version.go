@@ -27,11 +27,11 @@ type Version struct {
 	Homepage        []string
 	License         string
 	Description     string
-	Commits         []*Commit            `pg:"many2many:commit_to_versions,joinFK:commit_id"`
-	Masks           []*Mask              `pg:"many2many:mask_to_versions,joinFK:mask_versions"`
+	Commits         []*Commit            `pg:"many2many:commit_to_versions,join_fk:commit_id"`
+	Masks           []*Mask              `pg:"many2many:mask_to_versions,join_fk:mask_versions"`
 	PkgCheckResults []*PkgCheckResult    `pg:",fk:cpv"`
 	Dependencies    []*ReverseDependency `pg:",fk:reverse_dependency_version"`
-	Bugs            []*Bug               `pg:"many2many:version_to_bugs,joinFK:bug_id"`
+	Bugs            []*Bug               `pg:"many2many:version_to_bugs,join_fk:bug_id"`
 }
 
 func (v Version) BuildDepMap() map[string]map[string]string {
@@ -212,9 +212,13 @@ func (v *Version) computeVersionIdentifier() VersionIdentifier {
 }
 
 // getNumericPart returns the numeric part of the version, that is:
-//   version, letter
+//
+//	version, letter
+//
 // i.e. 10.3.18a becomes
-//   10.3.18, a
+//
+//	10.3.18, a
+//
 // The first returned string is the version and the second if the (optional) letter
 func getNumericPart(str string) (string, string) {
 	if unicode.IsLetter(rune(str[len(str)-1])) {
@@ -225,7 +229,9 @@ func getNumericPart(str string) (string, string) {
 
 // getSuffix creates a VersionSuffix based on the given string.
 // The given string is expected to be look like
-//   pre20190518
+//
+//	pre20190518
+//
 // for instance. The suffix named as well as the following number
 // will be parsed and returned as VersionSuffix
 func getSuffix(str string) *VersionSuffix {
@@ -253,7 +259,9 @@ func isRevision(str string) bool {
 
 // getSuffixOrder returns an int for the given suffix,
 // based on the following:
-//   _alpha < _beta < _pre < _rc < _p < none
+//
+//	_alpha < _beta < _pre < _rc < _p < none
+//
 // as defined in the Package Manager Specification (PMS)
 func getSuffixOrder(suffix string) int {
 	if suffix == "p" {

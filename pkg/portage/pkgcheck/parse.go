@@ -49,7 +49,7 @@ func UpdatePkgCheckResults() {
 
 	// update the database with the new results
 	for _, pkgCheckResult := range pkgCheckResults.Results {
-		database.DBCon.Insert(&models.PkgCheckResult{
+		database.DBCon.Model(&models.PkgCheckResult{
 			Id:       pkgCheckResult.Category + "/" + pkgCheckResult.Package + "-" + pkgCheckResult.Version + "-" + pkgCheckResult.Class + "-" + pkgCheckResult.Message,
 			Atom:     pkgCheckResult.Category + "/" + pkgCheckResult.Package,
 			Category: pkgCheckResult.Category,
@@ -58,7 +58,7 @@ func UpdatePkgCheckResults() {
 			CPV:      pkgCheckResult.Category + "/" + pkgCheckResult.Package + "-" + pkgCheckResult.Version,
 			Class:    pkgCheckResult.Class,
 			Message:  pkgCheckResult.Message,
-		})
+		}).Insert()
 	}
 
 	updateStatus()

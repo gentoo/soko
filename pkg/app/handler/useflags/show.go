@@ -3,7 +3,6 @@
 package useflags
 
 import (
-	"github.com/go-pg/pg/v9"
 	"html/template"
 	"net/http"
 	utils2 "soko/pkg/app/utils"
@@ -11,6 +10,8 @@ import (
 	"soko/pkg/models"
 	"soko/pkg/utils"
 	"strings"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // Show renders a template to show a given USE flag

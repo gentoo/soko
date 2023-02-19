@@ -4,7 +4,6 @@ package index
 
 import (
 	b64 "encoding/base64"
-	"github.com/go-pg/pg/v9/orm"
 	"html/template"
 	"net/http"
 	"reflect"
@@ -14,6 +13,8 @@ import (
 	"soko/pkg/models"
 	"strconv"
 	"strings"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // getAddedPackages returns a list of a
@@ -97,10 +98,10 @@ func getUpdatedVersions(n int) []*models.Version {
 	err := database.DBCon.Model(&updates).
 		Order("preceding_commits DESC").
 		Limit(3*n).
-		Relation("ChangedVersions", func(q *orm.Query) (*orm.Query, error) {
+		Relation("ChangedVersions", func(q *pg.Query) (*pg.Query, error) {
 			return q.Limit(30 * n), nil
 		}).
-		Relation("ChangedVersions.Commits", func(q *orm.Query) (*orm.Query, error) {
+		Relation("ChangedVersions.Commits", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("preceding_commits DESC"), nil
 		}).
 		Select()
@@ -165,7 +166,7 @@ func getFuncMap() template.FuncMap {
 // packages containing a thousands comma
 func formatPackageCount(packageCount int) string {
 	packages := strconv.Itoa(packageCount)
-	if len(string(packageCount)) == 6 {
+	if len(packages) == 6 {
 		return packages[:3] + "," + packages[3:]
 	} else if len(packages) == 5 {
 		return packages[:2] + "," + packages[2:]

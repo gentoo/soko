@@ -5,7 +5,6 @@ package resolvers
 import (
 	"context"
 	"errors"
-	"github.com/go-pg/pg/v9/orm"
 	"soko/pkg/api/graphql/generated"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/utils"
@@ -13,6 +12,8 @@ import (
 	"soko/pkg/models"
 	"strings"
 	"time"
+
+	"github.com/go-pg/pg/v10"
 )
 
 type Resolver struct{}
@@ -26,7 +27,7 @@ func (r *queryResolver) Application(ctx context.Context) (*models.Application, e
 func (r *queryResolver) LastCommitTime(ctx context.Context) (*time.Time, error) {
 	data := utils.GetApplicationData()
 	lastCommit := &models.Commit{Id: data.LastCommit}
-	err := database.DBCon.Select(lastCommit)
+	err := database.DBCon.Model(lastCommit).WherePK().Select()
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +340,7 @@ func getLimit(limit *int, defaultLimit int) int {
 	return n
 }
 
-func addStringParams(query *orm.Query, params map[string]*string) *orm.Query {
+func addStringParams(query *pg.Query, params map[string]*string) *pg.Query {
 	for key, value := range params {
 		if value != nil {
 			query = query.Where(key+" = ? ", *value)
@@ -348,7 +349,7 @@ func addStringParams(query *orm.Query, params map[string]*string) *orm.Query {
 	return query
 }
 
-func addIntParams(query *orm.Query, params map[string]*int) *orm.Query {
+func addIntParams(query *pg.Query, params map[string]*int) *pg.Query {
 	for key, value := range params {
 		if value != nil {
 			query = query.Where(key+" = ? ", *value)
@@ -357,7 +358,7 @@ func addIntParams(query *orm.Query, params map[string]*int) *orm.Query {
 	return query
 }
 
-func addTimeParams(query *orm.Query, params map[string]*time.Time) *orm.Query {
+func addTimeParams(query *pg.Query, params map[string]*time.Time) *pg.Query {
 	for key, value := range params {
 		if value != nil {
 			query = query.Where(key+" = ? ", *value)

@@ -33,13 +33,13 @@ func UpdateProjects() {
 
 	// insert new project list
 	for _, project := range projectList.Projects {
-		database.DBCon.Insert(&project)
+		database.DBCon.Model(&project).Insert()
 		for _, member := range project.Members {
-			database.DBCon.Insert(&models.MaintainerToProject{
+			database.DBCon.Model(&models.MaintainerToProject{
 				Id:              member.Email + "-" + project.Email,
 				MaintainerEmail: member.Email,
 				ProjectEmail:    project.Email,
-			})
+			}).Insert()
 		}
 	}
 

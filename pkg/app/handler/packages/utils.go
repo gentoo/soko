@@ -5,8 +5,6 @@ package packages
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/v9/orm"
 	"html/template"
 	"net/http"
 	"soko/pkg/app/utils"
@@ -17,6 +15,8 @@ import (
 	"sort"
 	"strings"
 	textTemplate "text/template"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // GetAddedPackages returns a list of recently added
@@ -55,10 +55,10 @@ func GetUpdatedVersions(n int) []*models.Version {
 	err := database.DBCon.Model(&updates).
 		Order("preceding_commits DESC").
 		Limit(n).
-		Relation("ChangedVersions", func(q *orm.Query) (*orm.Query, error) {
+		Relation("ChangedVersions", func(q *pg.Query) (*pg.Query, error) {
 			return q.Limit(10 * n), nil
 		}).
-		Relation("ChangedVersions.Commits", func(q *orm.Query) (*orm.Query, error) {
+		Relation("ChangedVersions.Commits", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("preceding_commits DESC"), nil
 		}).
 		Select()

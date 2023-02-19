@@ -12,7 +12,6 @@
 package repository
 
 import (
-	"github.com/go-pg/pg/v9"
 	"regexp"
 	"soko/pkg/database"
 	"soko/pkg/logger"
@@ -20,6 +19,8 @@ import (
 	"soko/pkg/portage/utils"
 	"strings"
 	"time"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // isMask checks whether the path
@@ -291,7 +292,7 @@ func maskVersions(versionSpecifier string, versions []*models.Version) {
 
 		_, err := database.DBCon.Model(maskToVersion).OnConflict("(id) DO UPDATE").Insert()
 
-		if err != nil{
+		if err != nil {
 			logger.Error.Println("Error while inserting mask to version entry")
 			logger.Error.Println(err)
 		}

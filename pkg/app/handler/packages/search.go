@@ -3,12 +3,13 @@
 package packages
 
 import (
-	"github.com/go-pg/pg"
 	"net/http"
 	"soko/pkg/app/handler/feeds"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
+
+	"github.com/go-pg/pg"
 )
 
 // Search renders a template containing a list of search results
@@ -23,7 +24,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		var maintainers []models.Maintainer
 		database.DBCon.Model(&maintainers).Where("email = ?", searchTerm).Select()
 		if len(maintainers) > 0 {
-			http.Redirect(w, r, "/maintainer/"+searchTerm, 301)
+			http.Redirect(w, r, "/maintainer/"+searchTerm, http.StatusMovedPermanently)
 			return
 		}
 	}

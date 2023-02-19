@@ -1,12 +1,13 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 var (
@@ -64,7 +65,7 @@ func Update() {
 	}
 
 	lastCommit := &models.Commit{Id: utils.GetApplicationData().LastCommit}
-	err := database.DBCon.Select(lastCommit)
+	err := database.DBCon.Model(lastCommit).WherePK().Select()
 	if err == nil {
 		LastCommitAge.Set(time.Since(lastCommit.CommitterDate).Seconds())
 	}

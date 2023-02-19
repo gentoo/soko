@@ -43,12 +43,12 @@ func Update() {
 
 // updateMetadata updates all USE flags, package masks and arches in the database
 // by parsing:
-//  - profiles/use.desc
-//  - profiles/use.local.desc
-//  - profiles/use.local.desc
-//  - profiles/desc/*
-//  - profiles/package.mask
-//  - profiles/arch.list
+//   - profiles/use.desc
+//   - profiles/use.local.desc
+//   - profiles/use.local.desc
+//   - profiles/desc/*
+//   - profiles/package.mask
+//   - profiles/arch.list
 //
 // It works incrementally so that files are only parsed and updated whenever the
 // file has been modified within the new commits. New commits are determined by
@@ -71,9 +71,10 @@ func updateMetadata() {
 
 // updatePackageData incrementally updates all package data in the database, that has
 // been changed since the last update. That is:
-//  - categories
-//  - packages
-//  - versions
+//   - categories
+//   - packages
+//   - versions
+//
 // changed data is determined by parsing all commits since the last update.
 func updatePackageData() {
 
@@ -261,7 +262,7 @@ func fixPrecedingCommitsOfPackages() {
 func getApplicationData() models.Application {
 	// Select user by primary key.
 	applicationData := &models.Application{Id: "latest"}
-	err := database.DBCon.Select(applicationData)
+	err := database.DBCon.Model(applicationData).WherePK().Select()
 	if err != nil {
 		logger.Error.Println("Error fetching application data")
 		return models.Application{

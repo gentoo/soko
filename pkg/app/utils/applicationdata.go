@@ -14,7 +14,7 @@ import (
 func GetApplicationData() models.Application {
 	// Select user by primary key.
 	applicationData := &models.Application{Id: "latest"}
-	err := database.DBCon.Select(applicationData)
+	err := database.DBCon.Model(applicationData).WherePK().Select()
 	if err != nil {
 		logger.Error.Println("Error fetching application data")
 		return models.Application{

@@ -2,11 +2,11 @@ package packages
 
 import (
 	"encoding/json"
-	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/v9/orm"
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // Show renders a template to show a given package
@@ -18,7 +18,7 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 		Where("atom LIKE ?", "%"+atom).
 		Relation("Versions").
 		Relation("Versions.Masks").
-		Relation("Commits", func(q *orm.Query) (*orm.Query, error) {
+		Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("preceding_commits DESC").Limit(1), nil
 		}).
 		Limit(1).

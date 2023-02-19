@@ -152,7 +152,7 @@ func deleteAllDependencies() {
 		return
 	}
 
-	res, err := database.DBCon.Model(&reverseDependencies).WherePK().Delete()
+	res, err := database.DBCon.Model(&reverseDependencies).Delete()
 	if err != nil {
 		logger.Error.Println(err)
 		return

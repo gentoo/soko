@@ -15,8 +15,8 @@ type Commit struct {
 	CommitterDate    time.Time
 	Message          string
 	ChangedFiles     *ChangedFiles
-	ChangedPackages  []*Package       `pg:"many2many:commit_to_packages,joinFK:package_atom"`
-	ChangedVersions  []*Version       `pg:"many2many:commit_to_versions,joinFK:version_id"`
+	ChangedPackages  []*Package       `pg:"many2many:commit_to_packages,join_fk:package_atom"`
+	ChangedVersions  []*Version       `pg:"many2many:commit_to_versions,join_fk:version_id"`
 	KeywordChanges   []*KeywordChange `pg:",fk:commit_id"`
 }
 
@@ -34,11 +34,11 @@ type ChangedFile struct {
 type KeywordChange struct {
 	Id         string `pg:",pk"`
 	CommitId   string
-	Commit     *Commit `pg:",fk:commit_id"`
+	Commit     *Commit `pg:",fk:commit_id,rel:has-one"`
 	VersionId  string
-	Version    *Version `pg:",fk:version_id"`
+	Version    *Version `pg:",fk:version_id,rel:has-one"`
 	PackageId  string
-	Package    *Package `pg:",fk:package_id"`
+	Package    *Package `pg:",fk:package_id,rel:has-one"`
 	Added      []string
 	Stabilized []string
 	All        []string
