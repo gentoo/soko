@@ -68,6 +68,25 @@
                 </div>
 
                 <h4 class="mt-4">
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseExternalResources" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                        External Resources
+                    </a>
+                </h4>
+                <div class="collapse show" id="collapseExternalResources">
+                    <dl class="ml-3">
+                        <dd>
+                            <span class="fa fa-fw fa-chain-broken"></span>
+                            <a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;maintainer={{.Maintainer.Project.Email}}" title="CI report" target="_blank">CI Report</a>
+                            (<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;maintainer={{.Maintainer.Project.Email}}" title="Verbose CI report" target="_blank">verbose</a>)
+                        </dd>
+                        <dd>
+                            <span class="fa fa-fw fa-book"></span>
+                            <a href="{{.Maintainer.Project.Url}}" target="_blank">Documentation</a>
+                        </dd>
+                    </dl>
+                </div>
+
+                <h4 class="mt-4">
                     <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseMembers" role="button" aria-expanded="false" aria-controls="collapseMembers">
                         Members
                     </a>
