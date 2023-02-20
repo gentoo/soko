@@ -42,51 +42,54 @@ func UpdatePkgCheckResults() {
 	pkgCheckResults, err := parseQAReport()
 	if err != nil {
 		logger.Error.Println("Error while parsing qa-reports data. Aborting...")
+		return
 	}
 
-	// clean up the database
-	deleteAllPkgCheckResults()
-
-	// update the database with the new results
-	for _, pkgCheckResult := range pkgCheckResults.Results {
-		database.DBCon.Model(&models.PkgCheckResult{
-			Id:       pkgCheckResult.Category + "/" + pkgCheckResult.Package + "-" + pkgCheckResult.Version + "-" + pkgCheckResult.Class + "-" + pkgCheckResult.Message,
-			Atom:     pkgCheckResult.Category + "/" + pkgCheckResult.Package,
+	collected := make(map[string]*models.PkgCheckResult, len(pkgCheckResults))
+	for _, pkgCheckResult := range pkgCheckResults {
+		catpkg := pkgCheckResult.Category + "/" + pkgCheckResult.Package
+		catpkgver := catpkg + "-" + pkgCheckResult.Version
+		id := catpkgver + "-" + pkgCheckResult.Class + "-" + pkgCheckResult.Message
+		collected[id] = &models.PkgCheckResult{
+			Id:       id,
+			Atom:     catpkg,
 			Category: pkgCheckResult.Category,
 			Package:  pkgCheckResult.Package,
 			Version:  pkgCheckResult.Version,
-			CPV:      pkgCheckResult.Category + "/" + pkgCheckResult.Package + "-" + pkgCheckResult.Version,
+			CPV:      catpkgver,
 			Class:    pkgCheckResult.Class,
 			Message:  pkgCheckResult.Message,
-		}).Insert()
+		}
 	}
+
+	// clean up the database
+	database.TruncateTable[models.PkgCheckResult]("id")
+
+	// update the database with the new results
+	rows := make([]*models.PkgCheckResult, 0, len(collected))
+	for _, row := range collected {
+		rows = append(rows, row)
+	}
+	res, err := database.DBCon.Model(&rows).OnConflict("(id) DO NOTHING").Insert()
+	if err != nil {
+		logger.Error.Println("Error during inserting pkgcheck results", err)
+		return
+	}
+	logger.Info.Println("Inserted", res.RowsAffected(), "pkgcheck results")
 
 	updateStatus()
 }
 
 // parseQAReport gets the xml from qa-reports.gentoo.org and parses it
-func parseQAReport() (PkgCheckResults, error) {
+func parseQAReport() ([]PkgCheckResult, error) {
 	resp, err := http.Get("https://qa-reports.gentoo.org/output/gentoo-ci/output.xml")
 	if err != nil {
-		return PkgCheckResults{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	xmlData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return PkgCheckResults{}, err
-	}
 	var pkgCheckResults PkgCheckResults
-	xml.Unmarshal(xmlData, &pkgCheckResults)
-	return pkgCheckResults, err
-}
-
-// deleteAllOutdated deletes all entries in the outdated table
-func deleteAllPkgCheckResults() {
-	var allPkgCheckResults []*models.PkgCheckResult
-	database.DBCon.Model(&allPkgCheckResults).Select()
-	for _, pkgCheckResult := range allPkgCheckResults {
-		database.DBCon.Model(pkgCheckResult).WherePK().Delete()
-	}
+	err = xml.NewDecoder(resp.Body).Decode(&pkgCheckResults)
+	return pkgCheckResults.Results, err
 }
 
 func updateStatus() {

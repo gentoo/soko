@@ -91,3 +91,22 @@ func Connect() {
 	}
 
 }
+
+func TruncateTable[K any](primary string) {
+	var val K
+	var allRows []*K
+	err := DBCon.Model(&allRows).Column(primary).Select()
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	} else if len(allRows) == 0 {
+		logger.Info.Printf("No %T to delete from the database", val)
+		return
+	}
+	res, err := DBCon.Model(&allRows).Delete()
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	logger.Info.Printf("Deleted %d %T from the database", res.RowsAffected(), val)
+}
