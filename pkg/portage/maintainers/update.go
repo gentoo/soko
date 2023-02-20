@@ -3,8 +3,8 @@ package maintainers
 import (
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"soko/pkg/logger"
 	"soko/pkg/models"
-	"soko/pkg/utils"
 	"sort"
 	"strings"
 	"time"
@@ -15,6 +15,7 @@ func FullImport() {
 	database.Connect()
 	defer database.DBCon.Close()
 
+	logger.Info.Println("Loading all raw maintainers from the database")
 	var allMaintainerInformation []*models.Maintainer
 	database.DBCon.Model((*models.Package)(nil)).ColumnExpr("jsonb_array_elements(maintainers)->>'Name' as name, jsonb_array_elements(maintainers) ->> 'Email' as email, jsonb_array_elements(maintainers) ->> 'Type' as type").Select(&allMaintainerInformation)
 
@@ -31,6 +32,7 @@ func FullImport() {
 		}
 	}
 
+	logger.Info.Println("Loading all packages from the database")
 	var gpackages []*models.Package
 	database.DBCon.Model(&gpackages).
 		Relation("Outdated").
@@ -41,15 +43,10 @@ func FullImport() {
 		Relation("Versions.PkgCheckResults").
 		Select()
 
-	// TODO in future we want an incremental update here
-	// but for now we delete everything and insert it again
-	// this is currently acceptable as it takes less than 2 seconds
-	deleteAllMaintainers()
-
 	for _, maintainer := range maintainers {
 		outdated := 0
 		securityBugs := 0
-		pullrequestIds := []string{}
+		pullRequestIds := make(map[string]struct{})
 		nonSecurityBugs := 0
 		stableRequests := 0
 		maintainerPackages := []*models.Package{}
@@ -68,7 +65,7 @@ func FullImport() {
 				outdated = outdated + len(gpackage.Outdated)
 
 				for _, pullRequest := range gpackage.PullRequests {
-					pullrequestIds = append(pullrequestIds, string(pullRequest.Id))
+					pullRequestIds[pullRequest.Id] = struct{}{}
 				}
 
 				// Find Stable Requests
@@ -92,14 +89,15 @@ func FullImport() {
 
 		maintainer.PackagesInformation = models.MaintainerPackagesInformation{
 			Outdated:       outdated,
-			PullRequests:   len(utils.Deduplicate(pullrequestIds)),
+			PullRequests:   len(pullRequestIds),
 			Bugs:           nonSecurityBugs,
 			SecurityBugs:   securityBugs,
 			StableRequests: stableRequests,
 		}
 
 		if maintainer.Name == "" {
-			maintainer.Name = strings.Title(strings.Split(maintainer.Email, "@")[0])
+			name, _, _ := strings.Cut(maintainer.Email, "@")
+			maintainer.Name = strings.Title(name)
 		}
 
 		if maintainer.Type == "project" && strings.HasPrefix(maintainer.Name, "Gentoo ") {
@@ -114,8 +112,23 @@ func FullImport() {
 			}
 		}
 
-		database.DBCon.Model(maintainer).WherePK().OnConflict("(email) DO UPDATE").Insert()
 	}
+
+	// TODO in future we want an incremental update here
+	// but for now we delete everything and insert it again
+	// this is currently acceptable as it takes less than 2 seconds
+	database.TruncateTable[models.Maintainer]("email")
+
+	rows := make([]*models.Maintainer, 0, len(maintainers))
+	for _, row := range maintainers {
+		rows = append(rows, row)
+	}
+	res, err := database.DBCon.Model(&rows).OnConflict("(email) DO NOTHING").Insert()
+	if err != nil {
+		logger.Error.Println("Error during inserting maintainers", err)
+		return
+	}
+	logger.Info.Println("Inserted", res.RowsAffected(), "maintainers")
 
 	updateStatus()
 }
@@ -129,7 +142,7 @@ func getAllBugs(packages []*models.Package) []*models.Bug {
 		}
 	}
 
-	var allBugsList []*models.Bug
+	allBugsList := make([]*models.Bug, 0, len(allBugs))
 	for _, bug := range allBugs {
 		allBugsList = append(allBugsList, bug)
 	}
@@ -139,24 +152,6 @@ func getAllBugs(packages []*models.Package) []*models.Bug {
 	})
 
 	return allBugsList
-}
-
-// deleteAllMaintainers deletes all entries in the maintainers table
-func deleteAllMaintainers() {
-	var maintainers []*models.Maintainer
-	database.DBCon.Model(&maintainers).Select()
-	for _, maintainer := range maintainers {
-		database.DBCon.Model(maintainer).WherePK().Delete()
-	}
-}
-
-func contains(element string, elements []string) bool {
-	for _, el := range elements {
-		if element == el {
-			return true
-		}
-	}
-	return false
 }
 
 func updateStatus() {
