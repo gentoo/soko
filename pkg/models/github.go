@@ -31,60 +31,57 @@ type GitHubPullRequestQueryResult struct {
 	Data GitHubPullRequestQueryResultData `json:"data"`
 }
 
-func (res GitHubPullRequestQueryResult) HasNextPage() bool {
+func (res *GitHubPullRequestQueryResult) HasNextPage() bool {
 	return res.Data.Search.PageInfo.HasNextPage
 }
 
-func (res GitHubPullRequestQueryResult) CreatePullRequest() []GithubPullRequest {
-	var pullrequests []GithubPullRequest
-	for _, rawObject := range res.Data.Search.Edges {
-		pullrequest := rawObject.Node
-		cistate := ""
-		cistatelink := ""
-		if pullrequest.Commits.Nodes != nil && len(pullrequest.Commits.Nodes) > 0 {
-			cistate = pullrequest.Commits.Nodes[0].Commit.Status.State
+func (res *GitHubPullRequestQueryResult) EndCursor() string {
+	return res.Data.Search.PageInfo.EndCursor
+}
 
-			if pullrequest.Commits.Nodes[0].Commit.Status.Contexts != nil && len(pullrequest.Commits.Nodes[0].Commit.Status.Contexts) > 0 {
-				cistatelink = pullrequest.Commits.Nodes[0].Commit.Status.Contexts[0].TargetUrl
+func (res *GitHubPullRequestQueryResult) AppendPullRequest(pullRequests map[int]*GithubPullRequest) {
+	for _, rawObject := range res.Data.Search.Edges {
+		pullRequest := rawObject.Node
+		var ciState, ciStateLink string
+		if pullRequest.Commits.Nodes != nil && len(pullRequest.Commits.Nodes) > 0 {
+			ciState = pullRequest.Commits.Nodes[0].Commit.Status.State
+
+			if pullRequest.Commits.Nodes[0].Commit.Status.Contexts != nil && len(pullRequest.Commits.Nodes[0].Commit.Status.Contexts) > 0 {
+				ciStateLink = pullRequest.Commits.Nodes[0].Commit.Status.Contexts[0].TargetUrl
 			}
 		}
 
-		pullrequests = append(pullrequests, GithubPullRequest{
-			Id:          strconv.Itoa(pullrequest.Number),
-			Closed:      pullrequest.Closed,
-			Url:         pullrequest.Url,
-			Title:       pullrequest.Title,
-			CreatedAt:   pullrequest.CreatedAt,
-			UpdatedAt:   pullrequest.UpdatedAt,
-			CiState:     cistate,
-			CiStateLink: cistatelink,
-			Labels:      pullrequest.CreateLabelsArray(),
-			Comments:    pullrequest.Comments.TotalCount,
-			Files:       pullrequest.CreateFilesArray(),
-			Author:      pullrequest.Author.Login,
-		})
+		pullRequests[pullRequest.Number] = &GithubPullRequest{
+			Id:          strconv.Itoa(pullRequest.Number),
+			Closed:      pullRequest.Closed,
+			Url:         pullRequest.Url,
+			Title:       pullRequest.Title,
+			CreatedAt:   pullRequest.CreatedAt,
+			UpdatedAt:   pullRequest.UpdatedAt,
+			CiState:     ciState,
+			CiStateLink: ciStateLink,
+			Labels:      pullRequest.CreateLabelsArray(),
+			Comments:    pullRequest.Comments.TotalCount,
+			Files:       pullRequest.CreateFilesArray(),
+			Author:      pullRequest.Author.Login,
+		}
 	}
-	return pullrequests
 }
 
-func (node GitHubPullRequestSearchNode) CreateLabelsArray() []GitHubPullRequestLabelNode {
-	var labels []GitHubPullRequestLabelNode
-	for _, label := range node.Labels.Edges {
-		labels = append(labels, label.Node)
-	}
-	return labels
-}
-
-func (node GitHubPullRequestSearchNode) CreateFilesArray() []GitHubPullRequestFileNode {
-	var labels []GitHubPullRequestFileNode
-	for _, label := range node.Files.Edges {
-		labels = append(labels, label.Node)
+func (node *GitHubPullRequestSearchNode) CreateLabelsArray() []GitHubPullRequestLabelNode {
+	labels := make([]GitHubPullRequestLabelNode, len(node.Labels.Edges))
+	for i, label := range node.Labels.Edges {
+		labels[i] = label.Node
 	}
 	return labels
 }
 
-func (res GitHubPullRequestQueryResult) EndCursor() string {
-	return res.Data.Search.PageInfo.EndCursor
+func (node *GitHubPullRequestSearchNode) CreateFilesArray() []GitHubPullRequestFileNode {
+	labels := make([]GitHubPullRequestFileNode, len(node.Files.Edges))
+	for i, label := range node.Files.Edges {
+		labels[i] = label.Node
+	}
+	return labels
 }
 
 type GitHubPullRequestQueryResultData struct {

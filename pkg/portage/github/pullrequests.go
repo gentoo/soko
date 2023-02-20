@@ -3,14 +3,12 @@ package github
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	appUtils "soko/pkg/app/utils"
+	"soko/pkg/app/utils"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
-	"soko/pkg/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -18,17 +16,17 @@ import (
 
 func buildQuery(limit int, isOpen bool, lastUpdated, after string) map[string]string {
 
-	lastUpdatedQuery := ""
+	var lastUpdatedQuery string
 	if lastUpdated != "" {
 		lastUpdatedQuery = `updated:>` + lastUpdated
 	}
 
-	afterQuery := ""
+	var afterQuery string
 	if after != "" {
 		afterQuery = `after: "` + after + `",`
 	}
 
-	isOpenQuery := ""
+	var isOpenQuery string
 	if isOpen {
 		isOpenQuery = `is:open`
 	}
@@ -113,7 +111,8 @@ func FullUpdatePullRequests() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	deleteAllPullrequests()
+	database.TruncateTable[models.GithubPullRequest]("id")
+	database.TruncateTable[models.PackageToGithubPullRequest]("id")
 
 	// year of the git migration
 	UpdatePullRequestsAfter(true, "2015-01-01", "")
@@ -126,7 +125,7 @@ func IncrementalUpdatePullRequests() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	lastUpdate := appUtils.GetApplicationData().LastUpdate.UTC().Format(time.RFC3339)
+	lastUpdate := utils.GetApplicationData().LastUpdate.UTC().Format(time.RFC3339)
 	lastUpdate = strings.Split(lastUpdate, "Z")[0] + "Z"
 	UpdatePullRequestsAfter(false, lastUpdate, "")
 	// TODO --> we need to update old ent
@@ -136,76 +135,85 @@ func IncrementalUpdatePullRequests() {
 }
 
 func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
-	jsonData := buildQuery(100, isOpen, lastUpdated, after)
-
-	jsonValue, _ := json.Marshal(jsonData)
-	request, err := http.NewRequest("POST", "https://api.github.com/graphql", bytes.NewBuffer(jsonValue))
-	request.Header.Set("Authorization", "bearer "+config.GithubAPIToken())
+	pullRequests := make(map[int]*models.GithubPullRequest)
 	client := &http.Client{Timeout: time.Second * 30}
-	response, err := client.Do(request)
-	if err != nil {
-		logger.Error.Println("The HTTP request failed with error")
-		logger.Error.Println(err)
+
+	for {
+		logger.Info.Println("Requesting pull requests starting with", len(pullRequests))
+		jsonData := buildQuery(100, isOpen, lastUpdated, after)
+		jsonValue, _ := json.Marshal(jsonData)
+
+		request, err := http.NewRequest(http.MethodPost, "https://api.github.com/graphql", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			logger.Error.Println("Failed to query github graphql", err)
+			return
+		}
+
+		request.Header.Set("Authorization", "bearer "+config.GithubAPIToken())
+		response, err := client.Do(request)
+		if err != nil {
+			logger.Error.Println("The HTTP request failed with error", err)
+			return
+		}
+		defer response.Body.Close()
+
+		var prData models.GitHubPullRequestQueryResult
+		err = json.NewDecoder(response.Body).Decode(&prData)
+		if err != nil {
+			logger.Error.Println("Failed to parse JSON", err)
+			return
+		}
+		prData.AppendPullRequest(pullRequests)
+
+		// If there is a next page, import it as well
+		if prData.HasNextPage() {
+			time.Sleep(2 * time.Second)
+			after = prData.EndCursor()
+		} else {
+			break
+		}
 	}
-	defer response.Body.Close()
-	data, _ := ioutil.ReadAll(response.Body)
 
-	var prData models.GitHubPullRequestQueryResult
-	err = json.Unmarshal([]byte(data), &prData)
+	if len(pullRequests) == 0 {
+		logger.Info.Println("No pull requests to insert")
+		return
+	}
 
-	pullrequests := prData.CreatePullRequest()
-
-	for _, pullrequest := range pullrequests {
-		//
-		// Create Pullrequest
-		//
-		database.DBCon.Model(&pullrequest).WherePK().OnConflict("(id) DO UPDATE").Insert()
-
-		//
-		// Create Package To Pullrequest
-		//
-		var affectedPackages []string
+	var pkgsPullRequests []*models.PackageToGithubPullRequest
+	for _, pullrequest := range pullRequests {
+		affectedPackages := make(map[string]struct{})
 		for _, file := range pullrequest.Files {
 			pathParts := strings.Split(file.Path, "/")
 			if len(pathParts) >= 2 && strings.Contains(pathParts[0], "-") {
-				affectedPackages = append(affectedPackages, pathParts[0]+"/"+pathParts[1])
+				affectedPackages[pathParts[0]+"/"+pathParts[1]] = struct{}{}
 			}
 		}
-		affectedPackages = utils.Deduplicate(affectedPackages)
-		for _, affectedPackage := range affectedPackages {
-			database.DBCon.Model(&models.PackageToGithubPullRequest{
+		for affectedPackage := range affectedPackages {
+			pkgsPullRequests = append(pkgsPullRequests, &models.PackageToGithubPullRequest{
 				Id:                  affectedPackage + "-" + pullrequest.Id,
 				PackageAtom:         affectedPackage,
 				GithubPullRequestId: pullrequest.Id,
-			}).WherePK().OnConflict("(id) DO UPDATE").Insert()
+			})
 		}
 	}
 
-	//
-	// If there is a next page, import it as well
-	//
-
-	if prData.HasNextPage() {
-		// Wait for some time, as Github will block the request otherwise
-		time.Sleep(2 * time.Second)
-		UpdatePullRequestsAfter(isOpen, lastUpdated, prData.EndCursor())
+	rows := make([]*models.GithubPullRequest, 0, len(pullRequests))
+	for _, row := range pullRequests {
+		rows = append(rows, row)
 	}
-
-}
-
-// deleteAllPullrequests deletes all entries in the pullrequests and package to pull request table
-func deleteAllPullrequests() {
-	var pullrequests []*models.GithubPullRequest
-	database.DBCon.Model(&pullrequests).Select()
-	for _, pullrequest := range pullrequests {
-		database.DBCon.Model(pullrequest).WherePK().Delete()
+	result, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		logger.Error.Println("Failed to insert pull requests", err)
+		return
 	}
+	logger.Info.Println("Inserted", result.RowsAffected(), "pull requests")
 
-	var packagesToGithubPullRequest []*models.PackageToGithubPullRequest
-	database.DBCon.Model(&packagesToGithubPullRequest).Select()
-	for _, packageToGithubPullRequest := range packagesToGithubPullRequest {
-		database.DBCon.Model(packageToGithubPullRequest).WherePK().Delete()
+	result, err = database.DBCon.Model(&pkgsPullRequests).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		logger.Error.Println("Failed to insert packages to pull requests", err)
+		return
 	}
+	logger.Info.Println("Inserted", result.RowsAffected(), "packages to pull requests")
 }
 
 func updateStatus() {
