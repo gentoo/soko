@@ -54,7 +54,7 @@
                                     Author/Date
                                 </div>
                                 <div class="col-xs-12 col-md-9">
-                                    {{(getMask .Versions).Author}} &lt;{{(getMask .Versions).AuthorEmail}}&gt; <span class="text-muted">({{(getMask .Versions).Date}})</span>
+                                    {{(getMask .Versions).Author}} &lt;{{(getMask .Versions).AuthorEmail}}&gt; <span class="text-muted">({{(getMask .Versions).Date.Format "2006-01-02"}})</span>
                                 </div>
                             </div>
                         </div>
