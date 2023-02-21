@@ -17,7 +17,7 @@ import (
 // isPackage checks whether the path points to a package
 // descriptions that is an metadata.xml file
 func isPackage(path string) bool {
-	isPackage, _ := regexp.MatchString(`[^/]*\/[^/]*\/metadata\.xml`, path)
+	isPackage, _ := regexp.MatchString(`^[^/]*\/[^/]*\/metadata\.xml$`, path)
 	return isPackage
 }
 

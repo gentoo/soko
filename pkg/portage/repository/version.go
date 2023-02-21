@@ -15,7 +15,7 @@ import (
 // isVersion checks whether the path points to a package version
 // that is an .ebuild file
 func isVersion(path string) bool {
-	isVersion, _ := regexp.MatchString(`[^/]*\/[^/]*\/.*\.ebuild`, path)
+	isVersion, _ := regexp.MatchString(`^[^/]*\/[^/]*\/.*\.ebuild$`, path)
 	return isVersion
 }
 

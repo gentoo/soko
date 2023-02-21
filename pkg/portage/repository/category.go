@@ -17,7 +17,7 @@ import (
 // isCategory checks whether the path points to a category
 // descriptions that is an metadata.xml file
 func isCategory(path string) bool {
-	isCategory, _ := regexp.MatchString(`[^/]*\/metadata\.xml`, path)
+	isCategory, _ := regexp.MatchString(`^[^/]*\/metadata\.xml$`, path)
 	return isCategory
 }
 
