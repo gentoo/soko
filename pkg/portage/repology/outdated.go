@@ -42,12 +42,10 @@ func UpdateOutdated() {
 	}
 
 	// Clean up the database
-	deleteAllOutdated()
+	database.TruncateTable[models.OutdatedPackages]("atom")
 
 	// Update the database
-	for _, outdated := range outdatedVersions {
-		database.DBCon.Model(outdated).Insert()
-	}
+	database.DBCon.Model(&outdatedVersions).Insert()
 
 	updateStatus()
 }
@@ -67,9 +65,7 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 
 	var outdatedVersions []*models.OutdatedPackages
 	for packagename := range repoPackages {
-		atom := ""
-		newest := ""
-		version := ""
+		var atom, newest, version string
 		outdated := false
 		// get the gentoo atom name first
 		for _, v := range repoPackages[packagename] {
@@ -117,25 +113,15 @@ func parseRepologyData(url string) (Packages, error) {
 		return Packages{}, err
 	}
 	defer resp.Body.Close()
-	var repoPackages Packages
-	dec := json.NewDecoder(resp.Body)
-	err = dec.Decode(&repoPackages)
-	return repoPackages, err
-}
 
-// deleteAllOutdated deletes all entries in the outdated table
-func deleteAllOutdated() {
-	var allOutdated []*models.OutdatedPackages
-	database.DBCon.Model(&allOutdated).Select()
-	for _, outdated := range allOutdated {
-		database.DBCon.Model(outdated).WherePK().Delete()
-	}
+	var repoPackages Packages
+	err = json.NewDecoder(resp.Body).Decode(&repoPackages)
+	return repoPackages, err
 }
 
 // readBlocklist parses a block list and returns a list of
 // lines whereas comments as well as empty lines are ignored
 func readBlocklist(file string) []string {
-	var blocklist []string
 	resp, err := http.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
 	if err != nil {
 		return []string{}
@@ -146,6 +132,7 @@ func readBlocklist(file string) []string {
 	buf.ReadFrom(resp.Body)
 	rawBlocklist := buf.String()
 
+	var blocklist []string
 	for _, line := range strings.Split(rawBlocklist, "\n") {
 		if !strings.HasPrefix(line, "#") && strings.TrimSpace(line) != "" {
 			blocklist = append(blocklist, line)
