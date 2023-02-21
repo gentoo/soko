@@ -13,19 +13,27 @@ import (
 )
 
 func UpdateBugs(init bool) {
-	UpdateSecurityBugs()
-	UpdatePackagesBugs(init)
+	database.Connect()
+	defer database.DBCon.Close()
 
-	UpdateClosedBugs()
+	updateSecurityBugs()
+	updatePackagesBugs(init)
+
+	updateClosedBugs()
+
+	logger.Info.Println("---")
 
 	updateStatus()
 }
 
-func UpdateSecurityBugs() {
+func updateSecurityBugs() {
+	logger.Info.Println("UpdateSecurityBugs")
+
 	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&component=Vulnerabilities&list_id=4688108&product=Gentoo%20Security&query_format=advanced&resolution=---&ctype=csv&human=1")
 }
 
-func UpdatePackagesBugs(init bool) {
+func updatePackagesBugs(init bool) {
+	logger.Info.Println("UpdatePackagesBugs")
 	//
 	// Keywording
 	//
@@ -45,8 +53,8 @@ func UpdatePackagesBugs(init bool) {
 	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2020-01-01&chfieldto=2021-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
 }
 
-func UpdateClosedBugs() {
-	logger.Error.Println("UpdateClosedBugs")
+func updateClosedBugs() {
+	logger.Info.Println("UpdateClosedBugs")
 	//
 	// Security
 	//
@@ -69,13 +77,14 @@ func UpdateClosedBugs() {
 }
 
 func deleteBugs(source string) {
-	database.Connect()
-	defer database.DBCon.Close()
-
 	data, err := readCSVFromUrl(source)
 	if err != nil {
 		logger.Error.Println(err)
+		return
 	}
+
+	var bugs []*models.Bug
+	var pkgsBugs []*models.PackageToBug
 
 	for idx, row := range data {
 		// skip header
@@ -83,46 +92,43 @@ func deleteBugs(source string) {
 			continue
 		}
 
-		bug := models.Bug{
+		bugs = append(bugs, &models.Bug{
 			Id: row[0],
-		}
-
-		//
-		// Delete bug
-		//
-		_, err = database.DBCon.Model(&bug).WherePK().Delete()
-		if err != nil {
-			logger.Error.Println(err)
-		}
-
-		//
-		// Delete Package To Bug
-		//
-		bugId := row[0]
-		summary := row[6]
-		summary = strings.Split(summary, " ")[0]
-		affectedPackage := versionSpecifierToPackageAtom(summary)
-
-		_, err = database.DBCon.Model(&models.PackageToBug{
-			Id:          affectedPackage + "-" + bugId,
-			PackageAtom: affectedPackage,
-			BugId:       bugId,
-		}).Where("bug_id = ?bug_id").Delete()
-		if err != nil {
-			logger.Error.Println(err)
-		}
+		})
+		affectedPackage := versionSpecifierToPackageAtom(strings.Split(row[6], " ")[0])
+		pkgsBugs = append(pkgsBugs, &models.PackageToBug{
+			Id: affectedPackage + "-" + row[0],
+		})
 	}
+
+	if len(bugs) == 0 {
+		return
+	}
+
+	res1, err := database.DBCon.Model(&bugs).Delete()
+	if err != nil {
+		logger.Error.Println("Failed to delete bugs:", err)
+		return
+	}
+
+	res2, err := database.DBCon.Model(&pkgsBugs).Delete()
+	if err != nil {
+		logger.Error.Println("Failed to delete package bugs:", err)
+		return
+	}
+	logger.Info.Println("Deleted", res1.RowsAffected(), "bugs and", res2.RowsAffected(), "package bugs")
 }
 
 func importBugs(source string) {
-
-	database.Connect()
-	defer database.DBCon.Close()
-
 	data, err := readCSVFromUrl(source)
 	if err != nil {
 		logger.Error.Println(err)
+		return
 	}
+
+	var bugs []*models.Bug
+	var verBugs []*models.VersionToBug
+	var pkgsBugs []*models.PackageToBug
 
 	for idx, row := range data {
 		// skip header
@@ -130,16 +136,14 @@ func importBugs(source string) {
 			continue
 		}
 
-		bug := models.Bug{
+		bugs = append(bugs, &models.Bug{
 			Id:        row[0],
 			Product:   row[1],
 			Component: row[2],
 			Assignee:  row[3],
 			Status:    row[4],
 			Summary:   row[6],
-		}
-
-		database.DBCon.Model(&bug).WherePK().OnConflict("(id) DO UPDATE").Insert()
+		})
 
 		//
 		// Insert Package To Bug
@@ -147,79 +151,91 @@ func importBugs(source string) {
 		bugId := row[0]
 		summary := row[6]
 		if strings.TrimSpace(row[8]) != "" {
+			versions := make(map[string]struct{})
 			for _, gpackage := range strings.Split(row[8], "\n") {
 				affectedVersions := strings.Split(gpackage, " ")[0]
 				if strings.TrimSpace(affectedVersions) != "" {
-					CalculateAffectedVersions(bugId, affectedVersions)
+					for _, version := range calculateAffectedVersions(bugId, affectedVersions) {
+						versions[version.Id] = struct{}{}
+					}
 				}
 			}
+			for version := range versions {
+				verBugs = append(verBugs, &models.VersionToBug{
+					Id:        version + "-" + bugId,
+					VersionId: version,
+					BugId:     bugId,
+				})
+			}
 		} else {
-			summary = strings.Split(summary, " ")[0]
+			summary, _, _ = strings.Cut(summary, " ")
 			affectedPackage := versionSpecifierToPackageAtom(summary)
 
-			database.DBCon.Model(&models.PackageToBug{
+			pkgsBugs = append(pkgsBugs, &models.PackageToBug{
 				Id:          affectedPackage + "-" + bugId,
 				PackageAtom: affectedPackage,
 				BugId:       bugId,
-			}).WherePK().OnConflict("(id) DO UPDATE").Insert()
+			})
 		}
 
 	}
 
+	res1, err := database.DBCon.Model(&bugs).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		logger.Error.Println("Failed to insert bugs:", err)
+		return
+	}
+
+	res2, err := database.DBCon.Model(&verBugs).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		logger.Error.Println("Failed to insert version bugs:", err)
+		return
+	}
+
+	res3, err := database.DBCon.Model(&pkgsBugs).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		logger.Error.Println("Failed to insert package bugs:", err)
+		return
+	}
+
+	logger.Info.Println("Inserted", res1.RowsAffected(), "bugs,", res2.RowsAffected(), "version bugs and", res3.RowsAffected(), "package bugs")
 }
 
-func CalculateAffectedVersions(bugId, versionSpecifier string) {
-
+func calculateAffectedVersions(bugId, versionSpecifier string) []*models.Version {
 	packageAtom := versionSpecifierToPackageAtom(versionSpecifier)
-	var versions []*models.Version
 
 	if strings.HasPrefix(versionSpecifier, "=") {
-		versions = exaktVersion(versionSpecifier, packageAtom)
+		return exactVersion(versionSpecifier, packageAtom)
 	} else if strings.HasPrefix(versionSpecifier, "<=") {
-		versions = comparedVersions("<=", versionSpecifier, packageAtom)
+		return comparedVersions("<=", versionSpecifier, packageAtom)
 	} else if strings.HasPrefix(versionSpecifier, "<") {
-		versions = comparedVersions("<", versionSpecifier, packageAtom)
+		return comparedVersions("<", versionSpecifier, packageAtom)
 	} else if strings.HasPrefix(versionSpecifier, ">=") {
-		versions = comparedVersions(">=", versionSpecifier, packageAtom)
+		return comparedVersions(">=", versionSpecifier, packageAtom)
 	} else if strings.HasPrefix(versionSpecifier, ">") {
-		versions = comparedVersions(">", versionSpecifier, packageAtom)
+		return comparedVersions(">", versionSpecifier, packageAtom)
 	} else if strings.HasPrefix(versionSpecifier, "~") {
-		versions = allRevisions(versionSpecifier, packageAtom)
+		return allRevisions(versionSpecifier, packageAtom)
 	} else if strings.Contains(versionSpecifier, ":") {
-		versions = versionsWithSlot(versionSpecifier, packageAtom)
+		return versionsWithSlot(versionSpecifier, packageAtom)
 	} else {
-		versions = allVersions(versionSpecifier, packageAtom)
-	}
-
-	for _, version := range versions {
-		versionToBug := &models.VersionToBug{
-			Id:        version.Id + "-" + bugId,
-			VersionId: version.Id,
-			BugId:     bugId,
-		}
-
-		_, err := database.DBCon.Model(versionToBug).OnConflict("(id) DO UPDATE").Insert()
-
-		if err != nil {
-			logger.Error.Printf("Error while inserting version to bug entry: %v", err)
-		}
+		return allVersions(versionSpecifier, packageAtom)
 	}
 }
 
 // comparedVersions computes and returns all versions that are >=, >, <= or < than then given version
-func comparedVersions(operator string, versionSpecifier string, packageAtom string) []*models.Version {
-	var results []*models.Version
-	var versions []*models.Version
+func comparedVersions(operator, versionSpecifier, packageAtom string) (results []*models.Version) {
 	versionSpecifier = strings.ReplaceAll(versionSpecifier, operator, "")
 	versionSpecifier = strings.ReplaceAll(versionSpecifier, packageAtom+"-", "")
-	versionSpecifier = strings.Split(versionSpecifier, ":")[0]
+	versionSpecifier, _, _ = strings.Cut(versionSpecifier, ":")
+	givenVersion := models.Version{Version: versionSpecifier}
 
+	var versions []*models.Version
 	database.DBCon.Model(&versions).
 		Where("atom = ?", packageAtom).
 		Select()
 
 	for _, v := range versions {
-		givenVersion := models.Version{Version: versionSpecifier}
 		if operator == ">" {
 			if v.GreaterThan(givenVersion) {
 				results = append(results, v)
@@ -238,53 +254,50 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 			}
 		}
 	}
-	return results
+	return
 }
 
+var revision = regexp.MustCompile(`-r[0-9]*$`)
+
 // allRevisions returns all revisions of the given version
-func allRevisions(versionSpecifier string, packageAtom string) []*models.Version {
-	var versions []*models.Version
-	revision := regexp.MustCompile(`-r[0-9]*$`)
+func allRevisions(versionSpecifier string, packageAtom string) (versions []*models.Version) {
 	versionWithoutRevision := revision.Split(versionSpecifier, 1)[0]
 	versionWithoutRevision = strings.ReplaceAll(versionWithoutRevision, "~", "")
 	database.DBCon.Model(&versions).
 		Where("id LIKE ?", versionWithoutRevision+"%").
-		Select()
+		Column("id").Select()
 
-	return versions
+	return
 }
 
-// exaktVersion returns the exact version specified in the versionSpecifier
-func exaktVersion(versionSpecifier string, packageAtom string) []*models.Version {
-	var versions []*models.Version
+// exactVersion returns the exact version specified in the versionSpecifier
+func exactVersion(versionSpecifier string, packageAtom string) (versions []*models.Version) {
 	database.DBCon.Model(&versions).
 		Where("id = ?", versionSpecifier).
-		Select()
+		Column("id").Select()
 
-	return versions
+	return
 }
 
 // TODO include subslot
 // versionsWithSlot returns all versions with the given slot
-func versionsWithSlot(versionSpecifier string, packageAtom string) []*models.Version {
-	var versions []*models.Version
-	slot := strings.Split(versionSpecifier, ":")[1]
+func versionsWithSlot(versionSpecifier string, packageAtom string) (versions []*models.Version) {
+	_, slot, _ := strings.Cut(versionSpecifier, ":")
 
 	database.DBCon.Model(&versions).
 		Where("atom = ?", packageAtom).
 		Where("slot = ?", slot).
-		Select()
+		Column("id").Select()
 
-	return versions
+	return
 }
 
 // allVersions returns all versions of the given package
-func allVersions(versionSpecifier string, packageAtom string) []*models.Version {
-	var versions []*models.Version
+func allVersions(versionSpecifier string, packageAtom string) (versions []*models.Version) {
 	database.DBCon.Model(&versions).
 		Where("atom = ?", packageAtom).
-		Select()
-	return versions
+		Column("id").Select()
+	return
 }
 
 func readCSVFromUrl(url string) ([][]string, error) {
@@ -292,8 +305,8 @@ func readCSVFromUrl(url string) ([][]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
+
 	reader := csv.NewReader(resp.Body)
 	reader.Comma = ','
 	data, err := reader.ReadAll()
@@ -304,6 +317,8 @@ func readCSVFromUrl(url string) ([][]string, error) {
 	return data, nil
 }
 
+var versionNumber = regexp.MustCompile(`-[0-9]`)
+
 // versionSpecifierToPackageAtom returns the package atom from a given version specifier
 func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage := strings.ReplaceAll(versionSpecifier, ">", "")
@@ -311,19 +326,14 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage = strings.ReplaceAll(gpackage, "=", "")
 	gpackage = strings.ReplaceAll(gpackage, "~", "")
 
-	gpackage = strings.Split(gpackage, ":")[0]
+	gpackage, _, _ = strings.Cut(gpackage, ":")
 
-	versionnumber := regexp.MustCompile(`-[0-9]`)
-	gpackage = versionnumber.Split(gpackage, 2)[0]
+	gpackage = versionNumber.Split(gpackage, 2)[0]
 
 	return gpackage
 }
 
 func updateStatus() {
-
-	database.Connect()
-	defer database.DBCon.Close()
-
 	database.DBCon.Model(&models.Application{
 		Id:         "bugs",
 		LastUpdate: time.Now(),
