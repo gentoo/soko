@@ -4,7 +4,6 @@ package repository
 
 import (
 	"encoding/xml"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"soko/pkg/config"
@@ -21,89 +20,136 @@ func isPackage(path string) bool {
 	return isPackage
 }
 
-// UpdatePackage updates the package in the database in case
-// the given path points to a package description
-func UpdatePackage(path string) {
+// UpdatePackages updates the packages in the database for each
+// given path that points to a package description
+func UpdatePackages(paths []string) {
+	deleted := map[string]*models.Package{}
+	modified := map[string]*models.Package{}
 
-	splittedLine := strings.Split(path, "\t")
+	for _, path := range paths {
+		splittedLine := strings.Split(path, "\t")
 
-	if len(splittedLine) != 2 {
-		if len(splittedLine) == 1 && isPackage(path) {
-			updateModifiedPackage(path)
+		if len(splittedLine) != 2 {
+			if len(splittedLine) == 1 && isPackage(path) {
+				if pkg := updateModifiedPackage(path); pkg != nil {
+					modified[pkg.Atom] = pkg
+				}
+			}
+			continue
 		}
-		return
+
+		status := splittedLine[0]
+		changedFile := splittedLine[1]
+
+		if !isPackage(changedFile) {
+			continue
+		} else if status == "D" {
+			pkg := updateDeletedPackage(changedFile)
+			deleted[pkg.Atom] = pkg
+		} else if status == "A" || status == "M" {
+			if pkg := updateModifiedPackage(changedFile); pkg != nil {
+				modified[pkg.Atom] = pkg
+			}
+		}
 	}
 
-	status := splittedLine[0]
-	changedFile := splittedLine[1]
+	if len(deleted) > 0 {
+		rows := make([]*models.Package, 0, len(deleted))
+		for _, row := range deleted {
+			rows = append(rows, row)
+		}
+		res, err := database.DBCon.Model(&rows).Delete()
+		if err != nil {
+			logger.Error.Println("Error during deleting packages", err)
+		} else {
+			logger.Info.Println("Deleted", res.RowsAffected(), "packages")
+		}
+	}
 
-	if isPackage(changedFile) && status == "D" {
-		updateDeletedPackage(changedFile)
-	} else if isPackage(changedFile) && (status == "A" || status == "M") {
-		updateModifiedPackage(changedFile)
+	if len(modified) > 0 {
+		rows := make([]*models.Package, 0, len(modified))
+		for _, row := range modified {
+			rows = append(rows, row)
+		}
+		res, err := database.DBCon.Model(&rows).OnConflict("(atom) DO UPDATE").
+			Set("atom = EXCLUDED.atom").
+			Set("category = EXCLUDED.category").
+			Set("name = EXCLUDED.name").
+			Set("longdescription = EXCLUDED.longdescription").
+			Set("maintainers = EXCLUDED.maintainers").
+			Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating packages", err)
+		} else {
+			logger.Info.Println("Updated", res.RowsAffected(), "packages")
+		}
 	}
 }
 
 // updateDeletedPackage deletes a package from the database
-func updateDeletedPackage(changedFile string) {
+func updateDeletedPackage(changedFile string) *models.Package {
 	splitted := strings.Split(changedFile, "/")
 	category := splitted[0]
 	packagename := splitted[1]
 	atom := category + "/" + packagename
 
-	gpackage := &models.Package{Atom: atom}
-	_, err := database.DBCon.Model(gpackage).WherePK().Delete()
-
-	if err != nil {
-		logger.Error.Println("Error during deleting package " + atom)
-		logger.Error.Println(err)
-	}
+	return &models.Package{Atom: atom}
 }
 
 // updateModifiedPackage adds a package to the database or
 // updates it. To do so, it parses the metadata from metadata.xml
-func updateModifiedPackage(changedFile string) {
+func updateModifiedPackage(changedFile string) *models.Package {
 	splitted := strings.Split(changedFile, "/")
 	category := splitted[0]
 	packagename := splitted[1]
 	atom := category + "/" + packagename
 
-	pkgmetadata := GetPkgMetadata(config.PortDir() + "/" + atom + "/metadata.xml")
-	var maintainers []*models.Maintainer
+	xmlFile, err := os.Open(config.PortDir() + "/" + atom + "/metadata.xml")
+	if err != nil {
+		logger.Error.Println("Error during reading package metadata", err)
+		return nil
+	}
+	defer xmlFile.Close()
+	var pkgMetadata PkgMetadata
+	err = xml.NewDecoder(xmlFile).Decode(&pkgMetadata)
+	if err != nil {
+		logger.Error.Println("Error during package", changedFile, "decoding", err)
+		return nil
+	}
 
-	for _, maintainer := range pkgmetadata.MaintainerList {
-		maintainer := &models.Maintainer{
+	maintainers := make([]*models.Maintainer, len(pkgMetadata.MaintainerList))
+	for i, maintainer := range pkgMetadata.MaintainerList {
+		maintainers[i] = &models.Maintainer{
 			Name:     maintainer.Name,
 			Type:     maintainer.Type,
 			Email:    maintainer.Email,
 			Restrict: maintainer.Restrict,
 		}
-		maintainers = append(maintainers, maintainer)
 	}
 
-	longDescription := ""
-	for _, l := range pkgmetadata.LongdescriptionList {
+	var longDescription string
+	for _, l := range pkgMetadata.LongDescriptionList {
 		if l.Language == "" || l.Language == "en" {
 			longDescription = l.Content
 		}
 	}
 
-	remoteIds := []models.RemoteId{}
-	for _, r := range pkgmetadata.Upstream.RemoteIds {
-		remoteIds = append(remoteIds, models.RemoteId{
+	remoteIds := make([]models.RemoteId, len(pkgMetadata.Upstream.RemoteIds))
+	for i, r := range pkgMetadata.Upstream.RemoteIds {
+		remoteIds[i] = models.RemoteId{
 			Type: r.Type,
 			Id:   r.Content,
-		})
+		}
 	}
 
 	upstream := models.Upstream{
 		RemoteIds: remoteIds,
-		Doc:       pkgmetadata.Upstream.Doc,
-		BugsTo:    pkgmetadata.Upstream.BugsTo,
-		Changelog: pkgmetadata.Upstream.Changelog,
+		Doc:       pkgMetadata.Upstream.Doc,
+		BugsTo:    pkgMetadata.Upstream.BugsTo,
+		Changelog: pkgMetadata.Upstream.Changelog,
 	}
 
-	gpackage := &models.Package{
+	return &models.Package{
 		Atom:            atom,
 		Category:        category,
 		Name:            packagename,
@@ -111,42 +157,14 @@ func updateModifiedPackage(changedFile string) {
 		Maintainers:     maintainers,
 		Upstream:        upstream,
 	}
-
-	_, err := database.DBCon.Model(gpackage).OnConflict("(atom) DO UPDATE").
-		Set("atom = EXCLUDED.atom").
-		Set("category = EXCLUDED.category").
-		Set("name = EXCLUDED.name").
-		Set("longdescription = EXCLUDED.longdescription").
-		Set("maintainers = EXCLUDED.maintainers").
-		Insert()
-
-	if err != nil {
-		logger.Error.Println("Error during updating package " + atom)
-		logger.Error.Println(err)
-	}
-}
-
-// GetPkgMetadata reads and parses the package
-// metadata from the metadata.xml file
-func GetPkgMetadata(path string) Pkgmetadata {
-	xmlFile, err := os.Open(path)
-	if err != nil {
-		logger.Error.Println("Error during reading package metadata")
-		logger.Error.Println(err)
-	}
-	defer xmlFile.Close()
-	byteValue, _ := ioutil.ReadAll(xmlFile)
-	var pkgmetadata Pkgmetadata
-	xml.Unmarshal(byteValue, &pkgmetadata)
-	return pkgmetadata
 }
 
 // Descriptions of the package metadata.xml format
 
-type Pkgmetadata struct {
+type PkgMetadata struct {
 	XMLName             xml.Name              `xml:"pkgmetadata"`
 	MaintainerList      []Maintainer          `xml:"maintainer"`
-	LongdescriptionList []LongdescriptionItem `xml:"longdescription"`
+	LongDescriptionList []LongDescriptionItem `xml:"longdescription"`
 	Upstream            Upstream              `xml:"upstream"`
 }
 
@@ -158,7 +176,7 @@ type Maintainer struct {
 	Name     string   `xml:"name"`
 }
 
-type LongdescriptionItem struct {
+type LongDescriptionItem struct {
 	XMLName  xml.Name `xml:"longdescription"`
 	Content  string   `xml:",chardata"`
 	Language string   `xml:"lang,attr"`

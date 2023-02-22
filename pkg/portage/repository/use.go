@@ -3,7 +3,6 @@
 package repository
 
 import (
-	"errors"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
@@ -12,26 +11,22 @@ import (
 	"strings"
 )
 
-var (
-	errInvalidLine = errors.New("invalid line")
-)
-
 // UpdateUse reads all USE flags descriptions from the given file in
 // case the given file contains USE flags descriptions and imports
 // each USE flag into the database
 func UpdateUse(path string) {
-
 	splittedLine := strings.Split(path, "\t")
 
 	var status, changedFile string
-	if len(splittedLine) == 2 {
+	switch len(splittedLine) {
+	case 2:
 		status = splittedLine[0]
 		changedFile = splittedLine[1]
-	} else if len(splittedLine) == 1 {
+	case 1:
 		// This happens in case of a full update
 		status = "A"
 		changedFile = splittedLine[0]
-	} else {
+	default:
 		// should not happen
 		return
 	}
@@ -40,27 +35,34 @@ func UpdateUse(path string) {
 
 		rawFlags, _ := utils.ReadLines(config.PortDir() + "/" + changedFile)
 
+		useFlags := make(map[string]*models.Useflag, len(rawFlags))
 		for _, rawFlag := range rawFlags {
-
-			if strings.TrimSpace(rawFlag) == "" || rawFlag[0:1] == "#" {
+			if strings.TrimSpace(rawFlag) == "" || rawFlag[0] == '#' {
 				continue
 			}
-
 			scope := getScope(changedFile)
-
-			var err error
-			if scope == "local" || scope == "global" {
-				err = createUseflag(rawFlag, scope)
-			} else if scope == "use_expand" {
+			switch scope {
+			case "local", "global":
+				if flag := createUseflag(rawFlag, scope); flag != nil {
+					useFlags[flag.Id] = flag
+				}
+			case "use_expand":
 				file := strings.Split(changedFile, "/")[2]
-				err = createUseExpand(rawFlag, file)
+				flag := createUseExpand(rawFlag, file)
+				useFlags[flag.Id] = flag
 			}
+		}
 
+		if len(useFlags) > 0 {
+			rows := make([]*models.Useflag, 0, len(useFlags))
+			for _, row := range useFlags {
+				rows = append(rows, row)
+			}
+			res, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
 			if err != nil {
-				logger.Info.Println("Error during updating useflag " + rawFlag)
-				logger.Info.Println(err)
-				logger.Error.Println("Error during updating useflag " + rawFlag)
-				logger.Error.Println(err)
+				logger.Error.Println("Error during updating use flags", err)
+			} else {
+				logger.Info.Println("Updated", res.RowsAffected(), "use flags")
 			}
 		}
 	}
@@ -69,50 +71,42 @@ func UpdateUse(path string) {
 
 // createUseflag parses the description from the file,
 // creates a USE flag and imports it into the database
-func createUseflag(rawFlag string, scope string) error {
+func createUseflag(rawFlag string, scope string) *models.Useflag {
 	pkguse, description, found := strings.Cut(rawFlag, " - ")
 	if !found {
-		return errInvalidLine
+		return nil
 	}
 
 	pkg, use, found := strings.Cut(pkguse, ":")
 	if found != (scope == "local") {
-		return errInvalidLine
+		return nil
 	} else if !found {
 		use = pkguse
 	}
 
-	useflag := &models.Useflag{
+	return &models.Useflag{
 		Id:          pkguse + "-" + scope,
 		Package:     pkg,
 		Name:        use,
 		Scope:       scope,
 		Description: description,
 	}
-
-	_, err := database.DBCon.Model(useflag).OnConflict("(id) DO UPDATE").Insert()
-
-	return err
 }
 
 // createUseExpand parses the description from the file,
 // creates a USE expand flag and imports it into the database
-func createUseExpand(rawFlag string, file string) error {
-	name := strings.ReplaceAll(file, ".desc", "")
-	line := strings.Split(rawFlag, " - ")
-	id := name + "_" + line[0]
+func createUseExpand(rawFlag string, file string) *models.Useflag {
+	group := strings.TrimSuffix(file, ".desc")
+	unexpanded, description, _ := strings.Cut(rawFlag, " - ")
+	id := group + "_" + unexpanded
 
-	useExpand := &models.Useflag{
+	return &models.Useflag{
 		Id:          id,
-		Name:        name + "_" + line[0],
+		Name:        id,
 		Scope:       "use_expand",
-		Description: strings.Join(line[1:], ""),
-		UseExpand:   name,
+		Description: description,
+		UseExpand:   group,
 	}
-
-	_, err := database.DBCon.Model(useExpand).OnConflict("(id) DO UPDATE").Insert()
-
-	return err
 }
 
 // getScope returns either "local", "global", "use_expand"

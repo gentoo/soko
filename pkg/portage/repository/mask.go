@@ -13,6 +13,7 @@ package repository
 
 import (
 	"regexp"
+	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
@@ -36,14 +37,15 @@ func UpdateMask(path string) {
 	splittedLine := strings.Split(path, "\t")
 
 	var status, changedFile string
-	if len(splittedLine) == 2 {
+	switch len(splittedLine) {
+	case 2:
 		status = splittedLine[0]
 		changedFile = splittedLine[1]
-	} else if len(splittedLine) == 1 {
+	case 1:
 		// This happens in case of a full update
 		status = "A"
 		changedFile = splittedLine[0]
-	} else {
+	default:
 		// should not happen
 		return
 	}
@@ -54,13 +56,15 @@ func UpdateMask(path string) {
 
 		// delete all existing masks before parsing the file again
 		// in future we might implement a incremental version here
-		deleteAllMasks()
+		database.TruncateTable[models.Mask]("versions")
 
 		for _, packageMask := range getMasks(changedFile) {
 			parsePackageMask(packageMask)
 		}
 	}
 }
+
+var versionNumber = regexp.MustCompile(`-[0-9]`)
 
 // versionSpecifierToPackageAtom returns the package atom from a given version specifier
 func versionSpecifierToPackageAtom(versionSpecifier string) string {
@@ -70,9 +74,7 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage = strings.ReplaceAll(gpackage, "~", "")
 
 	gpackage = strings.Split(gpackage, ":")[0]
-
-	versionnumber := regexp.MustCompile(`-[0-9]`)
-	gpackage = versionnumber.Split(gpackage, 2)[0]
+	gpackage = versionNumber.Split(gpackage, 2)[0]
 
 	return gpackage
 }
@@ -109,7 +111,7 @@ func parsePackageMask(packageMask string) {
 		packageMaskLine, packageMaskLines := packageMaskLines[0], packageMaskLines[1:]
 		author, authorEmail, date := parseAuthorLine(packageMaskLine)
 
-		reason := ""
+		var reason string
 		packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		for strings.HasPrefix(packageMaskLine, "#") {
 			reason = reason + " " + strings.Replace(packageMaskLine, "# ", "", 1)
@@ -119,7 +121,7 @@ func parsePackageMask(packageMask string) {
 		packageMaskLines = append(packageMaskLines, packageMaskLine)
 
 		for _, version := range packageMaskLines {
-			useflag := &models.Mask{
+			mask := &models.Mask{
 				Author:      author,
 				AuthorEmail: authorEmail,
 				Date:        date,
@@ -127,11 +129,9 @@ func parsePackageMask(packageMask string) {
 				Versions:    version,
 			}
 
-			_, err := database.DBCon.Model(useflag).OnConflict("(versions) DO UPDATE").Insert()
-
+			_, err := database.DBCon.Model(mask).OnConflict("(versions) DO UPDATE").Insert()
 			if err != nil {
-				logger.Error.Println("Error while inserting/updating package mask entry")
-				logger.Error.Println(err)
+				logger.Error.Println("Error while inserting/updating package mask entry", err)
 			}
 		}
 	}
@@ -141,11 +141,10 @@ func parsePackageMask(packageMask string) {
 // get all mask entries from the package.mask file
 func getMasks(path string) []string {
 	var masks []string
-	lines, err := utils.ReadLines(path)
+	lines, err := utils.ReadLines(config.PortDir() + "/" + path)
 
 	if err != nil {
-		logger.Error.Println("Could not read Masks file. Abort masks import")
-		logger.Error.Println(err)
+		logger.Error.Println("Could not read Masks file. Abort masks import", err)
 		return masks
 	}
 
@@ -161,15 +160,14 @@ func getMasks(path string) []string {
 // Calculate all versions that are currently
 // masked and update the MaskToVersion Table
 func CalculateMaskedVersions() {
-
 	// clean up all masked versions before recalculating them
-	deleteAllMasksToVersion()
+	database.TruncateTable[models.MaskToVersion]("id")
 
 	var masks []*models.Mask
 	err := database.DBCon.Model(&masks).Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Failed to retrieve package masks. Aborting update")
-		logger.Error.Println(err)
+		logger.Error.Println("Failed to retrieve package masks. Aborting update", err)
+		return
 	}
 
 	for _, mask := range masks {
@@ -178,7 +176,7 @@ func CalculateMaskedVersions() {
 		var versions []*models.Version
 
 		if strings.HasPrefix(versionSpecifier, "=") {
-			versions = exaktVersion(versionSpecifier, packageAtom)
+			versions = exactVersion(versionSpecifier, packageAtom)
 		} else if strings.HasPrefix(versionSpecifier, "<=") {
 			versions = comparedVersions("<=", versionSpecifier, packageAtom)
 		} else if strings.HasPrefix(versionSpecifier, "<") {
@@ -247,8 +245,8 @@ func allRevisions(versionSpecifier string, packageAtom string) []*models.Version
 	return versions
 }
 
-// exaktVersion returns the exact version specified in the versionSpecifier
-func exaktVersion(versionSpecifier string, packageAtom string) []*models.Version {
+// exactVersion returns the exact version specified in the versionSpecifier
+func exactVersion(versionSpecifier string, packageAtom string) []*models.Version {
 	var versions []*models.Version
 	database.DBCon.Model(&versions).
 		Where("id = ?", strings.Replace(versionSpecifier, "=", "", 1)).
@@ -293,26 +291,7 @@ func maskVersions(versionSpecifier string, versions []*models.Version) {
 		_, err := database.DBCon.Model(maskToVersion).OnConflict("(id) DO UPDATE").Insert()
 
 		if err != nil {
-			logger.Error.Println("Error while inserting mask to version entry")
-			logger.Error.Println(err)
+			logger.Error.Println("Error while inserting mask to version entry", err)
 		}
-	}
-}
-
-// deleteAllMasks deletes all entries in the mask table
-func deleteAllMasksToVersion() {
-	var masks []*models.MaskToVersion
-	database.DBCon.Model(&masks).Select()
-	for _, mask := range masks {
-		database.DBCon.Model(mask).WherePK().Delete()
-	}
-}
-
-// deleteAllMasks deletes all entries in the mask table
-func deleteAllMasks() {
-	var masks []*models.Mask
-	database.DBCon.Model(&masks).Select()
-	for _, mask := range masks {
-		database.DBCon.Model(mask).WherePK().Delete()
 	}
 }

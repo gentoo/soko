@@ -61,7 +61,9 @@ func updateMetadata() {
 
 	latestCommit := utils.GetLatestCommit()
 
-	for _, path := range utils.ChangedFiles(latestCommit, "HEAD") {
+	changed := utils.ChangedFiles(latestCommit, "HEAD")
+	logger.Info.Println("Iterating", len(changed), "changed files")
+	for _, path := range changed {
 		repository.UpdateUse(path)
 		repository.UpdateMask(path)
 		repository.UpdateArch(path)
@@ -82,11 +84,11 @@ func updatePackageData() {
 
 	latestCommit := utils.GetLatestCommit()
 
-	for _, path := range utils.ChangedFiles(latestCommit, "HEAD") {
-		repository.UpdateVersion(path)
-		repository.UpdatePackage(path)
-		repository.UpdateCategory(path)
-	}
+	changed := utils.ChangedFiles(latestCommit, "HEAD")
+	logger.Info.Println("Iterating", len(changed), "changed files")
+	repository.UpdateVersions(changed)
+	repository.UpdatePackages(changed)
+	repository.UpdateCategories(changed)
 
 }
 
@@ -149,11 +151,10 @@ func FullUpdate() {
 	// update the local useflags
 	repository.UpdateUse("profiles/use.local.desc")
 
-	for _, path := range utils.AllFiles() {
-		repository.UpdateVersion(path)
-		repository.UpdatePackage(path)
-		repository.UpdateCategory(path)
-	}
+	allFiles := utils.AllFiles()
+	repository.UpdateVersions(allFiles)
+	repository.UpdatePackages(allFiles)
+	repository.UpdateCategories(allFiles)
 
 	// Delete removed entries
 	logger.Info.Println("Delete removed files from the database")
@@ -169,72 +170,72 @@ func FullUpdate() {
 // deleteRemovedVersions removes all versions from the database
 // that are present in the database but not in the main tree.
 func deleteRemovedVersions() {
-	var versions []*models.Version
+	var versions, toDelete []*models.Version
 	database.DBCon.Model(&versions).Select()
 
 	for _, version := range versions {
 		path := config.PortDir() + "/" + version.Atom + "/" + version.Package + "-" + version.Version + ".ebuild"
 		if !utils.FileExists(path) {
-
-			logger.Error.Println("Found ebuild version in the database that does not exist at:")
-			logger.Error.Println(path)
-
-			_, err := database.DBCon.Model(version).WherePK().Delete()
-
-			if err != nil {
-				logger.Error.Println("Error deleting version " + version.Atom + " - " + version.Version)
-				logger.Error.Println(err)
-			}
+			logger.Error.Println("Found ebuild version in the database that does not exist at:", path)
+			toDelete = append(toDelete, version)
 		}
+	}
 
+	if len(toDelete) > 0 {
+		res, err := database.DBCon.Model(&toDelete).Delete()
+		if err != nil {
+			logger.Error.Println("Error deleting versions", err)
+		} else {
+			logger.Info.Println("Deleted", res.RowsAffected(), "versions")
+		}
 	}
 }
 
 // deleteRemovedPackages removes all packages from the database
 // that are present in the database but not in the main tree.
 func deleteRemovedPackages() {
-	var packages []*models.Package
+	var packages, toDelete []*models.Package
 	database.DBCon.Model(&packages).Select()
 
-	for _, gpackage := range packages {
-		path := config.PortDir() + "/" + gpackage.Atom
+	for _, pkg := range packages {
+		path := config.PortDir() + "/" + pkg.Atom
 		if !utils.FileExists(path) {
-
-			logger.Error.Println("Found package in the database that does not exist at:")
-			logger.Error.Println(path)
-
-			_, err := database.DBCon.Model(gpackage).WherePK().Delete()
-
-			if err != nil {
-				logger.Error.Println("Error deleting package " + gpackage.Atom)
-				logger.Error.Println(err)
-			}
+			logger.Error.Println("Found package in the database that does not exist at:", path)
+			toDelete = append(toDelete, pkg)
 		}
+	}
 
+	if len(toDelete) > 0 {
+		res, err := database.DBCon.Model(&toDelete).Delete()
+		if err != nil {
+			logger.Error.Println("Error deleting packages", err)
+		} else {
+			logger.Info.Println("Deleted", res.RowsAffected(), "packages")
+		}
 	}
 }
 
 // deleteRemovedCategories removes all categories from the database
 // that are present in the database but not in the main tree.
 func deleteRemovedCategories() {
-	var categories []*models.Category
+	var categories, toDelete []*models.Category
 	database.DBCon.Model(&categories).Select()
 
 	for _, category := range categories {
 		path := config.PortDir() + "/" + category.Name
 		if !utils.FileExists(path) {
-
-			logger.Error.Println("Found category in the database that does not exist at:")
-			logger.Error.Println(path)
-
-			_, err := database.DBCon.Model(category).WherePK().Delete()
-
-			if err != nil {
-				logger.Error.Println("Error deleting category " + category.Name)
-				logger.Error.Println(err)
-			}
+			logger.Error.Println("Found category in the database that does not exist at:", path)
+			toDelete = append(toDelete, category)
 		}
+	}
 
+	if len(toDelete) > 0 {
+		res, err := database.DBCon.Model(&toDelete).Delete()
+		if err != nil {
+			logger.Error.Println("Error deleting categories", err)
+		} else {
+			logger.Info.Println("Deleted", res.RowsAffected(), "categories")
+		}
 	}
 }
 
@@ -246,15 +247,16 @@ func deleteRemovedCategories() {
 // packages' section.
 func fixPrecedingCommitsOfPackages() {
 	var packages []*models.Package
-	database.DBCon.Model(&packages).Select()
-	for _, gpackage := range packages {
-		if gpackage.PrecedingCommits == 0 {
-			logger.Error.Println("Preceding Commits of package " + gpackage.Atom + " is null.")
-			logger.Error.Println("This should not happen. Preceding Commits will be set to 1")
-			gpackage.PrecedingCommits = 1
-			database.DBCon.Model(gpackage).WherePK().Update()
-		}
+	database.DBCon.Model(&packages).Where("preceding_commits = 0").Select()
+	if len(packages) == 0 {
+		return
 	}
+
+	logger.Error.Println("Found", len(packages), "packages with preceding commits == 0. This should not happen. Fixing...")
+	for _, pkg := range packages {
+		pkg.PrecedingCommits = 1
+	}
+	database.DBCon.Model(&packages).Update()
 }
 
 // GetApplicationData is used to retrieve the

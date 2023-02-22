@@ -23,8 +23,7 @@ func AllFiles() []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error.Println("ERROR: cmd.Run() failed with:")
-		logger.Error.Println(err)
+		logger.Error.Println("cmd.Run() failed with:", err)
 		return allFiles
 	}
 
@@ -45,7 +44,7 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error.Println("ERROR: cmd.Run() failed with %s\n", err)
+		logger.Error.Println("cmd.Run() failed with", err)
 		return changedFiles
 	}
 
@@ -56,10 +55,11 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 // GetCommits returns the log message of all commits after
 // the given startCommit and before the given endCommit. The
 // log message:
-//  - uses '%Y-%m-%dT%H:%M:%S%z' as date format
-//  - doesn't include merges
-//  - doesn't include renames
-//  - includes the status of the changed files
+//   - uses '%Y-%m-%dT%H:%M:%S%z' as date format
+//   - doesn't include merges
+//   - doesn't include renames
+//   - includes the status of the changed files
+//
 // Furthermore the commits are in reverse order.
 func GetCommits(startCommit string, endCommit string) []string {
 	var commits []string
@@ -76,7 +76,7 @@ func GetCommits(startCommit string, endCommit string) []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error.Println("cmd.Run() failed with %s\n", err)
+		logger.Error.Println("cmd.Run() failed with", err)
 		return commits
 	}
 
@@ -87,14 +87,14 @@ func GetCommits(startCommit string, endCommit string) []string {
 // GetLatestCommit retrieves the latest commit in
 // the database and returns the hash of the commit
 func GetLatestCommit() string {
-	latestCommit, _ := GetLatestCommitAndPreceeding()
+	latestCommit, _ := GetLatestCommitAndPreceding()
 	return latestCommit
 }
 
-// GetLatestCommitAndPreceeding retrieves the latest
+// GetLatestCommitAndPreceding retrieves the latest
 // commit in the database. The hash of the latest commit
 // as well as the number of preceding commits is returned
-func GetLatestCommitAndPreceeding() (string, int) {
+func GetLatestCommitAndPreceding() (string, int) {
 	latestCommit := EmptyTree()
 	PrecedingCommitsOffset := 0
 

@@ -19,32 +19,67 @@ func isVersion(path string) bool {
 	return isVersion
 }
 
-// UpdateVersion updates the version in the database in case
-// the given path points to a package version
-func UpdateVersion(path string) {
+// UpdateVersions updates the versions in the database for each
+// given path that points to a package version
+func UpdateVersions(paths []string) {
+	deleted := map[string]*models.Version{}
+	modified := map[string]*models.Version{}
 
-	line := strings.Split(path, "\t")
+	for _, path := range paths {
+		line := strings.Split(path, "\t")
 
-	if len(line) != 2 {
-		if len(line) == 1 && isVersion(path) {
-			updateModifiedVersion(path)
+		if len(line) != 2 {
+			if len(line) == 1 && isVersion(path) {
+				ver := updateModifiedVersion(path)
+				modified[ver.Id] = ver
+			}
+			continue
 		}
-		return
+
+		status := line[0]
+		changedFile := line[1]
+
+		if !isVersion(changedFile) {
+			continue
+		} else if status == "D" {
+			ver := updateDeletedVersion(changedFile)
+			deleted[ver.Id] = ver
+		} else if status == "A" || status == "M" {
+			ver := updateModifiedVersion(changedFile)
+			modified[ver.Id] = ver
+		}
 	}
 
-	status := line[0]
-	changedFile := line[1]
+	if len(deleted) > 0 {
+		rows := make([]*models.Version, 0, len(deleted))
+		for _, row := range deleted {
+			rows = append(rows, row)
+		}
+		res, err := database.DBCon.Model(&rows).Delete()
+		if err != nil {
+			logger.Error.Println("Error during deleting versions", err)
+		} else {
+			logger.Info.Println("Deleted", res.RowsAffected(), "versions")
+		}
+	}
 
-	if isVersion(changedFile) && status == "D" {
-		updateDeletedVersion(changedFile)
-	} else if isVersion(changedFile) && (status == "A" || status == "M") {
-		updateModifiedVersion(changedFile)
+	if len(modified) > 0 {
+		rows := make([]*models.Version, 0, len(modified))
+		for _, row := range modified {
+			rows = append(rows, row)
+		}
+		res, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating versions", err)
+		} else {
+			logger.Info.Println("Updated", res.RowsAffected(), "versions")
+		}
 	}
 }
 
 // updateDeletedVersion deletes a package version from the database
-func updateDeletedVersion(changedFile string) {
-	splitted := strings.Split(strings.ReplaceAll(changedFile, ".ebuild", ""), "/")
+func updateDeletedVersion(changedFile string) *models.Version {
+	splitted := strings.Split(strings.TrimSuffix(changedFile, ".ebuild"), "/")
 	category := splitted[0]
 	packagename := splitted[1]
 	version := strings.ReplaceAll(splitted[2], packagename+"-", "")
@@ -52,19 +87,13 @@ func updateDeletedVersion(changedFile string) {
 	atom := category + "/" + packagename
 	id := atom + "-" + version
 
-	versionObject := &models.Version{Id: id}
-	_, err := database.DBCon.Model(versionObject).WherePK().Delete()
-
-	if err != nil {
-		logger.Error.Println("Error during deleting version " + id)
-		logger.Error.Println(err)
-	}
+	return &models.Version{Id: id}
 }
 
 // updateModifiedVersion adds a package version to the database or
 // updates it. To do so, it parses the metadata from the md5-cache
-func updateModifiedVersion(changedFile string) {
-	splitted := strings.Split(strings.ReplaceAll(changedFile, ".ebuild", ""), "/")
+func updateModifiedVersion(changedFile string) *models.Version {
+	splitted := strings.Split(strings.TrimSuffix(changedFile, ".ebuild"), "/")
 	category := splitted[0]
 	packagename := splitted[1]
 	version := strings.ReplaceAll(splitted[2], packagename+"-", "")
@@ -76,56 +105,47 @@ func updateModifiedVersion(changedFile string) {
 
 	slot := "0"
 	subslot := "0"
-	eapi := ""
-	keywords := ""
-	var useflags []string
-	var restricts []string
-	var properties []string
-	var homepages []string
-	license := ""
-	description := ""
+	var eapi, keywords, license, description string
+	var useflags, restricts, properties, homepages []string
 
 	for _, metadata := range version_metadata {
 
 		switch {
 		case strings.HasPrefix(metadata, "EAPI="):
-			eapi = strings.ReplaceAll(metadata, "EAPI=", "")
+			eapi = strings.TrimPrefix(metadata, "EAPI=")
 
 		case strings.HasPrefix(metadata, "KEYWORDS="):
-			keywords = strings.ReplaceAll(metadata, "KEYWORDS=", "")
+			keywords = strings.TrimPrefix(metadata, "KEYWORDS=")
 
 		case strings.HasPrefix(metadata, "IUSE="):
-			useflags = strings.Split(strings.ReplaceAll(metadata, "IUSE=", ""), " ")
+			useflags = strings.Split(strings.TrimPrefix(metadata, "IUSE="), " ")
 
 		case strings.HasPrefix(metadata, "RESTRICT="):
-			restricts = strings.Split(strings.ReplaceAll(strings.ReplaceAll(metadata, "RESTRICT=", ""), "!test? ( test )", ""), " ")
+			restricts = strings.Split(strings.ReplaceAll(strings.TrimPrefix(metadata, "RESTRICT="), "!test? ( test )", ""), " ")
 			if len(restricts) == 1 && restricts[0] == "" {
 				restricts = []string{}
 			}
 
 		case strings.HasPrefix(metadata, "PROPERTIES="):
-			properties = strings.Split(strings.ReplaceAll(metadata, "PROPERTIES=", ""), " ")
+			properties = strings.Split(strings.TrimPrefix(metadata, "PROPERTIES="), " ")
 
 		case strings.HasPrefix(metadata, "HOMEPAGE="):
-			homepages = strings.Split(strings.ReplaceAll(metadata, "HOMEPAGE=", ""), " ")
+			homepages = strings.Split(strings.TrimPrefix(metadata, "HOMEPAGE="), " ")
 
 		case strings.HasPrefix(metadata, "LICENSE="):
-			license = strings.ReplaceAll(metadata, "LICENSE=", "")
+			license = strings.TrimPrefix(metadata, "LICENSE=")
 
 		case strings.HasPrefix(metadata, "DESCRIPTION="):
-			description = strings.ReplaceAll(metadata, "DESCRIPTION=", "")
+			description = strings.TrimPrefix(metadata, "DESCRIPTION=")
 
 		case strings.HasPrefix(metadata, "SLOT="):
-			rawslot := strings.ReplaceAll(metadata, "SLOT=", "")
-			slot = strings.Split(rawslot, "/")[0]
-			if len(strings.Split(rawslot, "/")) > 1 {
-				subslot = strings.Split(rawslot, "/")[1]
-			}
+			rawSlot := strings.TrimPrefix(metadata, "SLOT=")
+			slot, subslot, _ = strings.Cut(rawSlot, "/")
 		}
 
 	}
 
-	ebuildVersion := &models.Version{
+	return &models.Version{
 		Id:          id,
 		Category:    category,
 		Package:     packagename,
@@ -141,12 +161,5 @@ func updateModifiedVersion(changedFile string) {
 		Homepage:    homepages,
 		License:     license,
 		Description: description,
-	}
-
-	_, err := database.DBCon.Model(ebuildVersion).OnConflict("(id) DO UPDATE").Insert()
-
-	if err != nil {
-		logger.Error.Println("Error during updating version " + id)
-		logger.Error.Println(err)
 	}
 }

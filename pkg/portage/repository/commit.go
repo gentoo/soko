@@ -14,6 +14,15 @@ import (
 	"time"
 )
 
+var (
+	// arrays for collecting date for batch dump into database
+	commits         []*models.Commit
+	packages        []*models.Package
+	keywordChanges  = map[string]*models.KeywordChange{}
+	packagesCommit  []*models.CommitToPackage
+	versionsCommits []*models.CommitToVersion
+)
+
 // UpdateCommits incrementally imports all new commits. New commits are
 // determined by retrieving the last commit in the database (if present)
 // and parsing all following commits. In case no last commit is present
@@ -21,26 +30,30 @@ import (
 func UpdateCommits() string {
 	logger.Info.Println("Start updating commits")
 
-	latestCommit, PrecedingCommitsOffset := utils.GetLatestCommitAndPreceeding()
+	latestCommit, precedingCommitsOffset := utils.GetLatestCommitAndPreceding()
 
-	for PrecedingCommits, rawCommit := range utils.GetCommits(latestCommit, "HEAD") {
-		latestCommit = processCommit(PrecedingCommits, PrecedingCommitsOffset, rawCommit)
+	for precedingCommits, rawCommit := range utils.GetCommits(latestCommit, "HEAD") {
+		latestCommit = processCommit(precedingCommits, precedingCommitsOffset, rawCommit)
+
+		if len(commits) > 10000 {
+			dumpToDatabase()
+		}
 	}
+	dumpToDatabase()
 	logger.Info.Println("Finished updating commits")
 
 	return latestCommit
 }
 
 // processCommit parses a single commit log output and updates it into the database
-func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit string) string {
-
+func processCommit(PrecedingCommits, PrecedingCommitsOffset int, rawCommit string) string {
 	commitLines := strings.Split(rawCommit, "\n")
 
 	if len(commitLines) < 8 {
 		return ""
 	}
 
-	logProgess(PrecedingCommits)
+	logProgress(PrecedingCommits)
 
 	id := strings.TrimSpace(strings.ReplaceAll(commitLines[0], "commit ", ""))
 	authorName := strings.TrimSpace(strings.Split(strings.ReplaceAll(commitLines[1], "Author: ", ""), "<")[0])
@@ -59,7 +72,7 @@ func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit s
 
 	changedFiles := processChangedFiles(PrecedingCommits, PrecedingCommitsOffset, commitLines, id)
 
-	commit := &models.Commit{
+	commits = append(commits, &models.Commit{
 		Id:               id,
 		PrecedingCommits: PrecedingCommitsOffset + PrecedingCommits + 1,
 		AuthorName:       authorName,
@@ -70,26 +83,16 @@ func processCommit(PrecedingCommits int, PrecedingCommitsOffset int, rawCommit s
 		CommitterDate:    committerDate,
 		Message:          message,
 		ChangedFiles:     changedFiles,
-	}
-
-	_, err := database.DBCon.Model(commit).OnConflict("(id) DO UPDATE").Insert()
-
-	if err != nil {
-		logger.Error.Println("Error during updating commit: " + id)
-		logger.Error.Println(err)
-	}
+	})
 	return id
 }
 
 // processChangedFiles parses files that have changed in the commit and links the
 // commit to packages and package versions
-func processChangedFiles(PrecedingCommits int, PrecedingCommitsOffset int, commitLines []string, id string) *models.ChangedFiles {
-	var addedFiles []*models.ChangedFile
-	var modifiedFiles []*models.ChangedFile
-	var deletedFiles []*models.ChangedFile
+func processChangedFiles(PrecedingCommits, PrecedingCommitsOffset int, commitLines []string, id string) *models.ChangedFiles {
+	var addedFiles, modifiedFiles, deletedFiles []*models.ChangedFile
 
 	for _, commitLine := range commitLines {
-
 		line := strings.Split(commitLine, "\t")
 		if len(line) < 2 {
 			continue
@@ -99,25 +102,18 @@ func processChangedFiles(PrecedingCommits int, PrecedingCommitsOffset int, commi
 		path := strings.TrimSpace(line[1])
 
 		if strings.HasPrefix(status, "M") {
-
-			modifiedFiles = addChangedFile(modifiedFiles, path, "M")
+			modifiedFiles = append(modifiedFiles, &models.ChangedFile{Path: path, ChangeType: "M"})
 			createKeywordChange(id, path, commitLine)
-
 		} else if strings.HasPrefix(commitLine, "D") {
-
-			deletedFiles = addChangedFile(deletedFiles, path, "D")
-
+			deletedFiles = append(deletedFiles, &models.ChangedFile{Path: path, ChangeType: "D"})
 		} else if strings.HasPrefix(commitLine, "A") {
-
-			addedFiles = addChangedFile(addedFiles, path, "A")
+			addedFiles = append(addedFiles, &models.ChangedFile{Path: path, ChangeType: "A"})
 			updateFirstCommitOfPackage(path, commitLine, PrecedingCommitsOffset+PrecedingCommits+1)
 			createAddedKeywords(id, path, commitLine)
-
 		}
 
 		linkCommitToPackage(commitLine, path, id)
 		linkCommitToVersion(commitLine, path, id)
-
 	}
 
 	return &models.ChangedFiles{
@@ -127,8 +123,8 @@ func processChangedFiles(PrecedingCommits int, PrecedingCommitsOffset int, commi
 	}
 }
 
-// logProgess logs the progress of a loop
-func logProgess(counter int) {
+// logProgress logs the progress of a loop
+func logProgress(counter int) {
 	if counter%1000 == 0 {
 		logger.Info.Println("Processed commits: " + strconv.Itoa(counter))
 	} else if counter == 1 {
@@ -137,66 +133,45 @@ func logProgess(counter int) {
 	}
 }
 
-func linkCommitToPackage(commitLine string, path string, id string) {
-	var commitToPackage *models.CommitToPackage
+func linkCommitToPackage(commitLine, path, id string) {
 	if (len(strings.Split(commitLine, "/")) >= 3) &&
 		(strings.HasPrefix(commitLine, "M") ||
 			strings.HasPrefix(commitLine, "D") ||
 			strings.HasPrefix(commitLine, "A")) {
 
-		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
+		pathParts := strings.Split(strings.TrimSuffix(path, ".ebuild"), "/")
 
-		commitToPackageId := id + "-" + pathParts[0] + "/" + strings.Split(commitLine, "/")[1]
-		commitToPackage = &models.CommitToPackage{
-			Id:          commitToPackageId,
+		packageAtom := pathParts[0] + "/" + strings.Split(commitLine, "/")[1]
+		packagesCommit = append(packagesCommit, &models.CommitToPackage{
+			Id:          id + "-" + packageAtom,
 			CommitId:    id,
-			PackageAtom: pathParts[0] + "/" + strings.Split(commitLine, "/")[1],
-		}
-
-		_, err := database.DBCon.Model(commitToPackage).OnConflict("(id) DO NOTHING").Insert()
-
-		if err != nil {
-			logger.Error.Println("Error during updating CommitToPackage: " + commitToPackageId)
-			logger.Error.Println(err)
-		}
-
+			PackageAtom: packageAtom,
+		})
 	}
 }
 
-func linkCommitToVersion(commitLine string, path string, id string) {
-	var commitToVersion *models.CommitToVersion
+func linkCommitToVersion(commitLine, path, id string) {
 	if (strings.HasPrefix(commitLine, "M") ||
 		strings.HasPrefix(commitLine, "D") ||
 		strings.HasPrefix(commitLine, "A")) &&
-		len(strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")) == 3 &&
+		len(strings.Split(strings.TrimSuffix(path, ".ebuild"), "/")) == 3 &&
 		strings.HasSuffix(strings.TrimSpace(strings.Split(commitLine, "\t")[1]), ".ebuild") {
 
-		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
+		pathParts := strings.Split(strings.TrimSuffix(path, ".ebuild"), "/")
 
-		commitToVersionId := id + "-" + pathParts[0] + "/" + pathParts[2]
-		commitToVersion = &models.CommitToVersion{
-			Id:        commitToVersionId,
+		versionId := pathParts[0] + "/" + pathParts[2]
+		versionsCommits = append(versionsCommits, &models.CommitToVersion{
+			Id:        id + "-" + versionId,
 			CommitId:  id,
-			VersionId: pathParts[0] + "/" + pathParts[2],
-		}
-
-		_, err := database.DBCon.Model(commitToVersion).OnConflict("(id) DO NOTHING").Insert()
-
-		if err != nil {
-			logger.Error.Println("Error during updating CommitToVersion: " + commitToVersionId)
-			logger.Error.Println(err)
-		}
-
+			VersionId: versionId,
+		})
 	}
 }
 
-func createKeywordChange(id string, path string, commitLine string) {
-
-	if !strings.HasSuffix(path, ".ebuild") || !(len(strings.Split(commitLine, "/")) >= 3) {
+func createKeywordChange(id, path, commitLine string) {
+	if !strings.HasSuffix(path, ".ebuild") || !(strings.Count(commitLine, "/") >= 2) {
 		return
 	}
-
-	var change *models.KeywordChange
 
 	raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
 	if err != nil {
@@ -206,23 +181,19 @@ func createKeywordChange(id string, path string, commitLine string) {
 		}
 	}
 
-	var keywords_old []string
-	var keywords_new []string
+	var keywords_old, keywords_new []string
 
 	for _, line := range raw_lines {
 		if strings.HasPrefix(line, "-KEYWORDS=") {
-			keywords_old = strings.Split(strings.ReplaceAll(strings.ReplaceAll(line, "-KEYWORDS=", ""), "\"", ""), " ")
-
+			keywords_old = strings.Split(strings.ReplaceAll(strings.TrimPrefix(line, "-KEYWORDS="), "\"", ""), " ")
 		} else if strings.HasPrefix(line, "+KEYWORDS") {
-			keywords_new = strings.Split(strings.ReplaceAll(strings.ReplaceAll(line, "+KEYWORDS=", ""), "\"", ""), " ")
+			keywords_new = strings.Split(strings.ReplaceAll(strings.TrimPrefix(line, "+KEYWORDS="), "\"", ""), " ")
 		}
 	}
 
-	var added_keywords []string
-	var stabilized_keywords []string
+	var added_keywords, stabilized_keywords []string
 
 	if keywords_old != nil && keywords_new != nil {
-
 		for _, keyword := range keywords_new {
 			if !utils.Contains(keywords_old, keyword) {
 				added_keywords = append(added_keywords, keyword)
@@ -233,10 +204,10 @@ func createKeywordChange(id string, path string, commitLine string) {
 			}
 		}
 
-		pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
+		pathParts := strings.Split(strings.TrimSuffix(path, ".ebuild"), "/")
 
 		keywordChangeId := id + "-" + strings.TrimSpace(strings.Split(commitLine, "\t")[1])
-		change = &models.KeywordChange{
+		keywordChanges[keywordChangeId] = &models.KeywordChange{
 			Id:         keywordChangeId,
 			CommitId:   id,
 			VersionId:  pathParts[0] + "/" + pathParts[2],
@@ -245,21 +216,12 @@ func createKeywordChange(id string, path string, commitLine string) {
 			Stabilized: stabilized_keywords,
 			All:        keywords_new,
 		}
-
-		_, err := database.DBCon.Model(change).OnConflict("(id) DO UPDATE").Insert()
-
-		if err != nil {
-			logger.Error.Println("Error updating Keyword change: " + keywordChangeId)
-			logger.Error.Println(err)
-		}
-
 	}
 }
 
 func createAddedKeywords(id string, path string, commitLine string) {
-	var change *models.KeywordChange
 	if strings.HasSuffix(strings.TrimSpace(strings.Split(commitLine, "\t")[1]), ".ebuild") &&
-		(len(strings.Split(commitLine, "/")) >= 3) {
+		(strings.Count(commitLine, "/") >= 2) {
 
 		raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
 		if err != nil {
@@ -272,12 +234,11 @@ func createAddedKeywords(id string, path string, commitLine string) {
 
 		for _, line := range raw_lines {
 			if strings.HasPrefix(line, "+KEYWORDS=") {
-
-				pathParts := strings.Split(strings.ReplaceAll(path, ".ebuild", ""), "/")
-				keywords := strings.Split(strings.ReplaceAll(strings.ReplaceAll(line, "+KEYWORDS=", ""), "\"", ""), " ")
+				pathParts := strings.Split(strings.TrimSuffix(path, ".ebuild"), "/")
+				keywords := strings.Split(strings.ReplaceAll(strings.TrimPrefix(line, "+KEYWORDS="), "\"", ""), " ")
 
 				keywordChangeId := id + "-" + strings.TrimSpace(strings.Split(commitLine, "\t")[1])
-				change = &models.KeywordChange{
+				keywordChanges[keywordChangeId] = &models.KeywordChange{
 					Id:        keywordChangeId,
 					CommitId:  id,
 					VersionId: pathParts[0] + "/" + pathParts[2],
@@ -285,14 +246,6 @@ func createAddedKeywords(id string, path string, commitLine string) {
 					Added:     keywords,
 					All:       keywords,
 				}
-
-				_, err := database.DBCon.Model(change).OnConflict("(id) DO UPDATE").Insert()
-
-				if err != nil {
-					logger.Error.Println("Error updating Keyword change: " + keywordChangeId)
-					logger.Error.Println(err)
-				}
-
 			}
 		}
 
@@ -301,26 +254,60 @@ func createAddedKeywords(id string, path string, commitLine string) {
 
 func updateFirstCommitOfPackage(path string, commitLine string, precedingCommits int) {
 	// Added Package
-	if strings.HasSuffix(path, "metadata.xml") && len(strings.Split(path, "/")) == 3 {
-
+	if strings.HasSuffix(path, "metadata.xml") && strings.Count(commitLine, "/") == 2 {
 		atom := strings.Split(path, "/")[0] + "/" + strings.Split(path, "/")[1]
-		addedpackage := &models.Package{
+		packages = append(packages, &models.Package{
 			Atom:             atom,
 			PrecedingCommits: precedingCommits,
-		}
-
-		_, err := database.DBCon.Model(addedpackage).Column("preceding_commits").WherePK().Update()
-		if err != nil {
-			logger.Error.Println("Error updating precedingCommits (" + strconv.Itoa(precedingCommits) + ") of package: " + atom)
-			logger.Error.Println(err)
-		}
-
+		})
 	}
 }
 
-func addChangedFile(changedFiles []*models.ChangedFile, path string, status string) []*models.ChangedFile {
-	return append(changedFiles, &models.ChangedFile{
-		Path:       path,
-		ChangeType: status,
-	})
+func dumpToDatabase() {
+	logger.Info.Println("Writing to database")
+
+	if len(keywordChanges) > 0 {
+		rows := make([]*models.KeywordChange, 0, len(keywordChanges))
+		for _, keywordChange := range keywordChanges {
+			rows = append(rows, keywordChange)
+		}
+		_, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating KeywordChange", err)
+		}
+		keywordChanges = map[string]*models.KeywordChange{}
+	}
+
+	if len(packages) > 0 {
+		_, err := database.DBCon.Model(&packages).Column("preceding_commits").Update()
+		if err != nil {
+			logger.Error.Println("Error during updating precedingCommits", err)
+		}
+		packages = nil
+	}
+
+	if len(packagesCommit) > 0 {
+		_, err := database.DBCon.Model(&packagesCommit).OnConflict("(id) DO NOTHING").Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating CommitToPackage", err)
+		}
+		packagesCommit = nil
+	}
+
+	if len(versionsCommits) > 0 {
+		_, err := database.DBCon.Model(&versionsCommits).OnConflict("(id) DO NOTHING").Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating CommitToVersion", err)
+		}
+		versionsCommits = nil
+	}
+
+	if len(commits) > 0 {
+		_, err := database.DBCon.Model(&commits).OnConflict("(id) DO UPDATE").Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating commits:", err)
+		}
+		commits = nil
+	}
+
 }

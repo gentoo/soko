@@ -4,7 +4,6 @@ package repository
 
 import (
 	"encoding/xml"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"soko/pkg/config"
@@ -21,95 +20,112 @@ func isCategory(path string) bool {
 	return isCategory
 }
 
-// UpdateCategory updates the category in the database in case
-// the given path points to a category description
-func UpdateCategory(path string) {
+// UpdateCategories updates the categories in the database for each
+// given path that points to a category description
+func UpdateCategories(paths []string) {
+	deleted := map[string]*models.Category{}
+	modified := map[string]*models.Category{}
 
-	splittedLine := strings.Split(path, "\t")
+	for _, path := range paths {
+		splittedLine := strings.Split(path, "\t")
 
-	if len(splittedLine) != 2 {
-		if len(splittedLine) == 1 && isCategory(path) {
-			updateModifiedCategory(path)
+		if len(splittedLine) != 2 {
+			if len(splittedLine) == 1 && isCategory(path) {
+				if cat := updateModifiedCategory(path); cat != nil {
+					modified[cat.Name] = cat
+				}
+			}
+			continue
 		}
-		return
+
+		status := splittedLine[0]
+		changedFile := splittedLine[1]
+
+		if !isCategory(changedFile) {
+			continue
+		} else if status == "D" {
+			cat := updateDeletedCategory(changedFile)
+			deleted[cat.Name] = cat
+		} else if status == "A" || status == "M" {
+			if cat := updateModifiedCategory(changedFile); cat != nil {
+				modified[cat.Name] = cat
+			}
+		}
 	}
 
-	status := splittedLine[0]
-	changedFile := splittedLine[1]
+	if len(deleted) > 0 {
+		rows := make([]*models.Category, 0, len(deleted))
+		for _, row := range deleted {
+			rows = append(rows, row)
+		}
+		res, err := database.DBCon.Model(&rows).Delete()
+		if err != nil {
+			logger.Error.Println("Error during deleting categories", err)
+		} else {
+			logger.Info.Println("Deleted", res.RowsAffected(), "categories")
+		}
+	}
 
-	if isCategory(changedFile) && status == "D" {
-		updateDeletedCategory(changedFile)
-	} else if isCategory(changedFile) && (status == "A" || status == "M") {
-		updateModifiedCategory(changedFile)
+	if len(modified) > 0 {
+		rows := make([]*models.Category, 0, len(modified))
+		for _, row := range modified {
+			rows = append(rows, row)
+		}
+		res, err := database.DBCon.Model(&rows).OnConflict("(name) DO UPDATE").Insert()
+		if err != nil {
+			logger.Error.Println("Error during updating categories", err)
+		} else {
+			logger.Info.Println("Updated", res.RowsAffected(), "categories")
+		}
 	}
 }
 
 // updateDeletedCategory deletes a category from the database
-func updateDeletedCategory(changedFile string) {
-	splitted := strings.Split(changedFile, "/")
-	id := splitted[0]
-
-	category := &models.Category{Name: id}
-	_, err := database.DBCon.Model(category).WherePK().Delete()
-
-	if err != nil {
-		logger.Error.Println("Error during deleting category " + id)
-		logger.Error.Println(err)
-	}
-
+func updateDeletedCategory(changedFile string) *models.Category {
+	name, _, _ := strings.Cut(changedFile, "/")
+	return &models.Category{Name: name}
 }
 
 // updateModifiedCategory adds a category to the database or
 // updates it. To do so, it parses the metadata from metadata.xml
-func updateModifiedCategory(changedFile string) {
-	splitted := strings.Split(changedFile, "/")
-	id := splitted[0]
+func updateModifiedCategory(changedFile string) *models.Category {
+	name, _, _ := strings.Cut(changedFile, "/")
 
-	catmetadata := GetCatMetadata(config.PortDir() + "/" + changedFile)
-	description := ""
+	xmlFile, err := os.Open(config.PortDir() + "/" + changedFile)
+	if err != nil {
+		logger.Error.Println("Error during reading category metadata", err)
+		return nil
+	}
+	defer xmlFile.Close()
 
-	for _, longdescription := range catmetadata.Longdescriptions {
-		if longdescription.Lang == "en" {
-			description = strings.TrimSpace(longdescription.Content)
+	var catMetadata CatMetadata
+	err = xml.NewDecoder(xmlFile).Decode(&catMetadata)
+	if err != nil {
+		logger.Error.Println("Error during category", changedFile, "decoding", err)
+		return nil
+	}
+
+	var description string
+	for _, longDescription := range catMetadata.LongDescriptions {
+		if longDescription.Lang == "en" || longDescription.Lang == "" {
+			description = strings.TrimSpace(longDescription.Content)
 		}
 	}
 
-	category := &models.Category{
-		Name:        id,
+	return &models.Category{
+		Name:        name,
 		Description: description,
 	}
-
-	_, err := database.DBCon.Model(category).OnConflict("(name) DO UPDATE").Insert()
-
-	if err != nil {
-		logger.Error.Println("Error during updating category " + id)
-		logger.Error.Println(err)
-	}
-}
-
-// GetCatMetadata reads and parses the category
-// metadata from the metadata.xml file
-func GetCatMetadata(path string) Catmetadata {
-	xmlFile, err := os.Open(path)
-	if err != nil {
-		logger.Error.Println("Error during reading category metadata")
-		logger.Error.Println(err)
-	}
-	defer xmlFile.Close()
-	byteValue, _ := ioutil.ReadAll(xmlFile)
-	var catmetadata Catmetadata
-	xml.Unmarshal(byteValue, &catmetadata)
-	return catmetadata
 }
 
 // Descriptions of the category metadata.xml format
 
-type Catmetadata struct {
+type CatMetadata struct {
 	XMLName          xml.Name          `xml:"catmetadata"`
-	Longdescriptions []Longdescription `xml:"longdescription"`
+	LongDescriptions []LongDescription `xml:"longdescription"`
 }
 
-type Longdescription struct {
+type LongDescription struct {
 	XMLName xml.Name `xml:"longdescription"`
 	Lang    string   `xml:"lang,attr"`
 	Content string   `xml:",chardata"`
