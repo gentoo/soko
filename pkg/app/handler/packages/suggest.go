@@ -4,10 +4,11 @@ package packages
 
 import (
 	"encoding/json"
-	"github.com/go-pg/pg"
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
+
+	"github.com/go-pg/pg"
 )
 
 // Suggest returns json encoded suggestions of
@@ -37,14 +38,13 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 		Results []*Result `json:"results"`
 	}
 
-	var results []*Result
-
-	for _, gpackage := range packages {
-		results = append(results, &Result{
+	results := make([]*Result, len(packages))
+	for i, gpackage := range packages {
+		results[i] = &Result{
 			Name:        gpackage.Name,
 			Category:    gpackage.Category,
 			description: gpackage.Versions[0].Description,
-		})
+		}
 	}
 
 	result := Results{

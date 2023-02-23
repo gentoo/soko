@@ -21,8 +21,7 @@ import (
 
 // GetAddedPackages returns a list of recently added
 // packages containing a given number of packages
-func GetAddedPackages(n int) []*models.Package {
-	var addedPackages []*models.Package
+func GetAddedPackages(n int) (addedPackages []*models.Package) {
 	err := database.DBCon.Model(&addedPackages).
 		Order("preceding_commits DESC").
 		Limit(n).
@@ -30,27 +29,24 @@ func GetAddedPackages(n int) []*models.Package {
 		Relation("Versions.Commits").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Error during fetching added packages from database")
-		logger.Error.Println(err)
+		logger.Error.Println("Error during fetching added packages from database", err)
 	}
-	return addedPackages
+	return
 }
 
 // GetAddedVersions returns a list of recently added
 // versions containing a given number of versions
-func GetAddedVersions(n int) []*models.Version {
+func GetAddedVersions(n int) (addedVersions []*models.Version) {
 	addedPackages := GetAddedPackages(n)
-	var addedVersions []*models.Version
 	for _, addedPackage := range addedPackages {
 		addedVersions = append(addedVersions, addedPackage.Versions...)
 	}
-	return addedVersions
+	return
 }
 
 // GetUpdatedVersions returns a list of recently updated
 // versions containing a given number of versions
-func GetUpdatedVersions(n int) []*models.Version {
-	var updatedVersions []*models.Version
+func GetUpdatedVersions(n int) (updatedVersions []*models.Version) {
 	var updates []models.Commit
 	err := database.DBCon.Model(&updates).
 		Order("preceding_commits DESC").
@@ -63,7 +59,7 @@ func GetUpdatedVersions(n int) []*models.Version {
 		}).
 		Select()
 	if err != nil {
-		return updatedVersions
+		return
 	}
 	for _, commit := range updates {
 		for _, changedVersion := range commit.ChangedVersions {
@@ -72,57 +68,57 @@ func GetUpdatedVersions(n int) []*models.Version {
 		updatedVersions = append(updatedVersions, commit.ChangedVersions...)
 	}
 	if len(updatedVersions) > n {
-		updatedVersions = updatedVersions[:10]
+		updatedVersions = updatedVersions[:n]
 	}
-	return updatedVersions
+	return
 }
 
 // GetStabilizedVersions returns a list of recently stabilized
 // versions containing a given number of versions
-func GetStabilizedVersions(n int) []*models.Version {
-	var stabilizedVersions []*models.Version
+func GetStabilizedVersions(n int) (stabilizedVersions []*models.Version) {
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
 		Relation("Version").
 		Relation("Commit").
 		Order("commit.preceding_commits DESC").
 		Where("stabilized IS NOT NULL").
+		Where("version.id IS NOT NULL").
 		Limit(n).
 		Select()
 	if err != nil {
-		return stabilizedVersions
+		return
 	}
-	for _, update := range updates {
-		if update.Version != nil {
-			update.Version.Commits = []*models.Commit{update.Commit}
-			stabilizedVersions = append(stabilizedVersions, update.Version)
-		}
+
+	stabilizedVersions = make([]*models.Version, len(updates))
+	for i, update := range updates {
+		update.Version.Commits = []*models.Commit{update.Commit}
+		stabilizedVersions[i] = update.Version
 	}
-	return stabilizedVersions
+	return
 }
 
 // GetKeywordedVersions returns a list of recently keyworded
 // versions containing a given number of versions
-func GetKeywordedVersions(n int) []*models.Version {
-	var keywordedVersions []*models.Version
+func GetKeywordedVersions(n int) (keywordedVersions []*models.Version) {
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
 		Relation("Version").
 		Relation("Commit").
 		Order("commit.preceding_commits DESC").
 		Where("added IS NOT NULL").
+		Where("version.id IS NOT NULL").
 		Limit(n).
 		Select()
 	if err != nil {
-		return keywordedVersions
+		return
 	}
-	for _, update := range updates {
-		if update.Version != nil {
-			update.Version.Commits = []*models.Commit{update.Commit}
-			keywordedVersions = append(keywordedVersions, update.Version)
-		}
+
+	keywordedVersions = make([]*models.Version, len(updates))
+	for i, update := range updates {
+		update.Version.Commits = []*models.Commit{update.Commit}
+		keywordedVersions[i] = update.Version
 	}
-	return keywordedVersions
+	return
 }
 
 // RenderPackageTemplates renders the given templates using the given data

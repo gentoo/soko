@@ -25,58 +25,53 @@ func getPageData() interface{} {
 // getStabilizedVersionsForArch returns the given number of recently
 // stabilized versions of a specific arch
 func getStabilizedVersionsForArch(arch string, n int) ([]*models.Version, error) {
-	var stabilizedVersions []*models.Version
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
 		Relation("Version").
 		Relation("Commit").
 		Order("commit.preceding_commits DESC").
 		Where("stabilized::jsonb @> ?", "\""+arch+"\"").
+		Where("version.id IS NOT NULL").
 		Limit(n).
 		Select()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, update := range updates {
-		if update.Version != nil {
-			update.Version.Commits = []*models.Commit{update.Commit}
-			stabilizedVersions = append(stabilizedVersions, update.Version)
-		}
+	stabilizedVersions := make([]*models.Version, len(updates))
+	for i, update := range updates {
+		update.Version.Commits = []*models.Commit{update.Commit}
+		stabilizedVersions[i] = update.Version
 	}
-
 	return stabilizedVersions, err
 }
 
 // getKeywordedVersionsForArch returns the given number of recently
 // keyworded versions of a specific arch
 func getKeywordedVersionsForArch(arch string, n int) ([]*models.Version, error) {
-	var stabilizedVersions []*models.Version
 	var updates []models.KeywordChange
 	err := database.DBCon.Model(&updates).
 		Relation("Version").
 		Relation("Commit").
 		Order("commit.preceding_commits DESC").
 		Where("added::jsonb @> ?", "\""+arch+"\"").
+		Where("version.id IS NOT NULL").
 		Limit(n).
 		Select()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, update := range updates {
-		if update.Version != nil {
-			update.Version.Commits = []*models.Commit{update.Commit}
-			stabilizedVersions = append(stabilizedVersions, update.Version)
-		}
+	keywordedVersions := make([]*models.Version, len(updates))
+	for i, update := range updates {
+		update.Version.Commits = []*models.Commit{update.Commit}
+		keywordedVersions[i] = update.Version
 	}
-
-	return stabilizedVersions, err
+	return keywordedVersions, err
 }
 
 // RenderPackageTemplates renders the arches templates using the given data
 func renderPackageTemplates(page string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
-
 	templates := template.Must(
 		template.Must(
 			template.Must(
