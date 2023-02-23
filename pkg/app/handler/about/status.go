@@ -15,7 +15,9 @@ func Status(w http.ResponseWriter, r *http.Request) {
 		template.Must(
 			template.New("status").
 				Funcs(template.FuncMap{
-					"timeSince": time.Since,
+					"timeSince": func(t time.Time) time.Duration {
+						return time.Since(t).Round(time.Second)
+					},
 				}).
 				ParseGlob("web/templates/layout/*.tmpl")).
 			ParseGlob("web/templates/about/status.tmpl"))
