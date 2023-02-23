@@ -391,6 +391,8 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 		return "https://hackage.haskell.org/package/" + remoteId.Id
 	case "heptapod":
 		return "https://foss.heptapod.net/" + remoteId.Id
+	case "kde-invent":
+		return "https://invent.kde.org/" + remoteId.Id + ".git/"
 	case "launchpad":
 		return "https://launchpad.net/" + remoteId.Id
 	case "osdn":
