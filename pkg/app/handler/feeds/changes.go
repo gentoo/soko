@@ -2,10 +2,11 @@ package feeds
 
 import (
 	"fmt"
-	"github.com/gorilla/feeds"
 	"net/http"
 	"soko/pkg/models"
 	"time"
+
+	"github.com/gorilla/feeds"
 )
 
 // Show renders a template to show a given package
@@ -19,16 +20,15 @@ func Changes(title string, description string, changedVersions []*models.Version
 	}
 	addFeedItems(feed, changedVersions)
 	feed.WriteAtom(w)
-
 }
 
 // addFeedItems is a helper to add items to a feed; most of the feeds use []*models.Version as the entity.
 func addFeedItems(f *feeds.Feed, versions []*models.Version) {
 	for _, version := range versions {
-		cpv := fmt.Sprintf("%s-%s", version.Atom, version.Version)
+		cpv := version.Atom + "-" + version.Version
 		item := &feeds.Item{
 			Title:       cpv,
-			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", version.Atom)},
+			Link:        &feeds.Link{Href: "https://packages.gentoo.org/package/" + version.Atom},
 			Description: version.Description,
 			Author:      &feeds.Author{Name: "unknown"},
 			Created:     time.Now(),

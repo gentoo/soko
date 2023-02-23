@@ -2,10 +2,11 @@ package feeds
 
 import (
 	"fmt"
-	"github.com/gorilla/feeds"
 	"net/http"
 	"soko/pkg/models"
 	"time"
+
+	"github.com/gorilla/feeds"
 )
 
 // Show renders a template to show a given package
@@ -26,7 +27,7 @@ func addPackageFeedItems(f *feeds.Feed, gpackages []models.Package) {
 	for _, gpackage := range gpackages {
 		item := &feeds.Item{
 			Title:       gpackage.Atom,
-			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", gpackage.Atom)},
+			Link:        &feeds.Link{Href: "https://packages.gentoo.org/package/" + gpackage.Atom},
 			Description: gpackage.Longdescription,
 			Author:      &feeds.Author{Name: "unknown"},
 			Created:     time.Now(),
@@ -54,7 +55,7 @@ func addAddedPackageFeedItems(f *feeds.Feed, packages []*models.Package) {
 	for _, gpackage := range packages {
 		item := &feeds.Item{
 			Title:       gpackage.Atom,
-			Link:        &feeds.Link{Href: fmt.Sprintf("https://packages.gentoo.org/package/%s", gpackage.Atom)},
+			Link:        &feeds.Link{Href: "https://packages.gentoo.org/package/" + gpackage.Atom},
 			Description: gpackage.Description(),
 			Author:      &feeds.Author{Name: "unknown"},
 			Created:     time.Now(),
