@@ -33,20 +33,22 @@ func getAddedPackages(n int) []models.Package {
 }
 
 func getSearchHistoryPackages(r *http.Request) []models.Package {
-	var cookie, err = r.Cookie("search_history")
 	var searchedPackages []models.Package
-	if err == nil {
-		packagesList := getSearchHistoryFromCookie(cookie)
-		err := database.DBCon.Model(&searchedPackages).
-			Where(getSearchHistoryQuery(packagesList)).
-			Relation("Versions").
-			Select()
-		return getSortedSearchHistory(packagesList, searchedPackages)
-		if err != nil {
-			return searchedPackages
-		}
+	cookie, err := r.Cookie("search_history")
+	if err != nil {
+		return searchedPackages
 	}
-	return searchedPackages
+	packagesList := getSearchHistoryFromCookie(cookie)
+
+	err = database.DBCon.Model(&searchedPackages).
+		Where("atom in (?)", pg.In(packagesList)).
+		Relation("Versions").
+		Select()
+	if err != nil {
+		return searchedPackages
+	}
+
+	return getSortedSearchHistory(packagesList, searchedPackages)
 }
 
 func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.Package) []models.Package {
@@ -80,14 +82,6 @@ func getSearchHistoryFromCookie(cookie *http.Cookie) []string {
 		}
 	}
 	return packagesList
-}
-
-func getSearchHistoryQuery(packagesList []string) string {
-	var queryParts []string
-	for _, gpackage := range packagesList {
-		queryParts = append(queryParts, "atom = '"+gpackage+"'")
-	}
-	return strings.Join(queryParts, " OR ")
 }
 
 // getUpdatedVersions returns a list of a
