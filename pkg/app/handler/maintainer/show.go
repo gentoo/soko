@@ -14,35 +14,38 @@ import (
 // Show renders a template to show a given maintainer page
 func Show(w http.ResponseWriter, r *http.Request) {
 	maintainerEmail := r.URL.Path[len("/maintainer/"):]
-	maintainerEmail = strings.Split(maintainerEmail, "/")[0]
+	maintainerEmail, _, _ = strings.Cut(maintainerEmail, "/")
 	if !strings.Contains(maintainerEmail, "@") {
 		maintainerEmail = maintainerEmail + "@gentoo.org"
 	}
 
-	whereClause := "maintainers @> '[{\"Email\": \"" + maintainerEmail + "\"}]'"
+	var gpackages []*models.Package
+	query := database.DBCon.Model(&gpackages)
+
 	if maintainerEmail == "maintainer-needed@gentoo.org" {
-		whereClause = "maintainers IS null"
+		query = query.Where("maintainers IS null")
+	} else {
+		query = query.Where("maintainers @> ?", `[{"Email": "`+maintainerEmail+`"}]`)
 	}
 
 	maintainer := models.Maintainer{
 		Email: maintainerEmail,
 	}
-	database.DBCon.Model(&maintainer).WherePK().Relation("Project").Relation("Projects").Select()
+	err := database.DBCon.Model(&maintainer).WherePK().Relation("Project").Relation("Projects").Select()
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
 
 	userPreferences := utils.GetUserPreferences(r)
 	if userPreferences.Maintainers.IncludeProjectPackages && maintainer.Projects != nil && len(maintainer.Projects) > 0 {
-		whereParts := []string{"maintainers @> '[{\"Email\": \"" + maintainerEmail + "\"}]'"}
+		excludeList := strings.Join(userPreferences.Maintainers.ExcludedProjects, ",")
 		for _, proj := range maintainer.Projects {
-			if !strings.Contains(strings.Join(userPreferences.Maintainers.ExcludedProjects, ","), proj.Email) {
-				whereParts = append(whereParts, "maintainers @> '[{\"Email\": \""+proj.Email+"\"}]'")
+			if !strings.Contains(excludeList, proj.Email) {
+				query = query.WhereOr("maintainers @> ?", `[{"Email": "`+proj.Email+`"}]`)
 			}
 		}
-		whereClause = strings.Join(whereParts, " OR ")
 	}
-
-	var gpackages []*models.Package
-	query := database.DBCon.Model(&gpackages).
-		Where(whereClause)
 
 	pageName := "packages"
 	if strings.HasSuffix(r.URL.Path, "/changelog") {
@@ -93,9 +96,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			Relation("Versions.Masks")
 	}
 
-	err := query.Select()
+	err = query.Select()
 
-	if err != nil || len(gpackages) == 0 {
+	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
