@@ -6,7 +6,6 @@ import (
 	b64 "encoding/base64"
 	"html/template"
 	"net/http"
-	"reflect"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -51,8 +50,7 @@ func getSearchHistoryPackages(r *http.Request) []models.Package {
 	return getSortedSearchHistory(packagesList, searchedPackages)
 }
 
-func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.Package) []models.Package {
-	var result []models.Package
+func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.Package) (result []models.Package) {
 	for _, gpackage := range sortedPackagesList {
 		for _, gpackageObject := range packagesList {
 			if gpackageObject.Atom == gpackage {
@@ -60,20 +58,16 @@ func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.P
 			}
 		}
 	}
-	reverse(result)
-	return result
-}
 
-func reverse(s interface{}) {
-	n := reflect.ValueOf(s).Len()
-	swap := reflect.Swapper(s)
-	for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
-		swap(i, j)
+	// reverse the slice
+	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
+		result[i], result[j] = result[j], result[i]
 	}
+
+	return
 }
 
-func getSearchHistoryFromCookie(cookie *http.Cookie) []string {
-	var packagesList []string
+func getSearchHistoryFromCookie(cookie *http.Cookie) (packagesList []string) {
 	cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
 	if err == nil {
 		packagesList = strings.Split(string(cookieValue), ",")
@@ -81,7 +75,7 @@ func getSearchHistoryFromCookie(cookie *http.Cookie) []string {
 			packagesList = packagesList[len(packagesList)-10:]
 		}
 	}
-	return packagesList
+	return
 }
 
 // getUpdatedVersions returns a list of a
