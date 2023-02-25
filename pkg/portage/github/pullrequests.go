@@ -179,6 +179,7 @@ func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 		return
 	}
 
+	categoriesPullRequests := make(map[string]map[string]struct{})
 	var pkgsPullRequests []*models.PackageToGithubPullRequest
 	for _, pullrequest := range pullRequests {
 		affectedPackages := make(map[string]struct{})
@@ -186,6 +187,13 @@ func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 			pathParts := strings.Split(file.Path, "/")
 			if len(pathParts) >= 2 && strings.Contains(pathParts[0], "-") {
 				affectedPackages[pathParts[0]+"/"+pathParts[1]] = struct{}{}
+
+				prs, ok := categoriesPullRequests[pathParts[0]]
+				if !ok {
+					prs = make(map[string]struct{})
+				}
+				prs[pullrequest.Id] = struct{}{}
+				categoriesPullRequests[pathParts[0]] = prs
 			}
 		}
 		for affectedPackage := range affectedPackages {
@@ -214,6 +222,40 @@ func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 		return
 	}
 	logger.Info.Println("Inserted", result.RowsAffected(), "packages to pull requests")
+
+	updateCategoriesPullRequests(categoriesPullRequests)
+}
+
+func updateCategoriesPullRequests(categoriesPullRequests map[string]map[string]struct{}) {
+	var categories []*models.CategoryPackagesInformation
+	err := database.DBCon.Model(&categories).Column("name").Select()
+	if err != nil {
+		logger.Error.Println("Error while fetching categories packages information", err)
+		return
+	} else if len(categories) > 0 {
+		for _, category := range categories {
+			category.PullRequests = len(categoriesPullRequests[category.Name])
+			delete(categoriesPullRequests, category.Name)
+		}
+		_, err = database.DBCon.Model(&categories).Set("pull_requests = ?pull_requests").Update()
+		if err != nil {
+			logger.Error.Println("Error while fetching categories packages information", err)
+		}
+		categories = make([]*models.CategoryPackagesInformation, 0, len(categoriesPullRequests))
+	}
+
+	for category, prs := range categoriesPullRequests {
+		categories = append(categories, &models.CategoryPackagesInformation{
+			Name:         category,
+			PullRequests: len(prs),
+		})
+	}
+	if len(categories) > 0 {
+		_, err = database.DBCon.Model(&categories).Insert()
+		if err != nil {
+			logger.Error.Println("Error while inserting categories packages information", err)
+		}
+	}
 }
 
 func updateStatus() {
