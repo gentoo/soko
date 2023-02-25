@@ -34,12 +34,14 @@ func createCategoriesData(categories []*models.Category) interface{} {
 
 // createCategoriesData creates the data used in
 // the template to display a specific category
-func createCategoryData(category models.Category) interface{} {
+func createCategoryData(pageName string, category models.Category) interface{} {
 	return struct {
+		PageName    string
 		Header      models.Header
 		Category    models.Category
 		Application models.Application
 	}{
+		PageName:    pageName,
 		Header:      models.Header{Title: category.Name + " – ", Tab: "packages"},
 		Category:    category,
 		Application: utils.GetApplicationData(),
@@ -50,13 +52,15 @@ func createCategoryData(category models.Category) interface{} {
 func renderCategoryTemplate(page string, data interface{}, w http.ResponseWriter) {
 	templates := template.Must(
 		template.Must(
-			template.New(page).
-				Funcs(template.FuncMap{
-					"add": func(a, b int) int {
-						return a + b
-					},
-				}).
-				ParseGlob("web/templates/layout/*.tmpl")).
+			template.Must(
+				template.New(page).
+					Funcs(template.FuncMap{
+						"add": func(a, b int) int {
+							return a + b
+						},
+					}).
+					ParseGlob("web/templates/layout/*.tmpl")).
+				ParseGlob("web/templates/categories/components/*.tmpl")).
 			ParseGlob("web/templates/categories/*.tmpl"))
 
 	templates.ExecuteTemplate(w, page+".tmpl", data)

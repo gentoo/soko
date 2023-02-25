@@ -33,7 +33,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderCategoryTemplate("show", createCategoryData(*category), w)
+	renderCategoryTemplate("show", createCategoryData("packages", *category), w)
 }
 
 // build the json for the category
