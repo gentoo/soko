@@ -35,28 +35,62 @@ func UpdateOutdated() {
 	}
 
 	// Get all outdated Versions
+	outdatedCategories := make(map[string]int)
 	var outdatedVersions []*models.OutdatedPackages
 	letters := "abcdefghijklmnopqrstuvwxyz"
 	for _, letter := range letters {
-		outdatedVersions = append(outdatedVersions, getOutdatedStartingWith(letter)...)
+		outdatedVersions = append(outdatedVersions, getOutdatedStartingWith(letter, outdatedCategories)...)
 	}
 
 	// Clean up the database
 	database.TruncateTable[models.OutdatedPackages]("atom")
 
 	// Update the database
-	database.DBCon.Model(&outdatedVersions).Insert()
+	if len(outdatedVersions) > 0 {
+		database.DBCon.Model(&outdatedVersions).Insert()
+	}
+
+	// Updated the outdated status of categories
+	var categories []*models.CategoryPackagesInformation
+	err := database.DBCon.Model(&categories).Column("name").Select()
+	if err != nil {
+		logger.Error.Println("Error while fetching categories packages information", err)
+		return
+	} else if len(categories) > 0 {
+		for _, category := range categories {
+			category.Outdated = outdatedCategories[category.Name]
+			delete(outdatedCategories, category.Name)
+		}
+		_, err = database.DBCon.Model(&categories).Set("outdated = ?outdated").Update()
+		if err != nil {
+			logger.Error.Println("Error while fetching categories packages information", err)
+		}
+		categories = make([]*models.CategoryPackagesInformation, 0, len(outdatedCategories))
+	}
+
+	for category, count := range outdatedCategories {
+		categories = append(categories, &models.CategoryPackagesInformation{
+			Name:     category,
+			Outdated: count,
+		})
+	}
+	if len(categories) > 0 {
+		_, err = database.DBCon.Model(&categories).Insert()
+		if err != nil {
+			logger.Error.Println("Error while inserting categories packages information", err)
+		}
+	}
 
 	updateStatus()
 }
 
 // getOutdatedStartingWith gets all outdated packages starting with the given letter
-func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
+func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*models.OutdatedPackages {
 	repoPackages, err := parseRepologyData("https://repology.org/api/v1/projects/" + string(letter) + "/?inrepo=gentoo&outdated=1")
 
 	if err != nil {
 		logger.Error.Println("Error while fetching repology data")
-		return []*models.OutdatedPackages{}
+		return nil
 	}
 
 	blockedRepos := readBlocklist("ignored-repositories")
@@ -100,6 +134,11 @@ func getOutdatedStartingWith(letter rune) []*models.OutdatedPackages {
 				GentooVersion: version,
 				NewestVersion: newest,
 			})
+
+			category, _, found := strings.Cut(atom, "/")
+			if found {
+				outdatedCategories[category]++
+			}
 		}
 	}
 
