@@ -263,33 +263,31 @@ func getParameterValue(parameterName string, r *http.Request) string {
 func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, map[string][]models.Useflag) {
 	var localUseflags, allGlobalUseflags, filteredGlobalUseflags []models.Useflag
 	useExpands := make(map[string][]models.Useflag)
-	for _, rawUseflag := range gpackage.Versions[0].Useflags {
 
-		var tmp_useflags []models.Useflag
-		err := database.DBCon.Model(&tmp_useflags).
-			Where("Name = ?", strings.Replace(rawUseflag, "+", "", 1)).
-			Select()
+	rawUseFlags := make([]string, len(gpackage.Versions[0].Useflags))
+	for i, rawUseflag := range gpackage.Versions[0].Useflags {
+		rawUseFlags[i] = strings.Replace(rawUseflag, "+", "", 1)
+	}
 
-		if err != nil && err != pg.ErrNoRows {
-			logger.Error.Println("Error during fetching added packages from database")
-			logger.Error.Println(err)
-			continue
-		}
+	var tmp_useflags []models.Useflag
+	err := database.DBCon.Model(&tmp_useflags).
+		Where("name in (?)", pg.In(rawUseFlags)).
+		Order("name ASC").
+		Select()
+	if err != nil && err != pg.ErrNoRows {
+		logger.Error.Println("Error during fetching added packages from database", err)
+		return localUseflags, allGlobalUseflags, useExpands
+	}
 
-		for _, useflag := range tmp_useflags {
-			if useflag.Scope == "global" {
-				allGlobalUseflags = append(allGlobalUseflags, useflag)
-			} else if useflag.Scope == "local" {
-				if useflag.Package == gpackage.Atom {
-					localUseflags = append(localUseflags, useflag)
-				}
-			} else {
-				if _, ok := useExpands[useflag.UseExpand]; !ok {
-					useExpands[useflag.UseExpand] = []models.Useflag{useflag}
-				} else {
-					useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], useflag)
-				}
+	for _, useflag := range tmp_useflags {
+		if useflag.Scope == "global" {
+			allGlobalUseflags = append(allGlobalUseflags, useflag)
+		} else if useflag.Scope == "local" {
+			if useflag.Package == gpackage.Atom {
+				localUseflags = append(localUseflags, useflag)
 			}
+		} else {
+			useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], useflag)
 		}
 	}
 
