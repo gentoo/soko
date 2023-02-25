@@ -9,17 +9,18 @@
                         <div class="col-md-5">
                             <h1 class="stick-top kk-package-title" id="package-title">
                                 <div>
-                                    <div class="kk-package-name" style="margin-left: 0px!important;"><span class="fa fa-fw fa-cubes"></span><span class="ml-2">{{.Name}}</span></div>
+                                    <div class="kk-package-name" style="margin-left: 0px!important;"><span class="fa fa-fw fa-cubes"></span><span class="ml-2">{{.Category.Name}}</span></div>
                                 </div>
                             </h1>
                         </div>
                         <div class="col-md-7">
-                            {{.Description}}
+                            {{.Category.Description}}
                         </div>
 
                         <div class="col-md-12 pt-4 mt-1">
                             <nav class="nav kk-package-nav">
-                                <a class="nav-link active" href="/categories"><i class="fa fa-list-ul mr-1" aria-hidden="true"></i>Packages</a>
+                                <a class="nav-link {{if eq .PageName "packages"}}active{{end}}" href="/categories/{{.Category.Name}}"><i class="fa fa-list-ul mr-1" aria-hidden="true"></i> Packages <span class="ml-1 badge badge-pill kk-misc-badge">{{len .Category.Packages}}</span></a>
+                                <a class="nav-link {{if eq .PageName "outdated"}}active{{end}}" href="/categories/{{.Category.Name}}/outdated"><i class="fa fa-tag mr-1" aria-hidden="true"></i> Outdated <span class="ml-1 badge badge-pill kk-misc-badge">{{.Category.PackagesInformation.Outdated}}</span></a>
                             </nav>
                         </div>
                     </div>

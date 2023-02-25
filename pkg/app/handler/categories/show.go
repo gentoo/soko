@@ -14,34 +14,44 @@ import (
 
 // Show renders a template to show a given category
 func Show(w http.ResponseWriter, r *http.Request) {
-
-	if strings.HasSuffix(r.URL.Path, ".json") {
-		buildJson(w, r)
-		return
+	categoryName, pageUrl, found := strings.Cut(r.URL.Path[len("/categories/"):], "/")
+	if !found {
+		if strings.HasSuffix(r.URL.Path, ".json") {
+			buildJson(w, r, strings.TrimSuffix(categoryName, ".json"))
+			return
+		}
 	}
 
 	category := new(models.Category)
-	err := database.DBCon.Model(category).
-		Where("name = ?", getCategoryName(r)).
+	query := database.DBCon.Model(category).
+		Where("category.name = ?", categoryName).
+		Relation("PackagesInformation").
 		Relation("Packages", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("name ASC"), nil
-		}).
-		Relation("Packages.Versions").
-		Select()
+		}).Relation("Packages.Versions")
+
+	pageName := "packages"
+	switch pageUrl {
+	case "outdated":
+		pageName = "outdated"
+		query = query.Relation("Packages.Outdated")
+	}
+
+	err := query.Select()
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	renderCategoryTemplate("show", createCategoryData("packages", *category), w)
+	renderCategoryTemplate("show", createCategoryData(pageName, *category), w)
 }
 
 // build the json for the category
-func buildJson(w http.ResponseWriter, r *http.Request) {
+func buildJson(w http.ResponseWriter, r *http.Request, categoryName string) {
 
 	category := new(models.Category)
 	err := database.DBCon.Model(category).
-		Where("name = ?", getCategoryName(r)).
+		Where("name = ?", categoryName).
 		Relation("Packages").
 		Relation("Packages.Versions").
 		Select()
