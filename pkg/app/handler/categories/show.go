@@ -75,11 +75,17 @@ func buildJson(w http.ResponseWriter, r *http.Request) {
 func getJSONPackages(category *models.Category) []Package {
 	var categoryPackages []Package
 	for _, gpackage := range category.Packages {
-		categoryPackages = append(categoryPackages, Package{
-			Name:        gpackage.Name,
-			Href:        gpackage.Versions[0].Homepage[0],
-			Description: gpackage.Versions[0].Description,
-		})
+		if len(gpackage.Versions) > 0 {
+			var homepage string
+			if len(gpackage.Versions[0].Homepage) > 0 {
+				homepage = gpackage.Versions[0].Homepage[0]
+			}
+			categoryPackages = append(categoryPackages, Package{
+				Name:        gpackage.Name,
+				Href:        homepage,
+				Description: gpackage.Versions[0].Description,
+			})
+		}
 	}
 	return categoryPackages
 }
