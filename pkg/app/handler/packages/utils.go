@@ -386,7 +386,7 @@ func RemoteIdLink(remoteId models.RemoteId) string {
 	case "heptapod":
 		return "https://foss.heptapod.net/" + remoteId.Id
 	case "kde-invent":
-		return "https://invent.kde.org/" + remoteId.Id + ".git/"
+		return "https://invent.kde.org/" + remoteId.Id
 	case "launchpad":
 		return "https://launchpad.net/" + remoteId.Id
 	case "osdn":
