@@ -9,10 +9,10 @@
 
                     <div class="card border-top-0 rounded">
                         <table class="table mb-0 rounded">
-                            {{$prevCatLetter := (printf "%.1s" (index .Category.Packages 0).Name) }}
+                            {{$prevCatLetter := "" }}
                             {{- range .Category.Packages -}}
-                                {{- if ne (printf "%.1s" .Name) $prevCatLetter -}}
-                                    {{- $prevCatLetter = (printf "%.1s" .Name) -}}
+                                {{- if ne (packageLetter .Name) $prevCatLetter -}}
+                                    {{- $prevCatLetter = (packageLetter .Name) -}}
                                     <tr id="{{$prevCatLetter}}">
                                 {{- else -}}
                                     <tr>
@@ -31,14 +31,13 @@
                     </dd>
                     <h4 class="mt-4">Filter by Category</h4>
                     <div class="row pl-4 pr-5 mr-5">
-                        {{- $prevLetter := (printf "%.1s" (index .Category.Packages 0).Name) -}}
+                        {{- $prevLetter := "" -}}
                         {{- range .Category.Packages -}}
-                            {{- if ne (printf "%.1s" .Name) $prevLetter -}}
+                            {{- if ne (packageLetter .Name) $prevLetter -}}
+                                {{- $prevLetter = (packageLetter .Name) -}}
                                 <div class="col-md-2 px-2"><a href="#{{$prevLetter}}" class="text-muted text-capitalize">{{$prevLetter}}</a></div>
-                                {{- $prevLetter = (printf "%.1s" .Name) -}}
                             {{- end -}}
                         {{- end -}}
-                        <div class="col-md-2 px-2"><a href="#{{$prevLetter}}" class="text-muted text-capitalize">{{$prevLetter}}</a></div>
                     </div>
                 </div>
             </div>

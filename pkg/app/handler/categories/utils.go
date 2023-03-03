@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/models"
+	"strings"
 )
 
 // createCategoriesData creates the data used in
@@ -52,6 +53,9 @@ func renderCategoryTemplate(page string, data interface{}, w http.ResponseWriter
 					Funcs(template.FuncMap{
 						"add": func(a, b int) int {
 							return a + b
+						},
+						"packageLetter": func(name string) string {
+							return strings.ToLower(strings.TrimLeft(name, "_")[:1])
 						},
 					}).
 					ParseGlob("web/templates/layout/*.tmpl")).
