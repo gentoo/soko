@@ -84,8 +84,7 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 func parseAuthorLine(authorLine string) (string, string, time.Time) {
 
 	if !(strings.Contains(authorLine, "<") && strings.Contains(authorLine, ">")) {
-		logger.Error.Println("Error while parsing the author line in mask entry:")
-		logger.Error.Println(authorLine)
+		logger.Error.Println("Error while parsing the author line in mask entry:", authorLine)
 		return "", "", time.Now()
 	}
 
@@ -197,17 +196,32 @@ func CalculateMaskedVersions() {
 	}
 }
 
+// extract slot and subslot name from versionSpecifier
+func slotAndSubslot(versionSpecifier string) (string, []string) {
+	version, fullslot, found := strings.Cut(versionSpecifier, ":")
+	if found {
+		return version, strings.SplitN(fullslot, "/", 2)
+	} else {
+		return version, nil
+	}
+}
+
 // comparedVersions computes and returns all versions that are >=, >, <= or < than then given version
 func comparedVersions(operator string, versionSpecifier string, packageAtom string) []*models.Version {
-	var results []*models.Version
-	var versions []*models.Version
+	var results, versions []*models.Version
 	versionSpecifier = strings.ReplaceAll(versionSpecifier, operator, "")
 	versionSpecifier = strings.ReplaceAll(versionSpecifier, packageAtom+"-", "")
-	versionSpecifier = strings.Split(versionSpecifier, ":")[0]
+	versionSpecifier, slots := slotAndSubslot(versionSpecifier)
 
-	database.DBCon.Model(&versions).
-		Where("atom = ?", packageAtom).
-		Select()
+	q := database.DBCon.Model(&versions).
+		Where("atom = ?", packageAtom)
+	if len(slots) >= 1 {
+		q = q.Where("slot = ?", slots[0])
+	}
+	if len(slots) == 2 {
+		q = q.Where("subslot = ?", slots[1])
+	}
+	q.Select()
 
 	for _, v := range versions {
 		givenVersion := models.Version{Version: versionSpecifier}
@@ -232,15 +246,24 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 	return results
 }
 
+var revision = regexp.MustCompile(`-r[0-9]*$`)
+
 // allRevisions returns all revisions of the given version
 func allRevisions(versionSpecifier string, packageAtom string) []*models.Version {
 	var versions []*models.Version
-	revision := regexp.MustCompile(`-r[0-9]*$`)
+	versionSpecifier, slots := slotAndSubslot(versionSpecifier)
 	versionWithoutRevision := revision.Split(versionSpecifier, 1)[0]
 	versionWithoutRevision = strings.ReplaceAll(versionWithoutRevision, "~", "")
-	database.DBCon.Model(&versions).
-		Where("id LIKE ?", versionWithoutRevision+"%").
-		Select()
+
+	q := database.DBCon.Model(&versions).
+		Where("id LIKE ?", versionWithoutRevision+"%")
+	if len(slots) >= 1 {
+		q = q.Where("slot = ?", slots[0])
+	}
+	if len(slots) == 2 {
+		q = q.Where("subslot = ?", slots[1])
+	}
+	q.Select()
 
 	return versions
 }
@@ -248,23 +271,33 @@ func allRevisions(versionSpecifier string, packageAtom string) []*models.Version
 // exactVersion returns the exact version specified in the versionSpecifier
 func exactVersion(versionSpecifier string, packageAtom string) []*models.Version {
 	var versions []*models.Version
-	database.DBCon.Model(&versions).
-		Where("id = ?", strings.Replace(versionSpecifier, "=", "", 1)).
-		Select()
+	versionSpecifier, slots := slotAndSubslot(versionSpecifier)
+
+	q := database.DBCon.Model(&versions).
+		Where("id = ?", strings.Replace(versionSpecifier, "=", "", 1))
+	if len(slots) >= 1 {
+		q = q.Where("slot = ?", slots[0])
+	}
+	if len(slots) == 2 {
+		q = q.Where("subslot = ?", slots[1])
+	}
+	q.Select()
 
 	return versions
 }
 
-// TODO include subslot
 // versionsWithSlot returns all versions with the given slot
 func versionsWithSlot(versionSpecifier string, packageAtom string) []*models.Version {
 	var versions []*models.Version
-	slot := strings.Split(versionSpecifier, ":")[1]
+	_, slots := slotAndSubslot(versionSpecifier)
 
-	database.DBCon.Model(&versions).
+	q := database.DBCon.Model(&versions).
 		Where("atom = ?", packageAtom).
-		Where("slot = ?", slot).
-		Select()
+		Where("slot = ?", slots[0])
+	if len(slots) == 2 {
+		q = q.Where("subslot = ?", slots[1])
+	}
+	q.Select()
 
 	return versions
 }
@@ -280,7 +313,6 @@ func allVersions(versionSpecifier string, packageAtom string) []*models.Version 
 
 // maskVersions updates the MaskToVersion table using the given versions
 func maskVersions(versionSpecifier string, versions []*models.Version) {
-
 	for _, version := range versions {
 		maskToVersion := &models.MaskToVersion{
 			Id:           versionSpecifier + "-" + version.Id,
