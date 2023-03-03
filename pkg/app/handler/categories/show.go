@@ -22,19 +22,35 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var pullRequests []models.GithubPullRequest
 	category := new(models.Category)
 	query := database.DBCon.Model(category).
 		Where("category.name = ?", categoryName).
 		Relation("PackagesInformation").
 		Relation("Packages", func(q *pg.Query) (*pg.Query, error) {
 			return q.Order("name ASC"), nil
-		}).Relation("Packages.Versions")
+		})
 
 	pageName := "packages"
 	switch pageUrl {
 	case "outdated":
 		pageName = "outdated"
-		query = query.Relation("Packages.Outdated")
+		query = query.Relation("Packages.Versions").
+			Relation("Packages.Outdated")
+	case "pull-requests":
+		pageName = "pull-requests"
+		err := database.DBCon.Model(&pullRequests).
+			Join("JOIN package_to_github_pull_requests ON package_to_github_pull_requests.github_pull_request_id = github_pull_request.id").
+			Where("package_to_github_pull_requests.package_atom LIKE ?", categoryName+"/%").
+			Group("github_pull_request.id").
+			Order("github_pull_request.created_at DESC").
+			Select()
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+	default:
+		query = query.Relation("Packages.Versions")
 	}
 
 	err := query.Select()
@@ -43,7 +59,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderCategoryTemplate("show", createCategoryData(pageName, *category), w)
+	renderCategoryTemplate("show", createCategoryData(pageName, *category, pullRequests), w)
 }
 
 // build the json for the category

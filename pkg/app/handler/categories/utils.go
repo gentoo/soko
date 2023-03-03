@@ -27,17 +27,19 @@ func createCategoriesData(categories []*models.Category) interface{} {
 
 // createCategoriesData creates the data used in
 // the template to display a specific category
-func createCategoryData(pageName string, category models.Category) interface{} {
+func createCategoryData(pageName string, category models.Category, pullRequests []models.GithubPullRequest) interface{} {
 	return struct {
-		PageName    string
-		Header      models.Header
-		Category    models.Category
-		Application models.Application
+		PageName     string
+		Header       models.Header
+		Category     models.Category
+		PullRequests []models.GithubPullRequest
+		Application  models.Application
 	}{
-		PageName:    pageName,
-		Header:      models.Header{Title: category.Name + " – ", Tab: "packages"},
-		Category:    category,
-		Application: utils.GetApplicationData(),
+		PageName:     pageName,
+		Header:       models.Header{Title: category.Name + " – ", Tab: "packages"},
+		Category:     category,
+		PullRequests: pullRequests,
+		Application:  utils.GetApplicationData(),
 	}
 }
 
