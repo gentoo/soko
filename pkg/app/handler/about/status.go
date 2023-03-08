@@ -23,7 +23,7 @@ func Status(w http.ResponseWriter, r *http.Request) {
 			ParseGlob("web/templates/about/status.tmpl"))
 
 	var applicationData []*models.Application
-	database.DBCon.Model(&applicationData).Select()
+	database.DBCon.Model(&applicationData).Order("id").Select()
 
 	templates.ExecuteTemplate(w, "status.tmpl", struct {
 		Header       models.Header
