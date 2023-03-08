@@ -8,13 +8,13 @@
                         <div class="col-md-5">
                             <h1 class="stick-top kk-package-title" id="package-title">
                                 <small class="kk-package-cat">
-                                    {{if eq .Maintainer.Type "project"}}
+                                    {{- if eq .Maintainer.Type "project" -}}
                                         Gentoo Project
-                                    {{else if contains .Maintainer.Email "@gentoo.org"}}
+                                    {{- else if contains .Maintainer.Email "@gentoo.org" -}}
                                         Gentoo Developer
-                                    {{else if ne .Maintainer.Email ""}}
+                                    {{- else if ne .Maintainer.Email "" -}}
                                         Proxied Maintainer
-                                    {{end}}</small>
+                                    {{- end -}}</small>
                                 <div>
                                     <svg height="32" class="octicon octicon-person right left kk-package-icon" aria-label="Package icon" viewBox="0 0 16 16" version="1.1" width="32" role="img"><path fill-rule="evenodd" d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"></path></svg>
                                     <div class="kk-package-name">{{if .Maintainer.Name}}{{.Maintainer.Name}}{{else if .Maintainer.Email}}{{.Maintainer.Email}}{{else}}Maintainer Needed{{end}}</div>
@@ -26,21 +26,10 @@
                                 <!-- TODO -->
                             </p>
                         </div>
-                        {{$outdated_packages_counts := 0}}
-                        {{range .Packages}}
-                            {{if .Outdated}}
-                                {{$outdated_packages_counts = add $outdated_packages_counts 1}}
-                            {{end}}
-                        {{end}}
 
-                        {{$pull_requests_counts := 0}}
-                        {{range .Packages}}
-                            {{$pull_requests_counts = add $pull_requests_counts (len .PullRequests)}}
-                        {{end}}
-
-                        {{$security_bugs := 0}}
-                        {{$non_security_bugs := 0}}
-                        {{range .Packages}}
+                        {{- $security_bugs := 0 -}}
+                        {{- $non_security_bugs := 0 -}}
+                        {{- range .Packages -}}
                             {{range .Bugs}}
                                 {{if eq .Component "Vulnerabilities"}}
                                     {{$security_bugs = (add $security_bugs 1)}}
@@ -48,7 +37,7 @@
                                     {{$non_security_bugs = (add $non_security_bugs 1)}}
                                 {{end}}
                             {{end}}
-                        {{end}}
+                        {{- end -}}
                         <div class="col-md-12 pt-4 mt-1">
                             <nav class="nav kk-package-nav">
                                 <a class="nav-link {{if eq .PageName "packages"}}active{{end}}" href="/maintainer/{{if .Maintainer.Email}}{{.Maintainer.Email}}{{else}}maintainer-needed{{end}}"><i class="fa fa-info mr-1" aria-hidden="true"></i> Packages <span class="ml-1 badge badge-pill kk-misc-badge">{{len .Packages}}</span></a>
