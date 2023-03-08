@@ -1,164 +1,95 @@
-{{define "changelog"}}
+{{- define "changelog" -}}
 <div class="row">
     <div class="col-md-9">
-        {{ $commits := (index .Packages 0).Commits}}
-        {{ range $key, $value := .Packages}}
+        {{- $commits := (index .Packages 0).Commits -}}
+        {{- range $key, $value := .Packages -}}
             {{if ne $key 0}}
                 {{$commits = appendCommits $commits $value.Commits}}
             {{end}}
-        {{end}}
+        {{- end -}}
 
-        {{$commits = sortCommits $commits}}
+        {{- $commits = sortCommits $commits -}}
 
-        {{ if $commits }}
-
+        {{- if $commits }}
             <div class="col-md-12">
                 <h3>Latest Commits</h3>
+                <style>
+                    .kk-added-file-badge {
+                        background-color: #dff0d8;
+                        font-weight: normal;
+                    }
+                    .kk-added-file-badge > a {
+                        color: #424242!important;
+                    }
+                    .kk-modified-file-badge {
+                        background-color: #fcf8e3;
+                        font-weight: normal;
+                    }
+                    .kk-modified-file-badge > a {
+                        color: #424242!important;
+                    }
+                    .kk-deleted-file-badge {
+                        background-color: #f2dede;
+                        font-weight: normal;
+                    }
+                    .kk-deleted-file-badge > a {
+                        color: #424242!important;
+                    }
+                </style>
                 <ul class="timeline">
                     <li>
                         <span class="text-muted">Commits on {{((index $commits 0).CommitterDate).Format "2006-01-02"}}</span>
                         <ul class="list-group">
-                            {{$last_date := (index $commits 0).CommitterDate}}
-                            {{range $commits}}
-                            {{if eq ($last_date.Format "2006-01-02") (.CommitterDate.Format "2006-01-02")}}
-                            <li class="list-group-item">
-                                <div class="row">
-                                    <div class="col-md-8"><a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}"><b style="color:#424242!important;">{{.Message}}</b></a></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
-                                    <div class="col-md-12" style="color:#424242!important;">
-                                        {{ if (ne .AuthorName .CommitterName)}}
-                                            <span data-toggle="tooltip" title="authored on {{ .AuthorDate.Format "2006-01-02 15:04:05" }} UTC"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
-                                    <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
-                                        {{end}}
-                                        <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
-                                        <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2006-01-02 15:04:05" }} UTC
-                                    </div>
-                                    <div class="col-md-12">
-                                        {{$commit := .}}
-                                        {{range $key, $value := .ChangedFiles.Added }}
-                                            {{if le $key 100}}
-                                            <style>
-                                                .kk-added-file-badge {
-                                                    background-color: #dff0d8;
-                                                    font-weight: normal;
-                                                }
-                                                .kk-added-file-badge > a {
-                                                    color: #424242!important;
-                                                }
-                                            </style>
-                                            <span class="badge badge-pill kk-added-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
-                                            {{end}}
-                                        {{end}}
-                                        {{range $key, $value := .ChangedFiles.Modified }}
-                                            {{if le $key 100}}
-                                                <style>
-                                                    .kk-modified-file-badge {
-                                                        background-color: #fcf8e3;
-                                                        font-weight: normal;
-                                                    }
-                                                    .kk-modified-file-badge > a {
-                                                        color: #424242!important;
-                                                    }
-                                                </style>
-                                                <span class="badge badge-pill kk-modified-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
-                                            {{end}}
-                                        {{end}}
-                                        {{range $key, $value := .ChangedFiles.Deleted }}
-                                            {{if le $key 100}}
-                                                <style>
-                                                    .kk-deleted-file-badge {
-                                                        background-color: #f2dede;
-                                                        font-weight: normal;
-                                                    }
-                                                    .kk-deleted-file-badge > a {
-                                                        color: #424242!important;
-                                                    }
-                                                </style>
-                                                <span class="badge badge-pill kk-deleted-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
-                                            {{end}}
-                                        {{end}}
-                                    </div>
-                                </div>
-                            </li>
-                            {{else}}
+                            {{- $last_date := (index $commits 0).CommitterDate -}}
+                            {{- range $commits -}}
+                                {{- if ne ($last_date.Format "2006-01-02") (.CommitterDate.Format "2006-01-02") -}}
                         </ul>
                     </li>
                     <li>
                         <span class="text-muted">Commits on {{.CommitterDate.Format "2006-01-02"}}</span>
                         <ul class="list-group">
+                                {{- end -}}
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-md-8"><a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}"><b style="color:#424242!important;">{{.Message}}</b></a></div><div class="col-md-4 text-right text-muted"><a title="{{.Id}}" class="kk-commit" href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}">{{ printf "%.7s" .Id }}</a></div>
-                                    <div class="col-md-12">
-                                        {{ if (ne .AuthorName .CommitterName)}}
+                                    <div class="col-md-12" style="color:#424242!important;">
+                                        {{ if (ne .AuthorName .CommitterName) -}}
                                             <span data-toggle="tooltip" title="authored on {{ .AuthorDate.Format "2006-01-02 15:04:05" }} UTC"><img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src="{{ gravatar .AuthorEmail}}">
                                     <a href="mailto:{{ .AuthorEmail }}">{{ .AuthorName }}</a> authored</span> and&nbsp;
-                                        {{end}}
+                                        {{- end -}}
                                         <img class="rounded-sm inline" src="{{ gravatar .CommitterEmail}}">
                                         <a href="mailto:{{ .CommitterEmail }}">{{ .CommitterName }}</a> committed on {{ .CommitterDate.Format "2006-01-02 15:04:05" }} UTC
                                     </div>
                                     <div class="col-md-12">
-                                        {{$commit := .}}
-                                        {{range $key, $value := .ChangedFiles.Added }}
-                                            {{if le $key 100}}
-                                                <style>
-                                                    .kk-added-file-badge {
-                                                        background-color: #dff0d8;
-                                                        font-weight: normal;
-                                                    }
-                                                    .kk-added-file-badge > a {
-                                                        color: #424242!important;
-                                                    }
-                                                </style>
-                                                <span class="badge badge-pill kk-added-file-badge badge-light"><a title="{{ .Path }} has been added" class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
-                                            {{end}}
-                                        {{end}}
-                                        {{range $key, $value := .ChangedFiles.Modified }}
-                                            {{if le $key 100}}
-                                                    <style>
-                                                        .kk-modified-file-badge {
-                                                            background-color: #fcf8e3;
-                                                            font-weight: normal;
-                                                        }
-                                                        .kk-modified-file-badge > a {
-                                                            color: #424242!important;
-                                                        }
-                                                    </style>
-                                                    <span class="badge badge-pill kk-modified-file-badge badge-light"><a title="{{ .Path }} has been modified" class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path}}?id={{ $commit.Id }}">{{ .Path }}</a></span>
-                                            {{end}}
-                                        {{end}}
-                                        {{range $key, $value := .ChangedFiles.Deleted }}
-                                            {{if le $key 100}}
-                                                <style>
-                                                    .kk-deleted-file-badge {
-                                                        background-color: #f2dede;
-                                                        font-weight: normal;
-                                                    }
-                                                    .kk-deleted-file-badge > a {
-                                                        color: #424242!important;
-                                                    }
-                                                </style>
-                                                <span class="badge badge-pill kk-deleted-file-badge badge-light"><a title="{{ .Path }} has been deleted" class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
-                                            {{end}}
-                                        {{end}}
-                                        {{if gt (len .ChangedFiles.Added) 100}}
-                                            <a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}" class="text-muted">...</a>
-                                        {{else if gt (len .ChangedFiles.Modified) 100}}
-                                            <a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}" class="text-muted">...</a>
-                                        {{else if gt (len .ChangedFiles.Deleted) 100}}
-                                            <a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}" class="text-muted">...</a>
-                                        {{end}}
+                                        {{- $commit := . -}}
+                                        {{range $key, $value := .ChangedFiles.Added -}}
+                                            {{- if le $key 20}}
+                                                <span class="badge badge-pill kk-added-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
+                                            {{- end -}}
+                                        {{- end -}}
+                                        {{range $key, $value := .ChangedFiles.Modified -}}
+                                            {{- if le $key 20}}
+                                                <span class="badge badge-pill kk-modified-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
+                                            {{- end -}}
+                                        {{- end -}}
+                                        {{range $key, $value := .ChangedFiles.Deleted -}}
+                                            {{- if le $key 20 }}
+                                                <span class="badge badge-pill kk-deleted-file-badge badge-light"><a class="text-muted" href="https://gitweb.gentoo.org/repo/gentoo.git/diff/{{ .Path }}?id={{ $commit.Id }}">{{ .Path }}</a></span>
+                                            {{- end -}}
+                                        {{- end -}}
+                                        {{- if or (gt (len .ChangedFiles.Added) 20) (gt (len .ChangedFiles.Modified) 20) (gt (len .ChangedFiles.Deleted) 20) }}
+                                                <a href="https://gitweb.gentoo.org/repo/gentoo.git/commit/?id={{.Id}}" class="text-muted">...</a>
+                                        {{ end -}}
                                     </div>
                                 </div>
                             </li>
-                            {{end}}
-                            {{$last_date = .CommitterDate}}
-                            {{end}}
+                            {{- $last_date = .CommitterDate -}}
+                            {{- end -}}
                         </ul>
                     </li>
                 </ul>
             </div>
-
-        {{else}}
+        {{- else -}}
             <li class="list-group-item kk-panel-content-sorry">
                 This package has not been changed since our repository has moved to Git.
                 <br><br>
@@ -167,7 +98,7 @@
                     View old CVS Changelog
                 </a>
             </li>
-        {{end}}
+        {{- end -}}
     </div>
 </div>
-{{end}}
+{{- end -}}
