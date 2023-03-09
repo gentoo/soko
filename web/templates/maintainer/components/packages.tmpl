@@ -1,47 +1,30 @@
 {{define "packages"}}
     <div class="row">
         <div class="col-md-9">
-            {{if .Packages}}
-                <ul class="list-group">
-                    {{$category := ""}}
-
-                            {{ range .Packages }}
-                            {{ if eq .Category $category}}
-                                <li class="list-group-item">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <a href="/packages/{{.Atom}}" class="text-dark"><b>{{.Atom}}</b></a>
-                                        </div>
-                                        <div class="col-md-8 text-muted">
-                                            {{.Description}}
-                                        </div>
-                                    </div>
-                                </li>
-                                {{$category = .Category}}
-                            {{else}}
-                                    </ul>
-                                    <h3 id="{{.Category}}" class="{{if ne $category ""}}mt-4{{end}}">
-                                        {{$category = .Category}}
-                                        {{$category}}
-                                    </h3>
-                                    <ul class="list-group">
-                                        <li class="list-group-item">
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <a href="/packages/{{.Atom}}" class="text-dark"><b>{{.Atom}}</b></a>
-                                                </div>
-                                                <div class="col-md-8 text-muted">
-                                                    {{.Description}}
-                                                </div>
-                                            </div>
-                                        </li>
-                            {{end}}
-                        {{end}}
-
-
-
-                </ul>
-
+            {{- if .Packages}}
+                    <ul class="list-group">
+                {{- $category := "" -}}
+                {{- range .Packages -}}
+                    {{- if ne .Category $category}}
+                    </ul>
+                    <h3 id="{{.Category}}" class="{{if ne $category ""}}mt-4{{end}}">
+                        {{- $category = .Category -}}
+                        {{- $category -}}
+                    </h3>
+                    <ul class="list-group">
+                    {{- end }}
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <a href="/packages/{{.Atom}}" class="text-dark"><b>{{.Atom}}</b></a>
+                                </div>
+                                <div class="col-md-8 text-muted">
+                                    {{- .Description -}}
+                                </div>
+                            </div>
+                        </li>
+                {{- end }}
+                    </ul>
             {{else}}
                 <div class="row">
                     <div class="col-md-8">
@@ -50,7 +33,7 @@
                         <img style="width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"/>
                     </div>
                 </div>
-            {{end}}
+            {{- end}}
         </div>
         <div class="col-md-3 pt-4">
             {{if .Maintainer.Project.Description}}
@@ -139,16 +122,16 @@
             </h4>
             <div class="collapse show" id="collapseShortcuts">
                 <dl>
-                    {{$category := (index .Packages 0).Category}}
-                    {{$packageCounter := 0}}
-                    {{ range .Packages }}
-                        {{ if ne .Category $category}}
+                    {{- $category := (index .Packages 0).Category -}}
+                    {{- $packageCounter := 0 -}}
+                    {{- range .Packages -}}
+                        {{- if ne .Category $category }}
                             <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
-                            {{$category = .Category}}
-                            {{$packageCounter = 1}}
-                        {{else}}
-                            {{$packageCounter = add $packageCounter 1}}
-                        {{end}}
+                            {{- $category = .Category -}}
+                            {{- $packageCounter = 1 -}}
+                        {{ else -}}
+                            {{- $packageCounter = add $packageCounter 1 -}}
+                        {{- end -}}
                     {{end}}
                     <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
                 </dl>

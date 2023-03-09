@@ -1,36 +1,25 @@
 {{define "bugs"}}
     <div class="row">
         <div class="col-md-9">
-            {{$security_bugs := 0}}
-            {{$non_security_bugs := 0}}
-            {{range getAllBugs .Packages}}
-                {{if eq .Component "Vulnerabilities"}}
-                    {{$security_bugs = (add $security_bugs 1)}}
-                {{else}}
-                    {{$non_security_bugs = (add $non_security_bugs 1)}}
-                {{end}}
-            {{end}}
+            {{- $general_bugs := 0 -}}
+            {{- $stabilization_bugs := 0 -}}
+            {{- $keywording_bugs := 0 -}}
+            {{- range getAllBugs .Packages -}}
+                {{- if eq .Component "Current packages" -}}
+                    {{- $general_bugs = (add $general_bugs 1) -}}
+                {{- else if eq .Component "Stabilization" -}}
+                    {{- $stabilization_bugs = (add $stabilization_bugs 1) -}}
+                {{- else if eq .Component "Keywording" -}}
+                    {{- $keywording_bugs = (add $keywording_bugs 1) -}}
+                {{- end -}}
+            {{- end -}}
 
-            {{$general_bugs := 0}}
-            {{$stabilization_bugs := 0}}
-            {{$keywording_bugs := 0}}
-            {{range getAllBugs .Packages}}
-                {{if eq .Component "Current packages"}}
-                    {{$general_bugs = (add $general_bugs 1)}}
-                {{else if eq .Component "Stabilization"}}
-                    {{$stabilization_bugs = (add $stabilization_bugs 1)}}
-                {{else if eq .Component "Keywording"}}
-                    {{$keywording_bugs = (add $keywording_bugs 1)}}
-                {{end}}
-            {{end}}
-
-
-            {{if $non_security_bugs}}
+            {{- if .Maintainer.PackagesInformation.Bugs -}}
 
                 {{if $general_bugs}}
                     <h3 id="packages" class="mb-4">Bug Reports</h3>
                     <ul class="list-group">
-                        {{range getAllBugs .Packages}}
+                        {{- range getAllBugs .Packages -}}
                             {{if eq .Component "Current packages"}}
                                 <li class="list-group-item">
                                     <div class="row">
@@ -38,20 +27,18 @@
                                             <i class="fa fa-bug" aria-hidden="true"></i>
                                             <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
                                         </div>
-                                        <div class="col-md-12 text-muted">
-                                            {{.Id}} - Assigned to {{.Assignee}}
-                                        </div>
+                                        <div class="col-md-12 text-muted">{{.Id}} - Assigned to {{.Assignee}}</div>
                                     </div>
                                 </li>
                             {{end}}
-                        {{end}}
+                        {{- end -}}
                     </ul>
                 {{end}}
 
                 {{if $stabilization_bugs}}
                     <h3 id="stabilization" class="my-4">Stabilization Bug Reports</h3>
                     <ul class="list-group">
-                        {{range getAllBugs .Packages}}
+                        {{- range getAllBugs .Packages -}}
                             {{if eq .Component "Stabilization"}}
                                 <li class="list-group-item">
                                     <div class="row">
@@ -59,20 +46,18 @@
                                             <i class="fa fa-bug" aria-hidden="true"></i>
                                             <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
                                         </div>
-                                        <div class="col-md-12 text-muted">
-                                            {{.Id}} - Assigned to {{.Assignee}}
-                                        </div>
+                                        <div class="col-md-12 text-muted">{{.Id}} - Assigned to {{.Assignee}}</div>
                                     </div>
                                 </li>
                             {{end}}
-                        {{end}}
+                        {{- end -}}
                     </ul>
                 {{end}}
 
                 {{if $keywording_bugs}}
                     <h3 id="keywording" class="my-4">Keywording Bug Reports</h3>
                     <ul class="list-group">
-                        {{range getAllBugs .Packages}}
+                        {{- range getAllBugs .Packages -}}
                             {{if eq .Component "Keywording"}}
                                 <li class="list-group-item">
                                     <div class="row">
@@ -80,13 +65,11 @@
                                             <i class="fa fa-bug" aria-hidden="true"></i>
                                             <a href="https://bugs.gentoo.org/{{.Id}}" class="text-dark"><b>{{.Summary}}</b></a>
                                         </div>
-                                        <div class="col-md-12 text-muted">
-                                            {{.Id}} - Assigned to {{.Assignee}}
-                                        </div>
+                                        <div class="col-md-12 text-muted">{{.Id}} - Assigned to {{.Assignee}}</div>
                                     </div>
                                 </li>
                             {{end}}
-                        {{end}}
+                        {{- end -}}
                     </ul>
                 {{end}}
             {{else}}
