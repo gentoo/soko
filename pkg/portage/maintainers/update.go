@@ -5,10 +5,11 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
-	"sort"
 	"strings"
 	"time"
 )
+
+const maintainerNeededEmail = "maintainer-needed@gentoo.org"
 
 func FullImport() {
 
@@ -19,7 +20,11 @@ func FullImport() {
 	var allMaintainerInformation []*models.Maintainer
 	database.DBCon.Model((*models.Package)(nil)).ColumnExpr("jsonb_array_elements(maintainers)->>'Name' as name, jsonb_array_elements(maintainers) ->> 'Email' as email, jsonb_array_elements(maintainers) ->> 'Type' as type").Select(&allMaintainerInformation)
 
-	maintainers := map[string]*models.Maintainer{}
+	maintainers := map[string]*models.Maintainer{
+		maintainerNeededEmail: {
+			Email: maintainerNeededEmail,
+		},
+	}
 
 	for _, rawMaintainer := range allMaintainerInformation {
 		_, ok := maintainers[rawMaintainer.Email]
@@ -44,18 +49,19 @@ func FullImport() {
 		Select()
 
 	for _, maintainer := range maintainers {
-		outdated := 0
-		securityBugs := 0
+		var outdated, stableRequests int
 		pullRequestIds := make(map[string]struct{})
-		nonSecurityBugs := 0
-		stableRequests := 0
 		maintainerPackages := []*models.Package{}
 
 		for _, gpackage := range gpackages {
 			found := false
-			for _, packageMaintainer := range gpackage.Maintainers {
-				if packageMaintainer.Email == maintainer.Email {
-					found = true
+			if len(gpackage.Maintainers) == 0 && maintainer.Email == maintainerNeededEmail {
+				found = true
+			} else {
+				for _, packageMaintainer := range gpackage.Maintainers {
+					if packageMaintainer.Email == maintainer.Email {
+						found = true
+					}
 				}
 			}
 
@@ -79,13 +85,7 @@ func FullImport() {
 			}
 		}
 
-		for _, bug := range getAllBugs(maintainerPackages) {
-			if bug.Component == "Vulnerabilities" {
-				securityBugs++
-			} else {
-				nonSecurityBugs++
-			}
-		}
+		securityBugs, nonSecurityBugs := countBugs(maintainerPackages)
 
 		maintainer.PackagesInformation = models.MaintainerPackagesInformation{
 			Outdated:       outdated,
@@ -101,10 +101,8 @@ func FullImport() {
 		}
 
 		if maintainer.Type == "project" && strings.HasPrefix(maintainer.Name, "Gentoo ") {
-			maintainer.Name = strings.Replace(maintainer.Name, "Gentoo ", "", 1)
-		}
-
-		if maintainer.Type == "person" {
+			maintainer.Name = strings.TrimPrefix(maintainer.Name, "Gentoo ")
+		} else if maintainer.Type == "person" {
 			if strings.HasSuffix(maintainer.Email, "@gentoo.org") {
 				maintainer.Type = "gentoo-developer"
 			} else {
@@ -133,25 +131,23 @@ func FullImport() {
 	updateStatus()
 }
 
-func getAllBugs(packages []*models.Package) []*models.Bug {
+func countBugs(packages []*models.Package) (securityBugs, nonSecurityBugs int) {
 	allBugs := make(map[string]*models.Bug)
-
 	for _, gpackage := range packages {
 		for _, bug := range gpackage.AllBugs() {
 			allBugs[bug.Id] = bug
 		}
 	}
 
-	allBugsList := make([]*models.Bug, 0, len(allBugs))
 	for _, bug := range allBugs {
-		allBugsList = append(allBugsList, bug)
+		if bug.Component == "Vulnerabilities" {
+			securityBugs++
+		} else {
+			nonSecurityBugs++
+		}
 	}
 
-	sort.Slice(allBugsList, func(i, j int) bool {
-		return allBugsList[i].Id < allBugsList[j].Id
-	})
-
-	return allBugsList
+	return
 }
 
 func updateStatus() {
