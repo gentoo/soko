@@ -1,15 +1,7 @@
 {{- define "changelog" -}}
 <div class="row">
     <div class="col-md-9">
-        {{- $commits := (index .Packages 0).Commits -}}
-        {{- range $key, $value := .Packages -}}
-            {{if ne $key 0}}
-                {{$commits = appendCommits $commits $value.Commits}}
-            {{end}}
-        {{- end -}}
-
-        {{- $commits = sortCommits $commits -}}
-
+        {{- $commits := allCommits .Packages -}}
         {{- if $commits }}
             <div class="col-md-12">
                 <h3>Latest Commits</h3>

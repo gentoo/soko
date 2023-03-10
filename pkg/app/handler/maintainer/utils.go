@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"html/template"
 	"net/http"
-	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/utils"
 	"soko/pkg/models"
 	"sort"
@@ -96,33 +95,26 @@ func getAllBugs(packages []*models.Package) []*models.Bug {
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"contains":        strings.Contains,
-		"replaceall":      strings.ReplaceAll,
-		"tolower":         strings.ToLower,
-		"getAllBugs":      getAllBugs,
-		"formatRestricts": packages.FormatRestricts,
-		"appendCommits": func(a []*models.Commit, b []*models.Commit) []*models.Commit {
-			return append(a, b...)
+		"contains":   strings.Contains,
+		"replaceall": strings.ReplaceAll,
+		"tolower":    strings.ToLower,
+		"getAllBugs": getAllBugs,
+		"allCommits": func(packages []*models.Package) (commits []*models.Commit) {
+			for _, gpackage := range packages {
+				commits = append(commits, gpackage.Commits...)
+			}
+			sort.Slice(commits, func(i, j int) bool {
+				return commits[i].PrecedingCommits > commits[j].PrecedingCommits
+			})
+			return commits
 		},
 		"gravatar": func(email string) string {
 			hasher := md5.Sum([]byte(email))
 			hash := hex.EncodeToString(hasher[:])
 			return "https://www.gravatar.com/avatar/" + hash + "?s=13&amp;d=retro"
 		},
-		"getReverse": func(index int, versions []*models.Version) *models.Version {
-			return versions[len(versions)-1-index]
-		},
-		"mkSlice": func(args ...interface{}) []interface{} {
-			return args
-		},
 		"add": func(a, b int) int {
 			return a + b
-		},
-		"sortCommits": func(commits []*models.Commit) []*models.Commit {
-			sort.Slice(commits, func(i, j int) bool {
-				return commits[i].PrecedingCommits > commits[j].PrecedingCommits
-			})
-			return commits
 		},
 		"getPullRequests": func(packages []*models.Package) []*models.GithubPullRequest {
 			pullrequestsMap := map[string]*models.GithubPullRequest{}
