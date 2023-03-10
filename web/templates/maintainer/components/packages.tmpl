@@ -115,27 +115,29 @@
                     </dl>
                 </div>
             {{end}}
-            <h4 class="{{if .Maintainer.Project.Description}}mt-4{{end}}">
-                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
-                    Shortcuts
-                </a>
-            </h4>
-            <div class="collapse show" id="collapseShortcuts">
-                <dl>
-                    {{- $category := (index .Packages 0).Category -}}
-                    {{- $packageCounter := 0 -}}
-                    {{- range .Packages -}}
-                        {{- if ne .Category $category }}
-                            <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
-                            {{- $category = .Category -}}
-                            {{- $packageCounter = 1 -}}
-                        {{ else -}}
-                            {{- $packageCounter = add $packageCounter 1 -}}
-                        {{- end -}}
-                    {{end}}
-                    <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
-                </dl>
-            </div>
+            {{if .Packages}}
+                <h4 class="{{if .Maintainer.Project.Description}}mt-4{{end}}">
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
+                        Shortcuts
+                    </a>
+                </h4>
+                <div class="collapse show" id="collapseShortcuts">
+                    <dl>
+                        {{- $category := (index .Packages 0).Category -}}
+                        {{- $packageCounter := 0 -}}
+                        {{- range .Packages -}}
+                            {{- if ne .Category $category }}
+                                <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
+                                {{- $category = .Category -}}
+                                {{- $packageCounter = 1 -}}
+                            {{ else -}}
+                                {{- $packageCounter = add $packageCounter 1 -}}
+                            {{- end -}}
+                        {{end}}
+                        <dd class="ml-3 mb-0"><a href="#{{$category}}">{{$category}} ({{$packageCounter}})</a></dd>
+                    </dl>
+                </div>
+            {{end}}
         </div>
     </div>
 {{end}}
