@@ -128,6 +128,9 @@ func GetFuncMap() template.FuncMap {
 			for _, pr := range pullrequestsMap {
 				pullrequests = append(pullrequests, pr)
 			}
+			sort.Slice(pullrequests, func(i, j int) bool {
+				return pullrequests[i].CreatedAt > pullrequests[j].CreatedAt
+			})
 			return pullrequests
 		},
 	}
