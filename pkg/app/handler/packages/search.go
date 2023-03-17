@@ -3,13 +3,14 @@
 package packages
 
 import (
+	"encoding/json"
 	"net/http"
 	"soko/pkg/app/handler/feeds"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v10"
 )
 
 // Search renders a template containing a list of search results
@@ -33,19 +34,17 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		// if the query contains wildcards
 		wildcardSearchTerm := strings.ReplaceAll(searchTerm, "*", "%")
 		err = database.DBCon.Model(&packages).
-			WhereOr("atom LIKE ? ", wildcardSearchTerm).
-			WhereOr("name LIKE ? ", wildcardSearchTerm).
+			WhereOr("atom LIKE ?", wildcardSearchTerm).
+			WhereOr("name LIKE ?", wildcardSearchTerm).
 			Relation("Versions").
-			OrderExpr("name <-> '" + searchTerm + "'").
+			OrderExpr("name <-> ?", searchTerm).
 			Select()
 	} else {
 		// if the query contains no wildcards do a fuzzy search
-		searchQuery := BuildSearchQuery(searchTerm)
-		err = database.DBCon.Model(&packages).
-			Where(searchQuery).
-			WhereOr("atom LIKE ? ", ("%" + searchTerm + "%")).
+		err = BuildSearchQuery(database.DBCon.Model(&packages), searchTerm).
+			WhereOr("atom LIKE ?", "%"+searchTerm+"%").
 			Relation("Versions").
-			OrderExpr("name <-> '" + searchTerm + "'").
+			OrderExpr("name <-> ?", searchTerm).
 			Select()
 	}
 
@@ -68,13 +67,11 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 
 	searchTerm := getParameterValue("q", r)
 	searchTerm = strings.ReplaceAll(searchTerm, "*", "")
-	searchQuery := BuildSearchQuery(searchTerm)
 
 	var packages []models.Package
-	err := database.DBCon.Model(&packages).
-		Where(searchQuery).
+	err := BuildSearchQuery(database.DBCon.Model(&packages), searchTerm).
 		Relation("Versions").
-		OrderExpr("name <-> '" + searchTerm + "'").
+		OrderExpr("name <-> ?", searchTerm).
 		Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -85,13 +82,21 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 	feeds.Packages(searchTerm, packages, w)
 }
 
-func BuildSearchQuery(searchString string) string {
-	var searchClauses []string
+func BuildSearchQuery(query *pg.Query, searchString string) *pg.Query {
 	for _, searchTerm := range strings.Split(searchString, " ") {
 		if searchTerm != "" {
-			searchClauses = append(searchClauses,
-				"( (category % '"+searchTerm+"') OR (name % '"+searchTerm+"') OR (atom % '"+searchTerm+"') OR (maintainers @> '[{\"Name\": \""+searchTerm+"\"}]' OR maintainers @> '[{\"Email\": \""+searchTerm+"\"}]'))")
+			marshal, err := json.Marshal(searchTerm)
+			if err == nil {
+				continue
+			}
+			query = query.WhereGroup(func(q *pg.Query) (*pg.Query, error) {
+				return q.WhereOr("category % ?", searchTerm).
+					WhereOr("name % ?", searchTerm).
+					WhereOr("atom % ?", searchTerm).
+					WhereOr("maintainers @> ?", `[{"Name": "`+string(marshal)+`"}]`).
+					WhereOr("maintainers @> ?", `[{"Email": "`+string(marshal)+`"}]`), nil
+			})
 		}
 	}
-	return strings.Join(searchClauses, " AND ")
+	return query
 }
