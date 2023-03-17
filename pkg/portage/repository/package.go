@@ -77,6 +77,7 @@ func UpdatePackages(paths []string) {
 			Set("name = EXCLUDED.name").
 			Set("longdescription = EXCLUDED.longdescription").
 			Set("maintainers = EXCLUDED.maintainers").
+			Set("upstream = EXCLUDED.upstream").
 			Insert()
 		if err != nil {
 			logger.Error.Println("Error during updating packages", err)
