@@ -95,6 +95,8 @@ func FullImport() {
 			StableRequests: stableRequests,
 		}
 
+		maintainer.Name = strings.TrimSpace(maintainer.Name)
+
 		if maintainer.Name == "" {
 			name, _, _ := strings.Cut(maintainer.Email, "@")
 			maintainer.Name = strings.Title(name)

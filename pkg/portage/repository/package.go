@@ -121,9 +121,9 @@ func updateModifiedPackage(changedFile string) *models.Package {
 	maintainers := make([]*models.Maintainer, len(pkgMetadata.MaintainerList))
 	for i, maintainer := range pkgMetadata.MaintainerList {
 		maintainers[i] = &models.Maintainer{
-			Name:     maintainer.Name,
-			Type:     maintainer.Type,
-			Email:    maintainer.Email,
+			Name:     strings.TrimSpace(maintainer.Name),
+			Type:     strings.TrimSpace(maintainer.Type),
+			Email:    strings.TrimSpace(maintainer.Email),
 			Restrict: maintainer.Restrict,
 		}
 	}
