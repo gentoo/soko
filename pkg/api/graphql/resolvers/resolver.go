@@ -219,15 +219,15 @@ func (r *queryResolver) PackageSearch(ctx context.Context, searchTerm *string, r
 			WhereOr("atom LIKE ? ", wildcardSearchTerm).
 			WhereOr("name LIKE ? ", wildcardSearchTerm).
 			Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").
-			OrderExpr("name <-> '" + *searchTerm + "'").
+			OrderExpr("name <-> ?", searchTerm).
 			Limit(limit).
 			Select()
 	} else {
 		// if the query contains no wildcards do a fuzzy search
 		err = packages.BuildSearchQuery(database.DBCon.Model(&gpackages), *searchTerm).
-			WhereOr("atom LIKE ? ", "%" + *searchTerm + "%").
+			WhereOr("atom LIKE ? ", "%"+*searchTerm+"%").
 			Relation("PkgCheckResults").Relation("Bugs").Relation("PullRequests").Relation("ReverseDependencies").Relation("Commits").Relation("Versions").Relation("Versions.Masks").Relation("Versions.PkgCheckResults").Relation("Versions.Dependencies").Relation("PkgCheckResults").Relation("Outdated").
-			OrderExpr("name <-> '" + *searchTerm + "'").
+			OrderExpr("name <-> ?", searchTerm).
 			Limit(limit).
 			Select()
 	}
