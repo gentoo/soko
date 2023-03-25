@@ -77,6 +77,8 @@ func UpdatePkgCheckResults() {
 	}
 	logger.Info.Println("Inserted", res.RowsAffected(), "pkgcheck results")
 
+	updateCategoriesInfo()
+
 	updateStatus()
 }
 
@@ -90,6 +92,55 @@ func parseQAReport() ([]PkgCheckResult, error) {
 	var pkgCheckResults PkgCheckResults
 	err = xml.NewDecoder(resp.Body).Decode(&pkgCheckResults)
 	return pkgCheckResults.Results, err
+}
+
+func updateCategoriesInfo() {
+	var categoriesInfoArr []*models.CategoryPackagesInformation
+	err := database.DBCon.Model((*models.PkgCheckResult)(nil)).
+		ColumnExpr("SPLIT_PART(atom, '/', 1) as name").
+		ColumnExpr("COUNT(id) as stable_requests").
+		Where("NULLIF(atom, '') IS NOT NULL").
+		Where("class = 'StableRequest'").
+		GroupExpr("SPLIT_PART(atom, '/', 1)").
+		Select(&categoriesInfoArr)
+	if err != nil {
+		logger.Error.Println("Error while parsing qa-reports data. Aborting...", err)
+		return
+	}
+	categoriesInfo := make(map[string]int, len(categoriesInfoArr))
+	for _, categoryInfo := range categoriesInfoArr {
+		categoriesInfo[categoryInfo.Name] = categoryInfo.StableRequests
+	}
+
+	var categories []*models.CategoryPackagesInformation
+	err = database.DBCon.Model(&categories).Column("name").Select()
+	if err != nil {
+		logger.Error.Println("Error while fetching categories packages information", err)
+		return
+	} else if len(categories) > 0 {
+		for _, category := range categories {
+			category.StableRequests = categoriesInfo[category.Name]
+			delete(categoriesInfo, category.Name)
+		}
+		_, err = database.DBCon.Model(&categories).Set("pull_requests = ?pull_requests").Update()
+		if err != nil {
+			logger.Error.Println("Error while fetching categories packages information", err)
+		}
+		categories = make([]*models.CategoryPackagesInformation, 0, len(categoriesInfo))
+	}
+
+	for category, stableRequests := range categoriesInfo {
+		categories = append(categories, &models.CategoryPackagesInformation{
+			Name:           category,
+			StableRequests: stableRequests,
+		})
+	}
+	if len(categories) > 0 {
+		_, err = database.DBCon.Model(&categories).Insert()
+		if err != nil {
+			logger.Error.Println("Error while inserting categories packages information", err)
+		}
+	}
 }
 
 func updateStatus() {
