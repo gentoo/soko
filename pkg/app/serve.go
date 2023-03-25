@@ -3,8 +3,6 @@
 package app
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -22,6 +20,9 @@ import (
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 )
 
 // Serve is used to serve the web application
@@ -39,6 +40,7 @@ func Serve() {
 	setRoute("/useflags/search", useflags.Search)
 	setRoute("/useflags/global", useflags.Global)
 	setRoute("/useflags/local", useflags.Local)
+	setRoute("/useflags/expand", useflags.Expand)
 	setRoute("/useflags/popular", useflags.Index)
 	setRoute("/useflags", useflags.Default)
 	setRoute("/useflags/", useflags.Show)
