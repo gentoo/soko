@@ -51,9 +51,16 @@ func CreateSchema() error {
 			IfNotExists: true,
 		})
 		if err != nil {
+			logger.Error.Printf("Failed creating table %T, err: %s", model, err)
 			return err
 		}
 	}
+	_, err := DBCon.Exec("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+	if err != nil {
+		logger.Error.Println("Failed creating extension, err:", err)
+		return err
+	}
+
 	return nil
 }
 
