@@ -5,10 +5,9 @@ package useflags
 import (
 	"html/template"
 	"net/http"
-	utils2 "soko/pkg/app/utils"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
-	"soko/pkg/utils"
 	"strings"
 
 	"github.com/go-pg/pg/v10"
@@ -16,11 +15,10 @@ import (
 
 // Show renders a template to show a given USE flag
 func Show(w http.ResponseWriter, r *http.Request) {
-
-	useflagName := r.URL.Path[len("/useflags/"):]
+	useFlagName := r.URL.Path[len("/useflags/"):]
 
 	var useflags []models.Useflag
-	err := database.DBCon.Model(&useflags).Where("name = ? ", useflagName).Select()
+	err := database.DBCon.Model(&useflags).Where("name = ?", useFlagName).Select()
 	if err != nil || len(useflags) < 1 {
 		http.NotFound(w, r)
 		return
@@ -40,20 +38,16 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var versions []models.Version
-	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\""+useflagName+"\"").Select()
+	var packages []string
+	err = database.DBCon.Model((*models.Version)(nil)).
+		Column("atom").Distinct().
+		Where("useflags::jsonb @> ?", "\""+useFlagName+"\"").
+		Select(&packages)
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-
-	var packages []string
-	for _, version := range versions {
-		packages = append(packages, version.Atom)
-	}
-
-	packages = utils.Deduplicate(packages)
 
 	data := struct {
 		Header        models.Header
@@ -68,7 +62,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Useflag:       useflag,
 		LocalUseflags: localuseflags,
 		Packages:      packages,
-		Application:   utils2.GetApplicationData(),
+		Application:   utils.GetApplicationData(),
 	}
 
 	templates := template.Must(
@@ -85,21 +79,15 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 // ShowUseExpand renders a template to show a given use_expand
 func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Useflag) {
-
 	funcMap := template.FuncMap{
 		"replaceall": strings.ReplaceAll,
 	}
 
-	var otheruseexpands []models.Useflag
-	err := database.DBCon.Model(&otheruseexpands).Where("use_expand = ? ", useExpand.UseExpand).Select()
-	if err != nil && err != pg.ErrNoRows {
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-
-	var versions []models.Version
-	err = database.DBCon.Model(&versions).Column("atom").Where("useflags::jsonb @> ?", "\""+useExpand.Name+"\"").Select()
+	var otherUseExpands []models.Useflag
+	err := database.DBCon.Model(&otherUseExpands).
+		Column("name", "description").
+		Where("use_expand = ?", useExpand.UseExpand).
+		Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
@@ -107,11 +95,15 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 	}
 
 	var packages []string
-	for _, version := range versions {
-		packages = append(packages, version.Atom)
+	err = database.DBCon.Model((*models.Version)(nil)).
+		Column("atom").Distinct().
+		Where("useflags::jsonb @> ?", "\""+useExpand.Name+"\"").
+		Select(&packages)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
 	}
-
-	packages = utils.Deduplicate(packages)
 
 	data := struct {
 		Header          models.Header
@@ -124,9 +116,9 @@ func ShowUseExpand(w http.ResponseWriter, r *http.Request, useExpand models.Usef
 		Header:          models.Header{Title: useExpand.Name + " – ", Tab: "useflags"},
 		Page:            "show",
 		Useflag:         useExpand,
-		OtherUseExpands: otheruseexpands,
+		OtherUseExpands: otherUseExpands,
 		Packages:        packages,
-		Application:     utils2.GetApplicationData(),
+		Application:     utils.GetApplicationData(),
 	}
 
 	templates := template.Must(
