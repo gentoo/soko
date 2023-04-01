@@ -3,25 +3,30 @@
 package useflags
 
 import (
-	"github.com/go-pg/pg"
 	"html/template"
 	"net/http"
-	utils2 "soko/pkg/app/utils"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
+
+	"github.com/go-pg/pg"
 )
 
 // Search renders a template containing a list of search results
 // for a given query of USE flags
 func Search(w http.ResponseWriter, r *http.Request) {
 
-	results, _ := r.URL.Query()["q"]
+	results := r.URL.Query()["q"]
 
 	param := ""
 	var useflags []models.Useflag
 	if len(results) != 0 {
 		param = results[0]
-		err := database.DBCon.Model(&useflags).Where("name LIKE ? ", (param + "%")).Select()
+		err := database.DBCon.Model(&useflags).
+			Column("name", "description", "scope", "package").
+			Where("name LIKE ?", param+"%").
+			OrderExpr("scope, name <-> ?", param).
+			Select()
 		if err != nil && err != pg.ErrNoRows {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -40,7 +45,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		Page:        "search",
 		Search:      param,
 		Useflags:    useflags,
-		Application: utils2.GetApplicationData(),
+		Application: utils.GetApplicationData(),
 	}
 
 	templates := template.Must(
