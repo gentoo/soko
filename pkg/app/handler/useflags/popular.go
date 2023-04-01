@@ -8,57 +8,43 @@ import (
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
-	"sort"
-	"strings"
+
+	"github.com/go-pg/pg/v10"
 )
+
+var excludePopularUseflags = []string{"test", "doc", "debug"}
 
 // Popular shows a json encoded list of popular USE flags
 func Popular(w http.ResponseWriter, r *http.Request) {
+	popular := struct {
+		Name     string `json:"name"`
+		Useflags []struct {
+			Useflag  string       `pg:"useflag" json:"name"`
+			Count    int          `pg:"count" json:"size"`
+			Children types.Object `pg:"-" json:"children"`
+		} `json:"children"`
+	}{
+		Name: "flags",
+	}
 
-	var versions []models.Version
-	err := database.DBCon.Model(&versions).Column("useflags").Select()
+	err := database.DBCon.Model((*models.Version)(nil)).
+		Column("useflag").
+		ColumnExpr("COUNT(useflag) AS count").
+		TableExpr("jsonb_array_elements_text(useflags) AS raw_useflag").
+		TableExpr("REPLACE(raw_useflag,'+','') AS useflag").
+		Where(`useflag NOT LIKE '%\_%'`).
+		Where("useflag NOT IN (?)", pg.In(excludePopularUseflags)).
+		Group("useflag").
+		Order("count DESC").
+		Limit(66).
+		Select(&popular.Useflags)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
 
-	dict := make(map[string]int)
-	for _, version := range versions {
-		for _, useflag := range version.Useflags {
-			if useflag != "test" && useflag != "doc" && useflag != "debug" && len(strings.Split(useflag, "_")) < 2 {
-				dict[strings.ReplaceAll(useflag, "+", "")] = dict[strings.ReplaceAll(useflag, "+", "")] + 1
-			}
-		}
-	}
-
-	type kv struct {
-		Key      string       `json:"name"`
-		Value    int          `json:"size"`
-		Children types.Object `json:"children"`
-	}
-
-	type p struct {
-		Name     string `json:"name"`
-		Children []kv   `json:"children"`
-	}
-
-	var ss []kv
-	for k, v := range dict {
-		ss = append(ss, kv{k, v, nil})
-	}
-
-	sort.Slice(ss, func(i, j int) bool {
-		return ss[i].Value > ss[j].Value
-	})
-
-	popular := p{
-		Name:     "flags",
-		Children: ss[0:66],
-	}
-
 	b, err := json.Marshal(popular)
-
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
