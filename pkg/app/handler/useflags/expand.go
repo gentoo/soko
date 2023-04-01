@@ -3,7 +3,7 @@ package useflags
 import (
 	"html/template"
 	"net/http"
-	utils2 "soko/pkg/app/utils"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 
@@ -31,7 +31,7 @@ func Expand(w http.ResponseWriter, r *http.Request) {
 		Header:      models.Header{Title: "Use Expand" + " – ", Tab: "useflags"},
 		Page:        "expand",
 		Useflags:    useflags,
-		Application: utils2.GetApplicationData(),
+		Application: utils.GetApplicationData(),
 	}
 
 	templates := template.Must(

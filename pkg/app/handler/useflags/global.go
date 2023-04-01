@@ -1,22 +1,22 @@
-// Used to search for USE flags
-
 package useflags
 
 import (
-	"github.com/go-pg/pg"
 	"html/template"
 	"net/http"
-	utils2 "soko/pkg/app/utils"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
+
+	"github.com/go-pg/pg"
 )
 
-// Search renders a template containing a list of search results
-// for a given query of USE flags
 func Global(w http.ResponseWriter, r *http.Request) {
 
 	var useflags []models.Useflag
-	err := database.DBCon.Model(&useflags).Where("scope = 'global'").Select()
+	err := database.DBCon.Model(&useflags).
+		Order("name").
+		Where("scope = 'global'").
+		Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
@@ -32,7 +32,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 		Header:      models.Header{Title: "Global" + " – ", Tab: "useflags"},
 		Page:        "global",
 		Useflags:    useflags,
-		Application: utils2.GetApplicationData(),
+		Application: utils.GetApplicationData(),
 	}
 
 	templates := template.Must(

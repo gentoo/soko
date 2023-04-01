@@ -1,36 +1,27 @@
-// Used to search for USE flags
-
 package useflags
 
 import (
-	"github.com/go-pg/pg"
 	"html/template"
 	"net/http"
-	utils2 "soko/pkg/app/utils"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
-	"sort"
+
+	"github.com/go-pg/pg"
 )
 
-// Search renders a template containing a list of search results
-// for a given query of USE flags
 func Local(w http.ResponseWriter, r *http.Request) {
 
 	var useflags []models.Useflag
-	err := database.DBCon.Model(&useflags).Where("scope = 'local'").Select()
+	err := database.DBCon.Model(&useflags).
+		Where("scope = 'local'").
+		Order("package", "name").
+		Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-
-	sort.Slice(useflags, func(i, j int) bool {
-		if useflags[i].Package != useflags[j].Package {
-			return useflags[i].Package < useflags[j].Package
-		} else {
-			return useflags[i].Name < useflags[j].Name
-		}
-	})
 
 	data := struct {
 		Header      models.Header
@@ -41,7 +32,7 @@ func Local(w http.ResponseWriter, r *http.Request) {
 		Header:      models.Header{Title: "Local" + " – ", Tab: "useflags"},
 		Page:        "local",
 		Useflags:    useflags,
-		Application: utils2.GetApplicationData(),
+		Application: utils.GetApplicationData(),
 	}
 
 	templates := template.Must(
