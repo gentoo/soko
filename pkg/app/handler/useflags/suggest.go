@@ -14,45 +14,33 @@ import (
 // Suggest returns a json encoded suggestions of
 // USE flags based on the given query
 func Suggest(w http.ResponseWriter, r *http.Request) {
-
-	results, _ := r.URL.Query()["q"]
-
+	results, found := r.URL.Query()["q"]
+	if !found || len(results[0]) < 1 {
+		http.Error(w, http.StatusText(http.StatusBadRequest),
+			http.StatusBadRequest)
+		return
+	}
 	param := results[0]
 
-	var useflags []models.Useflag
-	err := database.DBCon.Model(&useflags).Where("name LIKE ? ", (param + "%")).Select()
+	var suggestions struct {
+		Results []struct {
+			Id          string `json:"id"`
+			Name        string `json:"name"`
+			Description string `json:"description"`
+		} `json:"results"`
+	}
+
+	err := database.DBCon.Model((*models.Useflag)(nil)).
+		Column("id", "name", "description").
+		Where("name LIKE ?", param+"%").
+		Select(&suggestions.Results)
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
 
-	type Suggest struct {
-		Id          string `json:"id"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-	}
-
-	type Suggestions struct {
-		Results []Suggest `json:"results"`
-	}
-
-	var suggests []Suggest
-
-	for _, useflag := range useflags {
-		suggests = append(suggests, Suggest{
-			Id:          useflag.Id,
-			Name:        useflag.Name,
-			Description: useflag.Description,
-		})
-	}
-
-	suggestions := Suggestions{
-		Results: suggests,
-	}
-
 	jsondata, err := json.Marshal(suggestions)
-
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
