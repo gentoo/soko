@@ -23,7 +23,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	query := database.DBCon.Model(&gpackages)
 
 	if maintainerEmail == "maintainer-needed@gentoo.org" {
-		query = query.Where("maintainers IS null")
+		query = query.Where("NULLIF(maintainers, '[]') IS null")
 	} else {
 		query = query.Where("maintainers @> ?", `[{"Email": "`+maintainerEmail+`"}]`)
 	}
