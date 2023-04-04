@@ -1,0 +1,42 @@
+{{- define "stabilization" -}}
+    <div class="row">
+        <div class="col-md-9">
+            <h3>Stable Requests</h3>
+            {{- if gt .Category.PackagesInformation.StableRequests 0}}
+            <ul class="timeline">
+                {{- range .Category.Packages -}}
+                    {{- range .Versions -}}
+                        {{- range .PkgCheckResults -}}
+                            <li>
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <a href="/packages/{{.Category}}/{{.Package}}" class="text-dark"><strong>{{.Category}}/{{.Package}}-{{.Version}}</strong></a><br/>
+                                        <span class="kk-version kk-cell-sep-right text-muted">
+                                        {{- .Message -}}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </li>
+                        {{- end -}}
+                    {{- end -}}
+                {{- end -}}
+            </ul>
+            {{- else -}}
+            <div class="text-center w-100"><i>- No Stable Requests found -</i></div>
+            {{- end }}
+        </div>
+        <div class="col-md-3 pt-4">
+            <h4>
+                <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+                Description
+                </a>
+            </h4>
+            <div class="collapse show" id="collapseDescription">
+            <span class="text-muted">
+                This page lists potential stabilization candidates. Please have a look at the <a href="https://wiki.gentoo.org/wiki/Stable_request">wiki page</a> for more information.
+            </span>
+            </div>
+        </div>
+    </div>
+{{end}}
+

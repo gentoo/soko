@@ -12,6 +12,8 @@
     <div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
         {{if eq .PageName "packages"}}
             {{template "packages" .}}
+        {{else if eq .PageName "stabilization"}}
+            {{template "stabilization" .}}
         {{else if eq .PageName "outdated"}}
             {{template "outdated" .}}
         {{else if eq .PageName "pull-requests"}}

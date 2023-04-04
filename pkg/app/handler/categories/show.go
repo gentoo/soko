@@ -33,6 +33,12 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	pageName := "packages"
 	switch pageUrl {
+	case "stabilization":
+		pageName = "stabilization"
+		query = query.Relation("Packages.Versions").
+			Relation("Packages.Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
+				return q.Where("class = 'StableRequest'"), nil
+			})
 	case "outdated":
 		pageName = "outdated"
 		query = query.Relation("Packages.Versions").
