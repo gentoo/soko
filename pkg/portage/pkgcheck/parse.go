@@ -122,7 +122,7 @@ func updateCategoriesInfo() {
 			category.StableRequests = categoriesInfo[category.Name]
 			delete(categoriesInfo, category.Name)
 		}
-		_, err = database.DBCon.Model(&categories).Set("pull_requests = ?pull_requests").Update()
+		_, err = database.DBCon.Model(&categories).Set("stable_requests = ?stable_requests").Update()
 		if err != nil {
 			logger.Error.Println("Error while fetching categories packages information", err)
 		}
