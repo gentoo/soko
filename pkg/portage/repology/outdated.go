@@ -87,57 +87,75 @@ func UpdateOutdated() {
 // getOutdatedStartingWith gets all outdated packages starting with the given letter
 func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*models.OutdatedPackages {
 	repoPackages, err := parseRepologyData("https://repology.org/api/v1/projects/" + string(letter) + "/?inrepo=gentoo&outdated=1")
-
 	if err != nil {
 		logger.Error.Println("Error while fetching repology data")
 		return nil
 	}
 
-	blockedRepos := readBlocklist("ignored-repositories")
-	blockedCategories := readBlocklist("ignored-categories")
-	blockedPackages := readBlocklist("ignored-packages")
+	blockedRepos := readBlockList("ignored-repositories")
+	blockedCategories := readBlockList("ignored-categories")
+	blockedPackages := readBlockList("ignored-packages")
 
 	var outdatedVersions []*models.OutdatedPackages
 	for packagename := range repoPackages {
-		var atom, newest, version string
-		outdated := false
+		outdated := make(map[string]bool)
+		currentVersion := make(map[string]string)
+		var newestVersion string
+
 		// get the gentoo atom name first
+		gentooPackages := make(map[string]struct{})
 		for _, v := range repoPackages[packagename] {
 			if v.Repo == "gentoo" {
-				atom = v.VisibleName
+				gentooPackages[v.VisibleName] = struct{}{}
 			}
 		}
+	mainLoop:
 		for _, v := range repoPackages[packagename] {
-			if v.Status == "newest" &&
-				!contains(blockedRepos, v.Repo) &&
-				!contains(blockedPackages, atom+"::"+v.Repo) {
-				newest = v.Version
-			}
-			if v.Repo == "gentoo" && v.Status == "newest" {
-				outdated = false
-				break
-			}
-			if v.Repo == "gentoo" &&
-				v.Status == "outdated" &&
-				!containsPrefix(blockedCategories, strings.Split(v.VisibleName, "/")[0]) &&
-				!containsPrefix(blockedPackages, v.VisibleName) {
-
-				atom = v.VisibleName
-				outdated = true
-				version = v.Version
+			category, _, _ := strings.Cut(v.VisibleName, "/")
+			if v.Repo == "gentoo" {
+				if v.Status == "newest" {
+					outdated[v.VisibleName] = false
+				} else if v.Status == "outdated" &&
+					!containsPrefix(blockedCategories, category) &&
+					!containsPrefix(blockedPackages, v.VisibleName) {
+					if _, found := outdated[v.VisibleName]; !found {
+						outdated[v.VisibleName] = true
+					}
+					if latest, found := currentVersion[v.VisibleName]; found {
+						current := models.Version{Version: v.Version}
+						if current.GreaterThan(models.Version{Version: latest}) {
+							currentVersion[v.VisibleName] = v.Version
+						}
+					} else {
+						currentVersion[v.VisibleName] = v.Version
+					}
+				}
+			} else if len(newestVersion) == 0 && v.Status == "newest" && !contains(blockedRepos, v.Repo) {
+				for atom := range gentooPackages {
+					if contains(blockedPackages, atom+"::"+v.Repo) {
+						continue mainLoop
+					}
+				}
+				newestVersion = v.Version
 			}
 		}
 
-		if outdated && newest != "" && strings.HasPrefix(packagename, string(letter)) {
-			outdatedVersions = append(outdatedVersions, &models.OutdatedPackages{
-				Atom:          atom,
-				GentooVersion: version,
-				NewestVersion: newest,
-			})
+		if len(newestVersion) == 0 {
+			continue
+		}
 
-			category, _, found := strings.Cut(atom, "/")
-			if found {
-				outdatedCategories[category]++
+		for atom, outdated := range outdated {
+			if outdated && packagename[0] == byte(letter) {
+				outdatedVersions = append(outdatedVersions, &models.OutdatedPackages{
+					Atom:          atom,
+					GentooVersion: currentVersion[atom],
+					NewestVersion: newestVersion,
+				})
+
+				category, _, found := strings.Cut(atom, "/")
+				if found {
+					outdatedCategories[category]++
+				}
 			}
 		}
 	}
@@ -158,12 +176,13 @@ func parseRepologyData(url string) (Packages, error) {
 	return repoPackages, err
 }
 
-// readBlocklist parses a block list and returns a list of
+// readBlockList parses a block list and returns a list of
 // lines whereas comments as well as empty lines are ignored
-func readBlocklist(file string) []string {
+func readBlockList(file string) map[string]struct{} {
+	blocklist := make(map[string]struct{})
 	resp, err := http.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
 	if err != nil {
-		return []string{}
+		return blocklist
 	}
 	defer resp.Body.Close()
 
@@ -171,10 +190,9 @@ func readBlocklist(file string) []string {
 	buf.ReadFrom(resp.Body)
 	rawBlocklist := buf.String()
 
-	var blocklist []string
 	for _, line := range strings.Split(rawBlocklist, "\n") {
 		if !strings.HasPrefix(line, "#") && strings.TrimSpace(line) != "" {
-			blocklist = append(blocklist, line)
+			blocklist[line] = struct{}{}
 		}
 	}
 	return blocklist
@@ -182,19 +200,15 @@ func readBlocklist(file string) []string {
 
 // contains returns true if the given list includes
 // the given string. Otherwise false is returned.
-func contains(list []string, item string) bool {
-	for _, i := range list {
-		if i == item {
-			return true
-		}
-	}
-	return false
+func contains(list map[string]struct{}, item string) bool {
+	_, found := list[item]
+	return found
 }
 
 // contains returns true if the given string is a prefix
 // of an item in the given list. Otherwise false is returned.
-func containsPrefix(list []string, item string) bool {
-	for _, i := range list {
+func containsPrefix(list map[string]struct{}, item string) bool {
+	for i := range list {
 		if strings.HasPrefix(i, item) {
 			return true
 		}
