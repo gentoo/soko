@@ -23,6 +23,8 @@ func UpdateBugs(init bool) {
 
 	logger.Info.Println("---")
 
+	updateCategoriesInfo()
+
 	updateStatus()
 }
 
@@ -321,6 +323,63 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage = versionNumber.Split(gpackage, 2)[0]
 
 	return gpackage
+}
+
+func updateCategoriesInfo() {
+	var categoriesInfoArr []*models.CategoryPackagesInformation
+	err := database.DBCon.Model((*models.PackageToBug)(nil)).
+		ColumnExpr("SPLIT_PART(package_atom, '/', 1) as name").
+		ColumnExpr("COUNT(DISTINCT bug_id) as bugs").
+		ColumnExpr("COUNT(DISTINCT bug_id) FILTER(WHERE component = ?) as security_bugs", "Vulnerabilities").
+		Join("JOIN bugs").JoinOn("package_to_bug.bug_id = bugs.id").
+		Where("NULLIF(package_atom, '') IS NOT NULL").
+		Where(`package_atom LIKE '%/%'`).
+		GroupExpr("SPLIT_PART(package_atom, '/', 1)").
+		Select(&categoriesInfoArr)
+	if err != nil {
+		logger.Error.Println("Error while parsing bugs data. Aborting...", err)
+		return
+	}
+	categoriesInfo := make(map[string]*models.CategoryPackagesInformation, len(categoriesInfoArr))
+	for _, categoryInfo := range categoriesInfoArr {
+		categoriesInfo[categoryInfo.Name] = categoryInfo
+	}
+
+	var categories []*models.CategoryPackagesInformation
+	err = database.DBCon.Model(&categories).Column("name").Select()
+	if err != nil {
+		logger.Error.Println("Error while fetching categories packages information", err)
+		return
+	} else if len(categories) > 0 {
+		for _, category := range categories {
+			if info, found := categoriesInfo[category.Name]; found {
+				category.Bugs = info.Bugs
+				category.SecurityBugs = info.SecurityBugs
+			} else {
+				category.Bugs = 0
+				category.SecurityBugs = 0
+			}
+			delete(categoriesInfo, category.Name)
+		}
+		_, err = database.DBCon.Model(&categories).
+			Set("bugs = ?bugs").
+			Set("security_bugs = ?security_bugs").
+			Update()
+		if err != nil {
+			logger.Error.Println("Error while updating categories packages information", err)
+		}
+		categories = make([]*models.CategoryPackagesInformation, 0, len(categoriesInfo))
+	}
+
+	for _, catInfo := range categoriesInfo {
+		categories = append(categories, catInfo)
+	}
+	if len(categories) > 0 {
+		_, err = database.DBCon.Model(&categories).Insert()
+		if err != nil {
+			logger.Error.Println("Error while inserting categories packages information", err)
+		}
+	}
 }
 
 func updateStatus() {
