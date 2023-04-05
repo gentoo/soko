@@ -58,22 +58,22 @@ func updateClosedBugs() {
 	//
 	// Security
 	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=RESOLVED&component=Vulnerabilities&list_id=4694466&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Security&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&ctype=csv&human=1")
+	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Vulnerabilities&list_id=4694466&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Security&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&ctype=csv")
 
 	//
 	// Keywording
 	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=RESOLVED&component=Keywording&list_id=4694472&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv&human=1")
+	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Keywording&list_id=4694472&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv")
 
 	//
 	// Stabilization
 	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=RESOLVED&component=Stabilization&list_id=4694456&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv&human=1")
+	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Stabilization&list_id=4694456&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv")
 
 	//
 	// Current Packages
 	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?bug_status=RESOLVED&component=Current%20packages&list_id=4773158&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv&human=1")
+	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Current%20packages&list_id=4773158&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv")
 }
 
 func deleteBugs(source string) {
@@ -83,35 +83,25 @@ func deleteBugs(source string) {
 		return
 	}
 
-	var bugs []*models.Bug
-	var pkgsBugs []*models.PackageToBug
-
+	bugs := make([]string, 0, len(data)-1)
 	for idx, row := range data {
-		// skip header
-		if idx == 0 || len(row) < 7 {
+		if idx == 0 || len(row) < 1 { // skip header
 			continue
 		}
-
-		bugs = append(bugs, &models.Bug{
-			Id: row[0],
-		})
-		affectedPackage := versionSpecifierToPackageAtom(strings.Split(row[6], " ")[0])
-		pkgsBugs = append(pkgsBugs, &models.PackageToBug{
-			Id: affectedPackage + "-" + row[0],
-		})
+		bugs = append(bugs, row[0])
 	}
 
 	if len(bugs) == 0 {
 		return
 	}
 
-	res1, err := database.DBCon.Model(&bugs).Delete()
+	res1, err := database.DBCon.Model((*models.Bug)(nil)).WhereIn("id IN (?)", bugs).Delete()
 	if err != nil {
 		logger.Error.Println("Failed to delete bugs:", err)
 		return
 	}
 
-	res2, err := database.DBCon.Model(&pkgsBugs).Delete()
+	res2, err := database.DBCon.Model((*models.PackageToBug)(nil)).WhereIn("bug_id IN (?)", bugs).Delete()
 	if err != nil {
 		logger.Error.Println("Failed to delete package bugs:", err)
 		return
