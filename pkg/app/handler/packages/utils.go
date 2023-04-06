@@ -436,20 +436,12 @@ func getMask(versions []*models.Version) *models.Mask {
 
 // showRemovalNotice if all versions of the package are masked
 func showRemovalNotice(versions []*models.Version) bool {
-	showNotice := false
 	for _, version := range versions {
 		if len(version.Masks) > 0 && version.Masks[0].Versions == version.Atom {
-			showNotice = true
+			return true
 		}
 	}
-	return showNotice
-}
-
-// sort the versions in ascending order
-func sortVersionsAsc(versions []*models.Version) {
-	sort.Slice(versions, func(i, j int) bool {
-		return versions[i].SmallerThan(*versions[j])
-	})
+	return false
 }
 
 // sort the versions in descending order
