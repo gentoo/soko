@@ -8,6 +8,7 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
+	"soko/pkg/portage/utils"
 	"strings"
 	"time"
 )
@@ -195,101 +196,7 @@ func importBugs(source string) {
 
 func calculateAffectedVersions(bugId, versionSpecifier string) []*models.Version {
 	packageAtom := versionSpecifierToPackageAtom(versionSpecifier)
-
-	if strings.HasPrefix(versionSpecifier, "=") {
-		return exactVersion(versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, "<=") {
-		return comparedVersions("<=", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, "<") {
-		return comparedVersions("<", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, ">=") {
-		return comparedVersions(">=", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, ">") {
-		return comparedVersions(">", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, "~") {
-		return allRevisions(versionSpecifier, packageAtom)
-	} else if strings.Contains(versionSpecifier, ":") {
-		return versionsWithSlot(versionSpecifier, packageAtom)
-	} else {
-		return allVersions(versionSpecifier, packageAtom)
-	}
-}
-
-// comparedVersions computes and returns all versions that are >=, >, <= or < than then given version
-func comparedVersions(operator, versionSpecifier, packageAtom string) (results []*models.Version) {
-	versionSpecifier = strings.ReplaceAll(versionSpecifier, operator, "")
-	versionSpecifier = strings.ReplaceAll(versionSpecifier, packageAtom+"-", "")
-	versionSpecifier, _, _ = strings.Cut(versionSpecifier, ":")
-	givenVersion := models.Version{Version: versionSpecifier}
-
-	var versions []*models.Version
-	database.DBCon.Model(&versions).
-		Where("atom = ?", packageAtom).
-		Select()
-
-	for _, v := range versions {
-		if operator == ">" {
-			if v.GreaterThan(givenVersion) {
-				results = append(results, v)
-			}
-		} else if operator == ">=" {
-			if v.GreaterThan(givenVersion) || v.EqualTo(givenVersion) {
-				results = append(results, v)
-			}
-		} else if operator == "<" {
-			if v.SmallerThan(givenVersion) {
-				results = append(results, v)
-			}
-		} else if operator == "<=" {
-			if v.SmallerThan(givenVersion) || v.EqualTo(givenVersion) {
-				results = append(results, v)
-			}
-		}
-	}
-	return
-}
-
-var revision = regexp.MustCompile(`-r[0-9]*$`)
-
-// allRevisions returns all revisions of the given version
-func allRevisions(versionSpecifier string, packageAtom string) (versions []*models.Version) {
-	versionWithoutRevision := revision.Split(versionSpecifier, 1)[0]
-	versionWithoutRevision = strings.ReplaceAll(versionWithoutRevision, "~", "")
-	database.DBCon.Model(&versions).
-		Where("id LIKE ?", versionWithoutRevision+"%").
-		Column("id").Select()
-
-	return
-}
-
-// exactVersion returns the exact version specified in the versionSpecifier
-func exactVersion(versionSpecifier string, packageAtom string) (versions []*models.Version) {
-	database.DBCon.Model(&versions).
-		Where("id = ?", versionSpecifier).
-		Column("id").Select()
-
-	return
-}
-
-// TODO include subslot
-// versionsWithSlot returns all versions with the given slot
-func versionsWithSlot(versionSpecifier string, packageAtom string) (versions []*models.Version) {
-	_, slot, _ := strings.Cut(versionSpecifier, ":")
-
-	database.DBCon.Model(&versions).
-		Where("atom = ?", packageAtom).
-		Where("slot = ?", slot).
-		Column("id").Select()
-
-	return
-}
-
-// allVersions returns all versions of the given package
-func allVersions(versionSpecifier string, packageAtom string) (versions []*models.Version) {
-	database.DBCon.Model(&versions).
-		Where("atom = ?", packageAtom).
-		Column("id").Select()
-	return
+	return utils.CalculateAffectedVersions(versionSpecifier, packageAtom)
 }
 
 func readCSVFromUrl(url string) ([][]string, error) {
