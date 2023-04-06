@@ -146,7 +146,7 @@ func importBugs(source string) {
 		if strings.TrimSpace(row[8]) != "" {
 			versions := make(map[string]struct{})
 			for _, gpackage := range strings.Split(row[8], "\n") {
-				affectedVersions := strings.Split(gpackage, " ")[0]
+				affectedVersions, _, _ := strings.Cut(strings.TrimSpace(gpackage), " ")
 				if strings.TrimSpace(affectedVersions) != "" {
 					for _, version := range calculateAffectedVersions(bugId, affectedVersions) {
 						versions[version.Id] = struct{}{}
@@ -161,7 +161,7 @@ func importBugs(source string) {
 				})
 			}
 		} else {
-			summary, _, _ = strings.Cut(summary, " ")
+			summary, _, _ = strings.Cut(strings.TrimSpace(summary), " ")
 			affectedPackage := versionSpecifierToPackageAtom(summary)
 
 			pkgsBugs = append(pkgsBugs, &models.PackageToBug{
