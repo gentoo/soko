@@ -16,10 +16,7 @@ import (
 // Search renders a template containing a list of search results
 // for a given query of packages
 func Search(w http.ResponseWriter, r *http.Request) {
-
 	searchTerm := getParameterValue("q", r)
-	var packages []models.Package
-	var err error
 
 	if strings.Contains(searchTerm, "@") {
 		var maintainers []models.Maintainer
@@ -28,29 +25,40 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/maintainer/"+searchTerm, http.StatusMovedPermanently)
 			return
 		}
+	} else if strings.Contains(searchTerm, "/") {
+		var packages []models.Package
+		database.DBCon.Model(&packages).Where("atom = ?", searchTerm).Select()
+		if len(packages) > 0 {
+			http.Redirect(w, r, "/packages/"+searchTerm, http.StatusMovedPermanently)
+			return
+		}
 	}
+
+	var packages []models.Package
+	query := database.DBCon.Model(&packages).
+		Relation("Versions")
 
 	if strings.Contains(searchTerm, "*") {
 		// if the query contains wildcards
 		wildcardSearchTerm := strings.ReplaceAll(searchTerm, "*", "%")
-		err = database.DBCon.Model(&packages).
+		query = query.
 			WhereOr("atom LIKE ?", wildcardSearchTerm).
-			WhereOr("name LIKE ?", wildcardSearchTerm).
-			Relation("Versions").
-			OrderExpr("name <-> ?", searchTerm).
-			Select()
+			WhereOr("name LIKE ?", wildcardSearchTerm)
 	} else {
 		// if the query contains no wildcards do a fuzzy search
-		err = BuildSearchQuery(database.DBCon.Model(&packages), searchTerm).
-			WhereOr("atom LIKE ?", "%"+searchTerm+"%").
-			Relation("Versions").
-			OrderExpr("name <-> ?", searchTerm).
-			Select()
+		query = BuildSearchQuery(query, searchTerm).
+			WhereOr("atom LIKE ?", "%"+searchTerm+"%")
 	}
 
+	err := query.OrderExpr("name <-> ?", searchTerm).
+		Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
+		return
+	}
+	if len(packages) == 1 {
+		http.Redirect(w, r, "/packages/"+packages[0].Atom, http.StatusMovedPermanently)
 		return
 	}
 
