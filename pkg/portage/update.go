@@ -38,7 +38,7 @@ func Update() {
 	updateHistory()
 
 	repository.CalculateMaskedVersions()
-
+	repository.CalculateDeprecatedToVersion()
 }
 
 // updateMetadata updates all USE flags, package masks and arches in the database
@@ -48,6 +48,7 @@ func Update() {
 //   - profiles/use.local.desc
 //   - profiles/desc/*
 //   - profiles/package.mask
+//   - profiles/package.deprecated
 //   - profiles/arch.list
 //
 // It works incrementally so that files are only parsed and updated whenever the
@@ -66,6 +67,7 @@ func updateMetadata() {
 	for _, path := range changed {
 		repository.UpdateUse(path)
 		repository.UpdateMask(path)
+		repository.UpdatePackagesDeprecated(path)
 		repository.UpdateArch(path)
 	}
 
