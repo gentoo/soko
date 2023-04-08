@@ -67,6 +67,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Relation("Versions").
 		Relation("Versions.Bugs").
 		Relation("Versions.Masks").
+		Relation("Versions.Deprecates").
 		Relation("Versions.PkgCheckResults").
 		Relation("Versions.Dependencies").
 		Relation("ReverseDependencies").

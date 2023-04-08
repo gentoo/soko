@@ -201,6 +201,8 @@ func GetFuncMap() template.FuncMap {
 		"isMasked":          isMasked,
 		"getMask":           getMask,
 		"showRemovalNotice": showRemovalNotice,
+		"isDeprecated":      isDeprecated,
+		"getDeprecation":    getDeprecation,
 		"add": func(a, b int) int {
 			return a + b
 		},
@@ -442,6 +444,26 @@ func showRemovalNotice(versions []*models.Version) bool {
 		}
 	}
 	return false
+}
+
+// isDeprecated returns true if any version is deprecated
+func isDeprecated(versions []*models.Version) bool {
+	for _, version := range versions {
+		if len(version.Deprecates) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// getDeprecation returns the deprecation entry of the first version that is deprecated
+func getDeprecation(versions []*models.Version) *models.DeprecatedPackage {
+	for _, version := range versions {
+		if len(version.Deprecates) > 0 {
+			return version.Deprecates[0]
+		}
+	}
+	return nil
 }
 
 // sort the versions in descending order

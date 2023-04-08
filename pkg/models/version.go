@@ -29,6 +29,7 @@ type Version struct {
 	Description     string
 	Commits         []*Commit            `pg:"many2many:commit_to_versions,join_fk:commit_id"`
 	Masks           []*Mask              `pg:"many2many:mask_to_versions,join_fk:mask_versions"`
+	Deprecates      []*DeprecatedPackage `pg:"many2many:deprecated_to_versions,join_fk:deprecated_versions"`
 	PkgCheckResults []*PkgCheckResult    `pg:",fk:cpv"`
 	Dependencies    []*ReverseDependency `pg:",fk:reverse_dependency_version"`
 	Bugs            []*Bug               `pg:"many2many:version_to_bugs,join_fk:bug_id"`
