@@ -33,8 +33,11 @@ func Update() {
 	// update the local useflags
 	repository.UpdateUse("profiles/use.local.desc")
 
-	updateMetadata()
-	updatePackageData()
+	latestCommit := utils.GetLatestCommit()
+	changed := utils.ChangedFiles(latestCommit, "HEAD")
+
+	updateMetadata(changed)
+	updatePackageData(changed)
 	updateHistory()
 
 	repository.CalculateMaskedVersions()
@@ -56,13 +59,10 @@ func Update() {
 // retrieving the last commit in the database (if present) and parsing all
 // following commits. In case no last commit is present a full import
 // starting with the first commit in the tree is done.
-func updateMetadata() {
+func updateMetadata(changed []string) {
 
 	logger.Info.Println("Start updating changed metadata")
 
-	latestCommit := utils.GetLatestCommit()
-
-	changed := utils.ChangedFiles(latestCommit, "HEAD")
 	logger.Info.Println("Iterating", len(changed), "changed files")
 	for _, path := range changed {
 		repository.UpdateUse(path)
@@ -80,13 +80,10 @@ func updateMetadata() {
 //   - versions
 //
 // changed data is determined by parsing all commits since the last update.
-func updatePackageData() {
+func updatePackageData(changed []string) {
 
 	logger.Info.Println("Start updating changed package data")
 
-	latestCommit := utils.GetLatestCommit()
-
-	changed := utils.ChangedFiles(latestCommit, "HEAD")
 	logger.Info.Println("Iterating", len(changed), "changed files")
 	repository.UpdateVersions(changed)
 	repository.UpdatePackages(changed)
@@ -154,6 +151,7 @@ func FullUpdate() {
 	repository.UpdateUse("profiles/use.local.desc")
 
 	allFiles := utils.AllFiles()
+	updateMetadata(allFiles)
 	repository.UpdateVersions(allFiles)
 	repository.UpdatePackages(allFiles)
 	repository.UpdateCategories(allFiles)
@@ -165,6 +163,9 @@ func FullUpdate() {
 	deleteRemovedCategories()
 
 	fixPrecedingCommitsOfPackages()
+
+	repository.CalculateMaskedVersions()
+	repository.CalculateDeprecatedToVersion()
 
 	logger.Info.Println("Finished update up...")
 }
