@@ -113,7 +113,11 @@ func parsePackageMask(packageMask string) {
 		var reason string
 		packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		for strings.HasPrefix(packageMaskLine, "#") {
-			reason = reason + " " + strings.Replace(packageMaskLine, "# ", "", 1)
+			if packageMaskLine == "#" {
+				reason += "\n"
+			} else {
+				reason = reason + " " + strings.TrimPrefix(packageMaskLine, "# ")
+			}
 			packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		}
 

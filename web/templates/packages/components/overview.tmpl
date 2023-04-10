@@ -37,7 +37,7 @@
                             </p>
                         {{end}}
 
-                        <strong class="kk-mask-reason">{{(getMask .Versions).Reason}}</strong>
+                        <strong class="kk-mask-reason">{{replaceNewline (getMask .Versions).Reason}}</strong>
 
                         <div class="kk-mask-details">
 
@@ -68,7 +68,7 @@
             <div class="card bg-warning mb-3">
                 <ul class="list-group list-group-flush bg-warning">
                     <li class="list-group-item bg-warning">
-                        <strong class="kk-mask-reason">{{(getDeprecation .Versions).Reason}}</strong>
+                        <strong class="kk-mask-reason">{{replaceNewline (getDeprecation .Versions).Reason}}</strong>
 
                         <div class="kk-mask-details">
 

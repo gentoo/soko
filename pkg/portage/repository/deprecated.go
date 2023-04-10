@@ -70,7 +70,11 @@ func parsePackagesDeprecated(entry string) {
 		var reason string
 		packageLine, packageLines = packageLines[0], packageLines[1:]
 		for strings.HasPrefix(packageLine, "#") {
-			reason = reason + " " + strings.Replace(packageLine, "# ", "", 1)
+			if packageLine == "#" {
+				reason += "\n"
+			} else {
+				reason = reason + " " + strings.TrimPrefix(packageLine, "# ")
+			}
 			packageLine, packageLines = packageLines[0], packageLines[1:]
 		}
 

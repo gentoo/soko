@@ -203,6 +203,9 @@ func GetFuncMap() template.FuncMap {
 		"showRemovalNotice": showRemovalNotice,
 		"isDeprecated":      isDeprecated,
 		"getDeprecation":    getDeprecation,
+		"replaceNewline": func(s string) template.HTML {
+			return template.HTML(strings.Replace(template.HTMLEscapeString(s), "\n", "<br>", -1))
+		},
 		"add": func(a, b int) int {
 			return a + b
 		},
