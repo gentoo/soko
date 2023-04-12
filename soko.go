@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/jasonlvhit/gocron"
 	"io"
 	"io/ioutil"
 	"os"
@@ -19,6 +18,8 @@ import (
 	"soko/pkg/portage/repology"
 	"soko/pkg/selfcheck"
 	"time"
+
+	"github.com/jasonlvhit/gocron"
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 	updateOutdatedPackages := flag.Bool("update-outdated-packages", false, "Update the repology.org data of outdated packages")
 	updatePkgcheckResults := flag.Bool("update-pkgcheck-results", false, "Update the qa-reports that is the pkgcheck results")
 	updatePullrequests := flag.Bool("update-pullrequests", false, "Update the pull requests")
-	initBugs := flag.Bool("init-bugs", false, "Import all bugs, including the old ones. This is usually just done once.")
+	flag.Bool("init-bugs", false, "Import all bugs, including the old ones. This is usually just done once.")
 	updateBugs := flag.Bool("update-bugs", false, "Update the bugs belonging to the packages")
 	updateDependencies := flag.Bool("update-dependencies", false, "Update the dependencies and reverse dependencies of the packages")
 	updateProjects := flag.Bool("update-projects", false, "Update the project information")
@@ -71,12 +72,9 @@ func main() {
 		logger.Info.Println("Updating the pull requests data")
 		github.FullUpdatePullRequests()
 	}
-	if *initBugs {
-		bugs.UpdateBugs(true)
-	}
 	if *updateBugs {
 		logger.Info.Println("Updating the bugs data")
-		bugs.UpdateBugs(false)
+		bugs.UpdateBugs()
 	}
 	if *updateDependencies {
 		logger.Info.Println("Updating the dependencies data")

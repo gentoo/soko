@@ -1,179 +1,195 @@
 package bugs
 
 import (
-	"encoding/csv"
+	"encoding/json"
 	"net/http"
+	"net/url"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-pg/pg/v10"
 )
 
-func UpdateBugs(init bool) {
+type restAPIBug struct {
+	Id                 int    `json:"id"`
+	Product            string `json:"product"`
+	Status             string `json:"status"`
+	Summary            string `json:"summary"`
+	Component          string `json:"component"`
+	StabilizationAtoms string `json:"cf_stabilisation_atoms"`
+	AssigneeDetails    struct {
+		RealName string `json:"real_name"`
+	} `json:"assigned_to_detail"`
+}
+
+func (b *restAPIBug) BugId() string {
+	return strconv.Itoa(b.Id)
+}
+
+func (b *restAPIBug) ToDBType() *models.Bug {
+	return &models.Bug{
+		Id:        b.BugId(),
+		Product:   b.Product,
+		Status:    b.Status,
+		Summary:   b.Summary,
+		Component: b.Component,
+		Assignee:  b.AssigneeDetails.RealName,
+	}
+}
+
+func UpdateBugs() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	updateSecurityBugs()
-	updatePackagesBugs(init)
-
-	updateClosedBugs()
-
-	logger.Info.Println("---")
+	update := models.Application{
+		Id: "bugs",
+	}
+	err := database.DBCon.Model(&update).WherePK().Select()
+	if err != nil && err != pg.ErrNoRows {
+		logger.Error.Println("Error:", err)
+		return
+	}
+	if update.LastCommit == "" {
+		importAllOpenBugs()
+	} else {
+		lastUpdate, err := time.Parse("2006-01-02", update.LastCommit)
+		if err != nil {
+			importAllOpenBugs()
+		} else {
+			if time.Now().Before(lastUpdate) {
+				lastUpdate = time.Now()
+			}
+			changedSince := lastUpdate.AddDate(0, 0, -2)
+			updateChangedBugs(changedSince)
+		}
+	}
 
 	updateCategoriesInfo()
 
 	updateStatus()
 }
 
-func updateSecurityBugs() {
-	logger.Info.Println("UpdateSecurityBugs")
+func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, err error) {
+	const limit = 5000
 
-	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&component=Vulnerabilities&list_id=4688108&product=Gentoo%20Security&query_format=advanced&resolution=---&ctype=csv&human=1")
-}
-
-func updatePackagesBugs(init bool) {
-	logger.Info.Println("UpdatePackagesBugs")
-	//
-	// Keywording
-	//
-	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&component=Keywording&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
-
-	//
-	// Stabilization
-	//
-	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&component=Stabilization&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
-
-	//
-	// Current Packages
-	//
-	if init {
-		importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2000-01-01&chfieldto=2020-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
-	}
-	importBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id,product,component,assigned_to,bug_status,resolution,short_desc,changeddate,cf_stabilisation_atoms&bug_status=UNCONFIRMED&bug_status=CONFIRMED&bug_status=IN_PROGRESS&chfield=%5BBug%20creation%5D&chfieldfrom=2020-01-01&chfieldto=2021-01-01&component=Current%20packages&limit=0&list_id=4688124&product=Gentoo%20Linux&query_format=advanced&resolution=---&ctype=csv&human=1")
-}
-
-func updateClosedBugs() {
-	logger.Info.Println("UpdateClosedBugs")
-	//
-	// Security
-	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Vulnerabilities&list_id=4694466&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Security&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&ctype=csv")
-
-	//
-	// Keywording
-	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Keywording&list_id=4694472&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv")
-
-	//
-	// Stabilization
-	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Stabilization&list_id=4694456&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv")
-
-	//
-	// Current Packages
-	//
-	deleteBugs("https://bugs.gentoo.org/buglist.cgi?columnlist=bug_id&bug_status=RESOLVED&component=Current%20packages&list_id=4773158&order=changeddate%20DESC%2Cbug_status%2Cpriority%2Cassigned_to%2Cbug_id&product=Gentoo%20Linux&query_format=advanced&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&resolution=CANTFIX&resolution=NEEDINFO&resolution=TEST-REQUEST&resolution=UPSTREAM&resolution=OBSOLETE&ctype=csv")
-}
-
-func deleteBugs(source string) {
-	data, err := readCSVFromUrl(source)
-	if err != nil {
-		logger.Error.Println(err)
-		return
+	params := url.Values{
+		"include_fields": []string{"id,product,status,summary,component,assigned_to,cf_stabilisation_atoms"},
+		"bug_status":     bugStatus,
+		"order":          []string{"changeddate DESC"},
+		"product":        []string{"Gentoo Linux"},
+		"limit":          []string{strconv.Itoa(limit)},
 	}
 
-	bugs := make([]string, 0, len(data)-1)
-	for idx, row := range data {
-		if idx == 0 || len(row) < 1 { // skip header
-			continue
+	if changedSince != nil {
+		params.Set("chfieldfrom", changedSince.Format("2006-01-02"))
+	}
+
+	for offset := 0; ; offset += limit {
+		logger.Info.Println("Importing bugs from bugs.gentoo.org:", offset, "to", offset+limit)
+		params.Set("offset", strconv.Itoa(offset))
+		resp, err := http.Get("https://bugs.gentoo.org/rest/bug?" + params.Encode())
+		if err != nil {
+			return nil, err
 		}
-		bugs = append(bugs, row[0])
-	}
+		defer resp.Body.Close()
 
-	if len(bugs) == 0 {
-		return
-	}
+		if resp.StatusCode != http.StatusOK {
+			logger.Info.Println("Not 200")
+			return bugs, nil
+		}
 
-	res1, err := database.DBCon.Model((*models.Bug)(nil)).WhereIn("id IN (?)", bugs).Delete()
-	if err != nil {
-		logger.Error.Println("Failed to delete bugs:", err)
-		return
-	}
+		var response struct {
+			Bugs []restAPIBug `json:"bugs"`
+		}
+		err = json.NewDecoder(resp.Body).Decode(&response)
+		if err != nil {
+			logger.Info.Println("Error:", err)
+			return bugs, nil
+		}
 
-	res2, err := database.DBCon.Model((*models.PackageToBug)(nil)).WhereIn("bug_id IN (?)", bugs).Delete()
-	if err != nil {
-		logger.Error.Println("Failed to delete package bugs:", err)
-		return
+		bugs = append(bugs, response.Bugs...)
+
+		if len(response.Bugs) < limit {
+			break
+		}
 	}
-	logger.Info.Println("Deleted", res1.RowsAffected(), "bugs and", res2.RowsAffected(), "package bugs")
+	logger.Info.Println("Collected", len(bugs), "bugs")
+	return
 }
 
-func importBugs(source string) {
-	data, err := readCSVFromUrl(source)
+func importAllOpenBugs() {
+	bugs, err := fetchBugs(nil, []string{"UNCONFIRMED", "CONFIRMED", "IN_PROGRESS"})
 	if err != nil {
 		logger.Error.Println(err)
 		return
 	}
 
-	var bugs []*models.Bug
+	database.TruncateTable[models.Bug]("id")
+	database.TruncateTable[models.PackageToBug]("id")
+	database.TruncateTable[models.VersionToBug]("id")
+
+	processApiBugs(bugs)
+}
+
+func updateChangedBugs(changedSince time.Time) {
+	bugs, err := fetchBugs(&changedSince, []string{"UNCONFIRMED", "CONFIRMED", "IN_PROGRESS", "RESOLVED"})
+	if err != nil {
+		logger.Error.Println(err)
+		return
+	}
+	processApiBugs(bugs)
+}
+
+func processApiBugs(bugs []restAPIBug) {
+	var resolvedBugs []string
+	var dbBugs []*models.Bug
 	var verBugs []*models.VersionToBug
 	var pkgsBugs []*models.PackageToBug
 
-	for idx, row := range data {
-		// skip header
-		if idx == 0 || len(row) < 7 {
-			continue
-		}
-
-		bugs = append(bugs, &models.Bug{
-			Id:        row[0],
-			Product:   row[1],
-			Component: row[2],
-			Assignee:  row[3],
-			Status:    row[4],
-			Summary:   row[6],
-		})
-
-		//
-		// Insert Package To Bug
-		//
-		bugId := row[0]
-		summary := row[6]
-		if strings.TrimSpace(row[8]) != "" {
-			versions := make(map[string]struct{})
-			for _, gpackage := range strings.Split(row[8], "\n") {
-				affectedVersions, _, _ := strings.Cut(strings.TrimSpace(gpackage), " ")
-				if strings.TrimSpace(affectedVersions) != "" {
-					for _, version := range calculateAffectedVersions(bugId, affectedVersions) {
-						versions[version.Id] = struct{}{}
+	for _, bug := range bugs {
+		if bug.Status == "RESOLVED" {
+			resolvedBugs = append(resolvedBugs, bug.BugId())
+		} else {
+			dbBugs = append(dbBugs, bug.ToDBType())
+			bugId := bug.BugId()
+			if strings.TrimSpace(bug.StabilizationAtoms) != "" {
+				versions := make(map[string]struct{})
+				for _, gpackage := range strings.Split(bug.StabilizationAtoms, "\n") {
+					affectedVersions, _, _ := strings.Cut(strings.TrimSpace(gpackage), " ")
+					if strings.TrimSpace(affectedVersions) != "" {
+						for _, version := range calculateAffectedVersions(affectedVersions) {
+							versions[version.Id] = struct{}{}
+						}
 					}
 				}
-			}
-			for version := range versions {
-				verBugs = append(verBugs, &models.VersionToBug{
-					Id:        version + "-" + bugId,
-					VersionId: version,
-					BugId:     bugId,
+				for version := range versions {
+					verBugs = append(verBugs, &models.VersionToBug{
+						Id:        version + "-" + bugId,
+						VersionId: version,
+						BugId:     bugId,
+					})
+				}
+			} else {
+				summary, _, _ := strings.Cut(strings.TrimSpace(bug.Summary), " ")
+				affectedPackage := versionSpecifierToPackageAtom(summary)
+
+				pkgsBugs = append(pkgsBugs, &models.PackageToBug{
+					Id:          affectedPackage + "-" + bugId,
+					PackageAtom: affectedPackage,
+					BugId:       bugId,
 				})
 			}
-		} else {
-			summary, _, _ = strings.Cut(strings.TrimSpace(summary), " ")
-			affectedPackage := versionSpecifierToPackageAtom(summary)
-
-			pkgsBugs = append(pkgsBugs, &models.PackageToBug{
-				Id:          affectedPackage + "-" + bugId,
-				PackageAtom: affectedPackage,
-				BugId:       bugId,
-			})
 		}
-
 	}
 
-	res1, err := database.DBCon.Model(&bugs).OnConflict("(id) DO UPDATE").Insert()
+	res1, err := database.DBCon.Model(&dbBugs).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
 		logger.Error.Println("Failed to insert bugs:", err)
 		return
@@ -192,28 +208,33 @@ func importBugs(source string) {
 	}
 
 	logger.Info.Println("Inserted", res1.RowsAffected(), "bugs,", res2.RowsAffected(), "version bugs and", res3.RowsAffected(), "package bugs")
+
+	if len(resolvedBugs) > 0 {
+		res1, err := database.DBCon.Model((*models.Bug)(nil)).WhereIn("id IN (?)", resolvedBugs).Delete()
+		if err != nil {
+			logger.Error.Println("Failed to delete bugs:", err)
+			return
+		}
+
+		res2, err := database.DBCon.Model((*models.PackageToBug)(nil)).WhereIn("bug_id IN (?)", resolvedBugs).Delete()
+		if err != nil {
+			logger.Error.Println("Failed to delete package bugs:", err)
+			return
+		}
+
+		res3, err := database.DBCon.Model((*models.VersionToBug)(nil)).WhereIn("bug_id IN (?)", resolvedBugs).Delete()
+		if err != nil {
+			logger.Error.Println("Failed to delete package bugs:", err)
+			return
+		}
+
+		logger.Info.Println("Deleted", res1.RowsAffected(), "bugs and", res2.RowsAffected(), "package bugs and", res3.RowsAffected(), "version bugs")
+	}
 }
 
-func calculateAffectedVersions(bugId, versionSpecifier string) []*models.Version {
+func calculateAffectedVersions(versionSpecifier string) []*models.Version {
 	packageAtom := versionSpecifierToPackageAtom(versionSpecifier)
 	return utils.CalculateAffectedVersions(versionSpecifier, packageAtom)
-}
-
-func readCSVFromUrl(url string) ([][]string, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	reader := csv.NewReader(resp.Body)
-	reader.Comma = ','
-	data, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }
 
 var versionNumber = regexp.MustCompile(`-[0-9]`)
@@ -249,7 +270,9 @@ func updateCategoriesInfo() {
 	}
 	categoriesInfo := make(map[string]*models.CategoryPackagesInformation, len(categoriesInfoArr))
 	for _, categoryInfo := range categoriesInfoArr {
-		categoriesInfo[categoryInfo.Name] = categoryInfo
+		if categoryInfo.Name != "" {
+			categoriesInfo[categoryInfo.Name] = categoryInfo
+		}
 	}
 
 	var categories []*models.CategoryPackagesInformation
@@ -293,6 +316,7 @@ func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "bugs",
 		LastUpdate: time.Now(),
+		LastCommit: time.Now().Format("2006-01-02"),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
 }
