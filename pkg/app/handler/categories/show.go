@@ -5,6 +5,7 @@ package categories
 import (
 	"encoding/json"
 	"net/http"
+	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
@@ -55,6 +56,17 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 			return
 		}
+	case "stabilization.json", "stabilization.xml", "stabilization.list":
+		err := query.Relation("Packages.Versions").
+			Relation("Packages.Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
+				return q.Where("class = 'StableRequest'"), nil
+			}).Select()
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		utils.StabilizationExport(w, pageUrl, category.Packages)
+		return
 	default:
 		query = query.Relation("Packages.Versions")
 	}

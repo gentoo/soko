@@ -83,6 +83,18 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			Relation("Versions").
 			Relation("Versions.Bugs").
 			Relation("Bugs")
+	case "stabilization.json", "stabilization.xml", "stabilization.list":
+		err = query.
+			Relation("Versions").
+			Relation("Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
+				return q.Where("class = ?", "StableRequest"), nil
+			}).Select()
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		utils.StabilizationExport(w, pageName, gpackages)
+		return
 	default:
 		pageName = "packages"
 		query = query.
