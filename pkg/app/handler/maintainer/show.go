@@ -69,8 +69,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	case "stabilization":
 		query = query.
 			Relation("Versions").
-			Relation("PkgCheckResults").
-			Relation("Versions.PkgCheckResults").
+			Relation("Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
+				return q.Where("class = ?", "StableRequest"), nil
+			}).
 			Relation("Bugs")
 	case "bugs":
 		query = query.

@@ -5,23 +5,19 @@
             <ul class="timeline">
                 {{- $stable_requests := 0 -}}
                 {{- range .Packages -}}
-                    {{- range $index, $element := .Versions -}}
-                        {{- if .PkgCheckResults -}}
-                            {{- range .PkgCheckResults -}}
-                                {{ if eq .Class "StableRequest" }}
-                                    {{- $stable_requests = (add $stable_requests 1) }}
-                                    <li>
-                                        <ul class="list-group">
-                                            <li class="list-group-item">
-                                                <a href="/packages/{{.Category}}/{{.Package}}" class="text-dark"><strong>{{.Category}}/{{.Package}}-{{.Version}}</strong></a><br/>
-                                                <span class="kk-version kk-cell-sep-right text-muted">
-                                                {{- .Message -}}
-                                                </span>
-                                            </li>
-                                        </ul>
+                    {{- range .Versions -}}
+                        {{- range .PkgCheckResults -}}
+                            {{- $stable_requests = (add $stable_requests 1) }}
+                            <li>
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <a href="/packages/{{.Category}}/{{.Package}}" class="text-dark"><strong>{{.Category}}/{{.Package}}-{{.Version}}</strong></a><br/>
+                                        <span class="kk-version kk-cell-sep-right text-muted">
+                                        {{- .Message -}}
+                                        </span>
                                     </li>
-                                {{end}}
-                            {{- end -}}
+                                </ul>
+                            </li>
                         {{- end -}}
                     {{- end -}}
                 {{- end -}}
