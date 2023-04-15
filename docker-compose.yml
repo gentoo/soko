@@ -74,6 +74,6 @@ services:
     # directory is scatchy, so add another socket position for the daemon to create, and
     # bind mount it. Add to docker daemon those args:
     #   --host=unix:///var/run/docker.sock --host=unix:///var/run/docker-watchtower/docker.sock
-      - /var/run/docker-watchtower/:/var/run/
+      - /var/run/docker-watchtower:/var/run/docker-watchtower
       - /root/.docker/config.json:/config.json
-    command: --label-enable
+    command: --label-enable --host unix:///var/run/docker-watchtower/docker.sock
