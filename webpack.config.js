@@ -1,3 +1,4 @@
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
@@ -11,27 +12,19 @@ module.exports = {
         useflags: './web/packs/useflags.js',
         userpref: './web/packs/userpref.js',
     },
+    mode: 'production',
     output: {
         path: path.resolve(__dirname, 'assets'),
         filename: '[name].js',
     },
-    plugins: [
-        require('postcss-import')
-    ],
     module: {
         rules: [
             {
                 test: /\.s[ac]ss$/i,
                 use: [
-                    // Creates `style` nodes from JS strings
-                    'style-loader',
-                    // Translates CSS into CommonJS
-                    {
-                        loader: 'css-loader',
-                    },{
-                        loader: 'resolve-url-loader',
-                    },
-                    // Compiles Sass to CSS
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'resolve-url-loader',
                     {
                         loader: 'sass-loader',
                         options: {
@@ -66,6 +59,9 @@ module.exports = {
             Popper: ['popper.js', 'default'],
             'window.Tether': 'tether',
             Modal: 'exports-loader?Modal!bootstrap/js/dist/modal',
+        }),
+        new MiniCssExtractPlugin({
+            filename: '[name].css',
         }),
     ],
 };
