@@ -57,8 +57,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		pageName = "reverse-dependencies"
 	}
 
-	gpackage := new(models.Package)
-	err := database.DBCon.Model(gpackage).
+	var gpackage models.Package
+	err := database.DBCon.Model(&gpackage).
 		Where("atom = ?", atom).
 		Relation("Outdated").
 		Relation("PkgCheckResults").
@@ -83,12 +83,12 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	sortVersionsDesc(gpackage.Versions)
 
-	localUseflags, globalUseflags, useExpands := getPackageUseflags(gpackage)
+	localUseflags, globalUseflags, useExpands := getPackageUseflags(&gpackage)
 
 	renderPackageTemplate("show",
 		"*",
 		GetFuncMap(),
-		createPackageData(pageName, gpackage, localUseflags, globalUseflags, useExpands, userPreferences),
+		createPackageData(pageName, &gpackage, localUseflags, globalUseflags, useExpands, userPreferences),
 		w)
 }
 

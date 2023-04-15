@@ -123,7 +123,7 @@ func setRoute(path string, handler http.HandlerFunc) {
 
 func redirect(from, to string) {
 	http.HandleFunc(from, func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, to, 301)
+		http.Redirect(w, r, to, http.StatusMovedPermanently)
 	})
 }
 
