@@ -69,6 +69,11 @@ services:
     image: containrrr/watchtower:0.3.10
     restart: always
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    # docker has an issue, that if it mounts a socket directly, upon daemon restart,
+    # the socket is recreated and the new one isn't mounted. Mounting the whole /var/run
+    # directory is scatchy, so add another socket position for the daemon to create, and
+    # bind mount it. Add to docker daemon those args:
+    #   --host=unix:///var/run/docker.sock --host=unix:///var/run/docker-watchtower/docker.sock
+      - /var/run/docker-watchtower/:/var/run/
       - /root/.docker/config.json:/config.json
     command: --label-enable
