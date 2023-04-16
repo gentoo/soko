@@ -5,6 +5,7 @@
     "core-js": "^3.30.0",
     "d3": "^3.5.17",
     "jquery": "^3.6.4",
+    "jquery-typeahead": "^2.11.1",
     "jquery-ujs": "^1.2.3",
     "popper.js": "^1.16.0",
     "regenerator-runtime": "^0.13.11",

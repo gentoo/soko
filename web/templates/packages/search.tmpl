@@ -42,14 +42,15 @@
                 <h2 class="site-welcome stick-top">Nothing found. :( Try again?</h2>
 
                 <form action="/packages/search" method="get">
-                    <div class="typeahead-container">
-                        <div class="typeahead-field">
-        <span class="typeahead-query">
-          <input id="q" name="q" type="search" autocomplete="off" placeholder="Find Packages" aria-label="Find Packages" value="{{.Search}}">
+                    <div class="typeahead__container">
+                        <div class="typeahead__field">
+                    <span class="typeahead__query">
+                      <input id="q" name="q" type="search" autocomplete="off" placeholder="Find Packages" aria-label="Find Packages" autofocus>
         </span>
-                            <span class="typeahead-button">
+
+                            <span class="typeahead__button">
           <button type="submit" title="Find" aria-label="Find">
-            <span class="typeahead-search-icon"></span><span class="sr-only">Find</span>
+                        <span class="typeahead__search-icon"></span><span class="sr-only">Find</span>
           </button>
         </span>
                         </div>
@@ -66,6 +67,7 @@
 
 {{template "footer" .Application }}
 
+<script src="/assets/index.js"></script>
 
 </body>
 </html>
