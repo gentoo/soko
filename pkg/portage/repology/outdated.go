@@ -42,11 +42,10 @@ func UpdateOutdated() {
 		outdatedVersions = append(outdatedVersions, getOutdatedStartingWith(letter, outdatedCategories)...)
 	}
 
-	// Clean up the database
-	database.TruncateTable[models.OutdatedPackages]("atom")
-
 	// Update the database
 	if len(outdatedVersions) > 0 {
+		database.TruncateTable[models.OutdatedPackages]("atom")
+
 		database.DBCon.Model(&outdatedVersions).Insert()
 	}
 
