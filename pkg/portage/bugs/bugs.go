@@ -56,10 +56,10 @@ func UpdateBugs() {
 		logger.Error.Println("Error:", err)
 		return
 	}
-	if update.LastCommit == "" {
+	if update.LastCommit != "" {
 		importAllOpenBugs()
 	} else {
-		lastUpdate, err := time.Parse("2006-01-02", update.LastCommit)
+		lastUpdate := update.LastUpdate
 		if err != nil {
 			importAllOpenBugs()
 		} else {
@@ -83,7 +83,7 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 		"include_fields": []string{"id,product,status,summary,component,assigned_to,cf_stabilisation_atoms"},
 		"bug_status":     bugStatus,
 		"order":          []string{"changeddate DESC"},
-		"product":        []string{"Gentoo Linux"},
+		"product":        []string{"Gentoo Linux", "Gentoo Security"},
 		"limit":          []string{strconv.Itoa(limit)},
 	}
 
@@ -152,12 +152,14 @@ func processApiBugs(bugs []restAPIBug) {
 	var dbBugs []*models.Bug
 	var verBugs []*models.VersionToBug
 	var pkgsBugs []*models.PackageToBug
+	processedBugs := make(map[int]struct{}, len(bugs))
 
 	for _, bug := range bugs {
 		if bug.Status == "RESOLVED" {
 			resolvedBugs = append(resolvedBugs, bug.BugId())
-		} else {
+		} else if _, found := processedBugs[bug.Id]; !found {
 			dbBugs = append(dbBugs, bug.ToDBType())
+			processedBugs[bug.Id] = struct{}{}
 			bugId := bug.BugId()
 			if strings.TrimSpace(bug.StabilizationAtoms) != "" {
 				versions := make(map[string]struct{})
@@ -316,7 +318,6 @@ func updateStatus() {
 	database.DBCon.Model(&models.Application{
 		Id:         "bugs",
 		LastUpdate: time.Now(),
-		LastCommit: time.Now().Format("2006-01-02"),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
 }
