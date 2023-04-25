@@ -11,7 +11,7 @@ import (
 // a list of 50 recently keyworded versions
 func Keyworded(w http.ResponseWriter, r *http.Request) {
 	keywordedVersions := GetKeywordedVersions(50)
-	RenderPackageTemplates("changedVersions", "changedVersions", "changedVersionRow", GetFuncMap(), CreateFeedData("Keyworded", keywordedVersions), w)
+	renderPackageTemplates("changedVersions", "changedVersions", "changedVersionRow", GetFuncMap(), CreateFeedData("Keyworded", keywordedVersions), w)
 }
 
 func KeywordedFeed(w http.ResponseWriter, r *http.Request) {

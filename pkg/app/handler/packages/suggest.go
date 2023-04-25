@@ -19,7 +19,7 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 
 	var packages []models.Package
 	err := database.DBCon.Model(&packages).
-		Where("atom LIKE ? ", ("%" + searchTerm + "%")).
+		Where("atom LIKE ? ", "%"+searchTerm+"%").
 		Relation("Versions").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
@@ -31,7 +31,7 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	type Result struct {
 		Name        string `json:"name"`
 		Category    string `json:"category"`
-		description string `json:"description"`
+		Description string `json:"description"`
 	}
 
 	type Results struct {
@@ -43,7 +43,7 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 		results[i] = &Result{
 			Name:        gpackage.Name,
 			Category:    gpackage.Category,
-			description: gpackage.Versions[0].Description,
+			Description: gpackage.Versions[0].Description,
 		}
 	}
 

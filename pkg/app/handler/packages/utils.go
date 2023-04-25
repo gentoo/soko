@@ -14,7 +14,6 @@ import (
 	utils2 "soko/pkg/utils"
 	"sort"
 	"strings"
-	textTemplate "text/template"
 
 	"github.com/go-pg/pg/v10"
 )
@@ -135,9 +134,9 @@ func renderPackageTemplate(page string, templatepattern string, funcMap template
 	templates.ExecuteTemplate(w, page+".tmpl", data)
 }
 
-// RenderPackageTemplates renders the given templates using the given data
+// renderPackageTemplates renders the given templates using the given data
 // Two patterns can be used to specify templates
-func RenderPackageTemplates(page string, templatepattern1 string, templatepattern2 string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
+func renderPackageTemplates(page string, templatepattern1 string, templatepattern2 string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
 	templates := template.Must(
 		template.Must(
 			template.Must(
@@ -175,17 +174,6 @@ func getSearchData(packages []models.Package, search string) interface{} {
 	}
 }
 
-// getChangelogData returns the data used in changelog templates
-func getChangelogData(commits []*models.Commit, atom string) interface{} {
-	return struct {
-		Commits []*models.Commit
-		Atom    string
-	}{
-		Commits: commits,
-		Atom:    atom,
-	}
-}
-
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
@@ -197,7 +185,7 @@ func GetFuncMap() template.FuncMap {
 		"getReverse":        getReverse,
 		"tolower":           strings.ToLower,
 		"formatRestricts":   FormatRestricts,
-		"RemoteIdLink":      RemoteIdLink,
+		"RemoteIdLink":      remoteIdLink,
 		"isMasked":          isMasked,
 		"getMask":           getMask,
 		"showRemovalNotice": showRemovalNotice,
@@ -209,22 +197,6 @@ func GetFuncMap() template.FuncMap {
 		"add": func(a, b int) int {
 			return a + b
 		},
-	}
-}
-
-// GetFuncMap returns the FuncMap used in templates
-func GetTextFuncMap() textTemplate.FuncMap {
-	return textTemplate.FuncMap{
-		"contains":          strings.Contains,
-		"replaceall":        strings.ReplaceAll,
-		"gravatar":          gravatar,
-		"mkSlice":           mkSlice,
-		"getReverse":        getReverse,
-		"tolower":           strings.ToLower,
-		"formatRestricts":   FormatRestricts,
-		"isMasked":          isMasked,
-		"getMask":           getMask,
-		"showRemovalNotice": showRemovalNotice,
 	}
 }
 
@@ -371,8 +343,8 @@ func FormatRestricts(restricts []string) string {
 	return strings.Join(result, ", ")
 }
 
-// RemoteIdLink returns a link to the homepage of a given remote id
-func RemoteIdLink(remoteId models.RemoteId) string {
+// remoteIdLink returns a link to the homepage of a given remote id
+func remoteIdLink(remoteId models.RemoteId) string {
 	switch remoteId.Type {
 	case "bitbucket":
 		return "https://bitbucket.org/" + remoteId.Id
