@@ -34,12 +34,28 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		updateSearchHistory(atom, w, r)
 	}
 
+	var gpackage models.Package
+	query := database.DBCon.Model(&gpackage).
+		Relation("Bugs").
+		Relation("PullRequests").
+		Relation("Versions", func(q *pg.Query) (*pg.Query, error) {
+			// performs mostly correct ordering of versions, which is perfected by sortVersionsDesc
+			return q.Order("version DESC"), nil
+		}).
+		Relation("Versions.Bugs")
+
 	if strings.HasSuffix(r.URL.Path, "/changelog") {
 		atom = strings.ReplaceAll(atom, "/changelog", "")
 		pageName = "changelog"
+		query = query.Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
+			return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
+		})
 	} else if strings.HasSuffix(r.URL.Path, "/qa-report") {
 		atom = strings.ReplaceAll(atom, "/qa-report", "")
 		pageName = "qa-report"
+		query = query.
+			Relation("PkgCheckResults").
+			Relation("Versions.PkgCheckResults")
 	} else if strings.HasSuffix(r.URL.Path, "/pull-requests") {
 		atom = strings.ReplaceAll(atom, "/pull-requests", "")
 		pageName = "pull-requests"
@@ -52,29 +68,23 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	} else if strings.HasSuffix(r.URL.Path, "/dependencies") {
 		atom = strings.ReplaceAll(atom, "/dependencies", "")
 		pageName = "dependencies"
+		query = query.Relation("Versions.Dependencies")
 	} else if strings.HasSuffix(r.URL.Path, "/reverse-dependencies") {
 		atom = strings.ReplaceAll(atom, "/reverse-dependencies", "")
 		pageName = "reverse-dependencies"
+		query = query.Relation("ReverseDependencies")
+	} else {
+		query = query.Relation("Outdated").
+			Relation("Versions.Masks").
+			Relation("Versions.Deprecates")
+		if userPreferences.Packages.Overview.ChangelogType == "full" {
+			query = query.Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
+				return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
+			})
+		}
 	}
 
-	var gpackage models.Package
-	err := database.DBCon.Model(&gpackage).
-		Where("atom = ?", atom).
-		Relation("Outdated").
-		Relation("PkgCheckResults").
-		Relation("Bugs").
-		Relation("PullRequests").
-		Relation("Versions").
-		Relation("Versions.Bugs").
-		Relation("Versions.Masks").
-		Relation("Versions.Deprecates").
-		Relation("Versions.PkgCheckResults").
-		Relation("Versions.Dependencies").
-		Relation("ReverseDependencies").
-		Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
-			return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
-		}).
-		Select()
+	err := query.Where("atom = ?", atom).Select()
 
 	if err != nil {
 		http.NotFound(w, r)
@@ -83,7 +93,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	sortVersionsDesc(gpackage.Versions)
 
-	localUseflags, globalUseflags, useExpands := getPackageUseflags(&gpackage)
+	var localUseflags, globalUseflags []models.Useflag
+	var useExpands map[string][]models.Useflag
+	if pageName == "overview" {
+		localUseflags, globalUseflags, useExpands = getPackageUseflags(&gpackage)
+	}
 	securityBugs, nonSecurityBugs := countBugs(&gpackage)
 
 	renderPackageTemplate("show",
