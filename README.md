@@ -3,7 +3,7 @@
 
 <p align="center">
 <a href="https://gitlab.com/gentoo/soko/-/pipelines"> <img src="https://gitlab.com/gentoo/soko/badges/master/pipeline.svg"></a>
-<a href="https://blog.golang.org/go1.14" ><img src="https://img.shields.io/badge/Go-v1.14-blue"></a>
+<a href="https://blog.golang.org/go1.19" ><img src="https://img.shields.io/badge/Go-v1.19-blue"></a>
 <a href="#contributing"> <img src="https://img.shields.io/badge/contributions-welcome-orange.svg"></a>
 <a href="https://packagestest.gentoo.org"><img src="https://img.shields.io/badge/staging%20environment-develop-blue" /></a>
 <a href="https://opensource.org/licenses/TBD"><img src="https://img.shields.io/badge/license-TBD-blue.svg"></a>
@@ -14,7 +14,7 @@
 
 This the code that powers [packages.gentoo.org](https://packages.gentoo.org/), internally codenamed soko which is Korean for package (who would have thought!)
 
-## Table Of Contents 
+## Table Of Contents
 
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -23,7 +23,7 @@ This the code that powers [packages.gentoo.org](https://packages.gentoo.org/), i
 
 ## Usage
 
-To get started quickly you can use docker-compose: 
+To get started quickly you can use docker-compose:
 ```
 $ docker-compose up
 ```
@@ -48,9 +48,10 @@ Some of the rewrites were complete flops, and never went public.
 * Golang
 * PostgreSQL backend.
 * Authors:
-   * [Max Magorsch](mailto:arzano@gentoo.org)
+   * [Max Magorsch (arzano)](mailto:arzano@gentoo.org)
 * Contributors:
    * [Alec Warner (antarus)](mailto:antarus@gentoo.org)
+   * [Arthur Zamarin (arthurzam)](mailto:arthurzam@gentoo.org)
 
 ### 2016-2019: 'kkuleomi'
 * https://gitweb.gentoo.org/sites/packages.git/
