@@ -194,14 +194,17 @@ func GetFuncMap() template.FuncMap {
 		"replaceNewline": func(s string) template.HTML {
 			return template.HTML(strings.Replace(template.HTMLEscapeString(s), "\n", "<br>", -1))
 		},
-		"add": func(a, b int) int {
-			return a + b
-		},
+		"bugCategoriesCount": bugCategoriesCount,
 	}
 }
 
-func listContains(list []string, item string) bool {
-	return strings.Contains("  "+strings.Join(list, "  ")+"  ", "  "+item+"  ")
+func listContains(list []string, value string) bool {
+	for _, item := range list {
+		if value == item {
+			return true
+		}
+	}
+	return false
 }
 
 // gravatar creates a link to the gravatar
@@ -467,4 +470,21 @@ func containsUseflag(useflag models.Useflag, useflags []models.Useflag) bool {
 		}
 	}
 	return false
+}
+
+func bugCategoriesCount(bugs []*models.Bug) interface{} {
+	var result struct {
+		General, Stabilization, Keywording int
+	}
+	for _, bug := range bugs {
+		switch bug.Component {
+		case "Current packages":
+			result.General++
+		case "Stabilization":
+			result.Stabilization++
+		case "Keywording":
+			result.Keywording++
+		}
+	}
+	return result
 }
