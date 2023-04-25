@@ -17,7 +17,7 @@
             {{if .Package.AllBugs}}
 
                 {{if $general_bugs}}
-                    <h3 class="mb-4">Bug Reports</h3>
+                    <h3 id="packages" class="mb-4">Bug Reports</h3>
                     <ul class="list-group">
                         {{range .Package.Bugs}}
                             {{if eq .Component "Current packages"}}
@@ -40,7 +40,7 @@
 
 
                 {{if $stabilization_bugs}}
-                    <h3 class="my-4">Stabilization Bug Reports</h3>
+                    <h3 id="stabilization" class="my-4">Stabilization Bug Reports</h3>
                     <ul class="list-group">
                         {{range .Package.AllBugs}}
                             {{if eq .Component "Stabilization"}}
@@ -61,7 +61,7 @@
                 {{end}}
 
                 {{if $keywording_bugs}}
-                    <h3 class="my-4">Keywording Bug Reports</h3>
+                    <h3 id="keywording" class="my-4">Keywording Bug Reports</h3>
                     <ul class="list-group">
                         {{range .Package.AllBugs}}
                             {{if eq .Component "Keywording"}}
