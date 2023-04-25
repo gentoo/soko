@@ -84,11 +84,12 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	sortVersionsDesc(gpackage.Versions)
 
 	localUseflags, globalUseflags, useExpands := getPackageUseflags(&gpackage)
+	securityBugs, nonSecurityBugs := countBugs(&gpackage)
 
 	renderPackageTemplate("show",
 		"*",
 		GetFuncMap(),
-		createPackageData(pageName, &gpackage, localUseflags, globalUseflags, useExpands, userPreferences),
+		createPackageData(pageName, &gpackage, localUseflags, globalUseflags, useExpands, userPreferences, securityBugs, nonSecurityBugs),
 		w)
 }
 
@@ -190,6 +191,17 @@ func changelogJSON(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)
+}
+
+func countBugs(gpackage *models.Package) (securityBugs, nonSecurityBugs int) {
+	for _, bug := range gpackage.Bugs {
+		if bug.Component == "Vulnerabilities" {
+			securityBugs++
+		} else {
+			nonSecurityBugs++
+		}
+	}
+	return
 }
 
 type Changes struct {

@@ -307,29 +307,39 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 }
 
 // createPackageData creates the data used in the show package template
-func createPackageData(pageName string, gpackage *models.Package, localUseflags []models.Useflag, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag, userPreferences models.UserPreferences) interface{} {
+func createPackageData(
+	pageName string,
+	gpackage *models.Package,
+	localUseflags, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag,
+	userPreferences models.UserPreferences,
+	securityBugs, nonSecurityBugs int,
+) interface{} {
 	return struct {
-		PageName        string
-		Header          models.Header
-		Package         models.Package
-		Versions        []*models.Version
-		Masks           []models.Mask
-		LocalUseflags   []models.Useflag
-		GlobalUseflags  []models.Useflag
-		UseExpands      map[string][]models.Useflag
-		Application     models.Application
-		UserPreferences models.UserPreferences
+		PageName             string
+		Header               models.Header
+		Package              models.Package
+		Versions             []*models.Version
+		Masks                []models.Mask
+		LocalUseflags        []models.Useflag
+		GlobalUseflags       []models.Useflag
+		UseExpands           map[string][]models.Useflag
+		Application          models.Application
+		UserPreferences      models.UserPreferences
+		SecurityBugsCount    int
+		NonSecurityBugsCount int
 	}{
-		PageName:        pageName,
-		Header:          models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
-		Package:         *gpackage,
-		Versions:        gpackage.Versions,
-		LocalUseflags:   localUseflags,
-		GlobalUseflags:  globalUseflags,
-		UseExpands:      useExpands,
-		Masks:           nil,
-		Application:     utils.GetApplicationData(),
-		UserPreferences: userPreferences,
+		PageName:             pageName,
+		Header:               models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
+		Package:              *gpackage,
+		Versions:             gpackage.Versions,
+		LocalUseflags:        localUseflags,
+		GlobalUseflags:       globalUseflags,
+		UseExpands:           useExpands,
+		Masks:                nil,
+		Application:          utils.GetApplicationData(),
+		UserPreferences:      userPreferences,
+		SecurityBugsCount:    securityBugs,
+		NonSecurityBugsCount: nonSecurityBugs,
 	}
 }
 

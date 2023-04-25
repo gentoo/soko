@@ -7,21 +7,18 @@
                     <li>
                         <span class="text-muted">All Versions</span>
                         <ul class="list-group">
-
-                            {{ if .Package.PkgCheckResults }}
-                                {{ range $.Package.PkgCheckResults }}
-                                    {{if $.UserPreferences.ContainsPkgcheckClass .Class}}
-                                        {{if not .Version}}
+                            {{- if .Package.PkgCheckResults -}}
+                                {{- range $.Package.PkgCheckResults -}}
+                                    {{- if $.UserPreferences.ContainsPkgcheckClass .Class -}}
+                                        {{- if not .Version -}}
                                             <li class="list-group-item">
                                                 <strong>{{ .Class }}</strong><br/>
-                                                <span class="kk-version kk-cell-sep-right text-muted">
-                                            {{ .Message }}
-                                        </span>
+                                                <span class="kk-version kk-cell-sep-right text-muted">{{ .Message }}</span>
                                             </li>
-                                        {{end}}
-                                    {{end}}
-                                {{end}}
-                            {{end}}
+                                        {{- end -}}
+                                    {{- end -}}
+                                {{- end -}}
+                            {{- end -}}
                         </ul>
                     </li>
 

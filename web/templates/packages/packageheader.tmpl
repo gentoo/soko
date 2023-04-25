@@ -3,7 +3,6 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-
                     <div class="row mt-3">
                         <div class="col-md-5">
                             <h1 class="stick-top kk-package-title" id="package-title" data-atom="{{.Package.Atom}}" data-category="{{.Package.Category}}" data-name="{{.Package.Name}}">
@@ -16,52 +15,43 @@
                         </div>
                         <div class="col-md-7">
                             <p class="lead kk-package-maindesc">
-                                {{(index .Versions 0).Description}}
+                                {{- (index .Versions 0).Description -}}
                             </p>
-                            {{if (index .Versions 0).Homepage}}
-                                <p class="kk-package-homepage">
-                                        <a href="{{ ( index (index .Versions 0).Homepage 0) }}">{{ ( index (index .Versions 0).Homepage 0) }}</a>
-                                </p>
-                            {{end}}
+                            {{ if (index .Versions 0).Homepage -}}
+                            <p class="kk-package-homepage">
+                                <a href="{{ ( index (index .Versions 0).Homepage 0) }}">{{ ( index (index .Versions 0).Homepage 0) }}</a>
+                            </p>
+                            {{- end }}
                         </div>
-                        {{$security_bugs := 0}}
-                        {{$non_security_bugs := 0}}
-                        {{range .Package.AllBugs}}
-                            {{if eq .Component "Vulnerabilities"}}
-                                {{$security_bugs = (add $security_bugs 1)}}
-                            {{else}}
-                                {{$non_security_bugs = (add $non_security_bugs 1)}}
-                            {{end}}
-                        {{end}}
                         <div class="col-md-12 pt-4 mt-1">
                             <nav class="nav kk-package-nav">
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Overview"}}
+                                {{ if listContains $.UserPreferences.Packages.Tabs.Visible "Overview" -}}
                                     <a class="nav-link {{if eq .PageName "overview"}}active{{end}}" href="/packages/{{.Package.Atom}}"><i class="fa fa-info mr-1" aria-hidden="true"></i> Overview</a>
-                                {{end}}
+                                {{ end -}}
 
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Dependencies"}}
+                                {{- if listContains $.UserPreferences.Packages.Tabs.Visible "Dependencies" -}}
                                     <a class="nav-link {{if eq .PageName "dependencies" "reverse-dependencies"}}active{{end}}" href="/packages/{{.Package.Atom}}/{{.UserPreferences.Packages.Dependencies.Default}}"><i class="fa fa-link"></i> Dependencies</a>
-                                {{end}}
+                                {{ end}}
 
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "QA report"}}
+                                {{- if listContains $.UserPreferences.Packages.Tabs.Visible "QA report" -}}
                                     <a class="nav-link {{if eq .PageName "qa-report"}}active{{end}}" href="/packages/{{.Package.Atom}}/qa-report"><i class="fa fa-fw fa-chain-broken"></i> QA report </a>
-                                {{end}}
+                                {{ end -}}
 
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Pull requests"}}
+                                {{- if listContains $.UserPreferences.Packages.Tabs.Visible "Pull requests" -}}
                                     <a class="nav-link {{if eq .PageName "pull-requests"}}active{{end}}" href="/packages/{{.Package.Atom}}/pull-requests"><span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span> Pull requests <span class="ml-1 badge badge-pill kk-misc-badge">{{len .Package.PullRequests}}</span></a>
-                                {{end}}
+                                {{ end -}}
 
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Bugs"}}
-                                    <a class="nav-link {{if eq .PageName "bugs"}}active{{end}}" href="/packages/{{.Package.Atom}}/bugs"><i class="fa fa-bug" aria-hidden="true"></i> Bugs <span class="ml-1 badge badge-pill kk-misc-badge">{{$non_security_bugs}}</span></a>
-                                {{end}}
+                                {{- if listContains $.UserPreferences.Packages.Tabs.Visible "Bugs" -}}
+                                    <a class="nav-link {{if eq .PageName "bugs"}}active{{end}}" href="/packages/{{.Package.Atom}}/bugs"><i class="fa fa-bug" aria-hidden="true"></i> Bugs <span class="ml-1 badge badge-pill kk-misc-badge">{{.NonSecurityBugsCount}}</span></a>
+                                {{ end -}}
 
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Security"}}
-                                    <a class="nav-link {{if eq .PageName "security"}}active{{end}}" href="/packages/{{.Package.Atom}}/security"><i class="fa fa-shield" aria-hidden="true"></i> Security <span class="ml-1 badge badge-pill kk-misc-badge">{{$security_bugs}}</span></a>
-                                {{end}}
+                                {{- if listContains $.UserPreferences.Packages.Tabs.Visible "Security" -}}
+                                    <a class="nav-link {{if eq .PageName "security"}}active{{end}}" href="/packages/{{.Package.Atom}}/security"><i class="fa fa-shield" aria-hidden="true"></i> Security <span class="ml-1 badge badge-pill kk-misc-badge">{{.SecurityBugsCount}}</span></a>
+                                {{ end -}}
 
-                                {{if listContains $.UserPreferences.Packages.Tabs.Visible "Changelog"}}
+                                {{- if listContains $.UserPreferences.Packages.Tabs.Visible "Changelog" -}}
                                     <a class="nav-link {{if eq .PageName "changelog"}}active{{end}}" href="/packages/{{.Package.Atom}}/changelog"><i class="fa fa-fw fa-history"></i> Changelog</a>
-                                {{end}}
+                                {{- end }}
                             </nav>
                         </div>
                     </div>
