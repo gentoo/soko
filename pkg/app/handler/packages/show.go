@@ -85,8 +85,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := query.Where("atom = ?", atom).Select()
-
-	if err != nil {
+	if err != nil || len(gpackage.Versions) == 0 {
 		http.NotFound(w, r)
 		return
 	}
@@ -108,14 +107,14 @@ func Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateSearchHistory(atom string, w http.ResponseWriter, r *http.Request) {
-	var cookie, err = r.Cookie("search_history")
+	cookie, err := r.Cookie("search_history")
 	var packages string
 	if err == nil {
 		cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
 		if err == nil {
 			packagesList := strings.Split(string(cookieValue), ",")
 			if strings.Contains(string(cookieValue), atom) {
-				newPackagesList := []string{}
+				newPackagesList := make([]string, 0, len(packagesList)-1)
 				for _, gpackage := range packagesList {
 					if gpackage != atom {
 						newPackagesList = append(newPackagesList, gpackage)

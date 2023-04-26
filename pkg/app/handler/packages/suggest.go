@@ -14,45 +14,32 @@ import (
 // Suggest returns json encoded suggestions of
 // packages based on the given query
 func Suggest(w http.ResponseWriter, r *http.Request) {
-
 	searchTerm := getParameterValue("q", r)
 
-	var packages []models.Package
-	err := database.DBCon.Model(&packages).
+	var suggestions struct {
+		Results []struct {
+			Name        string `json:"name"`
+			Category    string `json:"category"`
+			Description string `json:"description"`
+		} `json:"results"`
+	}
+
+	descriptionQuery := database.DBCon.Model((*models.Version)(nil)).
+		Column("description").
+		Where("atom = package.atom").
+		Limit(1)
+	err := database.DBCon.Model((*models.Package)(nil)).
+		Column("name", "category").
+		ColumnExpr("(?) AS description", descriptionQuery).
 		Where("atom LIKE ? ", "%"+searchTerm+"%").
-		Relation("Versions").
-		Select()
+		Select(&suggestions.Results)
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
 
-	type Result struct {
-		Name        string `json:"name"`
-		Category    string `json:"category"`
-		Description string `json:"description"`
-	}
-
-	type Results struct {
-		Results []*Result `json:"results"`
-	}
-
-	results := make([]*Result, len(packages))
-	for i, gpackage := range packages {
-		results[i] = &Result{
-			Name:        gpackage.Name,
-			Category:    gpackage.Category,
-			Description: gpackage.Versions[0].Description,
-		}
-	}
-
-	result := Results{
-		Results: results,
-	}
-
-	b, err := json.Marshal(result)
-
+	b, err := json.Marshal(suggestions)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
