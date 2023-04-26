@@ -1,7 +1,7 @@
 {{define "metadata"}}
-{{if gt (len .UserPreferences.Packages.Overview.MetadataFields) 0 }}
+{{- if gt (len .UserPreferences.Packages.Overview.MetadataFields) 0 -}}
     <h3 class="pt-3 mb-2">Package Metadata</h3>
-{{end}}
+{{- end -}}
 
 <div class="card border-0 mb-3">
     <ul class="list-group kk-metadata-list">
@@ -23,9 +23,9 @@
             {{end}}
         {{end}}
 
-        {{if listContains .UserPreferences.Packages.Overview.MetadataFields "upstream"}}
-            {{ if .Package.Upstream }}
-                {{ if or .Package.Upstream.Doc .Package.Upstream.Changelog .Package.Upstream.BugsTo .Package.Upstream.RemoteIds }}
+        {{- if listContains .UserPreferences.Packages.Overview.MetadataFields "upstream" -}}
+            {{- if .Package.Upstream -}}
+                {{- if or .Package.Upstream.Doc .Package.Upstream.Changelog .Package.Upstream.BugsTo .Package.Upstream.RemoteIds -}}
                     <li class="kk-metadata-item list-group-item">
                         <div class="row">
                             <div class="col-xs-12 col-md-3 kk-metadata-key">
@@ -34,57 +34,57 @@
                             </div>
                             <div class="col-xs-12 col-md-9">
                                 <table>
-                                    {{if .Package.Upstream.Doc}}
-                                        {{range $k, $v := .Package.Upstream.Doc}}
+                                    {{- if .Package.Upstream.Doc -}}
+                                        {{- range $k, $v := .Package.Upstream.Doc }}
                                             <tr>
                                                 <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Documentation </span>{{end}}</td>
-                                                {{if not (eq $v "")}}
+                                                {{ if $v -}}
                                                     <td><a href="{{ $v}}">{{ $v }}</a></td>
-                                                {{end}}
+                                                {{- end }}
                                             </tr>
-                                        {{end}}
-                                    {{end}}
-                                    {{if .Package.Upstream.Changelog}}
-                                            {{range $k, $v := .Package.Upstream.Changelog}}
-                                                <tr>
-                                                    <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Changelog</span>{{end}}</td>
-                                                    {{if not (eq $v "")}}
-                                                        <td><a href="{{ $v}}">{{ $v }}</a></td>
-                                                    {{end}}
-                                                </tr>
-                                            {{end}}
-                                    {{end}}
-                                    {{if .Package.Upstream.BugsTo}}
-                                            {{range $k, $v := .Package.Upstream.BugsTo}}
-                                                <tr>
-                                                    <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Bugs-To</span>{{end}}</td>
-                                                    {{if not (eq $v "")}}
-                                                        <td><a href="{{ $v}}">{{ $v }}</a></td>
-                                                    {{end}}
-                                                </tr>
-                                            {{end}}
-                                    {{end}}
-                                    {{if .Package.Upstream.RemoteIds}}
-                                            {{range $k, $v := .Package.Upstream.RemoteIds}}
-                                              {{ $link := RemoteIdLink . }}
-                                              {{if not (eq $link "")}}
-                                                <tr>
-                                                  <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Remote-Id</span>{{end}}</td>
-                                                  <td><a href="{{ $link}}">{{ $link }}</a></td>
-                                                </tr>
-                                              {{end}}
-                                            {{end}}
-                                    {{end}}
+                                        {{- end -}}
+                                    {{- end -}}
+                                    {{- if .Package.Upstream.Changelog -}}
+                                        {{- range $k, $v := .Package.Upstream.Changelog }}
+                                            <tr>
+                                                <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Changelog</span>{{end}}</td>
+                                                {{ if $v -}}
+                                                    <td><a href="{{ $v}}">{{ $v }}</a></td>
+                                                {{- end }}
+                                            </tr>
+                                        {{- end -}}
+                                    {{- end -}}
+                                    {{- if .Package.Upstream.BugsTo -}}
+                                        {{- range $k, $v := .Package.Upstream.BugsTo }}
+                                            <tr>
+                                                <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Bugs-To</span>{{end}}</td>
+                                                {{ if $v -}}
+                                                    <td><a href="{{ $v}}">{{ $v }}</a></td>
+                                                {{- end }}
+                                            </tr>
+                                        {{- end -}}
+                                    {{- end -}}
+                                    {{- if .Package.Upstream.RemoteIds -}}
+                                        {{- range $k, $v := .Package.Upstream.RemoteIds }}
+                                            {{- $link := RemoteIdLink . -}}
+                                            {{- if $link }}
+                                            <tr>
+                                                <td>{{if eq $k 0}}<span class="kk-useflag-group float-right mr-2">Remote-Id</span>{{end}}</td>
+                                                <td><a href="{{ $link}}">{{ $link }}</a></td>
+                                            </tr>
+                                            {{- end }}
+                                        {{- end -}}
+                                    {{- end }}
                                 </table>
                             </div>
                         </div>
                     </li>
-                {{end}}
-            {{end}}
-        {{end}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
 
-        {{if listContains .UserPreferences.Packages.Overview.MetadataFields "longdescription"}}
-            {{ if .Package.Longdescription }}
+        {{- if listContains .UserPreferences.Packages.Overview.MetadataFields "longdescription" -}}
+            {{- if .Package.Longdescription }}
             <li class="kk-metadata-item list-group-item">
                 <div class="row">
                     <div class="col-xs-12 col-md-3 kk-metadata-key">
@@ -96,11 +96,11 @@
                     </div>
                 </div>
             </li>
-            {{end}}
-        {{end}}
+            {{- end -}}
+        {{- end -}}
 
-        {{if listContains .UserPreferences.Packages.Overview.MetadataFields "useflags"}}
-            {{ if or .LocalUseflags .GlobalUseflags .UseExpands }}
+        {{- if listContains .UserPreferences.Packages.Overview.MetadataFields "useflags" -}}
+            {{- if or .LocalUseflags .GlobalUseflags .UseExpands }}
             <li class="kk-metadata-item list-group-item">
                 <div class="row">
                     <div class="col-xs-12 col-md-3 kk-metadata-key">
@@ -112,11 +112,11 @@
                     </div>
                 </div>
             </li>
-            {{end}}
-        {{end}}
+            {{- end -}}
+        {{- end -}}
 
-        {{if listContains .UserPreferences.Packages.Overview.MetadataFields "license"}}
-            {{ if (index .Versions 0).License }}
+        {{- if listContains .UserPreferences.Packages.Overview.MetadataFields "license" -}}
+            {{- if (index .Versions 0).License }}
             <li class="kk-metadata-item list-group-item">
                 <div class="row">
                     <div class="col-xs-12 col-md-3 kk-metadata-key">
@@ -128,25 +128,11 @@
                     </div>
                 </div>
             </li>
-            {{end}}
-        {{end}}
+            {{- end -}}
+        {{- end -}}
 
-        <!-- TODO
-        <li class="kk-metadata-item list-group-item">
-            <div class="row">
-                <div class="col-xs-12 col-md-3 kk-metadata-key">
-                    <span class="fa fa-fw fa-group"></span>
-                    <%= t :herds %>
-                </div>
-                <div class="col-xs-12 col-md-9">
-                    <%= render partial: 'herd', collection: package.herds.sort, as: 'herd', spacer_template: 'maintainer_spacer' %>
-                </div>
-            </div>
-        </li>
-        -->
-
-        {{if listContains .UserPreferences.Packages.Overview.MetadataFields "maintainers"}}
-            {{ if .Package.Maintainers }}
+        {{- if listContains .UserPreferences.Packages.Overview.MetadataFields "maintainers" -}}
+            {{- if .Package.Maintainers }}
             <li class="kk-metadata-item list-group-item">
                 <div class="row">
                     <div class="col-xs-12 col-md-3 kk-metadata-key">
@@ -154,17 +140,17 @@
                         Maintainer(s)
                     </div>
                     <div class="col-xs-12 col-md-9">
-                        {{ range .Package.Maintainers }}
-                            {{if (ne .Name (index $.Package.Maintainers 0).Name)}}
+                        {{- range .Package.Maintainers -}}
+                            {{- if (ne .Name (index $.Package.Maintainers 0).Name) -}}
                                 ,&nbsp;
-                            {{end}}
+                            {{- end }}
                             <a title="{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}" href="/maintainer/{{.Email}}">{{if .Name}}{{.Name}}{{else}}{{.Email}}{{end}}</a> <a href="mailto:{{.Email}}"><i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i></a>
-                        {{end}}
+                        {{- end }}
                     </div>
                 </div>
             </li>
-            {{end}}
-        {{end}}
+            {{- end -}}
+        {{- end -}}
 
     </ul>
 </div>
