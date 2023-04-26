@@ -3,11 +3,10 @@ WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
-FROM node:13 AS assetsbuilder
+FROM node:20 AS assetsbuilder
 WORKDIR /go/src/soko
 COPY . /go/src/soko
-RUN npm install && cd node_modules/@gentoo/tyrian && npm install && npm run dist && cd /go/src/soko
-RUN npx webpack
+RUN npm install && npx webpack
 
 FROM scratch
 WORKDIR /go/src/soko
