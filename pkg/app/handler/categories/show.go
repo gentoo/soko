@@ -82,28 +82,32 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 // build the json for the category
 func buildJson(w http.ResponseWriter, r *http.Request, categoryName string) {
+	var jsonCategory struct {
+		Name     string `json:"name"`
+		Href     string `json:"href"`
+		Packages []struct {
+			Package     string `json:"name"`
+			Href        string `json:"href"`
+			Description string `json:"description"`
+		} `json:"packages"`
+	}
 
-	category := new(models.Category)
-	err := database.DBCon.Model(category).
-		Where("name = ?", categoryName).
-		Relation("Packages").
-		Relation("Packages.Versions").
-		Select()
+	err := database.DBCon.Model((*models.Version)(nil)).
+		DistinctOn("package").
+		Column("package", "description").
+		ColumnExpr("homepage ->> 0 AS href").
+		Where("category = ?", categoryName).
+		Order("package ASC").
+		Select(&jsonCategory.Packages)
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	categoryPackages := getJSONPackages(category)
-
-	jsonCategory := Category{
-		Name:     category.Name,
-		Href:     "https://packages.gentoo.org/categories/" + category.Name,
-		Packages: categoryPackages,
-	}
+	jsonCategory.Name = categoryName
+	jsonCategory.Href = "https://packages.gentoo.org/categories/" + categoryName
 
 	b, err := json.Marshal(jsonCategory)
-
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
@@ -112,36 +116,4 @@ func buildJson(w http.ResponseWriter, r *http.Request, categoryName string) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(b)
-}
-
-// get all maintainers of the package in a format
-// that is intended to be used to convert it to json
-func getJSONPackages(category *models.Category) []Package {
-	var categoryPackages []Package
-	for _, gpackage := range category.Packages {
-		if len(gpackage.Versions) > 0 {
-			var homepage string
-			if len(gpackage.Versions[0].Homepage) > 0 {
-				homepage = gpackage.Versions[0].Homepage[0]
-			}
-			categoryPackages = append(categoryPackages, Package{
-				Name:        gpackage.Name,
-				Href:        homepage,
-				Description: gpackage.Versions[0].Description,
-			})
-		}
-	}
-	return categoryPackages
-}
-
-type Category struct {
-	Name     string    `json:"name"`
-	Href     string    `json:"href"`
-	Packages []Package `json:"packages"`
-}
-
-type Package struct {
-	Name        string `json:"name"`
-	Href        string `json:"href"`
-	Description string `json:"description"`
 }
