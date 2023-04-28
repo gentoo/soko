@@ -2,7 +2,8 @@
     {{- range $index, $version := .Package.Versions -}}
     <tr>
         <td class="kk-version ">
-            <strong><a class="kk-ebuild-link" href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{$version.Atom}}/{{$version.Package}}-{{$version.Version}}.ebuild">{{$version.Version}}</a></strong><span class="kk-slot" title="subslot {{ $version.Subslot }}"> : {{ $version.Slot }}</span>
+            <strong><a class="kk-ebuild-link" href="https://gitweb.gentoo.org/repo/gentoo.git/tree/{{$version.Atom}}/{{$version.Package}}-{{$version.Version}}.ebuild">{{$version.Version}}</a></strong>
+            <span class="kk-slot"> : {{ $version.Slot }}{{ if $version.Subslot }}/{{ $version.Subslot }}{{ end }}</span>
             {{- if $version.Restricts -}}
                 <span class="badge badge-danger kk-restrict-label" title="The following features are restricted: {{ $version.Restricts }}">{{ formatRestricts $version.Restricts }}</span>
             {{- end -}}
