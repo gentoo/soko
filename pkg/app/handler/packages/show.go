@@ -5,6 +5,7 @@ package packages
 import (
 	b64 "encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
@@ -48,7 +49,21 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		atom = strings.ReplaceAll(atom, "/changelog", "")
 		pageName = "changelog"
 		query = query.Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
-			return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
+			// here be dragons
+			const template = (`'%[1]s', (SELECT ARRAY_AGG("%[1]s") ` +
+				`FROM jsonb_array_elements(COALESCE(NULLIF(changed_files -> '%[1]s', 'null'), '[]')) AS "%[1]s" ` +
+				`WHERE "%[1]s" ->> 'Path' LIKE ?)`)
+			return q.Column("commit_to_package.*",
+				"commit.id", "preceding_commits", "message",
+				"author_name", "author_email", "author_date",
+				"committer_name", "committer_email", "committer_date").
+				ColumnExpr(("json_build_object(" +
+					fmt.Sprintf(template, "Modified") + "," +
+					fmt.Sprintf(template, "Added") + "," +
+					fmt.Sprintf(template, "Deleted") +
+					") AS changed_files"), atom+"/%", atom+"/%", atom+"/%").
+				Order("preceding_commits DESC").
+				Limit(userPreferences.Packages.Overview.ChangelogLength), nil
 		})
 	} else if strings.HasSuffix(r.URL.Path, "/qa-report") {
 		atom = strings.ReplaceAll(atom, "/qa-report", "")
