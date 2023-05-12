@@ -249,6 +249,10 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 		rawUseFlags[i] = strings.Replace(rawUseflag, "+", "", 1)
 	}
 
+	if len(rawUseFlags) == 0 {
+		return localUseflags, allGlobalUseflags, useExpands
+	}
+
 	var tmp_useflags []models.Useflag
 	err := database.DBCon.Model(&tmp_useflags).
 		Where("name in (?)", pg.In(rawUseFlags)).
