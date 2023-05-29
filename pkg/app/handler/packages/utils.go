@@ -244,6 +244,10 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 	var localUseflags, allGlobalUseflags, filteredGlobalUseflags []models.Useflag
 	useExpands := make(map[string][]models.Useflag)
 
+	if len(gpackage.Versions) == 0 {
+		return localUseflags, allGlobalUseflags, useExpands
+	}
+
 	rawUseFlags := make([]string, len(gpackage.Versions[0].Useflags))
 	for i, rawUseflag := range gpackage.Versions[0].Useflags {
 		rawUseFlags[i] = strings.Replace(rawUseflag, "+", "", 1)
