@@ -103,7 +103,7 @@ func parseAuthorLine(authorLine string) (string, string, time.Time) {
 	return author, authorEmail, parsedDate
 }
 
-var bugReplacer = regexp.MustCompile(`Bug #?(\d+)`)
+var bugReplacer = regexp.MustCompile(`[bB]ug #?(\d+)`)
 
 // parse the package.mask entries and
 // update the Mask table in the database
