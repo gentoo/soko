@@ -177,23 +177,21 @@ func getSearchData(packages []models.Package, search string) interface{} {
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"contains":          strings.Contains,
-		"listContains":      listContains,
-		"replaceall":        strings.ReplaceAll,
-		"gravatar":          gravatar,
-		"mkSlice":           mkSlice,
-		"getReverse":        getReverse,
-		"tolower":           strings.ToLower,
-		"formatRestricts":   FormatRestricts,
-		"RemoteIdLink":      remoteIdLink,
-		"isMasked":          isMasked,
-		"getMask":           getMask,
-		"showRemovalNotice": showRemovalNotice,
-		"isDeprecated":      isDeprecated,
-		"getDeprecation":    getDeprecation,
-		"replaceNewline": func(s string) template.HTML {
-			return template.HTML(strings.Replace(template.HTMLEscapeString(s), "\n", "<br>", -1))
-		},
+		"contains":           strings.Contains,
+		"listContains":       listContains,
+		"replaceall":         strings.ReplaceAll,
+		"gravatar":           gravatar,
+		"mkSlice":            mkSlice,
+		"getReverse":         getReverse,
+		"tolower":            strings.ToLower,
+		"formatRestricts":    FormatRestricts,
+		"RemoteIdLink":       remoteIdLink,
+		"isMasked":           isMasked,
+		"getMask":            getMask,
+		"noescape":           func(str string) template.HTML { return template.HTML(str) },
+		"showRemovalNotice":  showRemovalNotice,
+		"isDeprecated":       isDeprecated,
+		"getDeprecation":     getDeprecation,
 		"bugCategoriesCount": bugCategoriesCount,
 	}
 }

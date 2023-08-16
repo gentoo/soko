@@ -10,6 +10,7 @@
 package repository
 
 import (
+	"html/template"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
@@ -71,21 +72,23 @@ func parsePackagesDeprecated(entry string) {
 		packageLine, packageLines = packageLines[0], packageLines[1:]
 		for strings.HasPrefix(packageLine, "#") {
 			if packageLine == "#" {
-				reason += "\n"
+				reason += "<br />"
 			} else {
-				reason = reason + " " + strings.TrimPrefix(packageLine, "# ")
+				reason = reason + " " + template.HTMLEscapeString(strings.TrimPrefix(packageLine, "# "))
 			}
 			packageLine, packageLines = packageLines[0], packageLines[1:]
 		}
+
+		reason = bugReplacer.ReplaceAllString(reason, `<a href="https://bugs.gentoo.org/$1">$0</a>`)
 
 		packageLines = append(packageLines, packageLine)
 
 		for _, version := range packageLines {
 			entry := &models.DeprecatedPackage{
-				Author:      author,
-				AuthorEmail: authorEmail,
+				Author:      strings.TrimSpace(author),
+				AuthorEmail: strings.TrimSpace(authorEmail),
 				Date:        date,
-				Reason:      reason,
+				Reason:      strings.TrimSpace(reason),
 				Versions:    version,
 			}
 

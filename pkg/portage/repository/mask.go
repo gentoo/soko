@@ -12,6 +12,7 @@
 package repository
 
 import (
+	"html/template"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
@@ -102,6 +103,8 @@ func parseAuthorLine(authorLine string) (string, string, time.Time) {
 	return author, authorEmail, parsedDate
 }
 
+var bugReplacer = regexp.MustCompile(`Bug #?(\d+)`)
+
 // parse the package.mask entries and
 // update the Mask table in the database
 func parsePackageMask(packageMask string) {
@@ -114,21 +117,23 @@ func parsePackageMask(packageMask string) {
 		packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		for strings.HasPrefix(packageMaskLine, "#") {
 			if packageMaskLine == "#" {
-				reason += "\n"
+				reason += "<br />"
 			} else {
-				reason = reason + " " + strings.TrimPrefix(packageMaskLine, "# ")
+				reason = reason + " " + template.HTMLEscapeString(strings.TrimPrefix(packageMaskLine, "# "))
 			}
 			packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		}
+
+		reason = bugReplacer.ReplaceAllString(reason, `<a href="https://bugs.gentoo.org/$1">$0</a>`)
 
 		packageMaskLines = append(packageMaskLines, packageMaskLine)
 
 		for _, version := range packageMaskLines {
 			mask := &models.Mask{
-				Author:      author,
-				AuthorEmail: authorEmail,
+				Author:      strings.TrimSpace(author),
+				AuthorEmail: strings.TrimSpace(authorEmail),
 				Date:        date,
-				Reason:      reason,
+				Reason:      strings.TrimSpace(reason),
 				Versions:    version,
 			}
 
