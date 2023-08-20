@@ -27,7 +27,7 @@
                             <div class="col-md-12">
                                 {{$commit := .}}
                                 {{range $key, $value := .ChangedFiles.Added }}
-                                    {{-if gt $key 100 -}} {{- break -}}
+                                    {{- if gt $key 100 -}} {{- break -}}
                                         {{ if contains .Path (print $.Atom "/")}}
                                             <style>
                                                 .kk-added-file-badge {

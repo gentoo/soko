@@ -1,9 +1,13 @@
 {{define "changelog"}}
-
         {{ if .Package.Commits }}
-
-
-                <h3>Latest Commits</h3>
+                <span class="d-flex justify-content-between">
+                    <h3>Latest Commits</h3>
+                    <span>
+                        <a href="https://gitweb.gentoo.org/repo/gentoo.git/atom/{{.Package.Atom}}?h=master" target="_blank">
+                            <span class="fa fa-fw fa-rss text-dark"></span> RSS Feed
+                        </a>
+                    </span>
+                </span>
                 <ul class="timeline">
                     <li>
                         <span class="text-muted">Commits on {{(index .Package.Commits 0).CommitterDate.Format "2006-01-02"}}</span>
