@@ -8,12 +8,12 @@ FROM gentoo/stage3:latest as gentoobuilder
 # Need a portage tree to build, use last nights.
 COPY --from=gentoo/portage:latest /var/db/repos/gentoo /var/db/repos/gentoo
 # Sandbox doesn't work well in docker.
-ENV FEATURES="-userpriv -usersandbox -sandbox"
+ENV FEATURES="-userpriv -usersandbox -sandbox binpkg-ignore-signature"
 ENV USE="-bindist"
-ENV PORTAGE_BINHOST="https://gentoo.osuosl.org/experimental/amd64/binpkg/default/linux/17.1/x86-64/"
+ENV PORTAGE_BINHOST="https://gentoo.osuosl.org/releases/amd64/binpackages/17.1/x86-64/"
 RUN emerge -C openssh
 RUN emerge -v -g --quiet-build dev-vcs/git
-RUN echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
+RUN echo 'FEATURES="-userpriv -usersandbox -sandbox binpkg-ignore-signature"' >> /etc/portage/make.conf
 RUN rm -rf /var/db/repos/gentoo
 
 # We can't start from scratch and copy / due to:
