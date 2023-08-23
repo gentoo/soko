@@ -238,8 +238,15 @@ func getNumericPart(str string) (string, string) {
 func getSuffix(str string) *VersionSuffix {
 	allowedSuffixes := []string{"alpha", "beta", "pre", "rc", "p"}
 	for _, allowedSuffix := range allowedSuffixes {
-		if regexp.MustCompile(allowedSuffix + `\d+`).MatchString(str) {
-			parsedSuffix, err := strconv.Atoi(strings.ReplaceAll(str, allowedSuffix, ""))
+		if regexp.MustCompile(allowedSuffix + `\d*`).MatchString(str) {
+			trimmed := strings.TrimPrefix(str, allowedSuffix)
+			if len(trimmed) == 0 {
+				return &VersionSuffix{
+					Name:   allowedSuffix,
+					Number: 0,
+				}
+			}
+			parsedSuffix, err := strconv.Atoi(trimmed)
 			if err == nil {
 				return &VersionSuffix{
 					Name:   allowedSuffix,
