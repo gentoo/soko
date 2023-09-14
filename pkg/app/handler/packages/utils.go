@@ -357,6 +357,8 @@ func remoteIdLink(remoteId models.RemoteId) string {
 	switch remoteId.Type {
 	case "bitbucket":
 		return "https://bitbucket.org/" + remoteId.Id
+	case "codeberg":
+		return "https://codeberg.org/" + remoteId.Id
 	case "cpan":
 		return "https://metacpan.org/dist/" + remoteId.Id
 	case "cpan-module":
