@@ -3,7 +3,8 @@ package repology
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"soko/pkg/config"
@@ -31,7 +32,7 @@ func UpdateOutdated() {
 	defer database.DBCon.Close()
 
 	if config.Quiet() == "true" {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	// Get all outdated Versions
@@ -87,7 +88,7 @@ func UpdateOutdated() {
 func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*models.OutdatedPackages {
 	repoPackages, err := parseRepologyData("https://repology.org/api/v1/projects/" + string(letter) + "/?inrepo=gentoo&outdated=1")
 	if err != nil {
-		logger.Error.Println("Error while fetching repology data")
+		logger.Error.Printf("Error while fetching repology data (%s): %s", string(letter), err)
 		return nil
 	}
 
@@ -166,9 +167,13 @@ func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*
 func parseRepologyData(url string) (Packages, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return Packages{}, err
+		return Packages{}, fmt.Errorf("do http: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return Packages{}, fmt.Errorf("error while fetching repology data: %s", resp.Status)
+	}
 
 	var repoPackages Packages
 	err = json.NewDecoder(resp.Body).Decode(&repoPackages)
