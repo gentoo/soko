@@ -1,4 +1,4 @@
-FROM golang:1.20.3 AS builder
+FROM golang:1.21.4 AS builder
 WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .

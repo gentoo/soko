@@ -59,6 +59,6 @@ build-tag:
 
 go-test:
   stage: go-test
-  image: golang:1.19.3
+  image: golang:1.21.4
   script:
     - go test -v ./pkg/models/...
