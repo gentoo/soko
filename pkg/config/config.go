@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 func PortDir() string {
 	return getEnv("SOKO_PORT_DIR", "/mnt/packages-tree/gentoo")
@@ -64,6 +67,10 @@ func GraphiqlEndpoint() string {
 
 func CacheControl() string {
 	return getEnv("SOKO_CACHE_CONTROL", "max-age=300")
+}
+
+func UserAgent() string {
+	return fmt.Sprintf("Gentoo Soko %s/packages.gentoo.org/gpackages@gentoo.org", Version())
 }
 
 func getEnv(key string, fallback string) string {

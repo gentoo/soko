@@ -2,6 +2,7 @@ package repology
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,6 +14,8 @@ import (
 	"soko/pkg/models"
 	"strings"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type Package struct {
@@ -24,6 +27,9 @@ type Package struct {
 }
 
 type Packages map[string][]Package
+
+var client = http.Client{Timeout: 1 * time.Minute}
+var clientRateLimiter = rate.NewLimiter(rate.Every(2*time.Second), 1)
 
 // UpdateOutdated will update the database table that contains all outdated gentoo versions
 func UpdateOutdated() {
@@ -86,7 +92,7 @@ func UpdateOutdated() {
 
 // getOutdatedStartingWith gets all outdated packages starting with the given letter
 func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*models.OutdatedPackages {
-	repoPackages, err := parseRepologyData("https://repology.org/api/v1/projects/" + string(letter) + "/?inrepo=gentoo&outdated=1")
+	repoPackages, err := parseRepologyData(letter)
 	if err != nil {
 		logger.Error.Printf("Error while fetching repology data (%s): %s", string(letter), err)
 		return nil
@@ -164,8 +170,20 @@ func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*
 }
 
 // parseRepologyData gets the json from given url and parses it
-func parseRepologyData(url string) (Packages, error) {
-	resp, err := http.Get(url)
+func parseRepologyData(letter rune) (Packages, error) {
+	err := clientRateLimiter.Wait(context.Background())
+	if err != nil {
+		return Packages{}, fmt.Errorf("rate limiter failed: %w", err)
+	}
+
+	url := "https://repology.org/api/v1/projects/" + string(letter) + "/?inrepo=gentoo&outdated=1"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return Packages{}, fmt.Errorf("new request: %w", err)
+	}
+	req.Header.Set("User-Agent", config.UserAgent())
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return Packages{}, fmt.Errorf("do http: %w", err)
 	}
@@ -184,7 +202,7 @@ func parseRepologyData(url string) (Packages, error) {
 // lines whereas comments as well as empty lines are ignored
 func readBlockList(file string) map[string]struct{} {
 	blocklist := make(map[string]struct{})
-	resp, err := http.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
+	resp, err := client.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
 	if err != nil {
 		return blocklist
 	}
