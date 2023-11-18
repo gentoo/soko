@@ -79,7 +79,9 @@ func parsePackagesDeprecated(entry string) {
 			packageLine, packageLines = packageLines[0], packageLines[1:]
 		}
 
-		reason = bugReplacer.ReplaceAllString(reason, `<a href="https://bugs.gentoo.org/$1">$0</a>`)
+		reason = bugListMatcher.ReplaceAllStringFunc(reason, func(bugList string) string {
+			return bugReplacer.ReplaceAllString(bugList, `<a href="https://bugs.gentoo.org/$1">$0</a>`)
+		})
 
 		packageLines = append(packageLines, packageLine)
 

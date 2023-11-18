@@ -103,7 +103,9 @@ func parseAuthorLine(authorLine string) (string, string, time.Time) {
 	return author, authorEmail, parsedDate
 }
 
-var bugReplacer = regexp.MustCompile(`[bB]ug #?(\d+)`)
+// based on regex from GLEP-0084
+var bugListMatcher = regexp.MustCompile(`[Bb]ugs? +#\d+(,? +#\d+)*`)
+var bugReplacer = regexp.MustCompile(`#(\d+)`)
 
 // parse the package.mask entries and
 // update the Mask table in the database
@@ -124,7 +126,9 @@ func parsePackageMask(packageMask string) {
 			packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		}
 
-		reason = bugReplacer.ReplaceAllString(reason, `<a href="https://bugs.gentoo.org/$1">$0</a>`)
+		reason = bugListMatcher.ReplaceAllStringFunc(reason, func(bugList string) string {
+			return bugReplacer.ReplaceAllString(bugList, `<a href="https://bugs.gentoo.org/$1">$0</a>`)
+		})
 
 		packageMaskLines = append(packageMaskLines, packageMaskLine)
 
