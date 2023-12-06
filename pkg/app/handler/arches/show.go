@@ -45,6 +45,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		feedTitle := "Keyworded packages in Gentoo on " + arch
 		feedDescription := feedTitle
 		feeds.Changes(feedTitle, feedDescription, keywordedVersions, w)
+	case "leaf-packages":
+		leafs, err := getLeafPackagesForArch(arch)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Write([]byte(strings.Join(leafs, "\n")))
 	default:
 		http.NotFound(w, r)
 	}
