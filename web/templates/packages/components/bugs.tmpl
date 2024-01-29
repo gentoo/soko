@@ -75,7 +75,7 @@
                     </div>
                     <div class="col-md-8 pt-3">
                         <h2>Good job! There are no bugs.</h2>
-                        <span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/enter_bug.cgi">new bug</a>.</span>
+                        <span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/enter_bug.cgi?product=Gentoo%20Linux&component=Current%20packages&short_desc={{.Package.Category}}%2F{{.Package.Name}}:%20%3CADD%20SUMMARY%20HERE%3E">new bug</a>.</span>
                     </div>
                 </div>
             {{- end }}
@@ -90,7 +90,7 @@
                 <span class="text-muted">
                     Gentoo Bugzilla is where we track bugs of Gentoo and its packages; you are welcome to report, confirm and resolve bugs:
                     <ul>
-                        <li><a href="https://bugs.gentoo.org/enter_bug.cgi">File a new Bug</a></li>
+                        <li><a href="https://bugs.gentoo.org/enter_bug.cgi?product=Gentoo%20Linux&component=Current%20packages&short_desc={{.Package.Category}}%2F{{.Package.Name}}:%20%3CADD%20SUMMARY%20HERE%3E">File a new Bug</a></li>
                         <li><a href="https://bugs.gentoo.org/">Confirm a bug</a></li>
                         <li><a href="https://wiki.gentoo.org/wiki/Bugday">Participate in our monthly Bugday</a></li>
                     </ul>
