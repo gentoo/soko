@@ -1,0 +1,49 @@
+package about
+
+import "net/http"
+import "soko/pkg/app/layout"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "time"
+
+templ status(applications []*models.Application) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12 text-center">
+				<h1 class="px-3 pt-5 pb-1" style="font-size: 3em;">About packages.gentoo.org</h1>
+				<span style="font-size: 90%;" class="text-muted">
+					Feel free to <a href="/about/feedback">get in touch</a> { "if" } you have any questions that are not answered on this page.
+					<br/>
+					And welcome to the new packages.gentoo.org!
+				</span>
+			</div>
+			<div class="col-8 offset-md-2 mt-5 pt-4">
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Type</th>
+							<th scope="col">Last Update</th>
+							<th scope="col">Age</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, app := range applications {
+							<tr>
+								<th scope="row" class="text-capitalize">{ app.Id }</th>
+								<td>{ app.LastUpdate.Format(time.DateTime) } UTC</td>
+								<td>{ time.Since(app.LastUpdate).Round(time.Second).String() }</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}
+
+// Status shows the sync status of updater
+func Status(w http.ResponseWriter, r *http.Request) {
+    var applicationData []*models.Application
+	database.DBCon.Model(&applicationData).Order("id").Column("id", "last_update").Select()
+    layout.Layout("About", "about", status(applicationData)).Render(r.Context(), w)
+}
