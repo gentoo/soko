@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/99designs/gqlgen v0.17.42
+	github.com/a-h/templ v0.2.543
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-pg/pg/v10 v10.12.0

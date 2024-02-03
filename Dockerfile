@@ -1,7 +1,8 @@
 FROM golang:1.21.4 AS builder
+RUN go install github.com/a-h/templ/cmd/templ@latest
 WORKDIR /go/src/soko
 COPY . /go/src/soko
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
+RUN templ generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
 FROM node:21 AS assetsbuilder
 WORKDIR /go/src/soko
