@@ -3,7 +3,7 @@ package arches
 import (
 	"net/http"
 	"soko/pkg/app/handler/feeds"
-	"soko/pkg/app/handler/packages"
+	"soko/pkg/app/layout"
 	"soko/pkg/app/utils"
 	"strings"
 )
@@ -18,7 +18,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 			return
 		}
-		renderPackageTemplates("changedVersions", packages.GetFuncMap(), createFeedData(arch, "Newly Stable", "stable", stabilizedVersions, utils.GetUserPreferences(r)), w)
+		layout.Layout("Architectures", "arches", changedVersions(
+			arch, "Newly Stable", "stable", stabilizedVersions, utils.GetUserPreferences(r).Arches,
+		)).Render(r.Context(), w)
 	case "stable.atom":
 		stabilizedVersions, err := getStabilizedVersionsForArch(arch, 250)
 		if err != nil {
@@ -34,7 +36,10 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 			return
 		}
-		renderPackageTemplates("changedVersions", packages.GetFuncMap(), createFeedData(arch, "Keyworded", "keyworded", keywordedVersions, utils.GetUserPreferences(r)), w)
+		layout.Layout("Architectures", "arches", changedVersions(
+			arch, "Keyworded", "keyworded", keywordedVersions, utils.GetUserPreferences(r).Arches,
+		)).Render(r.Context(), w)
+		// renderPackageTemplates("changedVersions", packages.GetFuncMap(), createFeedData(arch, "Keyworded", "keyworded", keywordedVersions, utils.GetUserPreferences(r)), w)
 	case "keyworded.atom":
 		keywordedVersions, err := getKeywordedVersionsForArch(arch, 250)
 		if err != nil {

@@ -1,0 +1,213 @@
+package arches
+
+import "slices"
+import "strings"
+import "time"
+import "soko/pkg/app/handler/packages"
+import "soko/pkg/models"
+
+func activeClass(flag bool) string {
+	if flag {
+		return "nav-link active"
+	}
+	return "nav-link"
+}
+
+templ archesHeader(currentArch string, userPreferences models.ArchesPreferences) {
+	<div class="kk-header-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="row mt-3">
+						<div class="col-md-5 pt-2">
+							<h1 class="stick-top kk-package-title" id="package-title">
+								<div>
+									<div class="kk-package-name" style="margin-left: 0px!important;">
+										<span class="fa fa-fw fa-server"></span>
+										<span class="ml-2">Architectures</span>
+									</div>
+								</div>
+							</h1>
+						</div>
+						<div class="col-md-7"></div>
+						<div class="col-md-12 pt-4 mt-1">
+							<nav class="nav kk-package-nav">
+								for _, arch := range userPreferences.Visible {
+									<a
+										class={ activeClass(arch == currentArch) }
+										href={ templ.URL("/arches/" + arch + "/" + userPreferences.DefaultPage) }
+									>
+										{ arch }
+									</a>
+								}
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ changedVersionsTable(versions []*models.Version, userPreferences models.ArchesPreferences) {
+	for _, version := range versions {
+		<li class="list-group-item kk-package-detailed">
+			<div class="row">
+				<div class="col-xs-12 col-md-6">
+					<h4 class="stick-top"><a href={ templ.URL("/packages/" + version.Atom) }>{ version.Atom }</a></h4>
+					<div class="kk-package-detailed-toolbox">
+						<button type="button" class="kk-btn-xs btn btn-outline-secondary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="fa fa-fw fa-navicon"></span>
+						</button>
+						<div class="dropdown-menu dropdown-menu-right">
+							<a
+								class="dropdown-item"
+								target="_blank"
+								href={ templ.URL("https://bugs.gentoo.org/buglist.cgi?quicksearch=" + version.Atom) }
+							>
+								<span class="fa fa-fw fa-bug"></span>
+								Related bugs
+							</a>
+							<a
+								class="dropdown-item"
+								target="_blank"
+								href={ templ.URL("https://wiki.gentoo.org/index.php?title=Special:Search&fulltext=Search&search=" + version.Package) }
+							>
+								<span class="fa fa-fw fa-book"></span>
+								Documentation
+							</a>
+							<a
+								class="dropdown-item"
+								target="_blank"
+								href={ templ.URL("https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords=" + version.Package + "&mode=results") }
+							>
+								<span class="fa fa-fw fa-comments-o"></span>
+								Forums posts
+							</a>
+							<div class="dropdown-divider"></div>
+							<a
+								class="dropdown-item"
+								target="_blank"
+								href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/tree/" + version.Atom) }
+							>
+								<span class="fa fa-fw fa-code-fork"></span>
+								Git repository browser
+							</a>
+							<a
+								class="dropdown-item"
+								target="_blank"
+								href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/log/" + version.Atom + "?showmsg=1") }
+							>
+								<span class="fa fa-fw fa-history"></span>
+								Git log
+							</a>
+							<a
+								class="dropdown-item"
+								target="_blank"
+								href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/atom/" + version.Atom + "?h=master") }
+							>
+								<span class="fa fa-fw fa-rss"></span>
+								Changes feed
+							</a>
+						</div>
+					</div>
+					{ version.Description }
+					<br/>
+					<small class="text-muted"></small>
+					if len(version.Commits) > 0 {
+						<div class="kk-inline-changelog-entry">
+							<a
+								href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=" + version.Commits[0].Id) }
+								title="Git commit"
+							>
+								<span class="octicon octicon-git-pull-request"></span>
+								<span class="kk-commit-message">{ version.Commits[0].Message }</span>
+							</a>
+						</div>
+					}
+				</div>
+				<div class="col-xs-12 col-md-6">
+					<small class="text-muted pull-right">
+						if len(version.Commits) > 0 {
+							<span title={ version.Commits[0].CommitterDate.Format(time.DateTime) + " UTC" }>
+								{ version.Commits[0].CommitterDate.Format(time.DateTime) } UTC
+							</span>
+						} else {
+							<span title="unknown">unknown</span>
+						}
+					</small>
+					<div class="kk-version-card">
+						<p class="mb-2">
+							<strong>{ version.Version }</strong>
+							<span class="kk-slot"> : { version.Slot }</span>
+							if len(version.Restricts) > 0 {
+								<span
+									class="badge badge-danger kk-restrict-label"
+									title={ "The following features are restricted: " + strings.Join(version.Restricts, " ") }
+								>
+									{ packages.FormatRestricts(version.Restricts) }
+								</span>
+							}
+						</p>
+						<p>
+							for _, arch := range userPreferences.Visible {
+								if slices.Contains(strings.Fields(version.Keywords), arch) {
+									<span style="margin-right: 4px;" class="label kk-keyword-stable" title={ version.Version + " is stable on " + arch }>
+										{ arch }
+									</span>
+								} else if slices.Contains(strings.Fields(version.Keywords), "~"+arch) {
+									<span style="margin-right: 4px;" class="label kk-keyword-testing" title={ version.Version + " is testing on " + arch }>
+										~{ arch }
+									</span>
+								} else {
+									<span style="margin-right: 4px;" class="label kk-keyword-unknown" title={ version.Version + " is unknown on " + arch }>
+										?{ arch }
+									</span>
+								}
+							}
+						</p>
+					</div>
+				</div>
+			</div>
+		</li>
+	}
+}
+
+templ changedVersions(
+    currentArch string,
+    name string,
+    feedName string,
+    versions []*models.Version,
+    userPreferences models.ArchesPreferences,
+) {
+	@archesHeader(currentArch, userPreferences)
+	<div class="tab-content" id="myTabContent">
+		<div class="container mb-5">
+			<div class="row">
+				<div class="col-11">
+					if name == "Keyworded" {
+						<h3>
+							<a class="text-dark"><i class="fa fa-circle-o" aria-hidden="true"></i> Keyworded Packages</a>
+							<a href={ templ.URL("/arches/" + currentArch + "/stable") } class="ml-3 text-muted"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Newly Stable Packages</a>
+						</h3>
+					} else {
+						<h3>
+							<a href={ templ.URL("/arches/" + currentArch + "/keyworded") } class="text-muted"><i class="fa fa-circle-o" aria-hidden="true"></i> Keyworded Packages</a>
+							<a class="ml-3 text-dark"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Newly Stable Packages</a>
+						</h3>
+					}
+				</div>
+				<div class="col-1 text-right">
+					<h3>
+						<a title="Atom feed" href={ templ.URL("/arches/" + currentArch + "/" + feedName + ".atom") } class="kk-feed-icon"><span class="fa fa-fw fa-rss-square"></span></a>
+					</h3>
+				</div>
+				<div class="col-12">
+					<li class="list-group">
+						@changedVersionsTable(versions, userPreferences)
+					</li>
+				</div>
+			</div>
+		</div>
+	</div>
+}
