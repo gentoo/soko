@@ -4,10 +4,8 @@ package index
 
 import (
 	b64 "encoding/base64"
-	"html/template"
 	"net/http"
-	"soko/pkg/app/handler/packages"
-	"soko/pkg/app/utils"
+	"slices"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strconv"
@@ -58,12 +56,7 @@ func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.P
 			}
 		}
 	}
-
-	// reverse the slice
-	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
-		result[i], result[j] = result[j], result[i]
-	}
-
+	slices.Reverse(result)
 	return
 }
 
@@ -108,48 +101,6 @@ func getUpdatedVersions(n int) []*models.Version {
 	return updatedVersions
 }
 
-// createPageData creates the data used in the template of the landing page
-func createPageData(packagecount int, addedPackages []models.Package, updatedVersions []*models.Version, userPreferences models.UserPreferences) interface{} {
-	return struct {
-		Header          models.Header
-		PackageCount    string
-		AddedPackages   []models.Package
-		UpdatedPackages []*models.Version
-		Application     models.Application
-		UserPreferences models.UserPreferences
-	}{
-		Header:          models.Header{Title: "", Tab: "home"},
-		Application:     utils.GetApplicationData(),
-		PackageCount:    formatPackageCount(packagecount),
-		AddedPackages:   addedPackages,
-		UpdatedPackages: updatedVersions,
-		UserPreferences: userPreferences,
-	}
-}
-
-// renderIndexTemplate renders all templates used for the landing page
-func renderIndexTemplate(w http.ResponseWriter, pageData interface{}) {
-	templates := template.Must(
-		template.Must(
-			template.Must(
-				template.New("Show").
-					Funcs(getFuncMap()).
-					ParseGlob("web/templates/layout/*.tmpl")).
-				ParseGlob("web/templates/packages/changedVersionRow.tmpl")).
-			ParseGlob("web/templates/index/*.tmpl"))
-
-	templates.ExecuteTemplate(w, "show.tmpl", pageData)
-}
-
-// GetFuncMap returns the FuncMap used in templates
-func getFuncMap() template.FuncMap {
-	return template.FuncMap{
-		"contains":        strings.Contains,
-		"mkSlice":         mkSlice,
-		"formatRestricts": packages.FormatRestricts,
-	}
-}
-
 // formatPackageCount returns the formatted number of
 // packages containing a thousands comma
 func formatPackageCount(packageCount int) string {
@@ -163,9 +114,4 @@ func formatPackageCount(packageCount int) string {
 	} else {
 		return packages
 	}
-}
-
-// mkSlice creates a slice based on the given arguments
-func mkSlice(args ...interface{}) []interface{} {
-	return args
 }

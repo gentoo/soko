@@ -1,0 +1,113 @@
+package index
+
+import "net/http"
+import "soko/pkg/app/layout"
+import "soko/pkg/app/utils"
+import "soko/pkg/database"
+import "soko/pkg/models"
+
+templ header(packageCount int) {
+	<div class="col-12">
+		<div class="jumbotron mb-3" style="background: none!important;">
+			<h2 class="site-welcome stick-top">
+				Welcome to the Home
+				<br/>
+				of <span class="text-primary">{ formatPackageCount(packageCount) }</span> Gentoo Packages
+			</h2>
+			<form action="/packages/search" method="get">
+				<div class="typeahead__container px-5">
+					<div class="typeahead__field">
+						<span class="typeahead__query" style="font-size: 1.1em; height: 2.3em;">
+							<input class="rounded-left" style="font-size: 1.1em; height: 2.3em;border-right: 0px;" id="q" name="q" type="search" autocomplete="off" placeholder="Find Packages" aria-label="Find Packages" autofocus/>
+						</span>
+						<span class="typeahead__button" style="font-size: 1.1em!important; height: 2.3em!important;border-left: 0px;">
+							<button style="border-top-right-radius: 0.25rem !important; border-bottom-right-radius: 0.25rem !important; font-size: 1.1em!important; height: 2.3em!important;border-left: 0px;box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);!important;" type="submit" title="Find" aria-label="Find">
+								<span class="typeahead__search-icon"></span><span class="sr-only">Find</span>
+							</button>
+						</span>
+					</div>
+				</div>
+			</form>
+			<br/>
+			<small class="mt-4 px-5 text-muted" style="font-size: 12px;">
+				This is the new packages.gentoo.org site. If anything isn't working as expected,
+				<a href="mailto:gpackages@gentoo.org">contact us</a>.
+			</small>
+			<br/>
+			<small class="px-5 text-muted" style="font-size: 12px;">
+				You can search by <a href="/packages/search?q=sys-kernel/gentoo-sources">atom</a>, <a href="/packages/search?q=sys-kernel">category</a>, <a href="/packages/search?q=gentoo-sources">name</a>, <a href="/packages/search?q=kernel@gentoo.org">maintainer</a> or <a href="/packages/search?q=x11-wm%20haskell@gentoo.org">combine</a> queries. Results similar to your query will be found as well.
+			</small>
+		</div>
+	</div>
+}
+
+templ packagesList(addedPackages []models.Package, landingPage string) {
+	<div class="col-12">
+		<h3 class="mb-2">
+			<span class="fa fa-fw fa-history"></span>
+			if landingPage == "classic" {
+				<a class="text-dark" href="/packages/added">Added Packages</a>
+			} else {
+				<a class="text-dark">Search History</a>
+			}
+		</h3>
+		<div class="card border-top-0 mb-4">
+			<div class="table-responsive rounded">
+				<table class="table table-striped rounded mb-0">
+					<tbody>
+						for _, pkg := range addedPackages {
+							<tr>
+								<td>
+									<a href={ templ.URL("/packages/" + pkg.Atom) }>
+										<span class="text-muted">{ pkg.Category }</span>/<strong>{ pkg.Name }</strong>
+									</a>
+								</td>
+								<td>{ pkg.Versions[0].Description }</td>
+							</tr>
+						}
+						if landingPage == "full" && len(addedPackages) == 0 {
+							<tr><td class="text-center"><i>Visited packages will be displayed here in future</i></td></tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}
+
+templ page(packageCount int, addedPackages []models.Package, updatedVersions []*models.Version, userPreferences models.UserPreferences) {
+	<div class="container mb-5">
+		<div class="row">
+			@header(packageCount)
+			@packagesList(addedPackages, userPreferences.General.LandingPageLayout)
+			<div class="col-12">
+				<h3 class="pt-3 mb-2">
+					<span class="fa fa-fw fa-asterisk"></span>
+					<a class="text-dark" href="/packages/updated">Updated Packages</a>
+				</h3>
+				<ul class="list-group">
+					@utils.ChangedVersionsTable(updatedVersions, userPreferences.Arches)
+				</ul>
+			</div>
+		</div>
+	</div>
+	<script src="assets/index.js"></script>
+}
+
+// Show renders a template to show the landing page of the application
+func Show(w http.ResponseWriter, r *http.Request) {
+	count, _ := database.DBCon.Model((*models.Package)(nil)).Count()
+
+	var packagesList []models.Package
+	if utils.GetUserPreferences(r).General.LandingPageLayout == "classic" {
+		packagesList = getAddedPackages(10)
+	} else {
+		packagesList = getSearchHistoryPackages(r)
+	}
+
+	updatedVersions := getUpdatedVersions(10)
+
+	layout.Layout("", "home", page(
+		count, packagesList, updatedVersions, utils.GetUserPreferences(r),
+	)).Render(r.Context(), w)
+}

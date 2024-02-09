@@ -11,7 +11,6 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
-	utils2 "soko/pkg/utils"
 	"sort"
 	"strings"
 
@@ -184,7 +183,7 @@ func GetFuncMap() template.FuncMap {
 		"mkSlice":            mkSlice,
 		"getReverse":         getReverse,
 		"tolower":            strings.ToLower,
-		"formatRestricts":    FormatRestricts,
+		"formatRestricts":    utils.FormatRestricts,
 		"RemoteIdLink":       remoteIdLink,
 		"isMasked":           isMasked,
 		"getMask":            getMask,
@@ -337,19 +336,6 @@ func CreateFeedData(name string, versions []*models.Version) interface{} {
 		Versions:    versions,
 		Application: utils.GetApplicationData(),
 	}
-}
-
-// FormatRestricts returns a string containing a comma separated
-// list of capitalized first letters of the package restricts
-func FormatRestricts(restricts []string) string {
-	var result []string
-	for _, restrict := range restricts {
-		if restrict != "" && restrict != "(" && restrict != ")" && !strings.HasSuffix(restrict, "?") {
-			result = append(result, strings.ToUpper(string(restrict[0])))
-		}
-	}
-	result = utils2.Deduplicate(result)
-	return strings.Join(result, ", ")
 }
 
 // remoteIdLink returns a link to the homepage of a given remote id
