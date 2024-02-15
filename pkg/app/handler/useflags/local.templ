@@ -1,0 +1,48 @@
+package useflags
+
+import "net/http"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "github.com/go-pg/pg/v10"
+
+templ local(useflags []models.Useflag) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<div class="card border-0">
+					<div class="list-group">
+						for i, use := range useflags {
+							if i == 0 || use.Package != useflags[i-1].Package {
+								@templ.Raw("</div></div>")
+								<h3 class={ templ.KV("mt-4", i > 0) }>{ use.Package }</h3>
+								@templ.Raw(`<div class="card border-0"><div class="list-group">`)
+							}
+							<a
+								class="list-group-item list-group-item-action text-dark"
+								href={ templ.SafeURL("/useflags/" + use.Name) }
+							>
+								<h3 class="kk-search-result-header">{ use.Name }</h3>
+								{ use.Description }
+							</a>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+func Local(w http.ResponseWriter, r *http.Request) {
+	var useflags []models.Useflag
+	err := database.DBCon.Model(&useflags).
+		Where("scope = 'local'").
+		Order("package", "name").
+        Column("package", "name", "description").
+		Select()
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	RenderPage(w, r, "Local", "Local", local(useflags))
+}

@@ -1,0 +1,60 @@
+package useflags
+
+import "net/http"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "github.com/go-pg/pg/v10"
+
+templ expand(useflags []models.Useflag) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-md-9">
+				<div class="card border-0">
+					<div class="list-group">
+						for i, use := range useflags {
+							if i == 0 || use.UseExpand != useflags[i-1].UseExpand {
+								@templ.Raw("</div></div>")
+								<h3 class={ templ.KV("mt-4", i > 0) } id={ use.UseExpand }>{ use.UseExpand }</h3>
+								@templ.Raw(`<div class="card border-0"><div class="list-group">`)
+							}
+							<a
+								class="list-group-item list-group-item-action text-dark"
+								href={ templ.SafeURL("/useflags/" + use.Name) }
+							>
+								<h3 class="kk-search-result-header">{ use.Name }</h3>
+								{ use.Description }
+							</a>
+						}
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<dl>
+					<dd class="ml-3 mb-0">
+						for i, use := range useflags {
+							if i == 0 || use.UseExpand != useflags[i-1].UseExpand {
+								<a href={ templ.URL("#" + use.UseExpand) } class="text-muted">{ use.UseExpand }</a>
+								<br/>
+							}
+						}
+					</dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+}
+
+func Expand(w http.ResponseWriter, r *http.Request) {
+	var useflags []models.Useflag
+	err := database.DBCon.Model(&useflags).
+		Where("scope = 'use_expand'").
+		Order("use_expand", "name").
+        Column("use_expand", "name", "description").
+		Select()
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	RenderPage(w, r, "USE Expand", "USE Expand", expand(useflags))
+}

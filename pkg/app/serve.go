@@ -41,7 +41,7 @@ func Serve() {
 	setRoute("/useflags/global", useflags.Global)
 	setRoute("/useflags/local", useflags.Local)
 	setRoute("/useflags/expand", useflags.Expand)
-	setRoute("/useflags/popular", useflags.Index)
+	setRoute("/useflags/popular", useflags.PopularPage)
 	setRoute("/useflags", useflags.Default)
 	setRoute("/useflags/", useflags.Show)
 

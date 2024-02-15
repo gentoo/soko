@@ -5,12 +5,12 @@ import "soko/pkg/config"
 templ head(title string) {
 	<head>
 		<title>
-        if title != "" {
-            { title } – Gentoo Packages
-        } else {
-            Gentoo Packages
-        }
-        </title>
+			if title != "" {
+				{ title } – Gentoo Packages
+			} else {
+				Gentoo Packages
+			}
+		</title>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="theme-color" content="#54487a"/>
@@ -59,13 +59,6 @@ templ siteTitle() {
 	</div>
 }
 
-func activeClass(tab string, currentTab string) string {
-	if tab == currentTab {
-		return "nav-item active"
-	}
-	return "nav-item"
-}
-
 templ navigationBar(tab string) {
 	<nav class="tyrian-navbar navbar navbar-dark navbar-expand-lg bg-primary" role="navigation">
 		<div class="container">
@@ -76,12 +69,12 @@ templ navigationBar(tab string) {
 			</div>
 			<div class="collapse navbar-collapse navbar-main-collapse" id="navbar-main-collapse">
 				<ul class="navbar-nav mr-auto">
-					<li class={ activeClass("home", tab) }><a class="nav-link" href="/">Home</a></li>
-					<li class={ activeClass("packages", tab) }><a class="nav-link" href="/categories">Packages</a></li>
-					<li class={ activeClass("maintainers", tab) }><a class="nav-link" href="/maintainers">Maintainers</a></li>
-					<li class={ activeClass("useflags", tab) }><a class="nav-link" href="/useflags">USE flags</a></li>
-					<li class={ activeClass("arches", tab) }><a class="nav-link" href="/arches">Architectures</a></li>
-					<li class={ activeClass("about", tab) }><a class="nav-link" href="/about">About</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == "home") }><a class="nav-link" href="/">Home</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == "packages") }><a class="nav-link" href="/categories">Packages</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == "maintainers") }><a class="nav-link" href="/maintainers">Maintainers</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == "useflags") }><a class="nav-link" href="/useflags">USE flags</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == "arches") }><a class="nav-link" href="/arches">Architectures</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == "about") }><a class="nav-link" href="/about">About</a></li>
 				</ul>
 				if tab != "home" {
 					<form class="form-inline inlinesearch" role="search" action="/packages/search" method="get">
@@ -110,7 +103,7 @@ templ footer() {
 					</ul>
 				</div>
 				<div class="col-8 col-sm-8 col-md-8">
-					<strong>&copy; 2001&ndash;2023 Gentoo Authors</strong>
+					<strong>&copy; 2001&ndash;2024 Gentoo Authors</strong>
 					<br/>
 					<small>
 						Gentoo is a trademark of the Gentoo Foundation, Inc.
@@ -121,10 +114,8 @@ templ footer() {
 				</div>
 				<div class="col-2 col-sm-2 col-md-2 text-right">
 					<strong><a class="text-dark" href="https://www.gentoo.org/inside-gentoo/contact/">Contact</a></strong>
-                    <br />
-                    <small>
-                        { config.Version() }
-                    </small>
+					<br/>
+					<small>{ config.Version() }</small>
 				</div>
 			</div>
 		</div>
@@ -140,8 +131,51 @@ templ Layout(title string, tab string, contents templ.Component) {
 				@siteTitle()
 				@navigationBar(tab)
 			</header>
-            @contents
-            @footer()
+			@contents
+			@footer()
 		</body>
 	</html>
+}
+
+type SubTab struct {
+	Name string
+	Link templ.SafeURL
+	Icon string
+}
+
+templ tabbedHeader(subTitle string, icon string, tabs []SubTab, currentSubTab string, contents templ.Component) {
+	<div class="kk-header-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="row mt-3  pt-2">
+						<div class="col-md-5">
+							<h1 class="stick-top kk-package-title" id="package-title">
+								<div>
+									<div class="kk-package-name" style="margin-left: 0px!important;"><span class={ icon }></span><span class="ml-2">{ subTitle }</span></div>
+								</div>
+							</h1>
+						</div>
+						<div class="col-md-7"></div>
+						<div class="col-md-12 pt-4 mt-1">
+							<nav class="nav kk-package-nav">
+								for _, tab := range tabs {
+									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
+										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
+									</a>
+								}
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tab-content" id="myTabContent">
+		@contents
+	</div>
+}
+
+templ TabbedLayout(title string, tab string, subTitle string, icon string, tabs []SubTab, currentSubTab string, contents templ.Component) {
+	@Layout(title, tab, tabbedHeader(subTitle, icon, tabs, currentSubTab, contents))
 }

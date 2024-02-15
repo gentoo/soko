@@ -1,0 +1,31 @@
+package useflags
+
+import "net/http"
+
+templ popular() {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<div class="card" style="background: none;border: none;">
+					<noscript>
+						<div class="panel-body kk-panel-content-sorry">
+							This feature requires JavaScript to work.
+						</div>
+					</noscript>
+					<div
+						class="panel-body kk-useflag-bubble-container"
+						id="bubble-placeholder"
+						style="overflow: hidden!important; display: none;"
+					></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/assets/useflags.js"></script>
+}
+
+// PopularPage renders a template to show the index page of the USE flags
+// section containing a bubble chart of popular USE flags
+func PopularPage(w http.ResponseWriter, r *http.Request) {
+	RenderPage(w, r, "Useflags", "Widely used", popular())
+}

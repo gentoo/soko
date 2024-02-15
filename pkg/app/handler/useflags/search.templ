@@ -1,0 +1,92 @@
+package useflags
+
+import "net/http"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "github.com/go-pg/pg/v10"
+
+css searchButton() {
+	border-top-right-radius: 0.25rem !important;
+	border-bottom-right-radius: 0.25rem !important;
+	font-size: 1.1em !important;
+	height: 2.3em !important;
+	border-left: 0px;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075) !important;
+}
+
+templ search(query string, useflags []models.Useflag) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class={ "col-12", templ.KV("mt-5", len(useflags) == 0), templ.KV("pt-5", len(useflags) == 0) }>
+				<div class="col-12 mt-3 text-center">
+					<h2>Find USE flags</h2>
+				</div>
+				<div class="col-12">
+					<form action="/useflags/search" method="get" class="useflag-search mt-3 mb-5 mx-5 px-5">
+						<div class="typeahead__container mx-5 px-5">
+							<div class="typeahead__field">
+								<span class="typeahead__query" style="font-size: 1.1em; height: 2.3em;">
+									<input id="q" name="q" class="rounded-left" style="font-size: 1.1em; height: 2.3em;border-right: 0px;" type="search" autocomplete="off" placeholder="Find USE flags"/>
+								</span>
+								<span class="typeahead__button" style="font-size: 1.1em!important; height: 2.3em!important;border-left: 0px;">
+									<button class={ searchButton() } type="submit">
+										<span class="typeahead__search-icon"></span>
+									</button>
+								</span>
+							</div>
+						</div>
+					</form>
+				</div>
+				if query != "" {
+					if len(useflags) > 0 {
+						<h2>USE Flag Search Results <small>{ "for" } { query }</small></h2>
+						<div class="card border-0">
+							<div class="list-group">
+								for _, use := range useflags {
+									<a
+										class="list-group-item list-group-item-action text-dark"
+										href={ templ.URL("/useflags/" + use.Name) }
+									>
+										<h3 class="kk-search-result-header">
+											{ use.Name }
+											if use.Scope == "local" {
+												<span class="text-secondary">({ use.Package })</span>
+											}
+										</h3>
+										{ use.Description }
+									</a>
+								}
+							</div>
+						</div>
+					} else {
+						<h2>No results found <small>{ "for" } { query }</small></h2>
+					}
+				}
+			</div>
+		</div>
+	</div>
+	<script src="/assets/useflags.js"></script>
+}
+
+// Search renders a template containing a list of search results
+// for a given query of USE flags
+func Search(w http.ResponseWriter, r *http.Request) {
+	results := r.URL.Query()["q"]
+
+	param := ""
+	var useflags []models.Useflag
+	if len(results) != 0 {
+		param = results[0]
+		err := database.DBCon.Model(&useflags).
+			Column("name", "description", "scope", "package").
+			Where("name LIKE ?", param+"%").
+			OrderExpr("scope, name <-> ?", param).
+			Select()
+		if err != nil && err != pg.ErrNoRows {
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+	}
+	RenderPage(w, r, param, "Search", search(param, useflags))
+}

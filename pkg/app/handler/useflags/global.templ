@@ -1,0 +1,44 @@
+package useflags
+
+import "net/http"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "github.com/go-pg/pg/v10"
+
+templ global(useflags []models.Useflag) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<h3><span class="text-capitalize">Global</span> USE flags</h3>
+				<div class="card border-0">
+					<div class="list-group">
+						for _, use := range useflags {
+							<a
+								class="list-group-item list-group-item-action text-dark"
+								href={ templ.SafeURL("/useflags/" + use.Name) }
+							>
+								<h3 class="kk-search-result-header">{ use.Name }</h3>
+								{ use.Description }
+							</a>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+func Global(w http.ResponseWriter, r *http.Request) {
+	var useflags []models.Useflag
+	err := database.DBCon.Model(&useflags).
+		Where("scope = 'global'").
+		Order("name").
+        Column("name", "description").
+		Select()
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	RenderPage(w, r, "Global", "Global", global(useflags))
+}

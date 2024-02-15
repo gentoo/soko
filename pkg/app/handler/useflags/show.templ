@@ -1,0 +1,175 @@
+package useflags
+
+import "net/http"
+import "strconv"
+import "strings"
+import "soko/pkg/app/layout"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "github.com/go-pg/pg/v10"
+
+templ showUseflagHeader(useflag models.Useflag) {
+	<div class="kk-header-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="row mt-3  pt-2">
+						<div class="col-md-5">
+							<h1 class="stick-top kk-package-title" id="package-title">
+								<small class="kk-package-cat">
+									<a href="/useflags" class={ "text-dark", "ml-1", templ.KV("text-capitalize", useflag.UseExpand == "") }>
+										if useflag.UseExpand != "" {
+											{ useflag.UseExpand }
+										} else {
+											{ useflag.Scope } USE flag
+										}
+									</a>
+								</small>
+								<div>
+									<div class="kk-package-name" style="margin-left: 0px!important;">
+										<span class="fa fa-fw fa-sliders"></span>
+										<span class="ml-2">
+											if useflag.UseExpand != "" {
+												{ strings.TrimPrefix(useflag.Name, useflag.UseExpand + "_") }
+											} else {
+												{ useflag.Name }
+											}
+										</span>
+									</div>
+								</div>
+							</h1>
+						</div>
+						if useflag.Scope != "local" {
+							<div class="col-md-7">
+								<p class="lead kk-package-maindesc">
+									{ useflag.Description }
+								</p>
+							</div>
+						}
+						<div class="col-md-12 pt-4 mt-1"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ show(useflag models.Useflag, localUseflags, otherUseExpands []models.Useflag, Packages []string) {
+	@showUseflagHeader(useflag)
+	<div class="tab-content" id="myTabContent">
+		<div class="container mb-5">
+			<div class="row">
+				<div class="col-12">
+					if len(otherUseExpands) != 0 {
+						<h3 class="mb-2">Other “{ useflag.UseExpand }” USE_EXPAND flag values</h3>
+						<div class="card">
+							<div class="table-responsive">
+								<table class="table">
+									<thead>
+										<th>Use Flag</th>
+										<th>Description</th>
+									</thead>
+									<tbody>
+										for _, use := range otherUseExpands {
+											<tr>
+												<th class="kk-nobreak-cell">
+													<a href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+												</th>
+												<td>{ use.Description }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					}
+					if len(localUseflags) != 0 {
+						<h3 class="mb-2">Packages describing “{ useflag.Name }” as local USE flag</h3>
+						<div class="card mb-4 border-top-0">
+							<div class="table-responsive">
+								<table class="table mb-0">
+									<thead>
+										<th>Package</th>
+										<th>“{ useflag.Name }” Flag Description</th>
+									</thead>
+									<tbody>
+										for _, use := range localUseflags {
+											<tr>
+												<th class="kk-nobreak-cell">
+													<a href={ templ.URL("/packages/" + use.Package) }>{ use.Package }</a>
+												</th>
+												<td>{ use.Description }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					}
+					if len(Packages) != 0 {
+						<h3 class="mb-2 pt-2">All packages providing a “{ useflag.Name }” USE flag ({ strconv.Itoa(len(Packages)) })</h3>
+						<div class="card">
+							<div class="card-body">
+								<ul class="kk-col-list kk-3col-list kk-useflag-listing mb-0">
+									for _, pkg := range Packages {
+										<li><a href={ templ.URL("/packages/" + pkg) }>{ pkg }</a></li>
+									}
+								</ul>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// Show renders a template to show a given USE flag
+func Show(w http.ResponseWriter, r *http.Request) {
+	useFlagName := r.URL.Path[len("/useflags/"):]
+
+	var useflags []models.Useflag
+	err := database.DBCon.Model(&useflags).
+		Where("name = ?", useFlagName).
+		Order("scope", "package").
+		Select()
+	if err != nil || len(useflags) < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var packages []string
+	err = database.DBCon.Model((*models.Version)(nil)).
+		Column("atom").Distinct().
+		Where("useflags::jsonb @> ?", "\""+useFlagName+"\"").
+		Order("atom").
+		Select(&packages)
+	if err != nil && err != pg.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	useflag := useflags[0]
+
+	var localUseFlags, otherUseExpands []models.Useflag
+	if use := useflags[len(useflags)-1]; use.Scope == "use_expand" {
+		err := database.DBCon.Model(&otherUseExpands).
+			Column("name", "description").
+			Where("use_expand = ?", useflag.UseExpand).
+			Order("name").
+			Select()
+		if err != nil && err != pg.ErrNoRows {
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+	} else if useflag.Scope == "global" {
+		localUseFlags = useflags[1:]
+	} else {
+		localUseFlags = useflags
+	}
+
+	layout.Layout(useFlagName, "useflags",
+		show(useflag, localUseFlags, otherUseExpands, packages)).Render(r.Context(), w)
+}
