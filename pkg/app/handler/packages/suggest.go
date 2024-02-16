@@ -32,6 +32,8 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 		Column("name", "category").
 		ColumnExpr("(?) AS description", descriptionQuery).
 		Where("atom LIKE ? ", "%"+searchTerm+"%").
+		OrderExpr("name <-> ?", searchTerm).
+		Limit(10).
 		Select(&suggestions.Results)
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
