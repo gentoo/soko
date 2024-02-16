@@ -18,7 +18,10 @@ import (
 func Search(w http.ResponseWriter, r *http.Request) {
 	searchTerm := getParameterValue("q", r)
 
-	if strings.Contains(searchTerm, "@") {
+	if searchTerm == "" {
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+		return
+	} else if strings.Contains(searchTerm, "@") {
 		var maintainers []models.Maintainer
 		database.DBCon.Model(&maintainers).Where("email = ?", searchTerm).Select()
 		if len(maintainers) > 0 {
