@@ -16,5 +16,5 @@ var tabs = []layout.SubTab{
 }
 
 func RenderPage(w http.ResponseWriter, r *http.Request, title string, currentTab string, content templ.Component) {
-	layout.TabbedLayout(title, "useflags", "USE flags", "fa fa-fw fa-sliders", tabs, currentTab, content).Render(r.Context(), w)
+	layout.TabbedLayout(title, "useflags", "USE flags", "fa fa-fw fa-sliders", "", tabs, currentTab, content).Render(r.Context(), w)
 }

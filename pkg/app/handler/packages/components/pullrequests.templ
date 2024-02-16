@@ -1,0 +1,89 @@
+package components
+
+import "soko/pkg/models"
+import "strconv"
+
+templ PullRequests(hasPullRequests bool, pullRequests []models.GithubPullRequest) {
+	<div class="row">
+		<div class="col-md-9">
+			if hasPullRequests {
+				<h3 class="mb-4">Pull Requests</h3>
+				<ul class="list-group">
+					for _, pr := range pullRequests {
+						<li class="list-group-item">
+							<div class="row">
+								<div class="col-md-11">
+									<span class="octicon octicon-git-pull-request opticon-resource-icon ml-1" style="color:SeaGreen;"></span>
+									<a href={ templ.URL("https://github.com/gentoo/gentoo/pull/" + pr.Id) } class="text-dark">
+										<b>{ pr.Title }</b>
+									</a>
+									<a href={ templ.URL(pr.CiStateLink) }>
+										if pr.CiState == "SUCCESS" {
+											<i class="fa fa-check mx-1" aria-hidden="true" style="color: SeaGreen;"></i>
+										} else {
+											<i class="fa fa-times mx-1" aria-hidden="true" style="color: #b60205;"></i>
+										}
+									</a>
+									for _, label := range pr.Labels {
+										// the style attribute can be made more beautiful when this commit is released
+										// https://github.com/a-h/templ/commit/f24922fd3442f39c737273023f2f13b606274b20
+										if label.Color == "5319e7" || label.Color == "0052cc" || label.Color == "b60205" {
+											<span
+												class="badge badge-pill badge-light p-1"
+												{ templ.Attributes{"style": "font-weight: normal; color:#FFF; background-color: #" + label.Color + "!important;"}... }
+											>
+												{ label.Name }
+											</span>
+										} else {
+											<span
+												class="badge badge-pill badge-light p-1"
+												{ templ.Attributes{"style": "font-weight: normal; background-color: #" + label.Color + "!important;"}... }
+											>
+												{ label.Name }
+											</span>
+										}
+									}
+								</div>
+								<div class="col-md-1 text-right">
+									<a href={ templ.URL("https://github.com/gentoo/gentoo/pull/" + pr.Id) } class="text-muted">
+										<i class="fa fa-comment-o" aria-hidden="true"></i>
+										{ strconv.Itoa(pr.Comments) }
+									</a>
+								</div>
+								<div class="col-md-12 text-muted">
+									<span style="font-size: 90%;">
+										#{ pr.Id } opened { pr.CreatedAt } by { pr.Author }
+									</span>
+								</div>
+							</div>
+						</li>
+					}
+				</ul>
+			} else {
+				<div class="row pt-5">
+					<div class="col-md-4">
+						<img style="width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"/>
+					</div>
+					<div class="col-md-8 pt-3">
+						<h2>There are no pull requests</h2>
+						<span>You think something is missing here? <br/> Start with filling a <a href="https://wiki.gentoo.org/wiki/Gentoo_GitHub">new pull requests</a>.</span>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="col-md-3 pt-4">
+			<h4 class="">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Description
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					If you also like to help the Gentoo project, you can consider sending a Pull Request via GitHub.
+					<br/>
+					Before doing so, you might want to take a look at <a href="https://wiki.gentoo.org/wiki/Gentoo_GitHub">the wiki page</a>.
+				</span>
+			</div>
+		</div>
+	</div>
+}

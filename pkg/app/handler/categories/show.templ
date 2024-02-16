@@ -1,0 +1,102 @@
+package categories
+
+import "net/http"
+import "strconv"
+import "strings"
+import "soko/pkg/app/handler/packages/components"
+import "soko/pkg/app/layout"
+import "soko/pkg/models"
+
+func packageLetter(name string) string {
+	return strings.ToLower(strings.TrimLeft(name, "_")[:1])
+}
+
+templ showPackages(packages []*models.Package) {
+	<div class="row">
+		<div class="col-12">
+			<div class="row">
+				<div class="col-md-9">
+					// <p>
+					//   <input type="text" class="form-control form-control-xl" placeholder="Search packages in <%= @category.name %>">
+					// </p>
+					<div class="card border-top-0 rounded">
+						<table class="table mb-0 rounded">
+							for i, pkg := range packages {
+								<tr
+									if i == 0 || packageLetter(pkg.Name) != packageLetter(packages[i-1].Name) {
+										id={ packageLetter(pkg.Name) }
+									}
+								>
+									<th class="kk-nobreak-cell"><a href={ templ.URL("/packages/" + pkg.Atom) }>{ pkg.Name }</a></th>
+									<td>{ pkg.Versions[0].Description }</td>
+								</tr>
+							}
+						</table>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<h4>Statistics</h4>
+					<dd class="ml-3">
+						<dl>Packages: { strconv.Itoa(len(packages)) }</dl>
+					</dd>
+					<h4 class="mt-4">Filter by Category</h4>
+					<div class="row pl-4 pr-5 mr-5">
+						for i, pkg := range packages {
+							if i == 0 || packageLetter(pkg.Name) != packageLetter(packages[i-1].Name) {
+								<div class="col-md-2 px-2">
+									<a href={ templ.URL("#" + packageLetter(pkg.Name)) } class="text-muted text-capitalize">
+										{ packageLetter(pkg.Name) }
+									</a>
+								</div>
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ show(pageName string, category *models.Category, pullRequests []models.GithubPullRequest) {
+	<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+		switch pageName {
+			case "Packages":
+                @showPackages(category.Packages)
+			case "Stabilization":
+				@components.Stabilizations(category.PackagesInformation.StableRequests > 0, category.Packages)
+			case "Outdated":
+				@components.Outdated(category.PackagesInformation.Outdated > 0, category.Packages)
+			case "Pull requests":
+				@components.PullRequests(category.PackagesInformation.PullRequests > 0, pullRequests)
+		}
+	</div>
+}
+
+func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, category *models.Category, pullRequests []models.GithubPullRequest) {
+	layout.TabbedLayout(category.Name, "packages", category.Name, "fa fa-fw fa-cubes", category.Description, []layout.SubTab{
+		{
+			Name:       "Packages",
+			Link:       templ.URL("/categories/" + category.Name),
+			Icon:       "fa fa-list-ul mr-1",
+			BadgeValue: strconv.Itoa(len(category.Packages)),
+		},
+		{
+			Name:       "Stabilization",
+			Link:       templ.URL("/categories/" + category.Name + "/stabilization"),
+			Icon:       "fa fa-check-circle-o mr-1",
+			BadgeValue: strconv.Itoa(category.PackagesInformation.StableRequests),
+		},
+		{
+			Name:       "Outdated",
+			Link:       templ.URL("/categories/" + category.Name + "/outdated"),
+			Icon:       "fa fa-tag mr-1",
+			BadgeValue: strconv.Itoa(category.PackagesInformation.Outdated),
+		},
+		{
+			Name:       "Pull requests",
+			Link:       templ.URL("/categories/" + category.Name + "/pull-requests"),
+			Icon:       "octicon octicon-git-pull-request opticon-resource-icon ml-1",
+			BadgeValue: strconv.Itoa(category.PackagesInformation.PullRequests),
+		},
+	}, currentTab, show(currentTab, category, pullRequests)).Render(r.Context(), w)
+}

@@ -1,0 +1,51 @@
+package categories
+
+import "net/http"
+import "soko/pkg/database"
+import "soko/pkg/models"
+
+templ index(categories []*models.Category) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<div class="row">
+					<div class="col-md-12">
+						<h3 class="d-none mb-2">Browse all Categories</h3>
+						<div class="card rounded" style="background: none;border: none;">
+							<div class="card-body">
+								<ul class="kk-col-list kk-6col-list kk-category-listing">
+									for i, cat := range categories {
+										if i == 0 || cat.Name[0] != categories[i-1].Name[0] {
+											<li class="kk-col-list-header"><span class="kk-group-header">{ cat.Name[0:1] }</span></li>
+										}
+										<li>
+											<a
+												title={ cat.Description }
+												data-toggle="tooltip"
+												data-placement="right"
+												href={ templ.URL("/categories/" + cat.Name) }
+											>
+												{ cat.Name }
+											</a>
+										</li>
+									}
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// Index renders a template to show all categories
+func Index(w http.ResponseWriter, r *http.Request) {
+	var categories []*models.Category
+	err := database.DBCon.Model(&categories).Order("name ASC").Select()
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	RenderPage(w, r, "Categories", "Categories", index(categories))
+}

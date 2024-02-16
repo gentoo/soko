@@ -133,22 +133,6 @@ func renderPackageTemplate(page string, templatepattern string, funcMap template
 	templates.ExecuteTemplate(w, page+".tmpl", data)
 }
 
-// renderPackageTemplates renders the given templates using the given data
-// Two patterns can be used to specify templates
-func renderPackageTemplates(page string, templatepattern1 string, templatepattern2 string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
-	templates := template.Must(
-		template.Must(
-			template.Must(
-				template.Must(
-					template.New(page).
-						Funcs(funcMap).
-						ParseGlob("web/templates/layout/*.tmpl")).
-					ParseGlob("web/templates/packages/browsepackagesheader.tmpl")).
-				ParseGlob("web/templates/packages/" + templatepattern1 + ".tmpl")).
-			ParseGlob("web/templates/packages/" + templatepattern2 + ".tmpl"))
-	templates.ExecuteTemplate(w, page+".tmpl", data)
-}
-
 // getAtom returns the atom of the package from the given url
 func getAtom(r *http.Request) string {
 	atom := r.URL.Path[len("/packages/"):]

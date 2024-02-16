@@ -1,0 +1,76 @@
+package packages
+
+import "soko/pkg/app/utils"
+import "soko/pkg/models"
+import "net/http"
+import "soko/pkg/app/handler/categories"
+import "soko/pkg/app/handler/feeds"
+
+templ changedVersionsPage(pageType string, versions []*models.Version, userPreferences models.ArchesPreferences) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<h3 class="mb-2" style="text-transform: capitalize;">
+					{ pageType } Packages
+					<a
+						title="Atom feed"
+						class="kk-feed-icon"
+						href={ templ.URL("/packages/" + pageType + ".atom") }
+					>
+						<span class="fa fa-fw fa-rss-square"></span>
+					</a>
+				</h3>
+				<li class="list-group rounded">
+					@utils.ChangedVersionsTable(versions, userPreferences)
+				</li>
+			</div>
+		</div>
+	</div>
+}
+
+// Added renders a template containing a list of 50 recently added versions.
+func Added(w http.ResponseWriter, r *http.Request) {
+	addedVersions := GetAddedVersions(50)
+	categories.RenderPage(w, r, "Added Packages", "Added", changedVersionsPage("added", addedVersions, utils.GetUserPreferences(r).Arches))
+}
+
+func AddedFeed(w http.ResponseWriter, r *http.Request) {
+	addedPackages := GetAddedPackages(250)
+	feeds.AddedPackages("Added packages in Gentoo.", "Added packages in Gentoo.", addedPackages, w)
+}
+
+// Updated renders a template containing
+// a list of 50 recently updated versions
+func Updated(w http.ResponseWriter, r *http.Request) {
+	updatedVersions := GetUpdatedVersions(50)
+	categories.RenderPage(w, r, "Updated Packages", "Updated", changedVersionsPage("updated", updatedVersions, utils.GetUserPreferences(r).Arches))
+}
+
+func UpdatedFeed(w http.ResponseWriter, r *http.Request) {
+	updatedVersions := GetUpdatedVersions(250)
+	feeds.Changes("Added packages in Gentoo.", "Added packages in Gentoo.", updatedVersions, w)
+}
+
+// Stabilized renders a template containing
+// a list of 50 recently stabilized versions
+func Stabilized(w http.ResponseWriter, r *http.Request) {
+	stabilizedVersions := GetStabilizedVersions(50)
+	categories.RenderPage(w, r, "Stabilized Packages", "Newly Stable", changedVersionsPage("stabilized", stabilizedVersions, utils.GetUserPreferences(r).Arches))
+}
+
+func StabilizedFeed(w http.ResponseWriter, r *http.Request) {
+	stabilizedVersions := GetStabilizedVersions(250)
+	feeds.Changes("Stabilized packages in Gentoo.", "Stabilized packages in Gentoo.", stabilizedVersions, w)
+}
+
+// Keyworded renders a template containing
+// a list of 50 recently keyworded versions
+func Keyworded(w http.ResponseWriter, r *http.Request) {
+	keywordedVersions := GetKeywordedVersions(50)
+	categories.RenderPage(w, r, "Keyworded Packages", "Keyworded", changedVersionsPage("keyworded", keywordedVersions, utils.GetUserPreferences(r).Arches))
+}
+
+func KeywordedFeed(w http.ResponseWriter, r *http.Request) {
+	keywordedVersions := GetKeywordedVersions(250)
+	feeds.Changes("Keyworded packages in Gentoo.", "Keyworded packages in Gentoo.", keywordedVersions, w)
+}

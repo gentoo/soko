@@ -138,12 +138,13 @@ templ Layout(title string, tab string, contents templ.Component) {
 }
 
 type SubTab struct {
-	Name string
-	Link templ.SafeURL
-	Icon string
+	Name       string
+	Link       templ.SafeURL
+	Icon       string
+	BadgeValue string
 }
 
-templ tabbedHeader(subTitle string, icon string, tabs []SubTab, currentSubTab string, contents templ.Component) {
+templ tabbedHeader(subTitle string, icon string, description string, tabs []SubTab, currentSubTab string, contents templ.Component) {
 	<div class="kk-header-container">
 		<div class="container">
 			<div class="row">
@@ -156,12 +157,15 @@ templ tabbedHeader(subTitle string, icon string, tabs []SubTab, currentSubTab st
 								</div>
 							</h1>
 						</div>
-						<div class="col-md-7"></div>
+						<div class="col-md-7">{ description }</div>
 						<div class="col-md-12 pt-4 mt-1">
 							<nav class="nav kk-package-nav">
 								for _, tab := range tabs {
 									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
 										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
+										if tab.BadgeValue != "" {
+											<span class="ml-1 badge badge-pill kk-misc-badge">{ tab.BadgeValue }</span>
+										}
 									</a>
 								}
 							</nav>
@@ -176,6 +180,6 @@ templ tabbedHeader(subTitle string, icon string, tabs []SubTab, currentSubTab st
 	</div>
 }
 
-templ TabbedLayout(title string, tab string, subTitle string, icon string, tabs []SubTab, currentSubTab string, contents templ.Component) {
-	@Layout(title, tab, tabbedHeader(subTitle, icon, tabs, currentSubTab, contents))
+templ TabbedLayout(title string, tab string, subTitle string, icon string, description string, tabs []SubTab, currentSubTab string, contents templ.Component) {
+	@Layout(title, tab, tabbedHeader(subTitle, icon, description, tabs, currentSubTab, contents))
 }

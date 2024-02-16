@@ -1,0 +1,58 @@
+package components
+
+import "soko/pkg/models"
+
+templ Stabilizations(hasStabilizations bool, packages []*models.Package) {
+	<div class="row">
+		<div class="col-md-9">
+			<span class="d-flex justify-content-between">
+				<h3>Stable Requests</h3>
+				<span>
+					<button type="button" class="kk-btn-xs btn btn-outline-secondary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<span class="fa fa-fw fa-download"></span>
+					</button>
+					<span class="dropdown-menu dropdown-menu-right">
+						<a class="dropdown-item" href="./stabilization.list" target="_blank">Plain Text</a>
+						<a class="dropdown-item" href="./stabilization.json" target="_blank">JSON file</a>
+						<a class="dropdown-item" href="./stabilization.xml" target="_blank">XML file</a>
+					</span>
+				</span>
+			</span>
+			if hasStabilizations {
+				<ul class="timeline">
+					for _, pkg := range packages {
+						for _, ver := range pkg.Versions {
+							for _, res := range ver.PkgCheckResults {
+								<li>
+									<ul class="list-group">
+										<li class="list-group-item">
+											<a href={ templ.URL("/packages/" + ver.Atom) } class="text-dark">
+												<strong>{ ver.Id }</strong>
+											</a>
+											<br/>
+											<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
+										</li>
+									</ul>
+								</li>
+							}
+						}
+					}
+				</ul>
+			} else {
+				<div class="text-center w-100"><i>- No Stable Requests found -</i></div>
+			}
+		</div>
+		<div class="col-md-3 pt-4">
+			<h4>
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Description
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					This page lists potential stabilization candidates. Please have a look at the <a href="https://wiki.gentoo.org/wiki/Stable_request">wiki page</a> { "for" } more information.
+				</span>
+			</div>
+		</div>
+	</div>
+}

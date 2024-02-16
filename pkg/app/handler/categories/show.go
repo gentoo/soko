@@ -32,20 +32,20 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			return q.Order("name ASC"), nil
 		})
 
-	pageName := "packages"
+	pageName := "Packages"
 	switch pageUrl {
 	case "stabilization":
-		pageName = "stabilization"
+		pageName = "Stabilization"
 		query = query.Relation("Packages.Versions").
 			Relation("Packages.Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
 				return q.Where("class = 'StableRequest'"), nil
 			})
 	case "outdated":
-		pageName = "outdated"
+		pageName = "Outdated"
 		query = query.Relation("Packages.Versions").
 			Relation("Packages.Outdated")
 	case "pull-requests":
-		pageName = "pull-requests"
+		pageName = "Pull requests"
 		err := database.DBCon.Model(&pullRequests).
 			Join("JOIN package_to_github_pull_requests ON package_to_github_pull_requests.github_pull_request_id = github_pull_request.id").
 			Where("package_to_github_pull_requests.package_atom LIKE ?", categoryName+"/%").
@@ -77,7 +77,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderCategoryTemplate("show", createCategoryData(pageName, *category, pullRequests), w)
+	renderShowPage(w, r, pageName, category, pullRequests)
 }
 
 // build the json for the category
