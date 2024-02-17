@@ -142,21 +142,6 @@ func getAtom(r *http.Request) string {
 	return atom
 }
 
-// getSearchData returns the data used in search templates
-func getSearchData(packages []models.Package, search string) interface{} {
-	return struct {
-		Header      models.Header
-		Search      string
-		Packages    []models.Package
-		Application models.Application
-	}{
-		Header:      models.Header{Title: search + " – ", Tab: "packages"},
-		Search:      search,
-		Packages:    packages,
-		Application: utils.GetApplicationData(),
-	}
-}
-
 // GetFuncMap returns the FuncMap used in templates
 func GetFuncMap() template.FuncMap {
 	return template.FuncMap{

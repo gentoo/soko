@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"soko/pkg/app/handler/feeds"
+	"soko/pkg/app/layout"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
@@ -65,11 +66,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderPackageTemplate("search",
-		"search",
-		GetFuncMap(),
-		getSearchData(packages, searchTerm),
-		w)
+	layout.Layout(searchTerm, "packages", search(searchTerm, packages)).Render(r.Context(), w)
 }
 
 // Search renders a template containing a list of search results
