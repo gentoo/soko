@@ -29,8 +29,14 @@ func UpdateProjects() {
 	}
 
 	var members []*models.MaintainerToProject
+	membersMap := make(map[string]struct{})
 	for _, project := range projectList {
 		for _, member := range project.Members {
+			id := member.Email + "|" + project.Email
+			if _, ok := membersMap[id]; ok {
+				continue
+			}
+			membersMap[id] = struct{}{}
 			members = append(members, &models.MaintainerToProject{
 				Id:              member.Email + "-" + project.Email,
 				MaintainerEmail: member.Email,
@@ -44,8 +50,14 @@ func UpdateProjects() {
 	database.TruncateTable[models.MaintainerToProject]("id")
 
 	// insert new project list
-	database.DBCon.Model(&projectList).Insert()
-	database.DBCon.Model(&members).Insert()
+	_, err = database.DBCon.Model(&projectList).Insert()
+	if err != nil {
+		logger.Error.Println("Error while inserting project list", err)
+	}
+	_, err = database.DBCon.Model(&members).Insert()
+	if err != nil {
+		logger.Error.Println("Error while inserting project members", err)
+	}
 
 	updateStatus()
 }
@@ -60,7 +72,19 @@ func parseProjectList() ([]models.Project, error) {
 
 	var projectList models.ProjectList
 	err = xml.NewDecoder(resp.Body).Decode(&projectList)
-	return projectList.Projects, err
+	if err != nil {
+		return nil, err
+	}
+
+	uniqueProjects := make([]models.Project, 0, len(projectList.Projects))
+	seen := make(map[string]struct{}, len(projectList.Projects))
+	for _, project := range projectList.Projects {
+		if _, ok := seen[project.Email]; !ok {
+			seen[project.Email] = struct{}{}
+			uniqueProjects = append(uniqueProjects, project)
+		}
+	}
+	return uniqueProjects, nil
 }
 
 func updateStatus() {
