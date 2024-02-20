@@ -54,8 +54,10 @@ func Serve() {
 	setRoute("/about/feeds", about.Feeds)
 	setRoute("/about/status", about.Status)
 
-	setRoute("/maintainers", maintainer.Browse)
-	setRoute("/maintainers/", maintainer.Browse)
+	setRoute("/maintainers", maintainer.BrowseProjects)
+	redirect("/maintainers/gentoo-projects", "/maintainers")
+	setRoute("/maintainers/gentoo-developers", maintainer.BrowseDevs)
+	setRoute("/maintainers/proxied-maintainers", maintainer.BrowseProxyDevs)
 	setRoute("/maintainer/", maintainer.Show)
 
 	setRoute("/packages/search", packages.Search)

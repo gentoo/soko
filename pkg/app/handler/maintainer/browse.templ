@@ -1,0 +1,94 @@
+package maintainer
+
+import "soko/pkg/models"
+import "soko/pkg/app/layout"
+import "net/http"
+import "soko/pkg/database"
+
+templ browsePage(maintainers []*models.Maintainer) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<div class="row">
+					<div class="col-md-12">
+						<ul class="kk-col-list kk-6col-list kk-category-listing">
+							for i, maintainer := range maintainers {
+								if i == 0 || maintainer.Name[0] != maintainers[i-1].Name[0] {
+									<li class="kk-col-list-header">
+										<span class="kk-group-header">
+											if maintainer.Name != "" {
+												{ maintainer.Name[0:1] }
+											} else {
+												#
+											}
+										</span>
+									</li>
+								}
+								<li>
+									<a
+										title={ maintainer.Name }
+										data-toggle="tooltip"
+										data-placement="right"
+										href={ templ.URL("/maintainer/" + maintainer.Email) }
+									>
+										if maintainer.Name != "" {
+											{ maintainer.Name }
+										} else {
+											{ maintainer.Email }
+										}
+									</a>
+								</li>
+							}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+var browseViewTabs = []layout.SubTab{
+	{
+		Name: "Gentoo Projects",
+		Link: "/maintainers",
+		Icon: "fa fa-users mr-1",
+	},
+	{
+		Name: "Gentoo Developers",
+		Link: "/maintainers/gentoo-developers",
+		Icon: "fa fa-user mr-1",
+	},
+	{
+		Name: "Proxied Maintainers",
+		Link: "/maintainers/proxied-maintainers",
+		Icon: "fa fa-user-o mr-1",
+	},
+}
+
+func renderBrowsePage(w http.ResponseWriter, r *http.Request, title string, dbType string) {
+    var maintainers []*models.Maintainer
+	err := database.DBCon.Model(&maintainers).
+        Where("type = ?", dbType).
+        Order("name").
+        Select()
+    if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	layout.TabbedLayout(title, "maintainers", "Maintainers", "fa fa-fw fa-users", "", browseViewTabs,
+		title, browsePage(maintainers)).Render(r.Context(), w)
+}
+
+func BrowseProjects(w http.ResponseWriter, r *http.Request) {
+    renderBrowsePage(w, r, "Gentoo Projects", "project")
+}
+
+func BrowseDevs(w http.ResponseWriter, r *http.Request) {
+    renderBrowsePage(w, r, "Gentoo Developers", "gentoo-developer")
+}
+
+func BrowseProxyDevs(w http.ResponseWriter, r *http.Request) {
+    renderBrowsePage(w, r, "Proxied Maintainers", "proxied-maintainer")
+}

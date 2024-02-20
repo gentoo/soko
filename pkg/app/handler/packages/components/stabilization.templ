@@ -2,7 +2,7 @@ package components
 
 import "soko/pkg/models"
 
-templ Stabilizations(hasStabilizations bool, packages []*models.Package) {
+templ Stabilizations(hasStabilizations bool, results []*models.PkgCheckResult) {
 	<div class="row">
 		<div class="col-md-9">
 			<span class="d-flex justify-content-between">
@@ -20,22 +20,18 @@ templ Stabilizations(hasStabilizations bool, packages []*models.Package) {
 			</span>
 			if hasStabilizations {
 				<ul class="timeline">
-					for _, pkg := range packages {
-						for _, ver := range pkg.Versions {
-							for _, res := range ver.PkgCheckResults {
-								<li>
-									<ul class="list-group">
-										<li class="list-group-item">
-											<a href={ templ.URL("/packages/" + ver.Atom) } class="text-dark">
-												<strong>{ ver.Id }</strong>
-											</a>
-											<br/>
-											<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
-										</li>
-									</ul>
+					for _, res := range results {
+						<li>
+							<ul class="list-group">
+								<li class="list-group-item">
+									<a href={ templ.URL("/packages/" + res.Atom) } class="text-dark">
+										<strong>{ res.CPV }</strong>
+									</a>
+									<br/>
+									<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
 								</li>
-							}
-						}
+							</ul>
+						</li>
 					}
 				</ul>
 			} else {

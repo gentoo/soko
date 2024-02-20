@@ -1,0 +1,109 @@
+package components
+
+import "crypto/md5"
+import "encoding/hex"
+import "time"
+import "soko/pkg/models"
+
+func gravatar(email string) string {
+	hasher := md5.Sum([]byte(email))
+	hash := hex.EncodeToString(hasher[:])
+	return "https://www.gravatar.com/avatar/" + hash + "?s=13&amp;d=retro"
+}
+
+templ chagedPaths(commitId string, badgeClass string, files []*models.ChangedFile) {
+	for idx, value := range files {
+		if idx < 20 {
+			<span class={ "badge badge-pill badge-light", badgeClass }>
+				<a class="text-muted" href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/diff/" + value.Path + "?id=" + commitId) }>{ value.Path }</a>
+			</span>
+		}
+	}
+}
+
+templ Changelog(atom string, commits []*models.Commit) {
+	<div class="row">
+		<div class="col-md-9">
+			if len(commits) > 0 {
+				<div class="col-md-12">
+					<h3>Latest Commits</h3>
+					<style>
+                        .kk-added-file-badge {
+                            background-color: #dff0d8;
+                            font-weight: normal;
+                        }
+                        .kk-added-file-badge > a {
+                            color: #424242!important;
+                        }
+                        .kk-modified-file-badge {
+                            background-color: #fcf8e3;
+                            font-weight: normal;
+                        }
+                        .kk-modified-file-badge > a {
+                            color: #424242!important;
+                        }
+                        .kk-deleted-file-badge {
+                            background-color: #f2dede;
+                            font-weight: normal;
+                        }
+                        .kk-deleted-file-badge > a {
+                            color: #424242!important;
+                        }
+                    </style>
+					<ul class="timeline">
+						<li>
+							<span class="text-muted">Commits on { commits[0].CommitterDate.Format(time.DateOnly) }</span>
+							<ul class="list-group">
+								for i, commit := range commits {
+									if currentDate := commit.CommitterDate.Format(time.DateOnly); i > 0 && currentDate != commits[i-1].CommitterDate.Format(time.DateOnly) {
+										@templ.Raw("</ul></li><li>")
+										<span class="text-muted">Commits on { currentDate }</span>
+										@templ.Raw(`<ul class="list-group">`)
+									}
+									<li class="list-group-item">
+										<div class="row">
+											<div class="col-md-8">
+												<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=" + commit.Id) }><b style="color:#424242!important;">{ commit.Message }</b></a>
+											</div>
+											<div class="col-md-4 text-right text-muted">
+												<a title={ commit.Id } class="kk-commit" href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=" + commit.Id) }>{ commit.Id[:7] }</a>
+											</div>
+											<div class="col-md-12" style="color:#424242!important;">
+												if commit.AuthorName != commit.CommitterName {
+													<span data-toggle="tooltip" title={ "authored on " + commit.AuthorDate.Format(time.DateTime) + " UTC" }>
+														<img class="rounded-sm inline" data-toggle="popover" data-img="http://placehold.it/400x200" src={ gravatar(commit.AuthorEmail) }/>
+														<a href={ templ.URL("mailto:" + commit.AuthorEmail) }>{ commit.AuthorName }</a> authored
+													</span> and&nbsp;
+												}
+												<img class="rounded-sm inline" src={ gravatar(commit.CommitterEmail) }/>
+												<a href={ templ.URL("mailto:" + commit.CommitterEmail) }>{ commit.CommitterName }</a> committed on { commit.CommitterDate.Format(time.DateTime) } UTC
+											</div>
+											<div class="col-md-12">
+												@chagedPaths(commit.Id, "kk-added-file-badge", commit.ChangedFiles.Added)
+												@chagedPaths(commit.Id, "kk-modified-file-badge", commit.ChangedFiles.Modified)
+												@chagedPaths(commit.Id, "kk-deleted-file-badge", commit.ChangedFiles.Deleted)
+												if len(commit.ChangedFiles.Added)> 20 || len(commit.ChangedFiles.Modified) > 20 || len(commit.ChangedFiles.Deleted) > 20 {
+													<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=" + commit.Id) } class="text-muted">...</a>
+												}
+											</div>
+										</div>
+									</li>
+								}
+							</ul>
+						</li>
+					</ul>
+				</div>
+			} else if atom != "" {
+				<li class="list-group-item kk-panel-content-sorry">
+					This package has not been changed since our repository has moved to Git.
+					<br/>
+					<br/>
+					<a href={ templ.URL("https://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/" + atom + "/ChangeLog?view=markup") } class="btn btn-default">
+						<span class="fa fa-fw fa-history"></span>
+						View old CVS Changelog
+					</a>
+				</li>
+			}
+		</div>
+	</div>
+}

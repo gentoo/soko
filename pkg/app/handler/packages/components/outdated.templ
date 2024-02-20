@@ -1,24 +1,25 @@
 package components
 
-import "soko/pkg/models"
+type OutdatedItem struct {
+	Atom        string
+	Description string
+}
 
-templ Outdated(hasOutdated bool, outdatedPackages []*models.Package) {
+templ Outdated(outdated []OutdatedItem) {
 	<div class="row">
 		<div class="col-md-9">
-			if hasOutdated {
+			if len(outdated) > 0 {
 				<h3 class="mb-4">Outdated Packages</h3>
 				<ul class="list-group">
-					for _, pkg := range outdatedPackages {
-						if len(pkg.Outdated) > 0 {
-							<li class="list-group-item">
-								<div class="row">
-									<div class="col-md-4">
-										<a href={ templ.URL("/packages/" + pkg.Atom) } class="text-dark"><b>{ pkg.Atom }</b></a>
-									</div>
-									<div class="col-md-8 text-muted">{ pkg.Description() }</div>
+					for _, pkg := range outdated {
+						<li class="list-group-item">
+							<div class="row">
+								<div class="col-md-4">
+									<a href={ templ.URL("/packages/" + pkg.Atom) } class="text-dark"><b>{ pkg.Atom }</b></a>
 								</div>
-							</li>
-						}
+								<div class="col-md-8 text-muted">{ pkg.Description }</div>
+							</div>
+						</li>
 					}
 				</ul>
 			} else {

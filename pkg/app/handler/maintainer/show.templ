@@ -1,0 +1,237 @@
+package maintainer
+
+import "strconv"
+import "strings"
+import "soko/pkg/app/layout"
+import "soko/pkg/models"
+
+func showViewTabs(email string, packagesCount int, info *models.MaintainerPackagesInformation) []layout.SubTab {
+	return []layout.SubTab{
+		{
+			Name:       "Packages",
+			Link:       templ.URL("/maintainer/" + email),
+			Icon:       "fa fa-info mr-1",
+			BadgeValue: strconv.Itoa(packagesCount),
+		},
+		{
+			Name:       "Stabilization",
+			Link:       templ.URL("/maintainer/" + email + "/stabilization"),
+			Icon:       "fa fa-check-circle-o mr-1",
+			BadgeValue: strconv.Itoa(info.StableRequests),
+		},
+		{
+			Name:       "Outdated",
+			Link:       templ.URL("/maintainer/" + email + "/outdated"),
+			Icon:       "fa fa-tag mr-1",
+			BadgeValue: strconv.Itoa(info.Outdated),
+		},
+		{
+			Name:       "Pull requests",
+			Link:       templ.URL("/maintainer/" + email + "/pull-requests"),
+			Icon:       "octicon octicon-git-pull-request opticon-resource-icon ml-1",
+			BadgeValue: strconv.Itoa(info.PullRequests),
+		},
+		{
+			Name:       "Bugs",
+			Link:       templ.URL("/maintainer/" + email + "/bugs"),
+			Icon:       "fa fa-bug",
+			BadgeValue: strconv.Itoa(info.Bugs),
+		},
+		{
+			Name:       "Security",
+			Link:       templ.URL("/maintainer/" + email + "/security"),
+			Icon:       "fa fa-shield",
+			BadgeValue: strconv.Itoa(info.SecurityBugs),
+		},
+		{
+			Name: "Changelog",
+			Link: templ.URL("/maintainer/" + email + "/changelog"),
+			Icon: "fa fa-fw fa-history",
+		},
+	}
+}
+
+templ tabbedHeader(maintainer *models.Maintainer, packagesCount int, currentSubTab string) {
+	<div class="kk-header-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="row mt-3">
+						<div class="col-md-5">
+							<h1 class="stick-top kk-package-title" id="package-title">
+								<small class="kk-package-cat">
+									if maintainer.Email == "maintainer-needed@gentoo.org" {
+									} else if maintainer.Type == "project" {
+										Gentoo Project
+									} else if strings.Contains(maintainer.Email, "@gentoo.org") {
+										Gentoo Developer
+									} else if maintainer.Email != "" {
+										Proxied Maintainer
+									}
+								</small>
+								<div>
+									<svg height="32" class="octicon octicon-person right left kk-package-icon" aria-label="Package icon" viewBox="0 0 16 16" version="1.1" width="32" role="img"><path fill-rule="evenodd" d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"></path></svg>
+									<div class="kk-package-name">
+										if len(maintainer.Name) > 0 {
+											{  maintainer.Name }
+										} else if len(maintainer.Email) > 0 {
+											{  maintainer.Email }
+										} else {
+											Maintainer Needed
+										}
+									</div>
+								</div>
+							</h1>
+						</div>
+						<div class="col-md-7"></div>
+						<div class="col-md-12 pt-4 mt-1">
+							<nav class="nav kk-package-nav">
+								for _, tab := range showViewTabs(maintainer.Email, packagesCount, &maintainer.PackagesInformation) {
+									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
+										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
+										if tab.BadgeValue != "" {
+											<span class="ml-1 badge badge-pill kk-misc-badge">{ tab.BadgeValue }</span>
+										}
+									</a>
+								}
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ show(packagesCount int, maintainer *models.Maintainer, currentSubTab string, component templ.Component) {
+	@tabbedHeader(maintainer, packagesCount, currentSubTab)
+	<div class="tab-content" id="myTabContent">
+		<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+			@component
+		</div>
+	</div>
+}
+
+templ showPackages(packages []*models.Package, maintainer *models.Maintainer) {
+	<div class="row">
+		<div class="col-md-9">
+			if len(packages) > 0 {
+				<ul class="list-group">
+					<h3 id={ packages[0].Category }>{ packages[0].Category }</h3>
+					for i, pkg := range packages {
+						if i != 0 && pkg.Category != packages[i-1].Category {
+							@templ.Raw("</ul>")
+							<h3 class="mt-4" id={ pkg.Category }>{ pkg.Category }</h3>
+							@templ.Raw(`<ul class="list-group">`)
+						}
+						<li class="list-group-item">
+							<div class="row">
+								<div class="col-md-4">
+									<a href={ templ.URL("/packages/" + pkg.Atom) } class="text-dark"><b>{ pkg.Atom }</b></a>
+								</div>
+								<div class="col-md-8 text-muted">
+									{ pkg.Description() }
+								</div>
+							</div>
+						</li>
+					}
+				</ul>
+			} else {
+				<div class="row">
+					<div class="col-md-8"></div>
+					<div class="col-md-4">
+						<img
+							style="width: 100%;"
+							src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"
+						/>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="col-md-3 pt-4">
+			if maintainer.Project.Description != "" {
+				<h4 class="">
+					<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+						Description
+					</a>
+				</h4>
+				<div class="collapse show" id="collapseDescription">
+					<dl>
+						<dd class="ml-3 mb-0 text-muted">
+							{ maintainer.Project.Description }
+						</dd>
+					</dl>
+				</div>
+			}
+			<h4 class={ templ.KV("mt-4", maintainer.Project.Description != "") }>
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseExternalResources" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					External Resources
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseExternalResources">
+				<dl class="ml-3">
+					<dd>
+						<span class="fa fa-fw fa-chain-broken"></span>
+						<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.html;maintainer=" + maintainer.Email) } title="CI report" target="_blank">CI Report</a>
+						(<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;maintainer=" + maintainer.Email) } title="Verbose CI report" target="_blank">verbose</a>)
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-book"></span>
+						<a href={ templ.URL(maintainer.Project.Url) } target="_blank">Documentation</a>
+					</dd>
+				</dl>
+			</div>
+			if maintainer.Project.Description != "" {
+				<h4 class="mt-4">
+					<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseMembers" role="button" aria-expanded="false" aria-controls="collapseMembers">
+						Members
+					</a>
+				</h4>
+				<div class="collapse show" id="collapseMembers">
+					<dl>
+						for _, member := range maintainer.Project.Members {
+							<dd class="ml-3 mb-0">
+								<a href={ templ.URL("/maintainer/" + member.Email) }>{ member.Name }</a>
+								if member.IsLead {
+									(Lead)
+								}
+							</dd>
+						}
+					</dl>
+				</div>
+			}
+			if len(maintainer.Projects) > 0 {
+				<h4>
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseProjects" role="button" aria-expanded="false" aria-controls="collapseProjects">
+                        Projects
+                    </a>
+                </h4>
+                <div class="collapse show" id="collapseProjects">
+                    <dl>
+                        for _, project := range maintainer.Projects {
+                            <dd class="ml-3 mb-0"><a href={ templ.URL("/maintainer/" + project.Email) }>{ project.Name }</a></dd>
+						}
+                    </dl>
+                </div>
+			}
+			if len(packages) > 0 {
+				<h4 class="mt-4">
+                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
+                        Shortcuts
+                    </a>
+                </h4>
+				<div class="collapse show" id="collapseShortcuts">
+                    <dl>
+						for i, pkg := range packages {
+							if i == 0 || pkg.Category != packages[i-1].Category {
+								<dd class="ml-3 mb-0">
+									<a href={ templ.URL("#" + pkg.Category) }>{ pkg.Category }</a>
+								</dd>
+							}
+						}
+					</dl>
+				</div>
+			}
+		</div>
+	</div>
+}

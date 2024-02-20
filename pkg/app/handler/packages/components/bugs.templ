@@ -1,0 +1,138 @@
+package components
+
+import "soko/pkg/models"
+import "strconv"
+
+templ bugsList(title, component string, bugs []*models.Bug, titleClass, id string) {
+	<h3 id={ id } class={ titleClass }>{ title }</h3>
+	<ul class="list-group">
+		for _, bug := range bugs {
+			if bug.Component == component {
+				<li class="list-group-item">
+					<div class="row">
+						<div class="col-md-12">
+							<i class="fa fa-bug" aria-hidden="true"></i>
+							<a href={ templ.URL("https://bugs.gentoo.org/" + bug.Id) } class="text-dark"><b>{ bug.Summary }</b></a>
+						</div>
+						<div class="col-md-12 text-muted">
+							{ bug.Id } - Assigned to { bug.Assignee }
+						</div>
+					</div>
+				</li>
+			}
+		}
+	</ul>
+}
+
+templ Bugs(generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
+	<div class="row">
+		<div class="col-md-9">
+			if len(bugs) > 0 {
+				if generalCount > 0 {
+					@bugsList("Bug Reports", "Current packages", bugs, "mb-4", "packages")
+				}
+				if stabilizationCount > 0 {
+					@bugsList("Stabilization Bug Reports", "Stabilization", bugs, "my-4", "stabilization")
+				}
+				if keywordingCount > 0 {
+					@bugsList("Keywording Bug Reports", "Keywording", bugs, "my-4", "keywording")
+				}
+			} else {
+				<div class="row pt-5">
+					<div class="col-md-4">
+						<img style="width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"/>
+					</div>
+					<div class="col-md-8 pt-3">
+						<h2>Good job! There are no bugs.</h2>
+						<span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/enter_bug.cgi">new bug</a>.</span>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="col-md-3 pt-5">
+			<h4 class="">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Description
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					Gentoo Bugzilla is where we track bugs of Gentoo and its packages; you are welcome to report, confirm and resolve bugs:
+					<ul>
+						<li><a href="https://bugs.gentoo.org/enter_bug.cgi">File a new Bug</a></li>
+						<li><a href="https://bugs.gentoo.org/">Confirm a bug</a></li>
+						<li><a href="https://wiki.gentoo.org/wiki/Bugday">Participate in our monthly Bugday</a></li>
+					</ul>
+				</span>
+			</div>
+			<h4 class="">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
+					Shortcuts
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseShortcuts">
+				<ul>
+					<li>
+						<a
+							if generalCount > 0 {
+								href="#packages"
+							}
+						>
+							Packages Bugs ({ strconv.Itoa(generalCount) })
+						</a>
+					</li>
+					<li>
+						<a
+							if stabilizationCount > 0 {
+								href="#stabilization"
+							}
+						>
+							Stabilization Bugs ({ strconv.Itoa(stabilizationCount) })
+						</a>
+					</li>
+					<li>
+						<a
+							if keywordingCount > 0 {
+								href="#keywording"
+							}
+						>
+							Keywording Bugs ({ strconv.Itoa(keywordingCount) })
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+}
+
+templ SecurityBugs(hasSecurityBugs bool, bugs []*models.Bug) {
+	<div class="row">
+		<div class="col-md-9">
+			if hasSecurityBugs {
+				@bugsList("Security Bug Reports", "Vulnerabilities", bugs, "mb-4", "security")
+			} else {
+				<div class="row pt-5">
+					<div class="col-md-4">
+						<img style="width: 100%;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"/>
+					</div>
+					<div class="col-md-8 pt-3">
+						<h2>There are no open security bugs.</h2>
+						<span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/">new security bug</a>.</span>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="col-md-3 pt-5">
+			<h4>
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Contact Information
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					Please file new vulnerability reports on <a href="https://bugs.gentoo.org/">Gentoo Bugzilla</a> and assign them to the Gentoo Security product and Vulnerabilities component.
+				</span>
+			</div>
+		</div>
+	</div>
+}

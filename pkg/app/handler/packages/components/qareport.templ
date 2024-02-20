@@ -1,0 +1,74 @@
+package components
+
+import "soko/pkg/models"
+
+templ QaReport(packageResults []*models.PkgCheckResult, versions []*models.Version, userPreferences *models.UserPreferences) {
+	<div class="row">
+		<div class="col-md-9">
+			<h3>Pkgcheck Warnings</h3>
+			<ul class="timeline">
+				<li>
+					<span class="text-muted">All Versions</span>
+					<ul class="list-group">
+						for _, res := range packageResults {
+							if res.Version == "" && userPreferences.ContainsPkgcheckClass(res.Class) {
+								<li class="list-group-item">
+									<strong>{ res.Class }</strong>
+									<br/>
+									<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
+								</li>
+							}
+						}
+					</ul>
+				</li>
+				for _, ver := range versions {
+					<li>
+						<span class="text-muted">{ ver.Version }</span>
+						<ul class="list-group">
+							for _, res := range ver.PkgCheckResults {
+								if userPreferences.ContainsPkgcheckClass(res.Class) {
+									<li class="list-group-item">
+										<strong>{ res.Class }</strong>
+										<br/>
+										<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
+									</li>
+								}
+							}
+						</ul>
+					</li>
+				}
+			</ul>
+		</div>
+		<div class="col-md-3 pt-5">
+			<h4 class="">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Description
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					Pkgcheck is used regularly to generate QA reports. Pkgcheck is a pkgcore-based QA utility for ebuild repos.
+				</span>
+			</div>
+			<h4 class="mt-4">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseExternalResources" role="button" aria-expanded="false" aria-controls="collapseExternalResources">
+					External Resources
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseExternalResources">
+				<ul>
+					<li>
+						<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg={{.Package.Category}}:{{.Package.Name}}" target="_blank">
+							CI Report
+						</a>
+					</li>
+					<li>
+						<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg={{.Package.Category}}:{{.Package.Name}}" target="_blank">
+							CI Report (verbose)
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+}

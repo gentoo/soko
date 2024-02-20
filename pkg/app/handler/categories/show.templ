@@ -57,15 +57,41 @@ templ showPackages(packages []*models.Package) {
 	</div>
 }
 
+func collectStabilizations(packages []*models.Package) (stabilizations []*models.PkgCheckResult) {
+	for _, pkg := range packages {
+		for _, ver := range pkg.Versions {
+			for _, res := range ver.PkgCheckResults {
+				if res.Class == "StableRequest" {
+					stabilizations = append(stabilizations, res)
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
+func collectOutdated(packages []*models.Package) (outdated []components.OutdatedItem) {
+	for _, pkg := range packages {
+		if len(pkg.Outdated) > 0 {
+			outdated = append(outdated, components.OutdatedItem{
+				Atom:        pkg.Atom,
+				Description: pkg.Description(),
+			})
+		}
+	}
+	return
+}
+
 templ show(pageName string, category *models.Category, pullRequests []models.GithubPullRequest) {
 	<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
 		switch pageName {
 			case "Packages":
-                @showPackages(category.Packages)
+				@showPackages(category.Packages)
 			case "Stabilization":
-				@components.Stabilizations(category.PackagesInformation.StableRequests > 0, category.Packages)
+				@components.Stabilizations(category.PackagesInformation.StableRequests > 0, collectStabilizations(category.Packages))
 			case "Outdated":
-				@components.Outdated(category.PackagesInformation.Outdated > 0, category.Packages)
+				@components.Outdated(collectOutdated(category.Packages))
 			case "Pull requests":
 				@components.PullRequests(category.PackagesInformation.PullRequests > 0, pullRequests)
 		}
