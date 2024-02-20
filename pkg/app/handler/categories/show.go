@@ -23,7 +23,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var pullRequests []models.GithubPullRequest
+	var pullRequests []*models.GithubPullRequest
 	category := new(models.Category)
 	query := database.DBCon.Model(category).
 		Where("category.name = ?", categoryName).

@@ -2,7 +2,10 @@
 
 package models
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 type Package struct {
 	Atom                string `pg:",pk"`
@@ -33,6 +36,13 @@ type Maintainer struct {
 	Projects []*Project `pg:"many2many:maintainer_to_projects,join_fk:project_email"`
 }
 
+func (m *Maintainer) PrintName() string {
+	if m.Name != "" {
+		return m.Name
+	}
+	return m.Email
+}
+
 type MaintainerPackagesInformation struct {
 	Outdated       int
 	PullRequests   int
@@ -53,18 +63,36 @@ type RemoteId struct {
 	Id   string
 }
 
-func (p Package) BuildRevDepMap() map[string]map[string]string {
-	var data = map[string]map[string]string{}
+type packageDepMap struct {
+	Version string
+	Atom    string
+	Map     map[string]struct{}
+}
+
+func (p Package) BuildRevDepMap() []packageDepMap {
+	var data = map[string]packageDepMap{}
 
 	for _, dep := range p.ReverseDependencies {
-		if data[dep.ReverseDependencyVersion] == nil {
-			data[dep.ReverseDependencyVersion] = map[string]string{}
-			data[dep.ReverseDependencyVersion]["Atom"] = dep.ReverseDependencyAtom
+		if _, found := data[dep.ReverseDependencyVersion]; !found {
+			data[dep.ReverseDependencyVersion] = packageDepMap{
+				Version: dep.ReverseDependencyVersion,
+				Atom:    strings.ReplaceAll(dep.ReverseDependencyAtom, "[B]", ""),
+				Map:     map[string]struct{}{},
+			}
 		}
-		data[dep.ReverseDependencyVersion][dep.Type] = "true"
+		data[dep.ReverseDependencyVersion].Map[dep.Type] = struct{}{}
 	}
 
-	return data
+	result := make([]packageDepMap, 0, len(data))
+	for _, v := range data {
+		result = append(result, v)
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Version < result[j].Version
+	})
+
+	return result
 }
 
 func (p Package) Description() string {
@@ -74,6 +102,15 @@ func (p Package) Description() string {
 		}
 	}
 	return p.Longdescription
+}
+
+func (p *Package) HasVersion(version string) bool {
+	for _, v := range p.Versions {
+		if v.Version == version {
+			return true
+		}
+	}
+	return false
 }
 
 func (p Package) AllBugs() []*Bug {

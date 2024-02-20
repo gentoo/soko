@@ -1,0 +1,139 @@
+package packages
+
+import "soko/pkg/models"
+
+var dependenciesInnerTypes = []string{"rindex", "dindex", "bindex", "iindex", "pindex"}
+
+templ dependencies(pkg *models.Package) {
+	<div class="row">
+		<div class="col-md-9">
+			<h3>
+				<a class="text-dark">
+					<i class="fa fa-level-down" aria-hidden="true"></i> Dependencies
+				</a>
+				<a href={ templ.URL("/packages/" + pkg.Atom + "/reverse-dependencies") } class="ml-3 text-muted">
+					<i class="fa fa-level-up" aria-hidden="true"></i> Reverse-Dependencies
+				</a>
+			</h3>
+			<ul class="timeline">
+				for _, version := range pkg.Versions {
+					<li>
+						<span class="text-muted">{ version.Version }</span>
+						if depMap := version.BuildDepMap(); len(depMap) != 0 {
+							<div class="card mt-4">
+								<div class="table-responsive border-0">
+									<table class="table mb-0">
+										<thead>
+											<tr>
+												<th scope="col">Version</th>
+												<th scope="col">RDEPEND</th>
+												<th scope="col">DEPEND</th>
+												<th scope="col">BDEPEND</th>
+												<th scope="col">IDEPEND</th>
+												<th scope="col">PDEPEND</th>
+											</tr>
+										</thead>
+										<tbody>
+											for _, atomMap := range depMap {
+												<tr>
+													<th scope="row"><a class="text-dark" href={ templ.URL("/packages/" + atomMap.Atom) }>{ atomMap.Atom }</a></th>
+													for _, key := range dependenciesInnerTypes {
+														<td>
+															if _, found := atomMap.Map[key]; found {
+																<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>
+															} else {
+																<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>
+															}
+														</td>
+													}
+												</tr>
+											}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						}
+					</li>
+				}
+			</ul>
+		</div>
+		<div class="col-md-3 pt-5">
+			<h4 class="">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Description
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					The dependencies are regularly computed based on the <a href="https://qa-reports.gentoo.org/">qa-reports</a>.
+				</span>
+			</div>
+		</div>
+	</div>
+}
+
+templ reverseDependencies(pkg *models.Package) {
+	<div class="row">
+		<div class="col-md-9">
+			<h3>
+				<a class="text-muted" href={ templ.URL("/packages/" + pkg.Atom + "/dependencies") }>
+					<i class="fa fa-level-down" aria-hidden="true"></i> Dependencies
+				</a>
+				<a class="ml-3 text-dark">
+					<i class="fa fa-level-up" aria-hidden="true"></i> Reverse-Dependencies
+				</a>
+			</h3>
+			<div class="card mt-4">
+				<div class="table-responsive border-0">
+					<table class="table mb-0">
+						<thead>
+							<tr>
+								<th scope="col">Version</th>
+								<th scope="col">RDEPEND</th>
+								<th scope="col">DEPEND</th>
+								<th scope="col">BDEPEND</th>
+								<th scope="col">IDEPEND</th>
+								<th scope="col">PDEPEND</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, dep := range pkg.BuildRevDepMap() {
+								<tr>
+									<th scope="row"><a class="text-dark" href={ templ.URL("/packages/" + dep.Atom) }>{ dep.Version }</a></th>
+									for _, key := range dependenciesInnerTypes {
+										<td>
+											if _, found := dep.Map[key]; found {
+												<i class="fa fa-check" style="color:green;" aria-hidden="true"></i>
+											} else {
+												<i class="fa fa-times" style="color:#E1E1E1;" aria-hidden="true"></i>
+											}
+										</td>
+									}
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 pt-5">
+			<h4 class="">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+					Description
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseDescription">
+				<span class="text-muted">
+					The reverse dependencies are regularly parsed from the <a href="https://qa-reports.gentoo.org/">qa-reports</a>. The sources can be found at:
+					<ul>
+						<li><a href={ templ.URL("https://qa-reports.gentoo.org/output/genrdeps/rindex/" + pkg.Atom) }>rdepend</a></li>
+						<li><a href={ templ.URL("https://qa-reports.gentoo.org/output/genrdeps/dindex/" + pkg.Atom) }>depend</a></li>
+						<li><a href={ templ.URL("https://qa-reports.gentoo.org/output/genrdeps/bindex/" + pkg.Atom) }>bdepend</a></li>
+						<li><a href={ templ.URL("https://qa-reports.gentoo.org/output/genrdeps/iindex/" + pkg.Atom) }>idepend</a></li>
+						<li><a href={ templ.URL("https://qa-reports.gentoo.org/output/genrdeps/pindex/" + pkg.Atom) }>pdepend</a></li>
+					</ul>
+				</span>
+			</div>
+		</div>
+	</div>
+}

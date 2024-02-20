@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"soko/pkg/app/layout"
 	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -28,7 +29,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	atom := r.URL.Path[len("/packages/"):]
-	pageName := "overview"
+	var currentSubTab string
 	userPreferences := utils.GetUserPreferences(r)
 
 	if userPreferences.General.LandingPageLayout == "full" {
@@ -47,7 +48,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	if strings.HasSuffix(r.URL.Path, "/changelog") {
 		atom = strings.ReplaceAll(atom, "/changelog", "")
-		pageName = "changelog"
+		currentSubTab = "Changelog"
 		query = query.Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
 			// here be dragons
 			const template = (`'%[1]s', (SELECT ARRAY_AGG("%[1]s") ` +
@@ -67,26 +68,26 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		})
 	} else if strings.HasSuffix(r.URL.Path, "/qa-report") {
 		atom = strings.ReplaceAll(atom, "/qa-report", "")
-		pageName = "qa-report"
+		currentSubTab = "QA report"
 		query = query.
 			Relation("PkgCheckResults").
 			Relation("Versions.PkgCheckResults")
 	} else if strings.HasSuffix(r.URL.Path, "/pull-requests") {
 		atom = strings.ReplaceAll(atom, "/pull-requests", "")
-		pageName = "pull-requests"
+		currentSubTab = "Pull requests"
 	} else if strings.HasSuffix(r.URL.Path, "/bugs") {
 		atom = strings.ReplaceAll(atom, "/bugs", "")
-		pageName = "bugs"
+		currentSubTab = "Bugs"
 	} else if strings.HasSuffix(r.URL.Path, "/security") {
 		atom = strings.ReplaceAll(atom, "/security", "")
-		pageName = "security"
+		currentSubTab = "Security"
 	} else if strings.HasSuffix(r.URL.Path, "/dependencies") {
 		atom = strings.ReplaceAll(atom, "/dependencies", "")
-		pageName = "dependencies"
+		currentSubTab = "Dependencies"
 		query = query.Relation("Versions.Dependencies")
 	} else if strings.HasSuffix(r.URL.Path, "/reverse-dependencies") {
 		atom = strings.ReplaceAll(atom, "/reverse-dependencies", "")
-		pageName = "reverse-dependencies"
+		currentSubTab = "Reverse Dependencies"
 		query = query.Relation("ReverseDependencies")
 	} else {
 		query = query.Relation("Outdated").
@@ -97,6 +98,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 				return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
 			})
 		}
+		currentSubTab = "Overview"
 	}
 
 	err := query.Where("atom = ?", atom).Select()
@@ -107,18 +109,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	sortVersionsDesc(gpackage.Versions)
 
-	var localUseflags, globalUseflags []models.Useflag
-	var useExpands map[string][]models.Useflag
-	if pageName == "overview" {
-		localUseflags, globalUseflags, useExpands = getPackageUseflags(&gpackage)
-	}
-	securityBugs, nonSecurityBugs := countBugs(&gpackage)
-
-	renderPackageTemplate("show",
-		"*",
-		GetFuncMap(),
-		createPackageData(pageName, &gpackage, localUseflags, globalUseflags, useExpands, userPreferences, securityBugs, nonSecurityBugs),
-		w)
+	layout.Layout(gpackage.Atom, "packages",
+		show(&gpackage, currentSubTab, utils.GetUserPreferences(r)),
+	).Render(r.Context(), w)
 }
 
 func updateSearchHistory(atom string, w http.ResponseWriter, r *http.Request) {

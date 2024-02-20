@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -35,18 +36,31 @@ type Version struct {
 	Bugs            []*Bug               `pg:"many2many:version_to_bugs,join_fk:bug_id"`
 }
 
-func (v Version) BuildDepMap() map[string]map[string]string {
-	var data = map[string]map[string]string{}
+type versionDepMap struct {
+	Atom string
+	Map  map[string]struct{}
+}
+
+func (v Version) BuildDepMap() []versionDepMap {
+	var data = map[string]map[string]struct{}{}
 
 	for _, dep := range v.Dependencies {
 		if data[dep.Atom] == nil {
-			data[dep.Atom] = map[string]string{}
-			data[dep.Atom]["Atom"] = dep.Atom
+			data[dep.Atom] = map[string]struct{}{}
 		}
-		data[dep.Atom][dep.Type] = "true"
+		data[dep.Atom][dep.Type] = struct{}{}
 	}
 
-	return data
+	result := make([]versionDepMap, 0, len(data))
+	for k, v := range data {
+		result = append(result, versionDepMap{k, v})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Atom < result[j].Atom
+	})
+
+	return result
 }
 
 // GreaterThan returns true if the version is greater than the given version

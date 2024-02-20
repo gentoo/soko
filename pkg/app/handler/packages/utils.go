@@ -3,11 +3,7 @@
 package packages
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"html/template"
 	"net/http"
-	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
@@ -119,20 +115,6 @@ func GetKeywordedVersions(n int) (keywordedVersions []*models.Version) {
 	return
 }
 
-// RenderPackageTemplates renders the given templates using the given data
-// One pattern can be used to specify templates
-func renderPackageTemplate(page string, templatepattern string, funcMap template.FuncMap, data interface{}, w http.ResponseWriter) {
-	templates := template.Must(
-		template.Must(
-			template.Must(
-				template.New(page).
-					Funcs(funcMap).
-					ParseGlob("web/templates/layout/*.tmpl")).
-				ParseGlob("web/templates/packages/components/*.tmpl")).
-			ParseGlob("web/templates/packages/" + templatepattern + ".tmpl"))
-	templates.ExecuteTemplate(w, page+".tmpl", data)
-}
-
 // getAtom returns the atom of the package from the given url
 func getAtom(r *http.Request) string {
 	atom := r.URL.Path[len("/packages/"):]
@@ -140,56 +122,6 @@ func getAtom(r *http.Request) string {
 	atom = strings.Replace(atom, ".html", "", 1)
 	atom = strings.Replace(atom, ".json", "", 1)
 	return atom
-}
-
-// GetFuncMap returns the FuncMap used in templates
-func GetFuncMap() template.FuncMap {
-	return template.FuncMap{
-		"contains":           strings.Contains,
-		"listContains":       listContains,
-		"replaceall":         strings.ReplaceAll,
-		"gravatar":           gravatar,
-		"mkSlice":            mkSlice,
-		"getReverse":         getReverse,
-		"tolower":            strings.ToLower,
-		"formatRestricts":    utils.FormatRestricts,
-		"RemoteIdLink":       remoteIdLink,
-		"isMasked":           isMasked,
-		"getMask":            getMask,
-		"noescape":           func(str string) template.HTML { return template.HTML(str) },
-		"showRemovalNotice":  showRemovalNotice,
-		"isDeprecated":       isDeprecated,
-		"getDeprecation":     getDeprecation,
-		"bugCategoriesCount": bugCategoriesCount,
-	}
-}
-
-func listContains(list []string, value string) bool {
-	for _, item := range list {
-		if value == item {
-			return true
-		}
-	}
-	return false
-}
-
-// gravatar creates a link to the gravatar
-// based on the email
-func gravatar(email string) string {
-	hasher := md5.Sum([]byte(email))
-	hash := hex.EncodeToString(hasher[:])
-	return "https://www.gravatar.com/avatar/" + hash + "?s=13&amp;d=retro"
-}
-
-// mkSlice creates a slice of the given arguments
-func mkSlice(args ...interface{}) []interface{} {
-	return args
-}
-
-// getReverse returns the element of a slice in
-// reverse direction based on the index
-func getReverse(index int, versions []*models.Version) *models.Version {
-	return versions[len(versions)-1-index]
 }
 
 // getParameterValue returns the value of a given parameter
@@ -255,58 +187,6 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 	return localUseflags, filteredGlobalUseflags, useExpands
 }
 
-// createPackageData creates the data used in the show package template
-func createPackageData(
-	pageName string,
-	gpackage *models.Package,
-	localUseflags, globalUseflags []models.Useflag, useExpands map[string][]models.Useflag,
-	userPreferences models.UserPreferences,
-	securityBugs, nonSecurityBugs int,
-) interface{} {
-	return struct {
-		PageName             string
-		Header               models.Header
-		Package              models.Package
-		Versions             []*models.Version
-		Masks                []models.Mask
-		LocalUseflags        []models.Useflag
-		GlobalUseflags       []models.Useflag
-		UseExpands           map[string][]models.Useflag
-		Application          models.Application
-		UserPreferences      models.UserPreferences
-		SecurityBugsCount    int
-		NonSecurityBugsCount int
-	}{
-		PageName:             pageName,
-		Header:               models.Header{Title: gpackage.Atom + " – ", Tab: "packages"},
-		Package:              *gpackage,
-		Versions:             gpackage.Versions,
-		LocalUseflags:        localUseflags,
-		GlobalUseflags:       globalUseflags,
-		UseExpands:           useExpands,
-		Masks:                nil,
-		Application:          utils.GetApplicationData(),
-		UserPreferences:      userPreferences,
-		SecurityBugsCount:    securityBugs,
-		NonSecurityBugsCount: nonSecurityBugs,
-	}
-}
-
-// CreateFeedData creates the data used in changedVersions template
-func CreateFeedData(name string, versions []*models.Version) interface{} {
-	return struct {
-		Header      models.Header
-		Name        string
-		Versions    []*models.Version
-		Application models.Application
-	}{
-		Header:      models.Header{Title: "Packages – ", Tab: "packages"},
-		Name:        name,
-		Versions:    versions,
-		Application: utils.GetApplicationData(),
-	}
-}
-
 // remoteIdLink returns a link to the homepage of a given remote id
 func remoteIdLink(remoteId models.RemoteId) string {
 	switch remoteId.Type {
@@ -367,16 +247,6 @@ func remoteIdLink(remoteId models.RemoteId) string {
 	}
 }
 
-// isMasked returns true if any version is masked
-func isMasked(versions []*models.Version) bool {
-	for _, version := range versions {
-		if len(version.Masks) > 0 {
-			return true
-		}
-	}
-	return false
-}
-
 // getMask returns the mask entry of the first version that is masked
 func getMask(versions []*models.Version) *models.Mask {
 	for _, version := range versions {
@@ -391,16 +261,6 @@ func getMask(versions []*models.Version) *models.Mask {
 func showRemovalNotice(versions []*models.Version) bool {
 	for _, version := range versions {
 		if len(version.Masks) > 0 && version.Masks[0].Versions == version.Atom {
-			return true
-		}
-	}
-	return false
-}
-
-// isDeprecated returns true if any version is deprecated
-func isDeprecated(versions []*models.Version) bool {
-	for _, version := range versions {
-		if len(version.Deprecates) > 0 {
 			return true
 		}
 	}
@@ -433,21 +293,4 @@ func containsUseflag(useflag models.Useflag, useflags []models.Useflag) bool {
 		}
 	}
 	return false
-}
-
-func bugCategoriesCount(bugs []*models.Bug) interface{} {
-	var result struct {
-		General, Stabilization, Keywording int
-	}
-	for _, bug := range bugs {
-		switch bug.Component {
-		case "Current packages":
-			result.General++
-		case "Stabilization":
-			result.Stabilization++
-		case "Keywording":
-			result.Keywording++
-		}
-	}
-	return result
 }

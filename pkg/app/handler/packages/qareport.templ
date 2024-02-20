@@ -1,8 +1,8 @@
-package components
+package packages
 
 import "soko/pkg/models"
 
-templ QaReport(packageResults []*models.PkgCheckResult, versions []*models.Version, userPreferences *models.UserPreferences) {
+templ qaReport(pkg *models.Package, userPreferences *models.UserPreferences) {
 	<div class="row">
 		<div class="col-md-9">
 			<h3>Pkgcheck Warnings</h3>
@@ -10,7 +10,7 @@ templ QaReport(packageResults []*models.PkgCheckResult, versions []*models.Versi
 				<li>
 					<span class="text-muted">All Versions</span>
 					<ul class="list-group">
-						for _, res := range packageResults {
+						for _, res := range pkg.PkgCheckResults {
 							if res.Version == "" && userPreferences.ContainsPkgcheckClass(res.Class) {
 								<li class="list-group-item">
 									<strong>{ res.Class }</strong>
@@ -21,7 +21,7 @@ templ QaReport(packageResults []*models.PkgCheckResult, versions []*models.Versi
 						}
 					</ul>
 				</li>
-				for _, ver := range versions {
+				for _, ver := range pkg.Versions {
 					<li>
 						<span class="text-muted">{ ver.Version }</span>
 						<ul class="list-group">
@@ -58,12 +58,12 @@ templ QaReport(packageResults []*models.PkgCheckResult, versions []*models.Versi
 			<div class="collapse show" id="collapseExternalResources">
 				<ul>
 					<li>
-						<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg={{.Package.Category}}:{{.Package.Name}}" target="_blank">
+						<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg=" + pkg.Category + ":" + pkg.Name) } target="_blank">
 							CI Report
 						</a>
 					</li>
 					<li>
-						<a href="https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg={{.Package.Category}}:{{.Package.Name}}" target="_blank">
+						<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg=" + pkg.Category + ":" + pkg.Name) } target="_blank">
 							CI Report (verbose)
 						</a>
 					</li>

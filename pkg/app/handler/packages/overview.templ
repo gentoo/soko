@@ -1,0 +1,481 @@
+package packages
+
+import "slices"
+import "strings"
+import "time"
+import "soko/pkg/app/handler/packages/components"
+import "soko/pkg/app/utils"
+import "soko/pkg/models"
+
+func overviewSlotText(version *models.Version) string {
+	if version.Subslot != "" {
+		return version.Slot + "/" + version.Subslot
+	}
+	return version.Slot
+}
+
+templ overviewVersionRow(version *models.Version, userPreferences *models.UserPreferences) {
+	<tr>
+		<td class="kk-version ">
+			<strong>
+				<a
+					class="kk-ebuild-link"
+					href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/tree/" + version.Atom + "/" + version.Package + "-" + version.Version + ".ebuild") }
+				>
+					{ version.Version }
+				</a>
+			</strong>
+			<span class="kk-slot"> : { overviewSlotText(version) }</span>
+			if len(version.Restricts) > 0 {
+				<span
+					class="badge badge-danger kk-restrict-label"
+					title={ "The following features are restricted: " + strings.Join(version.Restricts, " ") }
+				>
+					{ utils.FormatRestricts(version.Restricts) }
+				</span>
+			}
+			if userPreferences.Packages.Overview.EAPI == "inline" {
+				<span style="background-color: white;border:1px solid grey;color: grey;" class="badge badge-danger kk-restrict-label" title="The following features are restricted:">EAPI { version.EAPI }</span>
+			}
+		</td>
+		if userPreferences.Packages.Overview.EAPI == "column" {
+			<td class="text-center">
+				{ version.EAPI }
+			</td>
+		}
+		for _, arch := range userPreferences.Packages.Overview.Keywords {
+			if keywords := strings.Fields(version.Keywords); slices.Contains(keywords, "~"+arch) {
+				if len(version.Masks) > 0 {
+					<td class="kk-keyword kk-keyword-masked" title={ version.Version + " is masked (testing) on " + arch }>
+						<svg height="16" class="octicon octicon-diff-modified" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-mask" xlink:href="#svg-ver-mask"></use></svg>
+						<span class="sr-only">~{ arch }</span>
+					</td>
+				} else {
+					<td class="kk-keyword kk-keyword-testing" title={ version.Version + " is testing on " + arch }>
+						<svg height="16" class="octicon octicon-diff-modified" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-testing" xlink:href="#svg-ver-testing"></use></svg>
+						<span class="sr-only">~{ arch }</span>
+					</td>
+				}
+			} else if slices.Contains(keywords, "-"+arch) {
+				<td class="kk-keyword kk-keyword-unavailable" title={ version.Version + " is unavailable on " + arch }>
+					<svg height="16" class="octicon octicon-diff-removed" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-unavailable" xlink:href="#svg-ver-unavailable"></use></svg>
+					<span class="sr-only">-{ arch }</span>
+				</td>
+			} else if slices.Contains(keywords, arch) {
+				if len(version.Masks) > 0 {
+					<td class="kk-keyword kk-keyword-masked" title={ version.Version + " is masked (stable) on " + arch }>
+						<svg height="16" class="octicon octicon-diff-added" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-mask" xlink:href="#svg-ver-mask"></use></svg>
+						<span class="sr-only">{ arch }</span>
+					</td>
+				} else {
+					<td class="kk-keyword kk-keyword-stable" title={ version.Version + " is stable on " + arch }>
+						<svg height="16" class="octicon octicon-diff-added" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-stable" xlink:href="#svg-ver-stable"></use></svg>
+						<span class="sr-only">{ arch }</span>
+					</td>
+				}
+			} else if slices.Contains(keywords, "-*") {
+				<td class="kk-keyword kk-keyword-unavailable" title={ version.Version + " is unavailable on " + arch }>
+					<svg height="16" class="octicon octicon-diff-removed" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-unavailable" xlink:href="#svg-ver-unavailable"></use></svg>
+					<span class="sr-only">-{ arch }</span>
+				</td>
+			} else {
+				<td class="kk-keyword kk-keyword-unkown" title={ version.Version + " is unknown on " + arch }>
+					<span class="sr-only">?{ arch }</span>
+				</td>
+			}
+		}
+	</tr>
+}
+
+templ overviewVersions(pkg *models.Package, userPreferences *models.UserPreferences) {
+	<h3 class="mb-2">Available Versions</h3>
+	<div class="card mb-4 rounded">
+		<svg style="display: none" version="1.1">
+			<defs>
+				<symbol id="svg-ver-mask" viewBox="0 0 14 16">
+					<path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zm-8.5-2H3v-1.5L9.5 4H11v1.5L4.5 12z"></path>
+				</symbol>
+				<symbol id="svg-ver-testing" viewBox="0 0 14 16">
+					<path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM4 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"></path>
+				</symbol>
+				<symbol id="svg-ver-unavailable" viewBox="0 0 14 16">
+					<path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zm-2-5H3V7h8v2z"></path>
+				</symbol>
+				<symbol id="svg-ver-stable" viewBox="0 0 14 16">
+					<path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM6 9H3V7h3V4h2v3h3v2H8v3H6V9z"></path>
+				</symbol>
+			</defs>
+		</svg>
+		<div class="table-responsive border-0">
+			<table class="table table-bordered kk-versions-table mb-0 overflow-hidden border-0">
+				<thead class="border-0">
+					<tr class="border-0">
+						<th class="kk-version border-left-0 border-top-0">Version</th>
+						if userPreferences.Packages.Overview.EAPI == "column" {
+							<th class="kk-keyword-header kk-keyword border-left-0 border-top-0">EAPI</th>
+						}
+						for _, arch := range userPreferences.Packages.Overview.Keywords {
+							<th class="kk-keyword-header kk-keyword border-left-0 border-top-0">{ arch }</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					for _, version := range pkg.Versions {
+						@overviewVersionRow(version, userPreferences)
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
+	<div class="row">
+		<div class="col-md-9">
+			if userPreferences.Packages.Overview.ShowOutdated && len(pkg.Outdated) > 0 {
+				if !pkg.HasVersion(pkg.Outdated[0].NewestVersion) {
+					<div class="alert alert-info">
+						<strong><span class="fa fa-fw fa-lightbulb-o"></span> Version { pkg.Outdated[0].NewestVersion } is available upstream. Please consider updating!</strong>
+						<br/>
+						It seems that version { pkg.Outdated[0].NewestVersion } is available upstream, while the latest version in the Gentoo tree is { pkg.Outdated[0].GentooVersion }.
+						<br/>
+						<small><i>You think this warning is false? Read more about it <a href="https://archives.gentoo.org/gentoo-dev/message/b793f4da5a5b5e20a063ea431500a820">here</a>.</i></small>
+					</div>
+				}
+			}
+			@overviewVersions(pkg, userPreferences)
+			if mask := getMask(pkg.Versions); mask != nil {
+				<h3 class="pt-3 mb-2">Masks</h3>
+				<div class="card kk-mask mb-3">
+					<ul class="list-group list-group-flush kk-mask">
+						<li class="list-group-item kk-mask">
+							if showRemovalNotice(pkg.Versions) {
+								<p style="color:#721c24;">
+									<strong><span class="fa fa-fw fa-warning"></span> This package is masked and could be removed soon!</strong>
+									<br/>
+									The mask comment indicates that this package is scheduled for removal from our package repository.
+									<br/>
+									Please review the mask information below for more details.
+								</p>
+							}
+							<strong class="kk-mask-reason">
+								@templ.Raw(mask.Reason)
+							</strong>
+							<div class="kk-mask-details">
+								<div class="row">
+									<div class="col-xs-12 col-md-3 kk-metadata-key">
+										Affected packages
+									</div>
+									<div class="col-xs-12 col-md-9 kk-mask-atoms overflow-hidden">
+										{ mask.Versions }
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 col-md-3 kk-metadata-key">
+										Author/Date
+									</div>
+									<div class="col-xs-12 col-md-9">
+										{ mask.Author } &lt;{ mask.AuthorEmail }&gt; <span class="text-muted">({ mask.Date.Format(time.DateOnly) })</span>
+									</div>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			} else if deprecation := getDeprecation(pkg.Versions); deprecation != nil {
+				<h3 class="pt-3 mb-2">Deprecation Warning</h3>
+				<div class="card bg-warning mb-3">
+					<ul class="list-group list-group-flush bg-warning">
+						<li class="list-group-item bg-warning">
+							<strong class="kk-mask-reason">
+								@templ.Raw(deprecation.Reason)
+							</strong>
+							<div class="kk-mask-details">
+								<div class="row">
+									<div class="col-xs-12 col-md-3 kk-metadata-key">
+										Affected packages
+									</div>
+									<div class="col-xs-12 col-md-9 kk-mask-atoms overflow-hidden">
+										{ deprecation.Versions }
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 col-md-3 kk-metadata-key">
+										Author/Date
+									</div>
+									<div class="col-xs-12 col-md-9">
+										{ deprecation.Author } &lt;{ deprecation.AuthorEmail }&gt; <span class="text-muted">({ deprecation.Date.Format(time.DateOnly) })</span>
+									</div>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			}
+			if len(pkg.Maintainers) == 0 {
+				<div class="alert alert-info">
+					<strong><span class="fa fa-fw fa-wrench"></span> This package needs a new maintainer!</strong>
+					<br/>
+					If you are interested in helping with the maintenance of { pkg.Name }, please get in touch with our
+					<a href="https://wiki.gentoo.org/wiki/Project:Proxy_Maintainers" class="alert-link">Proxy Maintainers team</a>.
+				</div>
+			}
+			if len(userPreferences.Packages.Overview.MetadataFields) > 0 {
+				<h3 class="pt-3 mb-2">Package Metadata</h3>
+				<div class="card border-0 mb-3">
+					<ul class="list-group kk-metadata-list">
+						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "homepage") {
+							if len(pkg.Versions[0].Homepage) > 1 {
+								<li class="kk-metadata-item list-group-item">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											<span class="fa fa-fw fa-home"></span>
+											Other homepage(s)
+										</div>
+										<div class="col-xs-12 col-md-9">
+											for i, url := range pkg.Versions[0].Homepage[1:] {
+												if i > 0 {
+													<br/>
+												}
+												<a href={ templ.URL(url) }>{ url }</a>
+											}
+										</div>
+									</div>
+								</li>
+							}
+						}
+						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "upstream") {
+							if len(pkg.Upstream.Doc) > 0 || len(pkg.Upstream.Changelog) > 0 || len(pkg.Upstream.BugsTo) > 0 || len(pkg.Upstream.RemoteIds) > 0 {
+								<li class="kk-metadata-item list-group-item">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											<span class="fa fa-fw fa-code-fork"></span>
+											Upstream
+										</div>
+										<div class="col-xs-12 col-md-9">
+											<table>
+												for i, url := range pkg.Upstream.Doc {
+													<tr>
+														<td>
+															if i == 0 {
+																<span class="kk-useflag-group float-right mr-2">Documentation</span>
+															}
+														</td>
+														<td><a href={ templ.URL(url) }>{ url }</a></td>
+													</tr>
+												}
+												for i, url := range pkg.Upstream.Changelog {
+													<tr>
+														<td>
+															if i == 0 {
+																<span class="kk-useflag-group float-right mr-2">Changelog</span>
+															}
+														</td>
+														<td><a href={ templ.URL(url) }>{ url }</a></td>
+													</tr>
+												}
+												for i, url := range pkg.Upstream.BugsTo {
+													<tr>
+														<td>
+															if i == 0 {
+																<span class="kk-useflag-group float-right mr-2">Bugs-To</span>
+															}
+														</td>
+														<td><a href={ templ.URL(url) }>{ url }</a></td>
+													</tr>
+												}
+												for i, remote := range pkg.Upstream.RemoteIds {
+													<tr>
+														<td>
+															if i == 0 {
+																<span class="kk-useflag-group float-right mr-2">Remote-Id</span>
+															}
+														</td>
+														<td>
+															if url := remoteIdLink(remote); url != "" {
+																<a href={ templ.URL(url) }>{ url }</a>
+															} else {
+																<a>({ remote.Type }) { remote.Id }</a>
+															}
+														</td>
+													</tr>
+												}
+											</table>
+										</div>
+									</div>
+								</li>
+							}
+						}
+						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "longdescription") {
+							if pkg.Longdescription != "" {
+								<li class="kk-metadata-item list-group-item">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											<span class="fa fa-fw fa-info"></span>Full description
+										</div>
+										<div class="col-xs-12 col-md-9">
+											{ pkg.Longdescription }
+										</div>
+									</div>
+								</li>
+							}
+						}
+						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "useflags") {
+							if localUseflags, globalUseflags, useExpands := getPackageUseflags(pkg); len(localUseflags) > 0 || len(globalUseflags) > 0 || len(useExpands) > 0 {
+								<li class="kk-metadata-item list-group-item">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											<span class="fa fa-fw fa-sliders"></span>
+											USE flags
+										</div>
+										<div class="col-xs-12 col-md-9">
+											if len(localUseflags) > 0 {
+												<span class="kk-useflag-group">Local Use Flags</span>
+												<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
+													for _, use := range localUseflags {
+														<li class="kk-useflag">
+															<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+														</li>
+													}
+												</ul>
+											}
+											if len(globalUseflags) > 0 {
+												<span class="kk-useflag-group">Global Use Flags</span>
+												<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
+													for _, use := range globalUseflags {
+														<li class="kk-useflag">
+															<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+														</li>
+													}
+												</ul>
+											}
+											if len(useExpands) > 0 {
+												for groupName, flags := range useExpands {
+													<span class="kk-useflag-group">{ groupName } (Use Expand)</span>
+													<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
+														for _, use := range flags {
+															<li class="kk-useflag">
+																<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ strings.TrimPrefix(use.Name, use.UseExpand + "_") }</a>
+															</li>
+														}
+													</ul>
+												}
+											}
+										</div>
+									</div>
+								</li>
+							}
+						}
+						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "license") {
+							if pkg.Versions[0].License != "" {
+								<li class="kk-metadata-item list-group-item">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											<span class="fa fa-fw fa-legal"></span>
+											License
+										</div>
+										<div class="col-xs-12 col-md-9">
+											{ pkg.Versions[0].License }
+										</div>
+									</div>
+								</li>
+							}
+						}
+						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "maintainers") {
+							if len(pkg.Maintainers) > 0 {
+								<li class="kk-metadata-item list-group-item">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											<span class="fa fa-fw fa-user"></span>
+											Maintainer(s)
+										</div>
+										<div class="col-xs-12 col-md-9">
+											for i, maintainer := range pkg.Maintainers {
+												if i > 0 {
+													,&nbsp;
+												}
+												<a title={ maintainer.PrintName() } href={ templ.URL("/maintainer/" + maintainer.Email) }>
+													{ maintainer.PrintName() }
+												</a>
+												<a href={ templ.URL("mailto:" + maintainer.Email) }>
+													<i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i>
+												</a>
+											}
+										</div>
+									</div>
+								</li>
+							}
+						}
+					</ul>
+				</div>
+			}
+			if userPreferences.Packages.Overview.Layout == "full" {
+				<div class="mt-4 pt-4"></div>
+				@components.Changelog(pkg.Atom, pkg.Commits)
+			}
+		</div>
+		<div class="col-md-3 pl-4 pt-4 mt-2">
+			<h4 class="mb-2 ml-1">
+				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseExternalResources" role="button" aria-expanded="false" aria-controls="collapseExternalResources">
+					External Resources
+				</a>
+			</h4>
+			<div class="collapse show" id="collapseExternalResources">
+				<dl class="ml-3">
+					<dd>
+						<span class="fa fa-fw fa-bug"></span>
+						<a href={ templ.URL("https://bugs.gentoo.org/buglist.cgi?quicksearch=" + pkg.Atom) } class="" target="_blank">
+							Related bugs
+						</a>
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-chain-broken"></span>
+						<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg=" + pkg.Category + ":" + pkg.Name) } title="CI report" target="_blank">CI Report</a>
+						(<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg=" + pkg.Category + ":" + pkg.Name) } title="Verbose CI report" target="_blank">verbose</a>)
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-sort-numeric-desc"></span>
+						<a href={ templ.URL("https://repology.org/tools/project-by?repo=gentoo&name_type=srcname&target_page=project_versions&name=" + pkg.Atom) } target="_blank">
+							Repology
+						</a>
+					</dd>
+					<dd>
+						<span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span>
+						<a href={ templ.URL("https://github.com/gentoo/gentoo/pulls?q=is%3Apr+is%3Aopen+in%3Atitle+" + pkg.Atom) } target="_blank">
+							Open Pull Requests
+						</a>
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-book"></span>
+						<a href={ templ.URL("https://wiki.gentoo.org/wiki/Special:Search/" + pkg.Name) } target="_blank">
+							Documentation
+						</a>
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-comments-o"></span>
+						<a href={ templ.URL("https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords=" + pkg.Name + "&mode=results") } target="_blank">
+							Forums posts
+						</a>
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-code-fork"></span>
+						<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/tree/" + pkg.Atom) } target="_blank">
+							Git repository browser
+						</a>
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-history"></span>
+						<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/log/" + pkg.Atom + "?showmsg=1") } title="Git log" target="_blank">Git log</a>
+						(<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/log/" + pkg.Atom) } title="Short git log" target="_blank">short</a>)
+					</dd>
+					<dd>
+						<span class="fa fa-fw fa-rss"></span>
+						<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/atom/" + pkg.Atom + "?h=master") } target="_blank">
+							Changes Feed
+						</a>
+					</dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+}

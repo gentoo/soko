@@ -83,7 +83,7 @@ func collectOutdated(packages []*models.Package) (outdated []components.Outdated
 	return
 }
 
-templ show(pageName string, category *models.Category, pullRequests []models.GithubPullRequest) {
+templ show(pageName string, category *models.Category, pullRequests []*models.GithubPullRequest) {
 	<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
 		switch pageName {
 			case "Packages":
@@ -98,7 +98,7 @@ templ show(pageName string, category *models.Category, pullRequests []models.Git
 	</div>
 }
 
-func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, category *models.Category, pullRequests []models.GithubPullRequest) {
+func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, category *models.Category, pullRequests []*models.GithubPullRequest) {
 	layout.TabbedLayout(category.Name, "packages", category.Name, "fa fa-fw fa-cubes", category.Description, []layout.SubTab{
 		{
 			Name:       "Packages",

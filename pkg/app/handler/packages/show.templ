@@ -1,0 +1,165 @@
+package packages
+
+import "slices"
+import "strconv"
+import "soko/pkg/app/handler/packages/components"
+import "soko/pkg/app/layout"
+import "soko/pkg/models"
+
+func showViewTabs(pkg *models.Package, userPreference *models.PackagesPreferences) []layout.SubTab {
+    securityBugs, nonSecurityBugs := countBugs(pkg)
+	return []layout.SubTab{
+		{
+			Name: "Overview",
+			Link: templ.URL("/packages/" + pkg.Atom),
+			Icon: "fa fa-info mr-1",
+		},
+		{
+			Name: "Dependencies",
+			Link: templ.URL("/packages/" + pkg.Atom + "/" + userPreference.Dependencies.Default),
+			Icon: "fa fa-link",
+		},
+		{
+			Name: "QA report",
+			Link: templ.URL("/packages/" + pkg.Atom + "/qa-report"),
+			Icon: "fa fa-fw fa-chain-broken",
+		},
+		{
+			Name:       "Pull requests",
+			Link:       templ.URL("/packages/" + pkg.Atom + "/pull-requests"),
+			Icon:       "octicon octicon-git-pull-request opticon-resource-icon ml-1",
+			BadgeValue: strconv.Itoa(len(pkg.PullRequests)),
+		},
+		{
+			Name:       "Bugs",
+			Link:       templ.URL("/packages/" + pkg.Atom + "/bugs"),
+			Icon:       "fa fa-bug",
+			BadgeValue: strconv.Itoa(nonSecurityBugs),
+		},
+		{
+			Name:       "Security",
+			Link:       templ.URL("/packages/" + pkg.Atom + "/security"),
+			Icon:       "fa fa-shield",
+			BadgeValue: strconv.Itoa(securityBugs),
+		},
+		{
+			Name: "Changelog",
+			Link: templ.URL("/packages/" + pkg.Atom + "/changelog"),
+			Icon: "fa fa-fw fa-history",
+		},
+	}
+}
+
+templ tabbedHeader(pkg *models.Package, currentSubTab string, userPreference *models.PackagesPreferences) {
+	<div class="kk-header-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="row mt-3">
+						<div class="col-md-5">
+							<h1 class="stick-top kk-package-title" id="package-title" data-atom={ pkg.Atom } data-category={ pkg.Category } data-name={ pkg.Name }>
+								<small class="kk-package-cat">
+									<a href={ templ.URL("/categories/" + pkg.Category) } class="text-dark">{ pkg.Category }</a>/
+								</small>
+								<div>
+									<svg height="32" class="octicon octicon-package right left kk-package-icon" aria-label="Package icon" viewBox="0 0 16 16" version="1.1" width="32" role="img"><path fill-rule="evenodd" d="M1 4.27v7.47c0 .45.3.84.75.97l6.5 1.73c.16.05.34.05.5 0l6.5-1.73c.45-.13.75-.52.75-.97V4.27c0-.45-.3-.84-.75-.97l-6.5-1.74a1.4 1.4 0 0 0-.5 0L1.75 3.3c-.45.13-.75.52-.75.97zm7 9.09l-6-1.59V5l6 1.61v6.75zM2 4l2.5-.67L11 5.06l-2.5.67L2 4zm13 7.77l-6 1.59V6.61l2-.55V8.5l2-.53V5.53L15 5v6.77zm-2-7.24L6.5 2.8l2-.53L15 4l-2 .53z"></path></svg>
+									<div class="kk-package-name">{ pkg.Name }</div>
+								</div>
+							</h1>
+						</div>
+						<div class="col-md-7">
+							<p class="lead kk-package-maindesc">{ pkg.Description() }</p>
+							if len(pkg.Versions[0].Homepage) > 0 {
+								<p class="kk-package-homepage">
+									<a href={ templ.URL(pkg.Versions[0].Homepage[0]) }>{ pkg.Versions[0].Homepage[0] }</a>
+								</p>
+							}
+						</div>
+						<div class="col-md-12 pt-4 mt-1">
+							<nav class="nav kk-package-nav">
+								for _, tab := range showViewTabs(pkg, userPreference) {
+									if slices.Contains(userPreference.Tabs.Visible, tab.Name) {
+										<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
+											<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
+											if tab.BadgeValue != "" {
+												<span class="ml-1 badge badge-pill kk-misc-badge">{ tab.BadgeValue }</span>
+											}
+										</a>
+									}
+								}
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+func collectAllBugs(pkg *models.Package) (generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
+	bugs = make([]*models.Bug, 0, len(pkg.Bugs))
+    handled := make(map[string]struct{}, len(pkg.Bugs))
+	for _, bug := range pkg.Bugs {
+		if bug.Component == "Current packages" {
+			generalCount++
+			bugs = append(bugs, bug)
+            handled[bug.Id] = struct{}{}
+		}
+	}
+	for _, ver := range pkg.Versions {
+		for _, bug := range ver.Bugs {
+            if _, found := handled[bug.Id]; found {
+                continue
+            }
+			if bug.Component == "Stabilization" {
+				stabilizationCount++
+				bugs = append(bugs, bug)
+			} else if bug.Component == "Keywording" {
+				keywordingCount++
+				bugs = append(bugs, bug)
+			}
+            handled[bug.Id] = struct{}{}
+		}
+	}
+	return
+}
+
+func collectSecurityBugs(pkg *models.Package) (bool, []*models.Bug) {
+	bugs := make([]*models.Bug, 0, len(pkg.Bugs))
+	for _, bug := range pkg.Bugs {
+		if bug.Component == "Vulnerabilities" {
+			bugs = append(bugs, bug)
+		}
+	}
+	return len(bugs) > 0, bugs
+}
+
+templ show(pkg *models.Package, currentSubTab string, userPreferences models.UserPreferences) {
+	if currentSubTab == "Reverse Dependencies" {
+		@tabbedHeader(pkg, "Dependencies", &userPreferences.Packages)
+	} else {
+		@tabbedHeader(pkg, currentSubTab, &userPreferences.Packages)
+	}
+	<div class="tab-content" id="myTabContent">
+		<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+			switch currentSubTab {
+                case "QA report":
+                    @qaReport(pkg, &userPreferences)
+				case "Pull requests":
+					@components.PullRequests(len(pkg.PullRequests) > 0, pkg.PullRequests)
+				case "Bugs":
+					@components.Bugs(collectAllBugs(pkg))
+				case "Security":
+					@components.SecurityBugs(collectSecurityBugs(pkg))
+				case "Changelog":
+					@components.Changelog(pkg.Atom, pkg.Commits)
+				case "Dependencies":
+					@dependencies(pkg)
+				case "Reverse Dependencies":
+					@reverseDependencies(pkg)
+				default:
+					@overview(pkg, &userPreferences)
+			}
+		</div>
+	</div>
+}

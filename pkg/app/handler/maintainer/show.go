@@ -91,7 +91,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		).Render(r.Context(), w)
 		return
 	case "pull-requests":
-		var pullRequests []models.GithubPullRequest
+		var pullRequests []*models.GithubPullRequest
 		err = database.DBCon.Model(&pullRequests).
 			DistinctOn("github_pull_request.id").
 			OrderExpr("github_pull_request.id DESC").
