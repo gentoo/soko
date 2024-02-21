@@ -4,7 +4,7 @@ package repository
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"io"
 	"os"
 	"regexp"
 	"soko/pkg/config"
@@ -83,8 +83,7 @@ func updateModifiedPackage(changedFile string) {
 
 }
 
-
-func addPackage(newPackage *models.Package){
+func addPackage(newPackage *models.Package) {
 	found := false
 	for _, p := range storage.Packages {
 		if p.Atom == newPackage.Atom {
@@ -106,7 +105,7 @@ func GetPkgMetadata(path string) Pkgmetadata {
 		logger.Error.Println(err)
 	}
 	defer xmlFile.Close()
-	byteValue, _ := ioutil.ReadAll(xmlFile)
+	byteValue, _ := io.ReadAll(xmlFile)
 	var pkgmetadata Pkgmetadata
 	xml.Unmarshal(byteValue, &pkgmetadata)
 	return pkgmetadata

@@ -2,7 +2,7 @@ package projects
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"soko/pkg/config"
@@ -18,7 +18,7 @@ func UpdateProjects() {
 	defer database.DBCon.Close()
 
 	if config.Quiet() == "true" {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	// get projects from api.gentoo.org

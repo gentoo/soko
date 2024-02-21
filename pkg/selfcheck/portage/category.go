@@ -4,7 +4,7 @@ package repository
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"io"
 	"os"
 	"regexp"
 	"soko/pkg/config"
@@ -29,7 +29,6 @@ func UpdateCategory(path string) {
 	}
 }
 
-
 // updateModifiedCategory adds a category to the database or
 // updates it. To do so, it parses the metadata from metadata.xml
 func updateModifiedCategory(changedFile string) {
@@ -51,7 +50,7 @@ func updateModifiedCategory(changedFile string) {
 	})
 }
 
-func addCategory(category *models.Category){
+func addCategory(category *models.Category) {
 	found := false
 	for _, cat := range storage.Categories {
 		if cat.Name == category.Name {
@@ -73,7 +72,7 @@ func GetCatMetadata(path string) Catmetadata {
 		logger.Error.Println(err)
 	}
 	defer xmlFile.Close()
-	byteValue, _ := ioutil.ReadAll(xmlFile)
+	byteValue, _ := io.ReadAll(xmlFile)
 	var catmetadata Catmetadata
 	xml.Unmarshal(byteValue, &catmetadata)
 	return catmetadata

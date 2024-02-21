@@ -3,7 +3,7 @@
 package portage
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"soko/pkg/config"
@@ -26,7 +26,7 @@ func Update() {
 	defer database.DBCon.Close()
 
 	if config.Quiet() == "true" {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	logger.Info.Println("Start update...")
@@ -140,7 +140,7 @@ func FullUpdate() {
 	defer database.DBCon.Close()
 
 	if config.Quiet() == "true" {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	logger.Info.Println("Full update up...")

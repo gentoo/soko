@@ -2,7 +2,7 @@ package pkgcheck
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"soko/pkg/config"
@@ -35,7 +35,7 @@ func UpdatePkgCheckResults() {
 	defer database.DBCon.Close()
 
 	if config.Quiet() == "true" {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	// get the pkg check results from qa-reports.gentoo.org

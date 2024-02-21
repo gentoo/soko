@@ -4,26 +4,19 @@ import (
 	"archive/tar"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
 	"soko/pkg/models"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ulikunitz/xz"
 )
 
 var Dependencies []*models.ReverseDependency
-
-var (
-	mu sync.RWMutex
-)
 
 func FullPackageDependenciesUpdate() {
 
@@ -37,13 +30,15 @@ func FullPackageDependenciesUpdate() {
 
 	logger.Info.Println("Got", dependencyCounter, "dependencies.")
 
-	// TODO in future we want a better incremental update here
-	deleteAllDependencies()
-
-	logger.Info.Println("Start inserting dependencies into the database")
+	database.TruncateTable[models.ReverseDependency]("id")
 	// because we removed all previous rows in table, we aren't concerned about
 	// duplicates, so we can use bulk insert
-	database.DBCon.Model(&Dependencies).Insert()
+	res, err := database.DBCon.Model(&Dependencies).Insert()
+	if err != nil {
+		logger.Error.Println("Error during inserting dependencies", err)
+	} else {
+		logger.Info.Println("Inserted", res.RowsAffected(), "dependencies")
+	}
 
 	updateStatus()
 }
@@ -83,10 +78,10 @@ func UpdateDependencies() (int, error) {
 			return 0, err
 		}
 		switch hdr.Typeflag {
-		case tar.TypeReg, tar.TypeRegA:
+		case tar.TypeReg:
 			nameParts := strings.SplitN(hdr.Name, "/", 2)
 
-			rawResponse, err := ioutil.ReadAll(tr)
+			rawResponse, err := io.ReadAll(tr)
 			if err != nil {
 				logger.Error.Println(err)
 				return 0, err
@@ -140,49 +135,6 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage = versionnumber.Split(gpackage, 2)[0]
 
 	return gpackage
-}
-
-func deleteAllDependencies() {
-	var reverseDependencies []*models.ReverseDependency
-	err := database.DBCon.Model(&reverseDependencies).Column("id").Select()
-	if err != nil {
-		logger.Error.Println(err)
-		return
-	} else if len(reverseDependencies) == 0 {
-		return
-	}
-
-	res, err := database.DBCon.Model(&reverseDependencies).Delete()
-	if err != nil {
-		logger.Error.Println(err)
-		return
-	}
-	logger.Info.Println("Deleted", res.RowsAffected(), "dependencies from the database.")
-}
-
-func deleteOutdatedDependencies(newDependencies []*models.ReverseDependency) {
-	var oldDependencies []*models.ReverseDependency
-	database.DBCon.Model(&oldDependencies).Select()
-
-	for index, oldDependency := range oldDependencies {
-
-		if index%10000 == 0 {
-			fmt.Println(time.Now().Format(time.Kitchen) + ": " + strconv.Itoa(index) + " / " + strconv.Itoa(len(oldDependencies)))
-		}
-
-		found := false
-		for _, newDependency := range newDependencies {
-			if oldDependency.Id == newDependency.Id {
-				found = true
-			}
-		}
-
-		if !found {
-			database.DBCon.Model(oldDependency).WherePK().Delete()
-		}
-
-	}
-
 }
 
 func updateStatus() {

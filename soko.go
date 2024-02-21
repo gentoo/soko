@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"io"
-	"io/ioutil"
 	"os"
 	"soko/pkg/app"
 	"soko/pkg/config"
@@ -106,7 +105,7 @@ func initLoggers(infoHandler io.Writer, errorHandler io.Writer) {
 	if config.Debug() == "true" {
 		logger.Init(os.Stdout, infoHandler, errorHandler)
 	} else {
-		logger.Init(ioutil.Discard, infoHandler, errorHandler)
+		logger.Init(io.Discard, infoHandler, errorHandler)
 	}
 }
 
