@@ -10,7 +10,6 @@
 package repository
 
 import (
-	"html/template"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
@@ -18,6 +17,7 @@ import (
 	"soko/pkg/portage/utils"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/go-pg/pg/v10"
 )
 
@@ -74,7 +74,7 @@ func parsePackagesDeprecated(entry string) {
 			if packageLine == "#" {
 				reason += "<br />"
 			} else {
-				reason = reason + " " + template.HTMLEscapeString(strings.TrimPrefix(packageLine, "# "))
+				reason = reason + " " + templ.EscapeString(strings.TrimPrefix(packageLine, "# "))
 			}
 			packageLine, packageLines = packageLines[0], packageLines[1:]
 		}

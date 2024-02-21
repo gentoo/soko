@@ -12,7 +12,6 @@
 package repository
 
 import (
-	"html/template"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
@@ -22,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/go-pg/pg/v10"
 )
 
@@ -121,7 +121,7 @@ func parsePackageMask(packageMask string) {
 			if packageMaskLine == "#" {
 				reason += "<br />"
 			} else {
-				reason = reason + " " + template.HTMLEscapeString(strings.TrimPrefix(packageMaskLine, "# "))
+				reason = reason + " " + templ.EscapeString(strings.TrimPrefix(packageMaskLine, "# "))
 			}
 			packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		}
