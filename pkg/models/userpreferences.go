@@ -19,12 +19,10 @@ type GeneralPreferences struct {
 type PackagesPreferences struct {
 	Overview     PackagesOverviewPreferences
 	Dependencies PackagesDependenciesPreferences
-	QAReport     PackagesQAReportPreferences
 	PullRequests PackagesPullRequestsPreferences
 	Bugs         PackagesBugsPreferences
 	Security     PackagesSecurityPreferences
 	Changelog    PackagesChangelogPreferences
-	Tabs         PackagesTabsPreferences
 }
 
 type PackagesOverviewPreferences struct {
@@ -39,11 +37,6 @@ type PackagesOverviewPreferences struct {
 
 type PackagesDependenciesPreferences struct {
 	Default string
-}
-
-type PackagesQAReportPreferences struct {
-	ExcludedWarningClasses []int
-	ShowAll                bool
 }
 
 type PackagesPullRequestsPreferences struct {
@@ -62,10 +55,6 @@ type PackagesSecurityPreferences struct {
 type PackagesChangelogPreferences struct {
 	Layout string
 	Size   int
-}
-
-type PackagesTabsPreferences struct {
-	Visible []string
 }
 
 type MaintainersPreferences struct {
@@ -89,12 +78,10 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.Packages = PackagesPreferences{}
 	userPreferences.Packages.Overview = PackagesOverviewPreferences{}
 	userPreferences.Packages.Dependencies = PackagesDependenciesPreferences{}
-	userPreferences.Packages.QAReport = PackagesQAReportPreferences{}
 	userPreferences.Packages.PullRequests = PackagesPullRequestsPreferences{}
 	userPreferences.Packages.Bugs = PackagesBugsPreferences{}
 	userPreferences.Packages.Security = PackagesSecurityPreferences{}
 	userPreferences.Packages.Changelog = PackagesChangelogPreferences{}
-	userPreferences.Packages.Tabs = PackagesTabsPreferences{}
 	userPreferences.Maintainers = MaintainersPreferences{}
 	userPreferences.Useflags = UseflagsPreferences{}
 	userPreferences.Arches = ArchesPreferences{}
@@ -111,9 +98,6 @@ func GetDefaultUserPreferences() UserPreferences {
 
 	userPreferences.Packages.Dependencies.Default = "dependencies"
 
-	userPreferences.Packages.QAReport.ExcludedWarningClasses = []int{}
-	userPreferences.Packages.QAReport.ShowAll = true
-
 	userPreferences.Packages.PullRequests.Layout = "default"
 
 	userPreferences.Packages.Bugs.Layout = "default"
@@ -123,8 +107,6 @@ func GetDefaultUserPreferences() UserPreferences {
 
 	userPreferences.Packages.Changelog.Layout = "compact"
 	userPreferences.Packages.Changelog.Size = 15
-
-	userPreferences.Packages.Tabs.Visible = []string{"Overview", "Dependencies", "QA report", "Pull requests", "Bugs", "Security", "Changelog"}
 
 	userPreferences.Arches.Visible = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}
 	userPreferences.Arches.DefaultArch = "amd64"
@@ -151,7 +133,7 @@ func (u *UserPreferences) Sanitize() {
 
 	sanitizedKeywords := []string{}
 	for _, keyword := range u.Packages.Overview.Keywords {
-		if strings.Contains(strings.Join(u.GetAllKeywords(), ","), keyword) {
+		if strings.Contains(strings.Join(GetAllKeywords(), ","), keyword) {
 			sanitizedKeywords = append(sanitizedKeywords, keyword)
 		}
 	}
@@ -201,23 +183,15 @@ func (u *UserPreferences) Sanitize() {
 		u.Packages.Changelog.Size = 100
 	}
 
-	sanitizedTabs := []string{}
-	for _, tab := range u.Packages.Tabs.Visible {
-		if strings.Contains(strings.Join(defaultUserPreferences.Packages.Tabs.Visible, ","), tab) {
-			sanitizedTabs = append(sanitizedTabs, tab)
-		}
-	}
-	u.Packages.Tabs.Visible = sanitizedTabs
-
 	sanitizedVisibleArches := []string{}
 	for _, keyword := range u.Arches.Visible {
-		if strings.Contains(strings.Join(u.GetAllKeywords(), ","), keyword) {
+		if strings.Contains(strings.Join(GetAllKeywords(), ","), keyword) {
 			sanitizedVisibleArches = append(sanitizedVisibleArches, keyword)
 		}
 	}
 	u.Arches.Visible = sanitizedVisibleArches
 
-	if !strings.Contains(strings.Join(u.GetAllKeywords(), ","), u.Arches.DefaultArch) {
+	if !strings.Contains(strings.Join(GetAllKeywords(), ","), u.Arches.DefaultArch) {
 		u.Arches.DefaultArch = defaultUserPreferences.Arches.DefaultArch
 	}
 
@@ -230,32 +204,8 @@ func (u *UserPreferences) Sanitize() {
 	}
 }
 
-func (u UserPreferences) ContainsPkgcheckClass(class string) bool {
-	for _, v := range u.Packages.QAReport.ExcludedWarningClasses {
-		if GetPkgcheckClass(v) == class {
-			return false
-		}
-	}
-	return true
-}
-
-func (u UserPreferences) GetAllKeywords() []string {
+func GetAllKeywords() []string {
 	return []string{"alpha", "amd64", "arm", "arm64", "hppa", "ia64", "loong", "m68k", "mips", "ppc", "ppc64", "riscv", "s390", "sparc", "x86", "amd64-linux", "arm-linux", "arm64-linux", "ppc64-linux", "x86-linux", "ppc-macos", "x64-macos", "sparc-solaris", "sparc64-solaris", "x64-solaris", "x86-solaris", "x64-winnt", "x86-winnt", "x64-cygwin"}
-}
-
-func GetPkgcheckClass(number int) string {
-	pkgcheckClasses := []string{"AbsoluteSymlink", "ArchesWithoutProfiles", "BadCommitSummary", "BadDependency", "BadDescription", "BadFilename", "BadHomepage", "BadKeywords", "BadPackageUpdate", "BadProtocol", "BadWhitespaceCharacter", "BannedCharacter", "BannedEapi", "BannedEapiCommand", "BinaryFile", "CatBadlyFormedXml", "CatInvalidXml", "CatMetadataXmlEmptyElement", "CatMetadataXmlIndentation", "CatMetadataXmlInvalidCatRef", "CatMetadataXmlInvalidPkgRef", "CatMissingMetadataXml", "ConflictingAccountIdentifiers", "ConflictingChksums", "DeadUrl", "DeprecatedChksum", "DeprecatedDep", "DeprecatedEapi", "DeprecatedEapiCommand", "DeprecatedEclass", "DeprecatedInsinto", "DirectNoMaintainer", "DirectStableKeywords", "DoubleEmptyLine", "DoublePrefixInPath", "DroppedKeywords", "DroppedStableKeywords", "DroppedUnstableKeywords", "DuplicateEclassInherits", "DuplicateFiles", "DuplicateKeywords", "EbuildIncorrectCopyright", "EbuildInvalidCopyright", "EbuildInvalidLicenseHeader", "EbuildNonGentooAuthorsCopyright", "EbuildOldGentooCopyright", "EclassBashSyntaxError", "EclassIncorrectCopyright", "EclassInvalidCopyright", "EclassInvalidLicenseHeader", "EclassNonGentooAuthorsCopyright", "EclassOldGentooCopyright", "EmptyCategoryDir", "EmptyFile", "EmptyMaintainer", "EmptyPackageDir", "EmptyProject", "EqualVersions", "ExecutableFile", "HomepageInSrcUri", "HttpsUrlAvailable", "IncorrectCopyright", "InvalidBdepend", "InvalidCommitMessage", "InvalidCommitTag", "InvalidCopyright", "InvalidDepend", "InvalidEapi", "InvalidLicense", "InvalidLicenseHeader", "InvalidPN", "InvalidPdepend", "InvalidProperties", "InvalidRdepend", "InvalidRequiredUse", "InvalidRestrict", "InvalidSlot", "InvalidSrcUri", "InvalidUTF8", "InvalidUseFlags", "LaggingProfileEapi", "LaggingStable", "MaintainerWithoutProxy", "MatchingChksums", "MatchingGlobalUse", "MismatchedPN", "MismatchedPerlVersion", "MissingAccountIdentifier", "MissingChksum", "MissingLicense", "MissingLicenseFile", "MissingLicenseRestricts", "MissingManifest", "MissingPackageRevision", "MissingPythonEclass", "MissingSignOff", "MissingSlash", "MissingSlotDep", "MissingTestRestrict", "MissingUnpackerDep", "MissingUri", "MissingUseDepDefault", "MissingVirtualKeywords", "MovedPackageUpdate", "MultiMovePackageUpdate", "NoFinalNewline", "NonGentooAuthorsCopyright", "NonexistentBlocker", "NonexistentDeps", "NonexistentProfilePath", "NonexistentProjectMaintainer", "NonsolvableDepsInDev", "NonsolvableDepsInExp", "NonsolvableDepsInStable", "ObsoleteUri", "OldGentooCopyright", "OldMultiMovePackageUpdate", "OldPackageUpdate", "OutdatedBlocker", "OutsideRangeAccountIdentifier", "OverlappingKeywords", "PkgBadlyFormedXml", "PkgInvalidXml", "PkgMetadataXmlEmptyElement", "PkgMetadataXmlIndentation", "PkgMetadataXmlInvalidCatRef", "PkgMetadataXmlInvalidPkgRef", "PkgMissingMetadataXml", "PotentialGlobalUse", "PotentialLocalUse", "PotentialStable", "ProbableGlobalUse", "ProbableUseExpand", "ProfileError", "ProfileWarning", "PythonEclassError", "PythonMissingDeps", "PythonMissingRequiredUse", "PythonRuntimeDepInAnyR1", "RdependChange", "RedirectedUrl", "RedundantDodir", "RedundantLongDescription", "RedundantUriRename", "RedundantVersion", "RequiredUseDefaults", "SSLCertificateError", "SizeViolation", "SourcingError", "StableRequest", "StaleProxyMaintProject", "StaticSrcUri", "TarballAvailable", "TrailingEmptyLine", "UncheckableDep", "UnderscoreInUseFlag", "UnknownCategories", "UnknownKeywords", "UnknownLicenses", "UnknownManifest", "UnknownMirror", "UnknownPkgDirEntry", "UnknownProfilePackageKeywords", "UnknownProfilePackageUse", "UnknownProfilePackages", "UnknownProfileUse", "UnknownProperties", "UnknownRestrict", "UnknownUseFlags", "UnnecessaryLicense", "UnnecessaryManifest", "UnnecessarySlashStrip", "UnsortedKeywords", "UnstableOnly", "UnstatedIuse", "UnusedEclasses", "UnusedGlobalUse", "UnusedInMastersEclasses", "UnusedInMastersGlobalUse", "UnusedInMastersLicenses", "UnusedInMastersMirrors", "UnusedLicenses", "UnusedLocalUse", "UnusedMirrors", "UnusedProfileDirs", "VariableInHomepage", "VisibleVcsPkg", "VulnerablePackage", "WhitespaceFound", "WrongIndentFound", "WrongMaintainerType"}
-	return pkgcheckClasses[number]
-}
-
-func GetPkgcheckClassIndex(class string) int {
-	pkgcheckClasses := []string{"AbsoluteSymlink", "ArchesWithoutProfiles", "BadCommitSummary", "BadDependency", "BadDescription", "BadFilename", "BadHomepage", "BadKeywords", "BadPackageUpdate", "BadProtocol", "BadWhitespaceCharacter", "BannedCharacter", "BannedEapi", "BannedEapiCommand", "BinaryFile", "CatBadlyFormedXml", "CatInvalidXml", "CatMetadataXmlEmptyElement", "CatMetadataXmlIndentation", "CatMetadataXmlInvalidCatRef", "CatMetadataXmlInvalidPkgRef", "CatMissingMetadataXml", "ConflictingAccountIdentifiers", "ConflictingChksums", "DeadUrl", "DeprecatedChksum", "DeprecatedDep", "DeprecatedEapi", "DeprecatedEapiCommand", "DeprecatedEclass", "DeprecatedInsinto", "DirectNoMaintainer", "DirectStableKeywords", "DoubleEmptyLine", "DoublePrefixInPath", "DroppedKeywords", "DroppedStableKeywords", "DroppedUnstableKeywords", "DuplicateEclassInherits", "DuplicateFiles", "DuplicateKeywords", "EbuildIncorrectCopyright", "EbuildInvalidCopyright", "EbuildInvalidLicenseHeader", "EbuildNonGentooAuthorsCopyright", "EbuildOldGentooCopyright", "EclassBashSyntaxError", "EclassIncorrectCopyright", "EclassInvalidCopyright", "EclassInvalidLicenseHeader", "EclassNonGentooAuthorsCopyright", "EclassOldGentooCopyright", "EmptyCategoryDir", "EmptyFile", "EmptyMaintainer", "EmptyPackageDir", "EmptyProject", "EqualVersions", "ExecutableFile", "HomepageInSrcUri", "HttpsUrlAvailable", "IncorrectCopyright", "InvalidBdepend", "InvalidCommitMessage", "InvalidCommitTag", "InvalidCopyright", "InvalidDepend", "InvalidEapi", "InvalidLicense", "InvalidLicenseHeader", "InvalidPN", "InvalidPdepend", "InvalidProperties", "InvalidRdepend", "InvalidRequiredUse", "InvalidRestrict", "InvalidSlot", "InvalidSrcUri", "InvalidUTF8", "InvalidUseFlags", "LaggingProfileEapi", "LaggingStable", "MaintainerWithoutProxy", "MatchingChksums", "MatchingGlobalUse", "MismatchedPN", "MismatchedPerlVersion", "MissingAccountIdentifier", "MissingChksum", "MissingLicense", "MissingLicenseFile", "MissingLicenseRestricts", "MissingManifest", "MissingPackageRevision", "MissingPythonEclass", "MissingSignOff", "MissingSlash", "MissingSlotDep", "MissingTestRestrict", "MissingUnpackerDep", "MissingUri", "MissingUseDepDefault", "MissingVirtualKeywords", "MovedPackageUpdate", "MultiMovePackageUpdate", "NoFinalNewline", "NonGentooAuthorsCopyright", "NonexistentBlocker", "NonexistentDeps", "NonexistentProfilePath", "NonexistentProjectMaintainer", "NonsolvableDepsInDev", "NonsolvableDepsInExp", "NonsolvableDepsInStable", "ObsoleteUri", "OldGentooCopyright", "OldMultiMovePackageUpdate", "OldPackageUpdate", "OutdatedBlocker", "OutsideRangeAccountIdentifier", "OverlappingKeywords", "PkgBadlyFormedXml", "PkgInvalidXml", "PkgMetadataXmlEmptyElement", "PkgMetadataXmlIndentation", "PkgMetadataXmlInvalidCatRef", "PkgMetadataXmlInvalidPkgRef", "PkgMissingMetadataXml", "PotentialGlobalUse", "PotentialLocalUse", "PotentialStable", "ProbableGlobalUse", "ProbableUseExpand", "ProfileError", "ProfileWarning", "PythonEclassError", "PythonMissingDeps", "PythonMissingRequiredUse", "PythonRuntimeDepInAnyR1", "RdependChange", "RedirectedUrl", "RedundantDodir", "RedundantLongDescription", "RedundantUriRename", "RedundantVersion", "RequiredUseDefaults", "SSLCertificateError", "SizeViolation", "SourcingError", "StableRequest", "StaleProxyMaintProject", "StaticSrcUri", "TarballAvailable", "TrailingEmptyLine", "UncheckableDep", "UnderscoreInUseFlag", "UnknownCategories", "UnknownKeywords", "UnknownLicenses", "UnknownManifest", "UnknownMirror", "UnknownPkgDirEntry", "UnknownProfilePackageKeywords", "UnknownProfilePackageUse", "UnknownProfilePackages", "UnknownProfileUse", "UnknownProperties", "UnknownRestrict", "UnknownUseFlags", "UnnecessaryLicense", "UnnecessaryManifest", "UnnecessarySlashStrip", "UnsortedKeywords", "UnstableOnly", "UnstatedIuse", "UnusedEclasses", "UnusedGlobalUse", "UnusedInMastersEclasses", "UnusedInMastersGlobalUse", "UnusedInMastersLicenses", "UnusedInMastersMirrors", "UnusedLicenses", "UnusedLocalUse", "UnusedMirrors", "UnusedProfileDirs", "VariableInHomepage", "VisibleVcsPkg", "VulnerablePackage", "WhitespaceFound", "WrongIndentFound", "WrongMaintainerType"}
-	for k, v := range pkgcheckClasses {
-		if v == class {
-			return k
-		}
-	}
-	return -1
 }
 
 func createSlice(n int) []int {

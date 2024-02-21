@@ -1,13 +1,12 @@
 package packages
 
-import "slices"
 import "strconv"
 import "soko/pkg/app/handler/packages/components"
 import "soko/pkg/app/layout"
 import "soko/pkg/models"
 
 func showViewTabs(pkg *models.Package, userPreference *models.PackagesPreferences) []layout.SubTab {
-    securityBugs, nonSecurityBugs := countBugs(pkg)
+	securityBugs, nonSecurityBugs := countBugs(pkg)
 	return []layout.SubTab{
 		{
 			Name: "Overview",
@@ -78,14 +77,12 @@ templ tabbedHeader(pkg *models.Package, currentSubTab string, userPreference *mo
 						<div class="col-md-12 pt-4 mt-1">
 							<nav class="nav kk-package-nav">
 								for _, tab := range showViewTabs(pkg, userPreference) {
-									if slices.Contains(userPreference.Tabs.Visible, tab.Name) {
-										<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
-											<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
-											if tab.BadgeValue != "" {
-												<span class="ml-1 badge badge-pill kk-misc-badge">{ tab.BadgeValue }</span>
-											}
-										</a>
-									}
+									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
+										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
+										if tab.BadgeValue != "" {
+											<span class="ml-1 badge badge-pill kk-misc-badge">{ tab.BadgeValue }</span>
+										}
+									</a>
 								}
 							</nav>
 						</div>
@@ -98,19 +95,19 @@ templ tabbedHeader(pkg *models.Package, currentSubTab string, userPreference *mo
 
 func collectAllBugs(pkg *models.Package) (generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
 	bugs = make([]*models.Bug, 0, len(pkg.Bugs))
-    handled := make(map[string]struct{}, len(pkg.Bugs))
+	handled := make(map[string]struct{}, len(pkg.Bugs))
 	for _, bug := range pkg.Bugs {
 		if bug.Component == "Current packages" {
 			generalCount++
 			bugs = append(bugs, bug)
-            handled[bug.Id] = struct{}{}
+			handled[bug.Id] = struct{}{}
 		}
 	}
 	for _, ver := range pkg.Versions {
 		for _, bug := range ver.Bugs {
-            if _, found := handled[bug.Id]; found {
-                continue
-            }
+			if _, found := handled[bug.Id]; found {
+				continue
+			}
 			if bug.Component == "Stabilization" {
 				stabilizationCount++
 				bugs = append(bugs, bug)
@@ -118,7 +115,7 @@ func collectAllBugs(pkg *models.Package) (generalCount, stabilizationCount, keyw
 				keywordingCount++
 				bugs = append(bugs, bug)
 			}
-            handled[bug.Id] = struct{}{}
+			handled[bug.Id] = struct{}{}
 		}
 	}
 	return
@@ -143,8 +140,8 @@ templ show(pkg *models.Package, currentSubTab string, userPreferences models.Use
 	<div class="tab-content" id="myTabContent">
 		<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
 			switch currentSubTab {
-                case "QA report":
-                    @qaReport(pkg, &userPreferences)
+				case "QA report":
+					@qaReport(pkg, &userPreferences)
 				case "Pull requests":
 					@components.PullRequests(len(pkg.PullRequests) > 0, pkg.PullRequests)
 				case "Bugs":

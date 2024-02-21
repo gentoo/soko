@@ -1,0 +1,407 @@
+package user
+
+import "encoding/base64"
+import "encoding/json"
+import "net/http"
+import "slices"
+import "strconv"
+import "time"
+import "soko/pkg/app/utils"
+import "soko/pkg/models"
+
+templ packages(preferences models.PackagesPreferences) {
+	<div class="row">
+		<div class="col-2 mt-1">
+			<div class="nav flex-column" role="tablist" aria-orientation="vertical" style="position: fixed;">
+				<a class="nav-link user-pref-nav-link active" id="overview-tab" href="#overview" aria-controls="overview-settings">Overview</a>
+				<a class="nav-link user-pref-nav-link" id="dependencies-tab" href="#dependencies">Dependencies</a>
+				<a class="nav-link user-pref-nav-link" id="pull-requests-tab" href="#pull-requests" aria-controls="pull-requests-settings">Pull requests</a>
+				<a class="nav-link user-pref-nav-link" id="bugs-tab" href="#bugs" aria-controls="bugs-settings">Bugs</a>
+				<a class="nav-link user-pref-nav-link" id="security-tab" href="#security" aria-controls="security-settings">Security</a>
+				<a class="nav-link user-pref-nav-link" id="changelog-tab" href="#changelog" aria-controls="changelog-settings">Changelog</a>
+				<a class="nav-link user-pref-nav-link" id="tabs-tab" href="#tabs" aria-controls="tabs-settings">Tabs</a>
+			</div>
+		</div>
+		<div class="col-9 mt-1">
+			<form method="post" action="/user/preferences/packages/edit">
+				<h3 id="overview">Overview</h3>
+				<hr class="mt-1"/>
+				<h4 class="mb-1">Layout</h4>
+				<div class="row">
+					<div class="col-6 mt-1">
+						<div class="card" style="background: transparent;">
+							<div class="card-body">
+								<img id="img1" alt="Versions + Metadata (default)" src="/assets/pgo2.png" style="width: 100%;cursor: pointer;"/>
+							</div>
+						</div>
+						<div class="text-center mt-2">
+							<div class="form-check text-center form-check-inline" style="text-overflow: ellipsis;overflow: hidden;">
+								<input
+									type="radio"
+									id="minimalOverviewLayout"
+									name="overview-layout"
+									value="minimal"
+									if preferences.Overview.Layout == "minimal" {
+										checked
+									}
+								/>
+								<label class="form-check-label ml-1" for="minimalOverviewLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Versions + Metadata (default)">Versions + Metadata <i>(default)</i></label>
+							</div>
+						</div>
+					</div>
+					<div class="col-6 mt-1">
+						<div class="card" style="background: transparent;">
+							<div class="card-body">
+								<img id="img2" alt="Versions + Metadata + Changelog" src="/assets/pgo1.png" onclick="document.getElementById('fullOverviewLayout').checked = true;" style="width: 100%;cursor: pointer;"/>
+							</div>
+						</div>
+						<div class="text-center mt-2">
+							<div class="form-check text-center form-check-inline" style="text-overflow: ellipsis;overflow: hidden;">
+								<input
+									type="radio"
+									id="fullOverviewLayout"
+									name="overview-layout"
+									value="full"
+									if preferences.Overview.Layout == "full" {
+										checked
+									}
+								/>
+								<label class="form-check-label ml-1" for="fullOverviewLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Versions + Metadata + Changelog">Versions + Metadata + Changelog</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h4 class="mt-4 mb-1">Keywords</h4>
+				<div class="row pl-3">
+					@archesTwoColumns(preferences.Overview.Keywords)
+				</div>
+				<h4 class="mt-4 mb-1">EAPI version</h4>
+				<div class="card">
+					<div class="card-body">
+						Show
+						<select class="form-control form-control-sm ml-2" style="max-width: 100px;display: inline;" name="overview-eapi" id="overview-eapi">
+							<option
+								value="none"
+								if preferences.Overview.EAPI == "none" {
+									selected
+								}
+							>none</option>
+							<option
+								value="column"
+								if preferences.Overview.EAPI == "column" {
+									selected
+								}
+							>in column</option>
+							<option
+								value="inline"
+								if preferences.Overview.EAPI == "inline" {
+									selected
+								}
+							>inline</option>
+						</select>
+					</div>
+				</div>
+				<h4 class="mt-4 mb-1">Outdated Versions</h4>
+				<div class="card">
+					<div class="card-body">
+						<div class="form-check form-check-inline">
+							<input
+								type="checkbox"
+								class=""
+								id="overview-showOutdated"
+								name="overview-showOutdated"
+								value="true"
+								if preferences.Overview.ShowOutdated {
+									checked
+								}
+							/>
+							<label class="form-check-label ml-1" for="overview-showOutdated">Show Outdated warnings?</label>
+						</div>
+					</div>
+				</div>
+				<h4 class="mt-4 mb-1">Metadata</h4>
+				<div class="card">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-4">
+								<div class="form-check form-check-inline">
+									<input
+										type="checkbox"
+										name="overview-metadata-fields"
+										id="overview-metadata-fields-homepage"
+										value="homepage"
+										if slices.Contains(preferences.Overview.MetadataFields, "homepage") {
+											checked
+										}
+									/>
+									<label class="form-check-label ml-1" for="overview-metadata-fields-homepage">Homepage</label>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="form-check form-check-inline">
+									<input
+										type="checkbox"
+										name="overview-metadata-fields"
+										id="overview-metadata-fields-upstream"
+										value="upstream"
+										if slices.Contains(preferences.Overview.MetadataFields, "upstream") {
+											checked
+										}
+									/>
+									<label class="form-check-label ml-1" for="overview-metadata-fields-upstream">Upstream</label>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="form-check form-check-inline">
+									<input
+										type="checkbox"
+										name="overview-metadata-fields"
+										id="overview-metadata-fields-longdescription"
+										value="longdescription"
+										if slices.Contains(preferences.Overview.MetadataFields, "longdescription") {
+											checked
+										}
+									/>
+									<label class="form-check-label ml-1" for="overview-metadata-fields-longdescription">Longdescription</label>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="form-check form-check-inline">
+									<input
+										type="checkbox"
+										name="overview-metadata-fields"
+										id="overview-metadata-fields-useflags"
+										value="useflags"
+										if slices.Contains(preferences.Overview.MetadataFields, "useflags") {
+											checked
+										}
+									/>
+									<label class="form-check-label ml-1" for="overview-metadata-fields-useflags">USE flags</label>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="form-check form-check-inline">
+									<input
+										type="checkbox"
+										name="overview-metadata-fields"
+										id="overview-metadata-fields-license"
+										value="license"
+										if slices.Contains(preferences.Overview.MetadataFields, "license") {
+											checked
+										}
+									/>
+									<label class="form-check-label ml-1" for="overview-metadata-fields-license">License</label>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="form-check form-check-inline">
+									<input
+										type="checkbox"
+										name="overview-metadata-fields"
+										id="overview-metadata-fields-maintainers"
+										value="maintainers"
+										if slices.Contains(preferences.Overview.MetadataFields, "maintainers") {
+											checked
+										}
+									/>
+									<label class="form-check-label ml-1" for="overview-metadata-fields-maintainers">Maintainers</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h4 class="mt-4 mb-1">Changelog</h4>
+				<div class="card">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-6">
+								Layout
+								<select class="form-control form-control-sm ml-1" style="max-width: 100px;display: inline;" name="overview-changelog-type" id="overview-changelog-type" disabled>
+									<option value="compact">default</option>
+								</select>
+							</div>
+							<div class="col-6">
+								Size <input type="number" name="overview-changelog-size" class="form-control form-control-sm ml-1" style="width:150px;display: inline;" value={ strconv.Itoa(preferences.Overview.ChangelogLength) }/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h3 class="mt-5" id="dependencies">Dependencies</h3>
+				<hr class="mt-1"/>
+				<div class="card">
+					<div class="card-body">
+						Default Page
+						<select class="form-control form-control-sm ml-1" style="max-width: 200px;display: inline;" name="dependencies-default-page" id="dependencies-default-page">
+							<option
+								value="dependencies"
+								if preferences.Dependencies.Default == "dependencies" {
+									selected
+								}
+							>dependencies</option>
+							<option
+								value="reverse-dependencies"
+								if preferences.Dependencies.Default == "reverse-dependencies" {
+									selected
+								}
+							>reverse-dependencies</option>
+						</select>
+					</div>
+				</div>
+				<h3 class="mt-5" id="pull-requests">Pull requests</h3>
+				<hr class="mt-1"/>
+				<div class="card">
+					<div class="card-body">
+						Layout
+						<select class="form-control form-control-sm ml-1" style="max-width: 200px;display: inline;" name="pullrequests-layout" id="pullrequests-layout" disabled>
+							<option
+								value="default"
+								if preferences.PullRequests.Layout == "default" {
+									selected
+								}
+							>default</option>
+						</select>
+					</div>
+				</div>
+				<h3 class="mt-5" id="bugs">Bugs</h3>
+				<hr class="mt-1"/>
+				<div class="card">
+					<div class="card-body">
+						Layout
+						<select class="form-control form-control-sm ml-1" style="max-width: 200px;display: inline;" name="bugs-layout" id="bugs-layout" disabled>
+							<option
+								value="default"
+								if preferences.PullRequests.Layout == "default" {
+									selected
+								}
+							>default</option>
+						</select>
+					</div>
+				</div>
+				<h3 class="mt-5" id="security">Security</h3>
+				<hr class="mt-1"/>
+				<div class="card">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-6">
+								Layout
+								<select class="form-control form-control-sm ml-1" style="max-width: 100px;display: inline;" name="security-layout" id="security-layout" disabled>
+									<option value="default">default</option>
+								</select>
+							</div>
+							<div class="col-6">
+								<div class="form-check form-check-inline pt-2">
+									<input
+										type="checkbox"
+										name="security-show-glsas"
+										id="security-show-glsas"
+										class="disabled"
+										value="true"
+										if preferences.Security.ShowGLSAs {
+											selected
+										}
+										disabled
+									/>
+									<label class="form-check-label ml-1" style="color:grey;">Show GLSAs</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h3 class="mt-5" id="changelog">Changelog</h3>
+				<hr class="mt-1"/>
+				<div class="card">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-6">
+								Layout
+								<select class="form-control form-control-sm ml-1" style="max-width: 100px;display: inline;" name="changelog-type" id="changelog-type" disabled>
+									<option value="compact">default</option>
+								</select>
+							</div>
+							<div class="col-6">
+								Size <input type="number" name="changelog-size" class="form-control form-control-sm" style="display: inline;width: 150px;" value={ strconv.Itoa(preferences.Changelog.Size) }/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 mt-4">
+						<button type="submit" class="float-right btn btn-sm btn-primary">Save</button>
+						<a class="float-right btn btn-sm btn-outline-danger mr-2" href="/user/preferences/packages/reset">Reset to Defaults</a>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div id="myModal" class="modal">
+		<span class="close">&times;</span>
+		<img class="modal-content" id="img01"/>
+		<div id="caption"></div>
+	</div>
+}
+
+func EditPackagesPreferences(w http.ResponseWriter, r *http.Request) {
+
+	userPreferences := utils.GetUserPreferences(r)
+
+	r.ParseForm()
+
+	// Overview: Layout
+	overviewLayout := r.Form.Get("overview-layout")
+	if overviewLayout == "minimal" || overviewLayout == "full" {
+		userPreferences.Packages.Overview.Layout = overviewLayout
+	}
+
+	// Overview: Keywords
+	overviewKeywords := r.Form["overview-keywords"]
+	userPreferences.Packages.Overview.Keywords = overviewKeywords
+
+	// EAPI
+	showEAPI := r.Form.Get("overview-eapi")
+	if showEAPI == "none" || showEAPI == "column" || showEAPI == "inline" {
+		userPreferences.Packages.Overview.EAPI = showEAPI
+	}
+
+	// Overview: Show Outdated
+	userPreferences.Packages.Overview.ShowOutdated = r.Form.Get("overview-showOutdated") == "true"
+
+	// Overview: Metadata fields
+	overviewMetadataFields := r.Form["overview-metadata-fields"]
+	userPreferences.Packages.Overview.MetadataFields = overviewMetadataFields
+
+	// Overview: Changelog
+	changelogSize, err := strconv.Atoi(r.Form.Get("overview-changelog-size"))
+	if err == nil {
+		if changelogSize < 100 {
+			userPreferences.Packages.Overview.ChangelogLength = changelogSize
+		} else {
+			userPreferences.Packages.Overview.ChangelogLength = 100
+		}
+	}
+
+	// Dependencies
+	defaultDependenciesPage := r.Form.Get("dependencies-default-page")
+	if defaultDependenciesPage == "dependencies" || defaultDependenciesPage == "reverse-dependencies" {
+		userPreferences.Packages.Dependencies.Default = defaultDependenciesPage
+	}
+
+	//
+	// Store cookie
+	//
+	encodedUserPreferences, err := json.Marshal(&userPreferences.Packages)
+	if err == nil {
+		sEnc := base64.StdEncoding.EncodeToString(encodedUserPreferences)
+		addCookie(w, "userpref_packages", "/", sEnc, 365*24*time.Hour)
+	}
+	http.Redirect(w, r, "/user/preferences/packages", http.StatusSeeOther)
+}
+
+func ResetPackages(w http.ResponseWriter, r *http.Request) {
+	userPreferences := utils.GetDefaultUserPreferences()
+	encodedUserPreferences, err := json.Marshal(&userPreferences.Packages)
+	if err == nil {
+		sEnc := base64.StdEncoding.EncodeToString(encodedUserPreferences)
+		addCookie(w, "userpref_packages", "/", sEnc, 365*24*time.Hour)
+	}
+	http.Redirect(w, r, "/user/preferences/packages", http.StatusSeeOther)
+}

@@ -1,0 +1,153 @@
+package user
+
+import "encoding/base64"
+import "encoding/json"
+import "net/http"
+import "slices"
+import "time"
+import "soko/pkg/app/utils"
+import "soko/pkg/models"
+
+func splitArches(selected []string) (firstColumn, secondColumn []string) {
+	allArches := models.GetAllKeywords()
+	remainingFirstColumn := len(allArches) - (len(allArches) / 2) - len(selected)
+	for _, arch := range allArches {
+		if !slices.Contains(selected, arch) {
+			if len(firstColumn) < remainingFirstColumn {
+				firstColumn = append(firstColumn, arch)
+			} else {
+				secondColumn = append(secondColumn, arch)
+			}
+		}
+	}
+	return
+}
+
+templ archesTwoColumns(selected []string) {
+	if firstColumn, secondColumn := splitArches(selected); true {
+		<ul id="example1" class="list-group col-6">
+			for _, arch := range selected {
+				<li class="list-group-item">
+					<div class="form-check form-check-inline w-100">
+						<input type="checkbox" id={ "visible-arches-" + arch } name="visible-arches" value={ arch } checked/>
+						<label class="form-check-label ml-1" for={ "visible-arches-" + arch }>{ arch }</label> <i class="fa fa-arrows ml-auto" aria-hidden="true"></i>
+					</div>
+				</li>
+			}
+			for _, arch := range firstColumn {
+				<li class="list-group-item">
+					<div class="form-check form-check-inline w-100">
+						<input type="checkbox" id={ "visible-arches-" + arch } name="visible-arches" value={ arch }/>
+						<label class="form-check-label ml-1" for={ "visible-arches-" + arch }>{ arch }</label> <i class="fa fa-arrows ml-auto" aria-hidden="true"></i>
+					</div>
+				</li>
+			}
+		</ul>
+		<ul id="example2" class="list-group col-6">
+			for _, arch := range secondColumn {
+				<li class="list-group-item">
+					<div class="form-check form-check-inline w-100">
+						<input type="checkbox" id={ "visible-arches-" + arch } name="visible-arches" value={ arch }/>
+						<label class="form-check-label ml-1" for={ "visible-arches-" + arch }>{ arch }</label> <i class="fa fa-arrows ml-auto" aria-hidden="true"></i>
+					</div>
+				</li>
+			}
+		</ul>
+	}
+}
+
+templ arches(preferences models.ArchesPreferences) {
+	<div class="row">
+		<div class="col-2 mt-1">
+			<div class="nav flex-column" role="tablist" aria-orientation="vertical" style="position: fixed;">
+				<a class="nav-link user-pref-nav-link active" id="keywords-tab" href="#keywords" aria-controls="overview-settings">Keywords</a>
+				<a class="nav-link user-pref-nav-link" id="defaults-tab" href="#defaults">Defaults</a>
+			</div>
+		</div>
+		<div class="col-10 mt-1">
+			<form method="post" action="/user/preferences/arches/visible">
+				<h3 class="" id="keywords">Keywords</h3>
+				<hr class="mt-1"/>
+				<div class="row pl-3">
+					@archesTwoColumns(preferences.Visible)
+				</div>
+				<h3 class="mt-5" id="defaults">Defaults</h3>
+				<hr class="mt-1"/>
+				<div class="card">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-6">
+								Default arch
+								<select class="form-control" style="max-width: 200px;display: inline;" name="arches-default-arch" id="arches-default-arch">
+									for _, arch := range models.GetAllKeywords() {
+										<option
+											value={ arch }
+											if preferences.DefaultArch == arch {
+												selected
+											}
+										>{ arch }</option>
+									}
+								</select>
+							</div>
+							<div class="col-6">
+								Default page
+								<select class="form-control" style="max-width: 150px;display: inline;" name="arches-default-page" id="arches-default-page">
+									<option
+										value="keyworded"
+										if preferences.DefaultPage == "keyworded" {
+											selected
+										}
+									>keyworded</option>
+									<option
+										value="stable"
+										if preferences.DefaultPage == "stable" {
+											selected
+										}
+									>newly stable</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 mt-4">
+						<button type="submit" class="float-right btn btn-sm btn-primary">Save</button>
+						<a class="float-right btn btn-sm btn-outline-danger mr-2" href="/user/preferences/arches/reset">Reset to Defaults</a>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	@sortableScript()
+}
+
+func Arches(w http.ResponseWriter, r *http.Request) {
+	userPreferences := utils.GetUserPreferences(r)
+	r.ParseForm()
+	// visible arches
+	visibleArches := r.Form["visible-arches"]
+	userPreferences.Arches.Visible = visibleArches
+	// default arch
+	defaultArch := r.Form.Get("arches-default-arch")
+	userPreferences.Arches.DefaultArch = defaultArch
+	// default arches page
+	defaultPage := r.Form.Get("arches-default-page")
+	userPreferences.Arches.DefaultPage = defaultPage
+	// store cookie
+	encodedUserPreferences, err := json.Marshal(&userPreferences.Arches)
+	if err == nil {
+		sEnc := base64.StdEncoding.EncodeToString(encodedUserPreferences)
+		addCookie(w, "userpref_arches", "/", sEnc, 365*24*time.Hour)
+	}
+	http.Redirect(w, r, "/user/preferences/arches", http.StatusSeeOther)
+}
+
+func ResetArches(w http.ResponseWriter, r *http.Request) {
+	userPreferences := utils.GetDefaultUserPreferences()
+	encodedUserPreferences, err := json.Marshal(&userPreferences.Arches)
+	if err == nil {
+		sEnc := base64.StdEncoding.EncodeToString(encodedUserPreferences)
+		addCookie(w, "userpref_arches", "/", sEnc, 365*24*time.Hour)
+	}
+	http.Redirect(w, r, "/user/preferences/arches", http.StatusSeeOther)
+}

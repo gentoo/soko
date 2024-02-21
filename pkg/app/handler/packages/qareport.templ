@@ -11,13 +11,11 @@ templ qaReport(pkg *models.Package, userPreferences *models.UserPreferences) {
 					<span class="text-muted">All Versions</span>
 					<ul class="list-group">
 						for _, res := range pkg.PkgCheckResults {
-							if res.Version == "" && userPreferences.ContainsPkgcheckClass(res.Class) {
-								<li class="list-group-item">
-									<strong>{ res.Class }</strong>
-									<br/>
-									<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
-								</li>
-							}
+							<li class="list-group-item">
+								<strong>{ res.Class }</strong>
+								<br/>
+								<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
+							</li>
 						}
 					</ul>
 				</li>
@@ -26,13 +24,11 @@ templ qaReport(pkg *models.Package, userPreferences *models.UserPreferences) {
 						<span class="text-muted">{ ver.Version }</span>
 						<ul class="list-group">
 							for _, res := range ver.PkgCheckResults {
-								if userPreferences.ContainsPkgcheckClass(res.Class) {
-									<li class="list-group-item">
-										<strong>{ res.Class }</strong>
-										<br/>
-										<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
-									</li>
-								}
+								<li class="list-group-item">
+									<strong>{ res.Class }</strong>
+									<br/>
+									<span class="kk-version kk-cell-sep-right text-muted">{ res.Message }</span>
+								</li>
 							}
 						</ul>
 					</li>

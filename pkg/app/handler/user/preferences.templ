@@ -1,0 +1,94 @@
+package user
+
+import "net/http"
+import "time"
+import "soko/pkg/app/layout"
+import "soko/pkg/app/utils"
+import "soko/pkg/config"
+import "soko/pkg/models"
+
+var viewTabs = []layout.SubTab{
+	{
+		Name: "General",
+		Link: "/user/preferences/general",
+		Icon: "fa fa-globe mr-1",
+	},
+	{
+		Name: "Packages",
+		Link: "/user/preferences/packages",
+		Icon: "fa fa-cube mr-1",
+	},
+	{
+		Name: "Maintainers",
+		Link: "/user/preferences/maintainers",
+		Icon: "fa fa-users mr-1",
+	},
+	{
+		Name: "USE flags",
+		Link: "/user/preferences/useflags",
+		Icon: "fa fa-sliders mr-1",
+	},
+	{
+		Name: "Architectures",
+		Link: "/user/preferences/arches",
+		Icon: "fa fa-server mr-1",
+	},
+}
+
+templ show(currentSubTab string, preferences models.UserPreferences) {
+	<div class="container mb-5">
+		switch currentSubTab {
+			case "General":
+				@general(preferences.General)
+			case "Packages":
+                @packages(preferences.Packages)
+			case "Maintainers":
+				@maintainers(preferences.Maintainers)
+			case "USE flags":
+				@useflags(preferences.Useflags)
+			case "Architectures":
+				@arches(preferences.Arches)
+		}
+	</div>
+	<script src="/assets/userpref.js"></script>
+}
+
+templ sortableScript() {
+	<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+	<script>
+        if(document.getElementById("example1") != null && document.getElementById("example2") != null) {
+            new Sortable(example1, {
+                group: 'shared',
+                animation: 150,
+                ghostClass: 'bg-info'
+            });
+            new Sortable(example2, {
+                group: 'shared',
+                animation: 150,
+                ghostClass: 'bg-info'
+            });
+        }
+    </script>
+}
+
+func Preferences(currentSubTab string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		layout.TabbedLayout("User", "preferences", "Preferences", "fa fa-fw fa-cog", "You can customize the page contents to your needs here", viewTabs,
+		currentSubTab, show(currentSubTab, utils.GetUserPreferences(r))).Render(r.Context(), w)
+	}
+}
+
+// addCookie will apply a new cookie to the response of a http request
+// with the key/value specified.
+func addCookie(w http.ResponseWriter, name, path, value string, ttl time.Duration) {
+	expire := time.Now().Add(ttl)
+	cookie := http.Cookie{
+		Name:     name,
+		Path:     path,
+		Value:    value,
+		Expires:  expire,
+		HttpOnly: true,
+		Secure:   config.DevMode() == "false",
+	}
+	http.SetCookie(w, &cookie)
+}

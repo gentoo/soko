@@ -78,9 +78,13 @@ func Serve() {
 	redirect("/packages/stabilized.atom", "/packages/stable.atom")
 	setRoute("/packages/search.atom", packages.SearchFeed)
 
-	setRoute("/user", user.Preferences)
-	setRoute("/user/preferences", user.Preferences)
-	setRoute("/user/preferences/", user.Preferences)
+	setRoute("/user", user.Preferences("General"))
+	setRoute("/user/preferences", user.Preferences("General"))
+	setRoute("/user/preferences/general", user.Preferences("General"))
+	setRoute("/user/preferences/packages", user.Preferences("Packages"))
+	setRoute("/user/preferences/maintainers", user.Preferences("Maintainers"))
+	setRoute("/user/preferences/useflags", user.Preferences("USE flags"))
+	setRoute("/user/preferences/arches", user.Preferences("Architectures"))
 
 	setRoute("/user/preferences/general/layout", user.General)
 	setRoute("/user/preferences/general/reset", user.ResetGeneral)
