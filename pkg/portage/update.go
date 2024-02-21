@@ -5,6 +5,7 @@ package portage
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/logger"
@@ -147,8 +148,18 @@ func FullUpdate() {
 	// Add new entries & update existing
 	logger.Info.Println("Update all present files")
 
-	// update the local useflags
+	// update useflags
+	database.TruncateTable[models.Useflag]("id")
+	repository.UpdateUse("profiles/use.desc")
 	repository.UpdateUse("profiles/use.local.desc")
+	entries, err := os.ReadDir(config.PortDir() + "/profiles/desc")
+	if err != nil {
+		logger.Error.Println("Error reading profiles/desc", err)
+	} else {
+		for _, entry := range entries {
+			repository.UpdateUse(config.PortDir() + "/profiles/desc/" + entry.Name())
+		}
+	}
 
 	allFiles := utils.AllFiles()
 	updateMetadata(allFiles)
