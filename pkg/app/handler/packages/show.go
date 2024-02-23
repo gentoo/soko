@@ -19,19 +19,19 @@ import (
 
 // Show renders a template to show a given package
 func Show(w http.ResponseWriter, r *http.Request) {
+	category := r.PathValue("category")
+	packageName := r.PathValue("package")
+	pageName := r.PathValue("pageName")
+	atom := category + "/" + packageName
 
-	if strings.HasSuffix(r.URL.Path, "/changelog.json") {
-		changelogJSON(w, r)
-		return
-	} else if strings.HasSuffix(r.URL.Path, ".json") {
+	if pageName == "" && strings.HasSuffix(packageName, ".json") {
 		buildJson(w, r)
 		return
 	}
 
-	atom := r.URL.Path[len("/packages/"):]
 	var currentSubTab string
-	userPreferences := utils.GetUserPreferences(r)
 
+	userPreferences := utils.GetUserPreferences(r)
 	if userPreferences.General.LandingPageLayout == "full" {
 		updateSearchHistory(atom, w, r)
 	}
@@ -46,8 +46,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		}).
 		Relation("Versions.Bugs")
 
-	if strings.HasSuffix(r.URL.Path, "/changelog") {
-		atom = strings.ReplaceAll(atom, "/changelog", "")
+	switch pageName {
+	case "changelog":
 		currentSubTab = "Changelog"
 		query = query.Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
 			// here be dragons
@@ -66,30 +66,32 @@ func Show(w http.ResponseWriter, r *http.Request) {
 				Order("preceding_commits DESC").
 				Limit(userPreferences.Packages.Overview.ChangelogLength), nil
 		})
-	} else if strings.HasSuffix(r.URL.Path, "/qa-report") {
-		atom = strings.ReplaceAll(atom, "/qa-report", "")
+	case "changelog.json":
+		changelogJSON(w, r)
+		return
+	case "qa-report":
 		currentSubTab = "QA report"
 		query = query.
 			Relation("PkgCheckResults").
 			Relation("Versions.PkgCheckResults")
-	} else if strings.HasSuffix(r.URL.Path, "/pull-requests") {
+	case "pull-requests":
 		atom = strings.ReplaceAll(atom, "/pull-requests", "")
 		currentSubTab = "Pull requests"
-	} else if strings.HasSuffix(r.URL.Path, "/bugs") {
+	case "bugs":
 		atom = strings.ReplaceAll(atom, "/bugs", "")
 		currentSubTab = "Bugs"
-	} else if strings.HasSuffix(r.URL.Path, "/security") {
+	case "security":
 		atom = strings.ReplaceAll(atom, "/security", "")
 		currentSubTab = "Security"
-	} else if strings.HasSuffix(r.URL.Path, "/dependencies") {
+	case "dependencies":
 		atom = strings.ReplaceAll(atom, "/dependencies", "")
 		currentSubTab = "Dependencies"
 		query = query.Relation("Versions.Dependencies")
-	} else if strings.HasSuffix(r.URL.Path, "/reverse-dependencies") {
+	case "reverse-dependencies":
 		atom = strings.ReplaceAll(atom, "/reverse-dependencies", "")
 		currentSubTab = "Reverse Dependencies"
 		query = query.Relation("ReverseDependencies")
-	} else {
+	case "", "overview":
 		query = query.Relation("Outdated").
 			Relation("Versions.Masks").
 			Relation("Versions.Deprecates")
@@ -99,6 +101,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		currentSubTab = "Overview"
+	default:
+		http.NotFound(w, r)
+		return
 	}
 
 	err := query.Where("atom = ?", atom).Select()

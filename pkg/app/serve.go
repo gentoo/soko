@@ -33,7 +33,8 @@ func Serve() {
 
 	setRoute("GET /categories", categories.Index)
 	setRoute("GET /categories.json", categories.JSONCategories)
-	setRoute("GET /categories/", categories.Show)
+	setRoute("GET /categories/{category}", categories.Show)
+	setRoute("GET /categories/{category}/{pageName}", categories.Show)
 
 	setRoute("GET /useflags/popular.json", useflags.Popular)
 	setRoute("GET /useflags/suggest.json", useflags.Suggest)
@@ -43,10 +44,14 @@ func Serve() {
 	setRoute("GET /useflags/expand", useflags.Expand)
 	setRoute("GET /useflags/popular", useflags.PopularPage)
 	setRoute("GET /useflags", useflags.Default)
-	setRoute("GET /useflags/", useflags.Show)
+	setRoute("GET /useflags/{useflag}", useflags.Show)
 
 	setRoute("GET /arches", arches.Index)
-	setRoute("GET /arches/", arches.Show)
+	setRoute("GET /arches/{arch}/stable", arches.ShowStable)
+	setRoute("GET /arches/{arch}/stable.atom", arches.ShowStableFeed)
+	setRoute("GET /arches/{arch}/keyworded", arches.ShowKeyworded)
+	setRoute("GET /arches/{arch}/keyworded.atom", arches.ShowKeywordedFeed)
+	setRoute("GET /arches/{arch}/leaf-packages", arches.ShowLeafPackages)
 
 	setRoute("GET /about", about.Index)
 	setRoute("GET /about/help", about.Help)
@@ -77,7 +82,8 @@ func Serve() {
 	setRoute("GET /packages/updated", packages.Updated)
 	setRoute("GET /packages/stable", packages.Stabilized)
 	setRoute("GET /packages/keyworded", packages.Keyworded)
-	setRoute("GET /packages/", packages.Show)
+	setRoute("GET /packages/{category}/{package}", packages.Show)
+	setRoute("GET /packages/{category}/{package}/{pageName}", packages.Show)
 	setRoute("GET /{$}", index.Show)
 
 	setRoute("GET /packages/added.atom", packages.AddedFeed)

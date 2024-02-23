@@ -126,7 +126,7 @@ templ show(useflag models.Useflag, localUseflags, otherUseExpands []models.Usefl
 
 // Show renders a template to show a given USE flag
 func Show(w http.ResponseWriter, r *http.Request) {
-	useFlagName := r.URL.Path[len("/useflags/"):]
+	useFlagName := r.PathValue("useflag")
 
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).

@@ -15,12 +15,12 @@ import (
 
 // Show renders a template to show a given category
 func Show(w http.ResponseWriter, r *http.Request) {
-	categoryName, pageUrl, found := strings.Cut(r.URL.Path[len("/categories/"):], "/")
-	if !found {
-		if strings.HasSuffix(r.URL.Path, ".json") {
-			buildJson(w, r, strings.TrimSuffix(categoryName, ".json"))
-			return
-		}
+	categoryName := r.PathValue("category")
+	pageUrl := r.PathValue("pageName")
+
+	if pageUrl == "" && strings.HasSuffix(categoryName, ".json") {
+		buildJson(w, r, strings.TrimSuffix(categoryName, ".json"))
+		return
 	}
 
 	var pullRequests []*models.GithubPullRequest
@@ -67,8 +67,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		}
 		utils.StabilizationExport(w, pageUrl, category.Packages)
 		return
-	default:
+	case "", "packages":
 		query = query.Relation("Packages.Versions")
+	default:
+		http.NotFound(w, r)
+		return
 	}
 
 	err := query.Select()
