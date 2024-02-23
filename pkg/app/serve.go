@@ -61,6 +61,7 @@ func Serve() {
 	setRoute("GET /maintainer/{email}", maintainer.ShowPackages)
 	setRoute("GET /maintainer/{email}/bugs", maintainer.ShowBugs)
 	setRoute("GET /maintainer/{email}/changelog", maintainer.ShowChangelog)
+	setRoute("GET /maintainer/{email}/info.json", maintainer.ShowInfoJson)
 	setRoute("GET /maintainer/{email}/outdated", maintainer.ShowOutdated)
 	setRoute("GET /maintainer/{email}/pull-requests", maintainer.ShowPullRequests)
 	setRoute("GET /maintainer/{email}/security", maintainer.ShowSecurity)

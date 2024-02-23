@@ -1,6 +1,7 @@
 package maintainer
 
 import (
+	"encoding/json"
 	"net/http"
 	"soko/pkg/app/handler/packages/components"
 	"soko/pkg/app/layout"
@@ -210,7 +211,7 @@ func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
 			return q.Where("class = ?", "StableRequest"), nil
 		}).Select()
 	if err != nil {
-		http.NotFound(w, r)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	utils.StabilizationExport(w, pageName, gpackages)
@@ -233,4 +234,36 @@ func ShowPackages(w http.ResponseWriter, r *http.Request) {
 	layout.Layout(maintainer.Name, "maintainers",
 		show(packagesCount, &maintainer, "Packages", showPackages(gpackages, &maintainer)),
 	).Render(r.Context(), w)
+}
+
+func ShowInfoJson(w http.ResponseWriter, r *http.Request) {
+	maintainer, _, _, err := common(w, r)
+	if err != nil {
+		return
+	}
+
+	var reply struct {
+		Email     string   `json:"email"`
+		Name      string   `json:"name"`
+		IsProject bool     `json:"is_project"`
+		Members   []string `json:"members"`
+		MemberOf  []string `json:"member_of"`
+	}
+
+	reply.Email = maintainer.Email
+	reply.Name = maintainer.Name
+	reply.IsProject = maintainer.Type == "project"
+
+	for _, member := range maintainer.Project.Members {
+		reply.Members = append(reply.Members, member.Email)
+	}
+	for _, project := range maintainer.Projects {
+		reply.MemberOf = append(reply.MemberOf, project.Email)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(reply)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
 }
