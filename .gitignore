@@ -3,6 +3,7 @@ assets/
 .idea
 
 .bin/soko
+__debug*
 
 *_templ.go
 *_templ.txt
