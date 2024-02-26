@@ -49,7 +49,7 @@ func Expand(w http.ResponseWriter, r *http.Request) {
 	err := database.DBCon.Model(&useflags).
 		Where("scope = 'use_expand'").
 		Order("use_expand", "name").
-        Column("use_expand", "name", "description").
+		Column("use_expand", "name", "description").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

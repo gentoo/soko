@@ -22,12 +22,12 @@ templ show() {
 				Loading...
 			</div>
 			<script src="https://unpkg.com/graphiql@0.17.5/graphiql.min.js" type="application/javascript"></script>
-            @templ.Raw(`<script>window.graphqlEndpoint = '` + config.GraphiqlEndpoint() + `';</script>`)
+			@templ.Raw(`<script>window.graphqlEndpoint = '` + config.GraphiqlEndpoint() + `';</script>`)
 			<script src="/assets/graphiql.js" type="application/javascript"></script>
 		</body>
 	</html>
 }
 
 func Show(w http.ResponseWriter, r *http.Request) {
-    show().Render(r.Context(), w)
+	show().Render(r.Context(), w)
 }

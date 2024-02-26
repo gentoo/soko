@@ -202,26 +202,26 @@ templ showPackages(packages []*models.Package, maintainer *models.Maintainer) {
 			}
 			if len(maintainer.Projects) > 0 {
 				<h4>
-                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseProjects" role="button" aria-expanded="false" aria-controls="collapseProjects">
-                        Projects
-                    </a>
-                </h4>
-                <div class="collapse show" id="collapseProjects">
-                    <dl>
-                        for _, project := range maintainer.Projects {
-                            <dd class="ml-3 mb-0"><a href={ templ.URL("/maintainer/" + project.Email) }>{ project.Name }</a></dd>
+					<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseProjects" role="button" aria-expanded="false" aria-controls="collapseProjects">
+						Projects
+					</a>
+				</h4>
+				<div class="collapse show" id="collapseProjects">
+					<dl>
+						for _, project := range maintainer.Projects {
+							<dd class="ml-3 mb-0"><a href={ templ.URL("/maintainer/" + project.Email) }>{ project.Name }</a></dd>
 						}
-                    </dl>
-                </div>
+					</dl>
+				</div>
 			}
 			if len(packages) > 0 {
 				<h4 class="mt-4">
-                    <a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
-                        Shortcuts
-                    </a>
-                </h4>
+					<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
+						Shortcuts
+					</a>
+				</h4>
 				<div class="collapse show" id="collapseShortcuts">
-                    <dl>
+					<dl>
 						for i, pkg := range packages {
 							if i == 0 || pkg.Category != packages[i-1].Category {
 								<dd class="ml-3 mb-0">

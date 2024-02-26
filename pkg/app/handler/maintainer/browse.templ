@@ -66,12 +66,12 @@ var browseViewTabs = []layout.SubTab{
 }
 
 func renderBrowsePage(w http.ResponseWriter, r *http.Request, title string, dbType string) {
-    var maintainers []*models.Maintainer
+	var maintainers []*models.Maintainer
 	err := database.DBCon.Model(&maintainers).
-        Where("type = ?", dbType).
-        Order("name").
-        Select()
-    if err != nil {
+		Where("type = ?", dbType).
+		Order("name").
+		Select()
+	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
@@ -82,13 +82,13 @@ func renderBrowsePage(w http.ResponseWriter, r *http.Request, title string, dbTy
 }
 
 func BrowseProjects(w http.ResponseWriter, r *http.Request) {
-    renderBrowsePage(w, r, "Gentoo Projects", "project")
+	renderBrowsePage(w, r, "Gentoo Projects", "project")
 }
 
 func BrowseDevs(w http.ResponseWriter, r *http.Request) {
-    renderBrowsePage(w, r, "Gentoo Developers", "gentoo-developer")
+	renderBrowsePage(w, r, "Gentoo Developers", "gentoo-developer")
 }
 
 func BrowseProxyDevs(w http.ResponseWriter, r *http.Request) {
-    renderBrowsePage(w, r, "Proxied Maintainers", "proxied-maintainer")
+	renderBrowsePage(w, r, "Proxied Maintainers", "proxied-maintainer")
 }
