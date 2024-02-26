@@ -25,18 +25,21 @@ templ Changelog(atom string, commits []*models.Commit) {
 	<div class="row">
 		<div class="col-md-9">
 			if len(commits) > 0 {
-				if atom == "" {
+				<span class="d-flex justify-content-between">
 					<h3>Latest Commits</h3>
-				} else {
-					<span class="d-flex justify-content-between">
-                    <h3>Latest Commits</h3>
-                    <span>
-                        <a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/atom/" + atom + "?h=master") } target="_blank">
-                            <span class="fa fa-fw fa-rss text-dark"></span> RSS Feed
-                        </a>
-                    </span>
-                </span>
-				}
+					<span>
+						<a
+							if atom != "" {
+								href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/atom/" + atom + "?h=master") }
+							} else {
+								href={ templ.URL("./changelog.atom") }
+							}
+							target="_blank"
+						>
+							<span class="fa fa-fw fa-rss text-dark"></span> RSS Feed
+						</a>
+					</span>
+				</span>
 				<style>
 					.kk-added-file-badge {
 						background-color: #dff0d8;

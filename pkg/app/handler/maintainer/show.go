@@ -9,8 +9,10 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
+	"time"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/gorilla/feeds"
 )
 
 func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintainer, packagesQuery *pg.Query, packagesCount int, err error) {
@@ -72,6 +74,44 @@ func ShowChangelog(w http.ResponseWriter, r *http.Request) {
 	layout.Layout(maintainer.Name, "maintainers",
 		show(packagesCount, &maintainer, "Changelog", components.Changelog("", commits)),
 	).Render(r.Context(), w)
+}
+
+func ShowChangelogFeed(w http.ResponseWriter, r *http.Request) {
+	maintainer, query, _, err := common(w, r)
+	if err != nil {
+		return
+	}
+	var commits []*models.Commit
+	err = database.DBCon.Model(&commits).
+		Join("JOIN commit_to_packages").JoinOn("commit.id = commit_to_packages.commit_id").
+		Where("commit_to_packages.package_atom IN (?)", query).
+		Order("preceding_commits DESC").
+		Limit(100).
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	feed := &feeds.Feed{
+		Title:       "100 latest commits for " + maintainer.Name,
+		Description: "100 latest commits for " + maintainer.Name,
+		Author:      &feeds.Author{Name: "Gentoo Packages Database"},
+		Created:     time.Now(),
+		Link:        &feeds.Link{Href: "https://packages.gentoo.org/maintainer/" + maintainer.Email + "/changelog"},
+	}
+
+	for _, commit := range commits {
+		feed.Add(&feeds.Item{
+			Title:   commit.Message,
+			Updated: commit.CommitterDate,
+			Created: commit.AuthorDate,
+			Author:  &feeds.Author{Name: commit.CommitterName, Email: commit.CommitterEmail},
+			Link:    &feeds.Link{Href: "https://gitweb.gentoo.org/repo/gentoo.git/commit/?id=" + commit.Id, Type: "text/html", Rel: "alternate"},
+			Id:      commit.Id,
+		})
+	}
+	feed.WriteAtom(w)
 }
 
 func ShowOutdated(w http.ResponseWriter, r *http.Request) {
