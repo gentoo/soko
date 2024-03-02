@@ -47,11 +47,11 @@ templ archesHeader(currentArch string, userPreferences models.ArchesPreferences)
 }
 
 templ changedVersions(
-    currentArch string,
-    name string,
-    feedName string,
-    versions []*models.Version,
-    userPreferences models.ArchesPreferences,
+	currentArch string,
+	name string,
+	feedName string,
+	versions []*models.Version,
+	userPreferences models.ArchesPreferences,
 ) {
 	@archesHeader(currentArch, userPreferences)
 	<div class="tab-content" id="myTabContent">

@@ -3,6 +3,15 @@ package components
 import "soko/pkg/models"
 import "strconv"
 
+css badgeColor(color string) {
+	font-weight: normal;
+	background-color: { "#" + color + "!important" };
+}
+
+func isDarkBadgeColor(color string) bool {
+	return color == "5319e7" || color == "0052cc" || color == "b60205"
+}
+
 templ PullRequests(hasPullRequests bool, pullRequests []*models.GithubPullRequest) {
 	<div class="row">
 		<div class="col-md-9">
@@ -25,23 +34,16 @@ templ PullRequests(hasPullRequests bool, pullRequests []*models.GithubPullReques
 										}
 									</a>
 									for _, label := range pr.Labels {
-										// the style attribute can be made more beautiful when this commit is released
-										// https://github.com/a-h/templ/commit/f24922fd3442f39c737273023f2f13b606274b20
-										if label.Color == "5319e7" || label.Color == "0052cc" || label.Color == "b60205" {
-											<span
-												class="badge badge-pill badge-light p-1"
-												{ templ.Attributes{"style": "font-weight: normal; color:#FFF; background-color: #" + label.Color + "!important;"}... }
-											>
-												{ label.Name }
-											</span>
-										} else {
-											<span
-												class="badge badge-pill badge-light p-1"
-												{ templ.Attributes{"style": "font-weight: normal; background-color: #" + label.Color + "!important;"}... }
-											>
-												{ label.Name }
-											</span>
-										}
+										<span
+											class={
+												"badge badge-pill p-1",
+												badgeColor(label.Color),
+												templ.KV("badge-light", !isDarkBadgeColor(label.Color)),
+												templ.KV("badge-dark", isDarkBadgeColor(label.Color)),
+											}
+										>
+											{ label.Name }
+										</span>
 									}
 								</div>
 								<div class="col-md-1 text-right">

@@ -1,5 +1,5 @@
 FROM golang:1.22.0 AS builder
-RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN go install github.com/a-h/templ/cmd/templ@v0.2.598
 WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN templ generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
