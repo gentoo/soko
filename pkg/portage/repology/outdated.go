@@ -1,12 +1,13 @@
 package repology
 
 import (
-	"bytes"
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -24,7 +25,7 @@ type Package struct {
 	Status      string `json:"status"`
 }
 
-type Packages map[string][]Package
+type Packages = map[string][]Package
 
 var client = http.Client{Timeout: 1 * time.Minute}
 var clientRateLimiter = rate.NewLimiter(rate.Every(2*time.Second), 1)
@@ -35,18 +36,21 @@ func UpdateOutdated() {
 	defer database.DBCon.Close()
 
 	// Get all outdated Versions
-	outdatedCategories := make(map[string]int)
-	var outdatedVersions []*models.OutdatedPackages
-	letters := "abcdefghijklmnopqrstuvwxyz"
-	for _, letter := range letters {
-		outdatedVersions = append(outdatedVersions, getOutdatedStartingWith(letter, outdatedCategories)...)
+	outdated := newOutdatedCheck()
+	for letter := 'a'; letter <= 'z'; letter++ {
+		outdated.getOutdatedStartingWith(letter)
 	}
 
 	// Update the database
-	if len(outdatedVersions) > 0 {
+	if len(outdated.outdatedVersions) > 0 {
 		database.TruncateTable[models.OutdatedPackages]("atom")
 
-		database.DBCon.Model(&outdatedVersions).Insert()
+		res, err := database.DBCon.Model(&outdated.outdatedVersions).Insert()
+		if err != nil {
+			slog.Error("Error while inserting outdated packages", slog.Any("err", err))
+		} else {
+			slog.Info("Inserted outdated packages", slog.Int("res", res.RowsAffected()))
+		}
 	}
 
 	// Updated the outdated status of categories
@@ -57,17 +61,17 @@ func UpdateOutdated() {
 		return
 	} else if len(categories) > 0 {
 		for _, category := range categories {
-			category.Outdated = outdatedCategories[category.Name]
-			delete(outdatedCategories, category.Name)
+			category.Outdated = outdated.outdatedCategories[category.Name]
+			delete(outdated.outdatedCategories, category.Name)
 		}
 		_, err = database.DBCon.Model(&categories).Set("outdated = ?outdated").Update()
 		if err != nil {
 			slog.Error("Failed updating categories packages information", slog.Any("err", err))
 		}
-		categories = make([]*models.CategoryPackagesInformation, 0, len(outdatedCategories))
+		categories = make([]*models.CategoryPackagesInformation, 0, len(outdated.outdatedCategories))
 	}
 
-	for category, count := range outdatedCategories {
+	for category, count := range outdated.outdatedCategories {
 		categories = append(categories, &models.CategoryPackagesInformation{
 			Name:     category,
 			Outdated: count,
@@ -83,19 +87,71 @@ func UpdateOutdated() {
 	updateStatus()
 }
 
+type atomOutdatedRules struct {
+	ignore         bool
+	ignoreVersions []string
+	ignoreRepos    []string
+	selectedRepos  []string
+}
+
+func (a *atomOutdatedRules) isIgnored(version string, repo string) bool {
+	if a == nil {
+		return false
+	} else if a.ignore {
+		return true
+	}
+
+	for _, v := range a.ignoreVersions {
+		if strings.HasPrefix(version, v) {
+			return true
+		}
+	}
+	for _, r := range a.ignoreRepos {
+		if strings.HasPrefix(repo, r) {
+			return true
+		}
+	}
+	if len(a.selectedRepos) > 0 {
+		found := false
+		for _, r := range a.selectedRepos {
+			if strings.HasPrefix(repo, r) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return true
+		}
+	}
+	return false
+}
+
+type outdatedCheck struct {
+	blockedRepos      map[string]struct{}
+	blockedCategories map[string]struct{}
+	atomRules         map[string]*atomOutdatedRules
+
+	outdatedCategories map[string]int
+	outdatedVersions   []*models.OutdatedPackages
+}
+
+func newOutdatedCheck() outdatedCheck {
+	return outdatedCheck{
+		blockedRepos:      readBlockList("ignored-repositories"),
+		blockedCategories: readBlockList("ignored-categories"),
+		atomRules:         buildAtomRules(),
+
+		outdatedCategories: make(map[string]int),
+	}
+}
+
 // getOutdatedStartingWith gets all outdated packages starting with the given letter
-func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*models.OutdatedPackages {
+func (o *outdatedCheck) getOutdatedStartingWith(letter rune) {
 	repoPackages, err := parseRepologyData(letter)
 	if err != nil {
 		slog.Error("Error while fetching repology data", slog.String("letter", string(letter)), slog.Any("err", err))
-		return nil
 	}
 
-	blockedRepos := readBlockList("ignored-repositories")
-	blockedCategories := readBlockList("ignored-categories")
-	blockedPackages := readBlockList("ignored-packages")
-
-	var outdatedVersions []*models.OutdatedPackages
 	for packagename := range repoPackages {
 		outdated := make(map[string]bool)
 		currentVersion := make(map[string]string)
@@ -114,9 +170,10 @@ func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*
 			if v.Repo == "gentoo" {
 				if v.Status == "newest" {
 					outdated[v.VisibleName] = false
-				} else if v.Status == "outdated" &&
-					!containsPrefix(blockedCategories, category) &&
-					!containsPrefix(blockedPackages, v.VisibleName) {
+				} else if v.Status == "outdated" {
+					if contains(o.blockedCategories, category) || o.atomRules[v.VisibleName].isIgnored(v.Version, v.Repo) {
+						continue
+					}
 					if _, found := outdated[v.VisibleName]; !found {
 						outdated[v.VisibleName] = true
 					}
@@ -129,9 +186,9 @@ func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*
 						currentVersion[v.VisibleName] = v.Version
 					}
 				}
-			} else if len(newestVersion) == 0 && v.Status == "newest" && !contains(blockedRepos, v.Repo) {
+			} else if len(newestVersion) == 0 && v.Status == "newest" && !contains(o.blockedRepos, v.Repo) {
 				for atom := range gentooPackages {
-					if contains(blockedPackages, atom+"::"+v.Repo) {
+					if o.atomRules[atom].isIgnored(v.Version, v.Repo) {
 						continue mainLoop
 					}
 				}
@@ -145,7 +202,7 @@ func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*
 
 		for atom, outdated := range outdated {
 			if outdated && packagename[0] == byte(letter) {
-				outdatedVersions = append(outdatedVersions, &models.OutdatedPackages{
+				o.outdatedVersions = append(o.outdatedVersions, &models.OutdatedPackages{
 					Atom:          atom,
 					GentooVersion: currentVersion[atom],
 					NewestVersion: newestVersion,
@@ -153,13 +210,11 @@ func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*
 
 				category, _, found := strings.Cut(atom, "/")
 				if found {
-					outdatedCategories[category]++
+					o.outdatedCategories[category]++
 				}
 			}
 		}
 	}
-
-	return outdatedVersions
 }
 
 // parseRepologyData gets the json from given url and parses it
@@ -197,15 +252,19 @@ func readBlockList(file string) map[string]struct{} {
 	blocklist := make(map[string]struct{})
 	resp, err := client.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
 	if err != nil {
+		slog.Error("Failed to fetch blacklist", slog.String("file", file), slog.Any("err", err))
 		return blocklist
 	}
 	defer resp.Body.Close()
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	rawBlocklist := buf.String()
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("Failed to fetch blacklist", slog.String("file", file), slog.String("status", resp.Status))
+		return blocklist
+	}
 
-	for _, line := range strings.Split(rawBlocklist, "\n") {
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
 		if !strings.HasPrefix(line, "#") && strings.TrimSpace(line) != "" {
 			blocklist[line] = struct{}{}
 		}
@@ -213,22 +272,51 @@ func readBlockList(file string) map[string]struct{} {
 	return blocklist
 }
 
+func buildAtomRules() map[string]*atomOutdatedRules {
+	var versionNumber = regexp.MustCompile(`-[0-9]`)
+
+	blacklist := readBlockList("ignored-packages")
+	whitelist := readBlockList("selected-packages")
+
+	atomRules := make(map[string]*atomOutdatedRules, len(blacklist)+len(whitelist))
+	for line := range blacklist {
+		cpv, repo, hasRepo := strings.Cut(line, "::")
+		atom := versionNumber.Split(cpv, 2)[0]
+		rule, found := atomRules[atom]
+		if !found {
+			rule = &atomOutdatedRules{}
+			atomRules[atom] = rule
+		}
+		if hasRepo && repo != "" {
+			rule.ignoreRepos = append(rule.ignoreRepos, repo)
+		} else if atom != cpv {
+			rule.ignoreVersions = append(rule.ignoreVersions, strings.TrimPrefix(cpv, atom+"-"))
+		} else {
+			rule.ignore = true
+		}
+	}
+
+	for line := range whitelist {
+		cpv, repo, hasRepo := strings.Cut(line, "::")
+		atom := versionNumber.Split(cpv, 2)[0]
+		rule, found := atomRules[atom]
+		if !found {
+			rule = &atomOutdatedRules{}
+			atomRules[atom] = rule
+		}
+		if hasRepo && repo != "" {
+			rule.selectedRepos = append(rule.selectedRepos, repo)
+		}
+	}
+
+	return atomRules
+}
+
 // contains returns true if the given list includes
 // the given string. Otherwise false is returned.
 func contains(list map[string]struct{}, item string) bool {
 	_, found := list[item]
 	return found
-}
-
-// contains returns true if the given string is a prefix
-// of an item in the given list. Otherwise false is returned.
-func containsPrefix(list map[string]struct{}, item string) bool {
-	for i := range list {
-		if strings.HasPrefix(i, item) {
-			return true
-		}
-	}
-	return false
 }
 
 func updateStatus() {
