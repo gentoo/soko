@@ -5,7 +5,7 @@ import "soko/pkg/app/handler/packages/components"
 import "soko/pkg/app/layout"
 import "soko/pkg/models"
 
-func showViewTabs(pkg *models.Package, userPreference *models.PackagesPreferences) []layout.SubTab {
+func showViewTabs(pkg *models.Package) []layout.SubTab {
 	securityBugs, nonSecurityBugs := countBugs(pkg)
 	return []layout.SubTab{
 		{
@@ -15,7 +15,7 @@ func showViewTabs(pkg *models.Package, userPreference *models.PackagesPreference
 		},
 		{
 			Name: "Dependencies",
-			Link: templ.URL("/packages/" + pkg.Atom + "/" + userPreference.Dependencies.Default),
+			Link: templ.URL("/packages/" + pkg.Atom + "/dependencies"),
 			Icon: "fa fa-link",
 		},
 		{
@@ -49,7 +49,7 @@ func showViewTabs(pkg *models.Package, userPreference *models.PackagesPreference
 	}
 }
 
-templ tabbedHeader(pkg *models.Package, currentSubTab string, userPreference *models.PackagesPreferences) {
+templ tabbedHeader(pkg *models.Package, currentSubTab string) {
 	<div class="kk-header-container">
 		<div class="container">
 			<div class="row">
@@ -76,7 +76,7 @@ templ tabbedHeader(pkg *models.Package, currentSubTab string, userPreference *mo
 						</div>
 						<div class="col-md-12 pt-4 mt-1">
 							<nav class="nav kk-package-nav">
-								for _, tab := range showViewTabs(pkg, userPreference) {
+								for _, tab := range showViewTabs(pkg) {
 									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
 										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
 										if tab.BadgeValue != "" {
@@ -133,15 +133,15 @@ func collectSecurityBugs(pkg *models.Package) (bool, []*models.Bug) {
 
 templ show(pkg *models.Package, currentSubTab string, userPreferences models.UserPreferences) {
 	if currentSubTab == "Reverse Dependencies" {
-		@tabbedHeader(pkg, "Dependencies", &userPreferences.Packages)
+		@tabbedHeader(pkg, "Dependencies")
 	} else {
-		@tabbedHeader(pkg, currentSubTab, &userPreferences.Packages)
+		@tabbedHeader(pkg, currentSubTab)
 	}
 	<div class="tab-content" id="myTabContent">
 		<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
 			switch currentSubTab {
 				case "QA report":
-					@qaReport(pkg, &userPreferences)
+					@qaReport(pkg)
 				case "Pull requests":
 					@components.PullRequests(len(pkg.PullRequests) > 0, pkg.PullRequests)
 				case "Bugs":

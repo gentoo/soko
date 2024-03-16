@@ -14,7 +14,6 @@ templ packages(preferences models.PackagesPreferences) {
 		<div class="col-2 mt-1">
 			<div class="nav flex-column" role="tablist" aria-orientation="vertical" style="position: fixed;">
 				<a class="nav-link user-pref-nav-link active" id="overview-tab" href="#overview" aria-controls="overview-settings">Overview</a>
-				<a class="nav-link user-pref-nav-link" id="dependencies-tab" href="#dependencies">Dependencies</a>
 				<a class="nav-link user-pref-nav-link" id="pull-requests-tab" href="#pull-requests" aria-controls="pull-requests-settings">Pull requests</a>
 				<a class="nav-link user-pref-nav-link" id="bugs-tab" href="#bugs" aria-controls="bugs-settings">Bugs</a>
 				<a class="nav-link user-pref-nav-link" id="security-tab" href="#security" aria-controls="security-settings">Security</a>
@@ -226,27 +225,6 @@ templ packages(preferences models.PackagesPreferences) {
 						</div>
 					</div>
 				</div>
-				<h3 class="mt-5" id="dependencies">Dependencies</h3>
-				<hr class="mt-1"/>
-				<div class="card">
-					<div class="card-body">
-						Default Page
-						<select class="form-control form-control-sm ml-1" style="max-width: 200px;display: inline;" name="dependencies-default-page" id="dependencies-default-page">
-							<option
-								value="dependencies"
-								if preferences.Dependencies.Default == "dependencies" {
-									selected
-								}
-							>dependencies</option>
-							<option
-								value="reverse-dependencies"
-								if preferences.Dependencies.Default == "reverse-dependencies" {
-									selected
-								}
-							>reverse-dependencies</option>
-						</select>
-					</div>
-				</div>
 				<h3 class="mt-5" id="pull-requests">Pull requests</h3>
 				<hr class="mt-1"/>
 				<div class="card">
@@ -377,12 +355,6 @@ func EditPackagesPreferences(w http.ResponseWriter, r *http.Request) {
 		} else {
 			userPreferences.Packages.Overview.ChangelogLength = 100
 		}
-	}
-
-	// Dependencies
-	defaultDependenciesPage := r.Form.Get("dependencies-default-page")
-	if defaultDependenciesPage == "dependencies" || defaultDependenciesPage == "reverse-dependencies" {
-		userPreferences.Packages.Dependencies.Default = defaultDependenciesPage
 	}
 
 	//

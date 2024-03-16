@@ -18,7 +18,6 @@ type GeneralPreferences struct {
 
 type PackagesPreferences struct {
 	Overview     PackagesOverviewPreferences
-	Dependencies PackagesDependenciesPreferences
 	PullRequests PackagesPullRequestsPreferences
 	Bugs         PackagesBugsPreferences
 	Security     PackagesSecurityPreferences
@@ -33,10 +32,6 @@ type PackagesOverviewPreferences struct {
 	MetadataFields  []string
 	ChangelogType   string
 	ChangelogLength int
-}
-
-type PackagesDependenciesPreferences struct {
-	Default string
 }
 
 type PackagesPullRequestsPreferences struct {
@@ -77,7 +72,6 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.General = GeneralPreferences{}
 	userPreferences.Packages = PackagesPreferences{}
 	userPreferences.Packages.Overview = PackagesOverviewPreferences{}
-	userPreferences.Packages.Dependencies = PackagesDependenciesPreferences{}
 	userPreferences.Packages.PullRequests = PackagesPullRequestsPreferences{}
 	userPreferences.Packages.Bugs = PackagesBugsPreferences{}
 	userPreferences.Packages.Security = PackagesSecurityPreferences{}
@@ -95,8 +89,6 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.Packages.Overview.MetadataFields = []string{"homepage", "upstream", "longdescription", "useflags", "license", "maintainers"}
 	userPreferences.Packages.Overview.ChangelogType = "compact"
 	userPreferences.Packages.Overview.ChangelogLength = 5
-
-	userPreferences.Packages.Dependencies.Default = "dependencies"
 
 	userPreferences.Packages.PullRequests.Layout = "default"
 
@@ -159,10 +151,6 @@ func (u *UserPreferences) Sanitize() {
 		u.Packages.Overview.ChangelogLength = 100
 	}
 
-	if !(u.Packages.Dependencies.Default == "dependencies" || u.Packages.Dependencies.Default == "reverse-dependencies") {
-		u.Packages.Dependencies.Default = defaultUserPreferences.Packages.Dependencies.Default
-	}
-
 	if !(u.Packages.PullRequests.Layout == "default") {
 		u.Packages.PullRequests.Layout = defaultUserPreferences.Packages.PullRequests.Layout
 	}
@@ -206,12 +194,4 @@ func (u *UserPreferences) Sanitize() {
 
 func GetAllKeywords() []string {
 	return []string{"alpha", "amd64", "arm", "arm64", "hppa", "ia64", "loong", "m68k", "mips", "ppc", "ppc64", "riscv", "s390", "sparc", "x86", "amd64-linux", "arm-linux", "arm64-linux", "ppc64-linux", "x86-linux", "ppc-macos", "x64-macos", "sparc-solaris", "sparc64-solaris", "x64-solaris", "x86-solaris", "x64-winnt", "x86-winnt", "x64-cygwin"}
-}
-
-func createSlice(n int) []int {
-	slice := []int{}
-	for i := 0; i <= n; i++ {
-		slice = append(slice, i)
-	}
-	return slice
 }
