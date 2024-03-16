@@ -138,3 +138,18 @@ func (p Package) AllBugs() []*Bug {
 
 	return allBugsList
 }
+
+func (p *Package) AllUseflags() []string {
+	useflags := make(map[string]struct{})
+	for _, version := range p.Versions {
+		for _, useflag := range version.Useflags {
+			useflags[strings.TrimPrefix(useflag, "+")] = struct{}{}
+		}
+	}
+
+	useflagsList := make([]string, 0, len(useflags))
+	for useflag := range useflags {
+		useflagsList = append(useflagsList, useflag)
+	}
+	return useflagsList
+}

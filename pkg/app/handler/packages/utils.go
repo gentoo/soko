@@ -138,33 +138,29 @@ func getParameterValue(parameterName string, r *http.Request) string {
 
 // getPackageUseflags retrieves all local USE flags, global USE
 // flags and use expands for a given package
-func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Useflag, map[string][]models.Useflag) {
-	var localUseflags, allGlobalUseflags, filteredGlobalUseflags []models.Useflag
-	useExpands := make(map[string][]models.Useflag)
-
-	if len(gpackage.Versions) == 0 {
-		return localUseflags, allGlobalUseflags, useExpands
-	}
-
-	rawUseFlags := make([]string, len(gpackage.Versions[0].Useflags))
-	for i, rawUseflag := range gpackage.Versions[0].Useflags {
-		rawUseFlags[i] = strings.Replace(rawUseflag, "+", "", 1)
-	}
-
+func getPackageUseflags(gpackage *models.Package) (localUseflags []models.Useflag, filteredGlobalUseflags []models.Useflag, useExpands map[string][]models.Useflag) {
+	rawUseFlags := gpackage.AllUseflags()
 	if len(rawUseFlags) == 0 {
-		return localUseflags, allGlobalUseflags, useExpands
+		return
 	}
 
 	var tmp_useflags []models.Useflag
 	err := database.DBCon.Model(&tmp_useflags).
-		Where("name in (?)", pg.In(rawUseFlags)).
+		WhereGroup(func(q *pg.Query) (*pg.Query, error) {
+			return q.Where("scope = ?", "local").Where("package = ?", gpackage.Atom), nil
+		}).
+		WhereOrGroup(func(q *pg.Query) (*pg.Query, error) {
+			return q.Where("scope != ?", "local").Where("name in (?)", pg.In(rawUseFlags)), nil
+		}).
 		Order("name ASC").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
 		slog.Error("Failed fetching use flags", slog.Any("err", err))
-		return localUseflags, allGlobalUseflags, useExpands
+		return
 	}
 
+	var allGlobalUseflags []models.Useflag
+	useExpands = make(map[string][]models.Useflag)
 	for _, useflag := range tmp_useflags {
 		if useflag.Scope == "global" {
 			allGlobalUseflags = append(allGlobalUseflags, useflag)
