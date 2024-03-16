@@ -4,11 +4,11 @@ import (
 	"archive/tar"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 	"time"
@@ -19,7 +19,6 @@ import (
 var Dependencies []*models.ReverseDependency
 
 func FullPackageDependenciesUpdate() {
-
 	database.Connect()
 	defer database.DBCon.Close()
 
@@ -28,16 +27,16 @@ func FullPackageDependenciesUpdate() {
 		return
 	}
 
-	logger.Info.Println("Got", dependencyCounter, "dependencies.")
+	slog.Info("collected dependencies", slog.Int("count", dependencyCounter))
 
 	database.TruncateTable[models.ReverseDependency]("id")
 	// because we removed all previous rows in table, we aren't concerned about
 	// duplicates, so we can use bulk insert
 	res, err := database.DBCon.Model(&Dependencies).Insert()
 	if err != nil {
-		logger.Error.Println("Error during inserting dependencies", err)
+		slog.Error("Error during inserting dependencies", slog.Any("err", err))
 	} else {
-		logger.Info.Println("Inserted", res.RowsAffected(), "dependencies")
+		slog.Info("Inserted dependencies", slog.Int("rows", res.RowsAffected()))
 	}
 
 	updateStatus()
@@ -50,19 +49,19 @@ func UpdateDependencies() (int, error) {
 
 	resp, err := client.Get("https://qa-reports.gentoo.org/output/genrdeps/rdeps.tar.xz")
 	if err != nil {
-		logger.Error.Println(err)
+		slog.Error("Failed fetching dependencies", slog.Any("err", err))
 		return 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		logger.Error.Printf("status code: %d", resp.StatusCode)
+		slog.Error("Got bad status code", slog.Int("code", resp.StatusCode))
 		return 0, fmt.Errorf("status code: %d", resp.StatusCode)
 	}
 
 	xz, err := xz.NewReader(resp.Body)
 	if err != nil {
-		logger.Error.Println(err)
+		slog.Error("Failed decompressing dependencies", slog.Any("err", err))
 		return 0, err
 	}
 
@@ -74,7 +73,7 @@ func UpdateDependencies() (int, error) {
 			break // end of tar archive
 		}
 		if err != nil {
-			logger.Error.Println(err)
+			slog.Error("Failed reading dependencies tar", slog.Any("err", err))
 			return 0, err
 		}
 		switch hdr.Typeflag {
@@ -83,10 +82,9 @@ func UpdateDependencies() (int, error) {
 
 			rawResponse, err := io.ReadAll(tr)
 			if err != nil {
-				logger.Error.Println(err)
+				slog.Error("Failed reading file from tar", slog.Any("err", err))
 				return 0, err
 			}
-
 			parseDependencies(string(rawResponse), nameParts[1], nameParts[0])
 			dependencyCounter++
 		}
@@ -95,10 +93,7 @@ func UpdateDependencies() (int, error) {
 }
 
 func parseDependencies(rawResponse, atom, kind string) {
-	rawDependencies := strings.Split(rawResponse, "\n")
-
-	for _, rawDependency := range rawDependencies {
-
+	for _, rawDependency := range strings.Split(rawResponse, "\n") {
 		dependencyParts := strings.Split(rawDependency, ":")
 
 		if strings.TrimSpace(dependencyParts[0]) == "" {
@@ -118,9 +113,7 @@ func parseDependencies(rawResponse, atom, kind string) {
 			ReverseDependencyVersion: dependencyParts[0],
 			Condition:                condition,
 		})
-
 	}
-
 }
 
 func versionSpecifierToPackageAtom(versionSpecifier string) string {

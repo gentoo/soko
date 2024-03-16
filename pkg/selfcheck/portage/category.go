@@ -5,10 +5,10 @@ package repository
 import (
 	"encoding/xml"
 	"io"
+	"log/slog"
 	"os"
 	"regexp"
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/selfcheck/storage"
 	"strings"
@@ -68,8 +68,8 @@ func addCategory(category *models.Category) {
 func GetCatMetadata(path string) Catmetadata {
 	xmlFile, err := os.Open(path)
 	if err != nil {
-		logger.Error.Println("Error during reading category metadata")
-		logger.Error.Println(err)
+		slog.Error("Failed reading category metadata", slog.String("path", path), slog.Any("err", err))
+		return Catmetadata{}
 	}
 	defer xmlFile.Close()
 	byteValue, _ := io.ReadAll(xmlFile)

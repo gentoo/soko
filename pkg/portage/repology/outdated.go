@@ -5,12 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 	"time"
@@ -33,13 +31,8 @@ var clientRateLimiter = rate.NewLimiter(rate.Every(2*time.Second), 1)
 
 // UpdateOutdated will update the database table that contains all outdated gentoo versions
 func UpdateOutdated() {
-
 	database.Connect()
 	defer database.DBCon.Close()
-
-	if config.Quiet() == "true" {
-		log.SetOutput(io.Discard)
-	}
 
 	// Get all outdated Versions
 	outdatedCategories := make(map[string]int)
@@ -60,7 +53,7 @@ func UpdateOutdated() {
 	var categories []*models.CategoryPackagesInformation
 	err := database.DBCon.Model(&categories).Column("name").Select()
 	if err != nil {
-		logger.Error.Println("Error while fetching categories packages information", err)
+		slog.Error("Failed fetching categories packages information", slog.Any("err", err))
 		return
 	} else if len(categories) > 0 {
 		for _, category := range categories {
@@ -69,7 +62,7 @@ func UpdateOutdated() {
 		}
 		_, err = database.DBCon.Model(&categories).Set("outdated = ?outdated").Update()
 		if err != nil {
-			logger.Error.Println("Error while fetching categories packages information", err)
+			slog.Error("Failed updating categories packages information", slog.Any("err", err))
 		}
 		categories = make([]*models.CategoryPackagesInformation, 0, len(outdatedCategories))
 	}
@@ -83,7 +76,7 @@ func UpdateOutdated() {
 	if len(categories) > 0 {
 		_, err = database.DBCon.Model(&categories).Insert()
 		if err != nil {
-			logger.Error.Println("Error while inserting categories packages information", err)
+			slog.Error("Error while inserting categories packages information", slog.Any("err", err))
 		}
 	}
 
@@ -94,7 +87,7 @@ func UpdateOutdated() {
 func getOutdatedStartingWith(letter rune, outdatedCategories map[string]int) []*models.OutdatedPackages {
 	repoPackages, err := parseRepologyData(letter)
 	if err != nil {
-		logger.Error.Printf("Error while fetching repology data (%s): %s", string(letter), err)
+		slog.Error("Error while fetching repology data", slog.String("letter", string(letter)), slog.Any("err", err))
 		return nil
 	}
 

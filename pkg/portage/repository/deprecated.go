@@ -10,9 +10,9 @@
 package repository
 
 import (
+	"log/slog"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
@@ -48,7 +48,7 @@ func UpdatePackagesDeprecated(path string) {
 	}
 
 	if status != "D" && isPackagesDeprecated(changedFile) {
-		logger.Info.Println("Updating package.deprecated")
+		slog.Info("Updating package.deprecated")
 
 		// delete all existing entries before parsing the file again
 		// in future we might implement a incremental version here
@@ -96,7 +96,7 @@ func parsePackagesDeprecated(entry string) {
 
 			_, err := database.DBCon.Model(entry).OnConflict("(versions) DO UPDATE").Insert()
 			if err != nil {
-				logger.Error.Println("Error while inserting/updating package deprecated entry", err)
+				slog.Error("Failed inserting/updating package deprecated entry", slog.Any("err", err))
 			}
 		}
 	}
@@ -108,7 +108,7 @@ func getDeprecatedPackages(path string) []string {
 	var deprecates []string
 	lines, err := utils.ReadLines(config.PortDir() + "/" + path)
 	if err != nil {
-		logger.Error.Println("Could not read package.deprecated file, aborting import, err:", err)
+		slog.Error("Could not read package.deprecated file. Abort deprecated import", slog.Any("err", err))
 		return deprecates
 	}
 
@@ -129,7 +129,7 @@ func CalculateDeprecatedToVersion() {
 	var deprecates []*models.DeprecatedPackage
 	err := database.DBCon.Model(&deprecates).Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Failed to retrieve package masks. Aborting update", err)
+		slog.Error("Failed to retrieve package masks. Aborting update", slog.Any("err", err))
 		return
 	}
 
@@ -147,7 +147,7 @@ func CalculateDeprecatedToVersion() {
 
 			_, err := database.DBCon.Model(depToVersion).OnConflict("(id) DO UPDATE").Insert()
 			if err != nil {
-				logger.Error.Println("Error while inserting mask to version entry", err)
+				slog.Error("Failed inserting/updating deprecated to version entry", slog.Any("err", err))
 			}
 		}
 	}

@@ -4,9 +4,9 @@ package database
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 
 	"github.com/go-pg/pg/v10"
@@ -53,13 +53,14 @@ func CreateSchema() error {
 			IfNotExists: true,
 		})
 		if err != nil {
-			logger.Error.Printf("Failed creating table %T, err: %s", model, err)
+			tableName := string(DBCon.Model(model).TableModel().Table().TypeName)
+			slog.Error("Failed creating table", slog.String("table", tableName), slog.Any("err", err))
 			return err
 		}
 	}
 	_, err := DBCon.Exec("CREATE EXTENSION IF NOT EXISTS pg_trgm")
 	if err != nil {
-		logger.Error.Println("Failed creating extension, err:", err)
+		slog.Error("Failed creating extension 'pg_trgm'", slog.Any("err", err))
 		return err
 	}
 
@@ -76,7 +77,7 @@ func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Cont
 func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
 	query, err := q.FormattedQuery()
 	if err == nil {
-		logger.Debug.Println(string(query))
+		slog.Debug(string(query))
 	}
 	return nil
 }
@@ -91,32 +92,24 @@ func Connect() {
 		Addr:     config.PostgresHost() + ":" + config.PostgresPort(),
 	})
 
-	DBCon.AddQueryHook(dbLogger{})
+	if !config.Quiet() {
+		DBCon.AddQueryHook(dbLogger{})
+	}
 
 	err := CreateSchema()
 	if err != nil {
-		logger.Error.Println("ERROR: Could not create database schema")
-		logger.Error.Println(err)
-		log.Fatalln(err)
+		slog.Error("Failed creating database schema", slog.Any("err", err))
+		os.Exit(1)
 	}
-
 }
 
-func TruncateTable[K any](primary string) {
-	var val K
-	var allRows []*K
-	err := DBCon.Model(&allRows).Column(primary).Select()
+func TruncateTable[K any](_ string) {
+	query := DBCon.Model((*K)(nil))
+	tableName := string(query.TableModel().Table().TypeName)
+	_, err := query.Exec("TRUNCATE TABLE ?TableName")
 	if err != nil {
-		logger.Error.Println(err)
-		return
-	} else if len(allRows) == 0 {
-		logger.Info.Printf("No %T to delete from the database", val)
-		return
+		slog.Error("Failed truncating table", slog.String("table", tableName), slog.Any("err", err))
+	} else {
+		slog.Info("Truncated table", slog.String("table", tableName))
 	}
-	res, err := DBCon.Model(&allRows).Delete()
-	if err != nil {
-		logger.Error.Println(err)
-		return
-	}
-	logger.Info.Printf("Deleted %d %T from the database", res.RowsAffected(), val)
 }

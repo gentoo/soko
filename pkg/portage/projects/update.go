@@ -2,12 +2,10 @@ package projects
 
 import (
 	"encoding/xml"
-	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"time"
 )
@@ -17,14 +15,10 @@ func UpdateProjects() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	if config.Quiet() == "true" {
-		log.SetOutput(io.Discard)
-	}
-
 	// get projects from api.gentoo.org
 	projectList, err := parseProjectList()
 	if err != nil {
-		logger.Error.Println("Error while parsing project list", err)
+		slog.Error("Error while parsing project list", slog.Any("err", err))
 		return
 	}
 
@@ -52,11 +46,13 @@ func UpdateProjects() {
 	// insert new project list
 	_, err = database.DBCon.Model(&projectList).Insert()
 	if err != nil {
-		logger.Error.Println("Error while inserting project list", err)
+		slog.Error("Error while inserting project list", slog.Any("err", err))
+		return
 	}
 	_, err = database.DBCon.Model(&members).Insert()
 	if err != nil {
-		logger.Error.Println("Error while inserting project members", err)
+		slog.Error("Error while inserting project members", slog.Any("err", err))
+		return
 	}
 
 	updateStatus()

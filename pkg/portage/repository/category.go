@@ -4,11 +4,11 @@ package repository
 
 import (
 	"encoding/xml"
+	"log/slog"
 	"os"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 )
@@ -60,9 +60,9 @@ func UpdateCategories(paths []string) {
 		}
 		res, err := database.DBCon.Model(&rows).Delete()
 		if err != nil {
-			logger.Error.Println("Error during deleting categories", err)
+			slog.Error("Failed deleting categories", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Deleted", res.RowsAffected(), "categories")
+			slog.Info("Deleted categories", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 
@@ -73,9 +73,9 @@ func UpdateCategories(paths []string) {
 		}
 		res, err := database.DBCon.Model(&rows).OnConflict("(name) DO UPDATE").Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating categories", err)
+			slog.Error("Failed updating categories", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Updated", res.RowsAffected(), "categories")
+			slog.Info("Updated categories", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 }
@@ -93,7 +93,7 @@ func updateModifiedCategory(changedFile string) *models.Category {
 
 	xmlFile, err := os.Open(config.PortDir() + "/" + changedFile)
 	if err != nil {
-		logger.Error.Println("Error during reading category metadata", err)
+		slog.Error("Failed reading category metadata", slog.String("category", changedFile), slog.Any("err", err))
 		return nil
 	}
 	defer xmlFile.Close()
@@ -101,7 +101,7 @@ func updateModifiedCategory(changedFile string) *models.Category {
 	var catMetadata CatMetadata
 	err = xml.NewDecoder(xmlFile).Decode(&catMetadata)
 	if err != nil {
-		logger.Error.Println("Error during category", changedFile, "decoding", err)
+		slog.Error("Error decoding category", slog.String("category", changedFile), slog.Any("err", err))
 		return nil
 	}
 

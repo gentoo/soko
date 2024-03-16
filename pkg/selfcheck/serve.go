@@ -1,23 +1,26 @@
 package selfcheck
 
 import (
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/metrics"
 )
 
 // Serve is used to serve the web application
 func Serve() {
-
 	// prometheus metrics
 	http.Handle("/metrics", metricsHandler())
 
-	logger.Info.Println("Serving on port: " + config.Port())
-	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
-
+	address := ":" + config.Port()
+	slog.Info("Serving self-check", slog.String("address", address))
+	err := http.ListenAndServe(address, nil)
+	slog.Error("exited server", "err", err)
+	os.Exit(1)
 }
 
 // metricsHandler is used as default middleware to update the metrics

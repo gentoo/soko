@@ -3,9 +3,10 @@
 package app
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"soko/pkg/api/graphql/generated"
 	"soko/pkg/api/graphql/graphiql"
 	"soko/pkg/api/graphql/resolvers"
@@ -19,7 +20,6 @@ import (
 	"soko/pkg/app/handler/user"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -134,8 +134,11 @@ func Serve() {
 	// graphiql: api explorer
 	setRoute("/api/explore/", graphiql.Show)
 
-	logger.Info.Println("Serving on port: " + config.Port())
-	log.Fatal(http.ListenAndServe(":"+config.Port(), nil))
+	address := ":" + config.Port()
+	slog.Info("Serving HTTP", "address", address)
+	err := http.ListenAndServe(address, nil)
+	slog.Error("exited server", "err", err)
+	os.Exit(1)
 }
 
 // define a route using the default middleware and the given handler

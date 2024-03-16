@@ -3,8 +3,8 @@
 package repository
 
 import (
+	"log/slog"
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"soko/pkg/selfcheck/storage"
@@ -37,10 +37,7 @@ func UpdateUse(path string) {
 			}
 
 			if err != nil {
-				logger.Info.Println("Error during updating useflag " + rawFlag)
-				logger.Info.Println(err)
-				logger.Error.Println("Error during updating useflag " + rawFlag)
-				logger.Error.Println(err)
+				slog.Error("Failed updating useflag", slog.String("useflag", rawFlag), slog.Any("err", err))
 			}
 		}
 	}

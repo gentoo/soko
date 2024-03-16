@@ -12,10 +12,10 @@
 package repository
 
 import (
+	"log/slog"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
@@ -52,8 +52,7 @@ func UpdateMask(path string) {
 	}
 
 	if status != "D" && isMask(changedFile) {
-
-		logger.Info.Println("Updating Masks")
+		slog.Info("Updating Masks")
 
 		// delete all existing masks before parsing the file again
 		// in future we might implement a incremental version here
@@ -83,9 +82,8 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 // parseAuthorLine parses the first line in the package.mask file
 // and returns the author name, author email and the date
 func parseAuthorLine(authorLine string) (string, string, time.Time) {
-
 	if !(strings.Contains(authorLine, "<") && strings.Contains(authorLine, ">")) {
-		logger.Error.Println("Error while parsing the author line in mask entry:", authorLine)
+		slog.Error("Error while parsing the author line in mask entry", slog.String("authorLine", authorLine))
 		return "", "", time.Now()
 	}
 
@@ -97,8 +95,7 @@ func parseAuthorLine(authorLine string) (string, string, time.Time) {
 	date = strings.ReplaceAll(date, ")", "")
 	parsedDate, err := time.Parse("2006-01-02", date)
 	if err != nil {
-		logger.Error.Println("Error while parsing package mask date: " + date)
-		logger.Error.Println(err)
+		slog.Error("Failed parsing package mask date", slog.String("date", date), slog.Any("err", err))
 	}
 	return author, authorEmail, parsedDate
 }
@@ -143,7 +140,7 @@ func parsePackageMask(packageMask string) {
 
 			_, err := database.DBCon.Model(mask).OnConflict("(versions) DO UPDATE").Insert()
 			if err != nil {
-				logger.Error.Println("Error while inserting/updating package mask entry", err)
+				slog.Error("Failed inserting/updating package mask entry", slog.Any("err", err))
 			}
 		}
 	}
@@ -156,7 +153,7 @@ func getMasks(path string) []string {
 	lines, err := utils.ReadLines(config.PortDir() + "/" + path)
 
 	if err != nil {
-		logger.Error.Println("Could not read Masks file. Abort masks import", err)
+		slog.Error("Could not read Masks file. Abort masks import", slog.Any("err", err))
 		return masks
 	}
 
@@ -178,7 +175,7 @@ func CalculateMaskedVersions() {
 	var masks []*models.Mask
 	err := database.DBCon.Model(&masks).Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Failed to retrieve package masks. Aborting update", err)
+		slog.Error("Failed to retrieve package masks. Aborting update", slog.Any("err", err))
 		return
 	}
 
@@ -202,7 +199,7 @@ func maskVersions(versionSpecifier string, versions []*models.Version) {
 		_, err := database.DBCon.Model(maskToVersion).OnConflict("(id) DO UPDATE").Insert()
 
 		if err != nil {
-			logger.Error.Println("Error while inserting mask to version entry", err)
+			slog.Error("Error while inserting mask to version entry", slog.Any("err", err))
 		}
 	}
 }

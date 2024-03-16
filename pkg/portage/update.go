@@ -3,12 +3,10 @@
 package portage
 
 import (
-	"io"
-	"log"
+	"log/slog"
 	"os"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/repository"
 	"soko/pkg/portage/utils"
@@ -21,15 +19,10 @@ import (
 // this is the first update that is there is no last update a full import
 // starting with the first commit in the tree is done.
 func Update() {
-
 	database.Connect()
 	defer database.DBCon.Close()
 
-	if config.Quiet() == "true" {
-		log.SetOutput(io.Discard)
-	}
-
-	logger.Info.Println("Start update...")
+	slog.Info("Start update...")
 
 	// update the local useflags
 	repository.UpdateUse("profiles/use.local.desc")
@@ -61,17 +54,14 @@ func Update() {
 // following commits. In case no last commit is present a full import
 // starting with the first commit in the tree is done.
 func updateMetadata(changed []string) {
-
-	logger.Info.Println("Start updating changed metadata")
-
-	logger.Info.Println("Iterating", len(changed), "changed files")
+	slog.Info("Start updating changed metadata")
+	slog.Info("Iterating changed files", slog.Int("count", len(changed)))
 	for _, path := range changed {
 		repository.UpdateUse(path)
 		repository.UpdateMask(path)
 		repository.UpdatePackagesDeprecated(path)
 		repository.UpdateArch(path)
 	}
-
 }
 
 // updatePackageData incrementally updates all package data in the database, that has
@@ -82,14 +72,12 @@ func updateMetadata(changed []string) {
 //
 // changed data is determined by parsing all commits since the last update.
 func updatePackageData(changed []string) {
+	slog.Info("Start updating changed package data")
+	slog.Info("Iterating changed files", slog.Int("count", len(changed)))
 
-	logger.Info.Println("Start updating changed package data")
-
-	logger.Info.Println("Iterating", len(changed), "changed files")
 	repository.UpdateVersions(changed)
 	repository.UpdatePackages(changed)
 	repository.UpdateCategories(changed)
-
 }
 
 // updateHistory incrementally imports all new commits. New commits are
@@ -97,8 +85,7 @@ func updatePackageData(changed []string) {
 // and parsing all following commits. In case no last commit is present
 // a full import starting with the first commit in the tree is done.
 func updateHistory() {
-
-	logger.Info.Println("Start updating the history")
+	slog.Info("Start updating the history")
 
 	latestCommit := repository.UpdateCommits()
 
@@ -114,13 +101,9 @@ func updateHistory() {
 		LastCommit: latestCommit,
 	}
 
-	_, err := database.DBCon.Model(application).
-		OnConflict("(id) DO UPDATE").
-		Insert()
-
+	_, err := database.DBCon.Model(application).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
-		logger.Error.Println("Updating application data failed")
-		logger.Error.Println(err)
+		slog.Error("Failed updating application data", slog.Any("err", err))
 	}
 }
 
@@ -135,26 +118,20 @@ func updateHistory() {
 // Once there is no outdated data found anymore this method may become
 // obsolete.
 func FullUpdate() {
-
 	database.Connect()
 	defer database.DBCon.Close()
 
-	if config.Quiet() == "true" {
-		log.SetOutput(io.Discard)
-	}
-
-	logger.Info.Println("Full update up...")
+	slog.Info("Full update up...")
 
 	// Add new entries & update existing
-	logger.Info.Println("Update all present files")
+	slog.Info("Update all present files")
 
 	// update useflags
 	database.TruncateTable[models.Useflag]("id")
 	repository.UpdateUse("profiles/use.desc")
 	repository.UpdateUse("profiles/use.local.desc")
-	entries, err := os.ReadDir(config.PortDir() + "/profiles/desc")
-	if err != nil {
-		logger.Error.Println("Error reading profiles/desc", err)
+	if entries, err := os.ReadDir(config.PortDir() + "/profiles/desc"); err != nil {
+		slog.Error("Error reading profiles/desc", slog.Any("err", err))
 	} else {
 		for _, entry := range entries {
 			repository.UpdateUse(config.PortDir() + "/profiles/desc/" + entry.Name())
@@ -168,7 +145,7 @@ func FullUpdate() {
 	repository.UpdateCategories(allFiles)
 
 	// Delete removed entries
-	logger.Info.Println("Delete removed files from the database")
+	slog.Info("Delete removed files from the database")
 	deleteRemovedVersions()
 	deleteRemovedPackages()
 	deleteRemovedCategories()
@@ -178,7 +155,7 @@ func FullUpdate() {
 	repository.CalculateMaskedVersions()
 	repository.CalculateDeprecatedToVersion()
 
-	logger.Info.Println("Finished update up...")
+	slog.Info("Finished update up...")
 }
 
 // deleteRemovedVersions removes all versions from the database
@@ -190,7 +167,7 @@ func deleteRemovedVersions() {
 	for _, version := range versions {
 		path := config.PortDir() + "/" + version.Atom + "/" + version.Package + "-" + version.Version + ".ebuild"
 		if !utils.FileExists(path) {
-			logger.Error.Println("Found ebuild version in the database that does not exist at:", path)
+			slog.Error("Found ebuild version in the database that does not exist", slog.String("path", path))
 			toDelete = append(toDelete, version)
 		}
 	}
@@ -198,9 +175,9 @@ func deleteRemovedVersions() {
 	if len(toDelete) > 0 {
 		res, err := database.DBCon.Model(&toDelete).Delete()
 		if err != nil {
-			logger.Error.Println("Error deleting versions", err)
+			slog.Error("Failed deleting versions", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Deleted", res.RowsAffected(), "versions")
+			slog.Info("Deleted versions", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 }
@@ -209,22 +186,22 @@ func deleteRemovedVersions() {
 // that are present in the database but not in the main tree.
 func deleteRemovedPackages() {
 	var packages, toDelete []*models.Package
-	database.DBCon.Model(&packages).Select()
+	database.DBCon.Model(&packages).Column("atom").Select()
 
 	for _, pkg := range packages {
 		path := config.PortDir() + "/" + pkg.Atom
 		if !utils.FileExists(path) {
-			logger.Error.Println("Found package in the database that does not exist at:", path)
+			slog.Error("Found package in the database that does not exist", slog.String("path", path))
 			toDelete = append(toDelete, pkg)
 		}
 	}
 
 	if len(toDelete) > 0 {
-		res, err := database.DBCon.Model(&toDelete).Delete()
+		res, err := database.DBCon.Model(&toDelete).WherePK().Delete()
 		if err != nil {
-			logger.Error.Println("Error deleting packages", err)
+			slog.Error("Failed deleting packages", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Deleted", res.RowsAffected(), "packages")
+			slog.Info("Deleted packages", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 }
@@ -238,7 +215,7 @@ func deleteRemovedCategories() {
 	for _, category := range categories {
 		path := config.PortDir() + "/" + category.Name
 		if !utils.FileExists(path) {
-			logger.Error.Println("Found category in the database that does not exist at:", path)
+			slog.Error("Found category in the database that does not exist", slog.String("path", path))
 			toDelete = append(toDelete, category)
 		}
 	}
@@ -246,9 +223,9 @@ func deleteRemovedCategories() {
 	if len(toDelete) > 0 {
 		res, err := database.DBCon.Model(&toDelete).Delete()
 		if err != nil {
-			logger.Error.Println("Error deleting categories", err)
+			slog.Error("Failed deleting categories", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Deleted", res.RowsAffected(), "categories")
+			slog.Info("Deleted categories", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 }
@@ -266,7 +243,7 @@ func fixPrecedingCommitsOfPackages() {
 		return
 	}
 
-	logger.Error.Println("Found", len(packages), "packages with preceding commits == 0. This should not happen. Fixing...")
+	slog.Error("Found packages with preceding commits == 0. This should not happen. Fixing...", slog.Int("count", len(packages)))
 	for _, pkg := range packages {
 		pkg.PrecedingCommits = 1
 	}
@@ -280,7 +257,7 @@ func getApplicationData() models.Application {
 	applicationData := &models.Application{Id: "latest"}
 	err := database.DBCon.Model(applicationData).WherePK().Select()
 	if err != nil {
-		logger.Error.Println("Error fetching application data")
+		slog.Error("Failed fetching application data", slog.Any("err", err))
 		return models.Application{
 			Id:         "latest",
 			LastUpdate: time.Now(),

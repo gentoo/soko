@@ -3,10 +3,10 @@
 package repository
 
 import (
+	"log/slog"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
@@ -57,9 +57,9 @@ func UpdateVersions(paths []string) {
 		}
 		res, err := database.DBCon.Model(&rows).Delete()
 		if err != nil {
-			logger.Error.Println("Error during deleting versions", err)
+			slog.Error("Failed deleting versions", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Deleted", res.RowsAffected(), "versions")
+			slog.Info("Deleted versions", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 
@@ -70,9 +70,9 @@ func UpdateVersions(paths []string) {
 		}
 		res, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating versions", err)
+			slog.Error("Failed updating versions", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Updated", res.RowsAffected(), "versions")
+			slog.Info("Updated versions", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 }
@@ -109,7 +109,6 @@ func updateModifiedVersion(changedFile string) *models.Version {
 	var useflags, restricts, properties, homepages []string
 
 	for _, metadata := range version_metadata {
-
 		switch {
 		case strings.HasPrefix(metadata, "EAPI="):
 			eapi = strings.TrimPrefix(metadata, "EAPI=")
@@ -142,7 +141,6 @@ func updateModifiedVersion(changedFile string) *models.Version {
 			rawSlot := strings.TrimPrefix(metadata, "SLOT=")
 			slot, subslot, _ = strings.Cut(rawSlot, "/")
 		}
-
 	}
 
 	return &models.Version{

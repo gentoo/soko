@@ -3,13 +3,13 @@
 package repository
 
 import (
+	"log/slog"
 	"os/exec"
+	"slices"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -28,7 +28,7 @@ var (
 // and parsing all following commits. In case no last commit is present
 // a full import starting with the first commit in the tree is done.
 func UpdateCommits() string {
-	logger.Info.Println("Start updating commits")
+	slog.Info("Start updating commits")
 
 	latestCommit, precedingCommitsOffset := utils.GetLatestCommitAndPreceding()
 
@@ -40,7 +40,7 @@ func UpdateCommits() string {
 		}
 	}
 	dumpToDatabase()
-	logger.Info.Println("Finished updating commits")
+	slog.Info("Finished updating commits")
 
 	return latestCommit
 }
@@ -126,10 +126,10 @@ func processChangedFiles(PrecedingCommits, PrecedingCommitsOffset int, commitLin
 // logProgress logs the progress of a loop
 func logProgress(counter int) {
 	if counter%1000 == 0 {
-		logger.Info.Println("Processed commits: " + strconv.Itoa(counter))
+		slog.Info("Processed commits", slog.Int("commits", counter))
 	} else if counter == 1 {
 		// The initial commit is *huge* that's why we log it as well
-		logger.Info.Println("Processed first commit.")
+		slog.Info("Processed first commit.")
 	}
 }
 
@@ -176,7 +176,7 @@ func createKeywordChange(id, path, commitLine string) {
 	raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
-			logger.Error.Println("Problem parsing file")
+			slog.Error("Failed running git show", slog.String("id", id), slog.String("path", path), slog.Any("err", err))
 			return
 		}
 	}
@@ -195,11 +195,11 @@ func createKeywordChange(id, path, commitLine string) {
 
 	if keywords_old != nil && keywords_new != nil {
 		for _, keyword := range keywords_new {
-			if !utils.Contains(keywords_old, keyword) {
+			if !slices.Contains(keywords_old, keyword) {
 				added_keywords = append(added_keywords, keyword)
 			}
 
-			if !strings.HasPrefix(keyword, "~") && utils.Contains(keywords_old, ("~"+keyword)) {
+			if !strings.HasPrefix(keyword, "~") && slices.Contains(keywords_old, "~"+keyword) {
 				stabilized_keywords = append(stabilized_keywords, keyword)
 			}
 		}
@@ -226,8 +226,7 @@ func createAddedKeywords(id string, path string, commitLine string) {
 		raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
 		if err != nil {
 			if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
-				logger.Error.Println("Problem parsing file")
-				logger.Error.Println(exitError)
+				slog.Error("Failed running git show", slog.String("id", id), slog.String("path", path), slog.Any("err", err))
 				return
 			}
 		}
@@ -264,7 +263,12 @@ func updateFirstCommitOfPackage(path string, commitLine string, precedingCommits
 }
 
 func dumpToDatabase() {
-	logger.Info.Println("Writing to database")
+	slog.Info("Writing to database",
+		slog.Int("KeywordChange", len(keywordChanges)),
+		slog.Int("Package", len(packages)),
+		slog.Int("CommitToPackage", len(packagesCommit)),
+		slog.Int("CommitToVersion", len(versionsCommits)),
+		slog.Int("Commit", len(commits)))
 
 	if len(keywordChanges) > 0 {
 		rows := make([]*models.KeywordChange, 0, len(keywordChanges))
@@ -273,41 +277,40 @@ func dumpToDatabase() {
 		}
 		_, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating KeywordChange", err)
+			slog.Error("Failed inserting KeywordChange", slog.Any("err", err))
 		}
-		keywordChanges = map[string]*models.KeywordChange{}
+		clear(keywordChanges)
 	}
 
 	if len(packages) > 0 {
 		_, err := database.DBCon.Model(&packages).Column("preceding_commits").Update()
 		if err != nil {
-			logger.Error.Println("Error during updating precedingCommits", err)
+			slog.Error("Failed inserting Package", slog.Any("err", err))
 		}
-		packages = nil
+		clear(packages)
 	}
 
 	if len(packagesCommit) > 0 {
 		_, err := database.DBCon.Model(&packagesCommit).OnConflict("(id) DO NOTHING").Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating CommitToPackage", err)
+			slog.Error("Failed inserting CommitToPackage", slog.Any("err", err))
 		}
-		packagesCommit = nil
+		clear(packagesCommit)
 	}
 
 	if len(versionsCommits) > 0 {
 		_, err := database.DBCon.Model(&versionsCommits).OnConflict("(id) DO NOTHING").Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating CommitToVersion", err)
+			slog.Error("Failed inserting CommitToVersion", slog.Any("err", err))
 		}
-		versionsCommits = nil
+		clear(versionsCommits)
 	}
 
 	if len(commits) > 0 {
 		_, err := database.DBCon.Model(&commits).OnConflict("(id) DO UPDATE").Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating commits:", err)
+			slog.Error("Failed inserting Commit", slog.Any("err", err))
 		}
-		commits = nil
+		clear(commits)
 	}
-
 }

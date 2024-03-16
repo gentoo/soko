@@ -3,9 +3,9 @@
 package repository
 
 import (
+	"log/slog"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strings"
@@ -60,9 +60,9 @@ func UpdateUse(path string) {
 			}
 			res, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
 			if err != nil {
-				logger.Error.Println("Error during updating use flags", err)
+				slog.Error("Failed updating use flags", slog.Any("err", err))
 			} else {
-				logger.Info.Println("Updated", res.RowsAffected(), "use flags")
+				slog.Info("Updated use flags", slog.Int("rows", res.RowsAffected()))
 			}
 		}
 	}

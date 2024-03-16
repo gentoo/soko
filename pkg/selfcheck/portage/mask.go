@@ -12,8 +12,8 @@
 package repository
 
 import (
+	"log/slog"
 	"regexp"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"soko/pkg/selfcheck/storage"
@@ -57,8 +57,7 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 func parseAuthorLine(authorLine string) (string, string, time.Time) {
 
 	if !(strings.Contains(authorLine, "<") && strings.Contains(authorLine, ">")) {
-		logger.Error.Println("Error while parsing the author line in mask entry:")
-		logger.Error.Println(authorLine)
+		slog.Error("Error while parsing the author line in mask entry", slog.String("authorLine", authorLine))
 		return "", "", time.Now()
 	}
 
@@ -70,8 +69,7 @@ func parseAuthorLine(authorLine string) (string, string, time.Time) {
 	date = strings.ReplaceAll(date, ")", "")
 	parsedDate, err := time.Parse("2006-01-02", date)
 	if err != nil {
-		logger.Error.Println("Error while parsing package mask date: " + date)
-		logger.Error.Println(err)
+		slog.Error("Failed parsing package mask date", slog.String("date", date), slog.Any("err", err))
 	}
 	return author, authorEmail, parsedDate
 }
@@ -115,8 +113,7 @@ func getMasks(path string) []string {
 	lines, err := utils.ReadLines(path)
 
 	if err != nil {
-		logger.Error.Println("Could not read Masks file. Abort masks import")
-		logger.Error.Println(err)
+		slog.Error("Could not read Masks file. Abort masks import", slog.Any("err", err))
 		return masks
 	}
 
@@ -171,7 +168,7 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 	versionSpecifier = strings.Split(versionSpecifier, ":")[0]
 
 	for _, version := range storage.Versions {
-		if  version.Atom == packageAtom {
+		if version.Atom == packageAtom {
 			versions = append(versions, version)
 		}
 	}
@@ -207,7 +204,7 @@ func allRevisions(versionSpecifier string, packageAtom string) []*models.Version
 	versionWithoutRevision = strings.ReplaceAll(versionWithoutRevision, "~", "")
 
 	for _, version := range storage.Versions {
-		if  strings.HasPrefix(version.Id, versionWithoutRevision) {
+		if strings.HasPrefix(version.Id, versionWithoutRevision) {
 			versions = append(versions, version)
 		}
 	}

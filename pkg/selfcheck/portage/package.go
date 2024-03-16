@@ -5,10 +5,10 @@ package repository
 import (
 	"encoding/xml"
 	"io"
+	"log/slog"
 	"os"
 	"regexp"
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/selfcheck/storage"
 	"strings"
@@ -101,8 +101,8 @@ func addPackage(newPackage *models.Package) {
 func GetPkgMetadata(path string) Pkgmetadata {
 	xmlFile, err := os.Open(path)
 	if err != nil {
-		logger.Error.Println("Error during reading package metadata")
-		logger.Error.Println(err)
+		slog.Error("Failed reading package metadata", slog.String("path", path), slog.Any("err", err))
+		return Pkgmetadata{}
 	}
 	defer xmlFile.Close()
 	byteValue, _ := io.ReadAll(xmlFile)

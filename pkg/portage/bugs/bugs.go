@@ -2,12 +2,12 @@ package bugs
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/portage/utils"
 	"strconv"
@@ -53,7 +53,7 @@ func UpdateBugs() {
 	}
 	err := database.DBCon.Model(&update).WherePK().Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Error:", err)
+		slog.Error("Failed to fetch last update time for bugs", slog.Any("err", err))
 		return
 	}
 	if update.LastCommit != "" {
@@ -92,7 +92,7 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 	}
 
 	for offset := 0; ; offset += limit {
-		logger.Info.Println("Importing bugs from bugs.gentoo.org:", offset, "to", offset+limit)
+		slog.Info("Importing bugs from bugs.gentoo.org", slog.Int("start", offset), slog.Int("end", offset+limit))
 		params.Set("offset", strconv.Itoa(offset))
 		resp, err := http.Get("https://bugs.gentoo.org/rest/bug?" + params.Encode())
 		if err != nil {
@@ -101,7 +101,7 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			logger.Info.Println("Not 200")
+			slog.Error("Failed to fetch bugs", slog.Int("status", resp.StatusCode))
 			return bugs, nil
 		}
 
@@ -110,7 +110,7 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 		}
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
-			logger.Info.Println("Error:", err)
+			slog.Error("Failed to decode bugs", slog.Any("err", err))
 			return bugs, nil
 		}
 
@@ -120,14 +120,16 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 			break
 		}
 	}
-	logger.Info.Println("Collected", len(bugs), "bugs")
+	slog.Info("Collected bugs", slog.Int("count", len(bugs)))
 	return
 }
 
 func importAllOpenBugs() {
 	bugs, err := fetchBugs(nil, []string{"UNCONFIRMED", "CONFIRMED", "IN_PROGRESS"})
 	if err != nil {
-		logger.Error.Println(err)
+		slog.Error("Failed to fetch bugs",
+			slog.String("status", "UNCONFIRMED, CONFIRMED, IN_PROGRESS"),
+			slog.Any("err", err))
 		return
 	}
 
@@ -141,7 +143,10 @@ func importAllOpenBugs() {
 func updateChangedBugs(changedSince time.Time) {
 	bugs, err := fetchBugs(&changedSince, []string{"UNCONFIRMED", "CONFIRMED", "IN_PROGRESS", "RESOLVED"})
 	if err != nil {
-		logger.Error.Println(err)
+		slog.Error("Failed to fetch bugs",
+			slog.String("status", "UNCONFIRMED, CONFIRMED, IN_PROGRESS, RESOLVED"),
+			slog.Time("changed_since", changedSince),
+			slog.Any("err", err))
 		return
 	}
 	processApiBugs(bugs)
@@ -193,44 +198,50 @@ func processApiBugs(bugs []restAPIBug) {
 
 	res1, err := database.DBCon.Model(&dbBugs).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
-		logger.Error.Println("Failed to insert bugs:", err)
+		slog.Error("Failed to insert bugs", slog.Any("err", err))
 		return
 	}
 
 	res2, err := database.DBCon.Model(&verBugs).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
-		logger.Error.Println("Failed to insert version bugs:", err)
+		slog.Error("Failed to insert version bugs", slog.Any("err", err))
 		return
 	}
 
 	res3, err := database.DBCon.Model(&pkgsBugs).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
-		logger.Error.Println("Failed to insert package bugs:", err)
+		slog.Error("Failed to insert package bugs", slog.Any("err", err))
 		return
 	}
 
-	logger.Info.Println("Inserted", res1.RowsAffected(), "bugs,", res2.RowsAffected(), "version bugs and", res3.RowsAffected(), "package bugs")
+	slog.Info("Inserted",
+		slog.Int("bugs", res1.RowsAffected()),
+		slog.Int("version_bugs", res2.RowsAffected()),
+		slog.Int("package_bugs", res3.RowsAffected()))
 
 	if len(resolvedBugs) > 0 {
 		res1, err := database.DBCon.Model((*models.Bug)(nil)).WhereIn("id IN (?)", resolvedBugs).Delete()
 		if err != nil {
-			logger.Error.Println("Failed to delete bugs:", err)
+			slog.Error("Failed to delete bugs", slog.Any("err", err))
 			return
 		}
 
 		res2, err := database.DBCon.Model((*models.PackageToBug)(nil)).WhereIn("bug_id IN (?)", resolvedBugs).Delete()
 		if err != nil {
-			logger.Error.Println("Failed to delete package bugs:", err)
+			slog.Error("Failed to delete package bugs", slog.Any("err", err))
 			return
 		}
 
 		res3, err := database.DBCon.Model((*models.VersionToBug)(nil)).WhereIn("bug_id IN (?)", resolvedBugs).Delete()
 		if err != nil {
-			logger.Error.Println("Failed to delete package bugs:", err)
+			slog.Error("Failed to delete version bugs", slog.Any("err", err))
 			return
 		}
 
-		logger.Info.Println("Deleted", res1.RowsAffected(), "bugs and", res2.RowsAffected(), "package bugs and", res3.RowsAffected(), "version bugs")
+		slog.Info("Deleted",
+			slog.Int("bugs", res1.RowsAffected()),
+			slog.Int("package_bugs", res2.RowsAffected()),
+			slog.Int("version_bugs", res3.RowsAffected()))
 	}
 }
 
@@ -267,7 +278,7 @@ func updateCategoriesInfo() {
 		GroupExpr("SPLIT_PART(package_atom, '/', 1)").
 		Select(&categoriesInfoArr)
 	if err != nil {
-		logger.Error.Println("Error while parsing bugs data. Aborting...", err)
+		slog.Error("Failed collecting bugs stats", slog.Any("err", err))
 		return
 	}
 	categoriesInfo := make(map[string]*models.CategoryPackagesInformation, len(categoriesInfoArr))
@@ -280,7 +291,7 @@ func updateCategoriesInfo() {
 	var categories []*models.CategoryPackagesInformation
 	err = database.DBCon.Model(&categories).Column("name").Select()
 	if err != nil {
-		logger.Error.Println("Error while fetching categories packages information", err)
+		slog.Error("Failed fetching categories packages information", slog.Any("err", err))
 		return
 	} else if len(categories) > 0 {
 		for _, category := range categories {
@@ -298,7 +309,7 @@ func updateCategoriesInfo() {
 			Set("security_bugs = ?security_bugs").
 			Update()
 		if err != nil {
-			logger.Error.Println("Error while updating categories packages information", err)
+			slog.Error("Failed updating categories packages information", slog.Any("err", err))
 		}
 		categories = make([]*models.CategoryPackagesInformation, 0, len(categoriesInfo))
 	}
@@ -309,7 +320,7 @@ func updateCategoriesInfo() {
 	if len(categories) > 0 {
 		_, err = database.DBCon.Model(&categories).Insert()
 		if err != nil {
-			logger.Error.Println("Error while inserting categories packages information", err)
+			slog.Error("Failed inserting categories packages information", slog.Any("err", err))
 		}
 	}
 }

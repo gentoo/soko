@@ -1,9 +1,9 @@
 package maintainers
 
 import (
+	"log/slog"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 	"time"
@@ -16,7 +16,7 @@ func FullImport() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	logger.Info.Println("Loading all raw maintainers from the database")
+	slog.Info("Loading all raw maintainers from the database")
 	var allMaintainerInformation []*models.Maintainer
 	database.DBCon.Model((*models.Package)(nil)).ColumnExpr("jsonb_array_elements(maintainers)->>'Name' as name, jsonb_array_elements(maintainers) ->> 'Email' as email, jsonb_array_elements(maintainers) ->> 'Type' as type").Select(&allMaintainerInformation)
 
@@ -37,7 +37,7 @@ func FullImport() {
 		}
 	}
 
-	logger.Info.Println("Loading all packages from the database")
+	slog.Info("Loading all packages from the database")
 	var gpackages []*models.Package
 	database.DBCon.Model(&gpackages).
 		Relation("Outdated").
@@ -125,10 +125,10 @@ func FullImport() {
 	}
 	res, err := database.DBCon.Model(&rows).OnConflict("(email) DO NOTHING").Insert()
 	if err != nil {
-		logger.Error.Println("Error during inserting maintainers", err)
+		slog.Error("Failed inserting maintainers", slog.Any("err", err))
 		return
 	}
-	logger.Info.Println("Inserted", res.RowsAffected(), "maintainers")
+	slog.Info("Inserted maintainers", slog.Int("rows", res.RowsAffected()))
 
 	updateStatus()
 }

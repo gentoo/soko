@@ -10,7 +10,9 @@ require (
 	github.com/go-pg/pg/v10 v10.12.0
 	github.com/gorilla/feeds v1.1.2
 	github.com/jasonlvhit/gocron v0.0.1
+	github.com/lmittmann/tint v1.0.4
 	github.com/prometheus/client_golang v1.18.0
+	github.com/samber/slog-multi v1.0.2
 	github.com/ulikunitz/xz v0.5.11
 	github.com/vektah/gqlparser/v2 v2.5.11
 	golang.org/x/time v0.5.0
@@ -41,6 +43,7 @@ require (
 	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common v0.47.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
+	github.com/samber/lo v1.39.0 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
 	github.com/sosodev/duration v1.2.0 // indirect
@@ -51,6 +54,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f // indirect
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect

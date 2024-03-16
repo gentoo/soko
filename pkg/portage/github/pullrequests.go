@@ -3,11 +3,10 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"log/slog"
 	"net/http"
-	"soko/pkg/app/utils"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strconv"
 	"strings"
@@ -15,7 +14,6 @@ import (
 )
 
 func buildQuery(limit int, isOpen bool, lastUpdated, after string) map[string]string {
-
 	var lastUpdatedQuery string
 	if lastUpdated != "" {
 		lastUpdatedQuery = `updated:>` + lastUpdated
@@ -107,7 +105,6 @@ func buildQuery(limit int, isOpen bool, lastUpdated, after string) map[string]st
 }
 
 func FullUpdatePullRequests() {
-
 	database.Connect()
 	defer database.DBCon.Close()
 
@@ -115,44 +112,30 @@ func FullUpdatePullRequests() {
 	database.TruncateTable[models.PackageToGithubPullRequest]("id")
 
 	// year of the git migration
-	UpdatePullRequestsAfter(true, "2015-01-01", "")
+	updatePullRequestsAfter(true, "2015-01-01", "")
 
 	updateStatus()
 }
 
-func IncrementalUpdatePullRequests() {
-
-	database.Connect()
-	defer database.DBCon.Close()
-
-	lastUpdate := utils.GetApplicationData().LastUpdate.UTC().Format(time.RFC3339)
-	lastUpdate = strings.Split(lastUpdate, "Z")[0] + "Z"
-	UpdatePullRequestsAfter(false, lastUpdate, "")
-	// TODO --> we need to update old ent
-	// TODO --> delete closed pull requests
-
-	updateStatus()
-}
-
-func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
+func updatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 	pullRequests := make(map[int]*models.GithubPullRequest)
 	client := &http.Client{Timeout: time.Second * 30}
 
 	for {
-		logger.Info.Println("Requesting pull requests starting with", len(pullRequests))
+		slog.Info("Requesting pull requests", slog.Int("index", len(pullRequests)))
 		jsonData := buildQuery(100, isOpen, lastUpdated, after)
 		jsonValue, _ := json.Marshal(jsonData)
 
 		request, err := http.NewRequest(http.MethodPost, "https://api.github.com/graphql", bytes.NewBuffer(jsonValue))
 		if err != nil {
-			logger.Error.Println("Failed to query github graphql", err)
+			slog.Error("Failed querying github graphql", slog.Any("err", err))
 			return
 		}
 
 		request.Header.Set("Authorization", "bearer "+config.GithubAPIToken())
 		response, err := client.Do(request)
 		if err != nil {
-			logger.Error.Println("The HTTP request failed with error", err)
+			slog.Error("The HTTP request failed", slog.Any("err", err))
 			return
 		}
 		defer response.Body.Close()
@@ -160,7 +143,7 @@ func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 		var prData models.GitHubPullRequestQueryResult
 		err = json.NewDecoder(response.Body).Decode(&prData)
 		if err != nil {
-			logger.Error.Println("Failed to parse JSON", err)
+			slog.Error("Failed to parse JSON", slog.Any("err", err))
 			return
 		}
 		prData.AppendPullRequest(pullRequests)
@@ -175,7 +158,7 @@ func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 	}
 
 	if len(pullRequests) == 0 {
-		logger.Info.Println("No pull requests to insert")
+		slog.Info("No pull requests to insert")
 		return
 	}
 
@@ -211,17 +194,17 @@ func UpdatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 	}
 	result, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
-		logger.Error.Println("Failed to insert pull requests", err)
+		slog.Error("Failed to insert pull requests", slog.Any("err", err))
 		return
 	}
-	logger.Info.Println("Inserted", result.RowsAffected(), "pull requests")
+	slog.Info("Inserted pull requests", slog.Int("rows", result.RowsAffected()))
 
 	result, err = database.DBCon.Model(&pkgsPullRequests).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
-		logger.Error.Println("Failed to insert packages to pull requests", err)
+		slog.Error("Failed to insert packages to pull requests", slog.Any("err", err))
 		return
 	}
-	logger.Info.Println("Inserted", result.RowsAffected(), "packages to pull requests")
+	slog.Info("Inserted packages to pull requests", slog.Int("rows", result.RowsAffected()))
 
 	updateCategoriesPullRequests(categoriesPullRequests)
 }
@@ -230,7 +213,7 @@ func updateCategoriesPullRequests(categoriesPullRequests map[string]map[string]s
 	var categories []*models.CategoryPackagesInformation
 	err := database.DBCon.Model(&categories).Column("name").Select()
 	if err != nil {
-		logger.Error.Println("Error while fetching categories packages information", err)
+		slog.Error("Failed fetching categories packages information", slog.Any("err", err))
 		return
 	} else if len(categories) > 0 {
 		for _, category := range categories {
@@ -239,7 +222,7 @@ func updateCategoriesPullRequests(categoriesPullRequests map[string]map[string]s
 		}
 		_, err = database.DBCon.Model(&categories).Set("pull_requests = ?pull_requests").Update()
 		if err != nil {
-			logger.Error.Println("Error while fetching categories packages information", err)
+			slog.Error("Failed updating categories packages information", slog.Any("err", err))
 		}
 		categories = make([]*models.CategoryPackagesInformation, 0, len(categoriesPullRequests))
 	}
@@ -253,7 +236,7 @@ func updateCategoriesPullRequests(categoriesPullRequests map[string]map[string]s
 	if len(categories) > 0 {
 		_, err = database.DBCon.Model(&categories).Insert()
 		if err != nil {
-			logger.Error.Println("Error while inserting categories packages information", err)
+			slog.Error("Failed inserting categories packages information", slog.Any("err", err))
 		}
 	}
 }

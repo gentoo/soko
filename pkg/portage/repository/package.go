@@ -4,11 +4,11 @@ package repository
 
 import (
 	"encoding/xml"
+	"log/slog"
 	"os"
 	"regexp"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 )
@@ -60,9 +60,9 @@ func UpdatePackages(paths []string) {
 		}
 		res, err := database.DBCon.Model(&rows).Delete()
 		if err != nil {
-			logger.Error.Println("Error during deleting packages", err)
+			slog.Error("Failed deleting packages", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Deleted", res.RowsAffected(), "packages")
+			slog.Info("Deleted packages", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 
@@ -80,9 +80,9 @@ func UpdatePackages(paths []string) {
 			Set("upstream = EXCLUDED.upstream").
 			Insert()
 		if err != nil {
-			logger.Error.Println("Error during updating packages", err)
+			slog.Error("Failed updating packages", slog.Any("err", err))
 		} else {
-			logger.Info.Println("Updated", res.RowsAffected(), "packages")
+			slog.Info("Updated packages", slog.Int("rows", res.RowsAffected()))
 		}
 	}
 }
@@ -107,14 +107,14 @@ func updateModifiedPackage(changedFile string) *models.Package {
 
 	xmlFile, err := os.Open(config.PortDir() + "/" + atom + "/metadata.xml")
 	if err != nil {
-		logger.Error.Println("Error during reading package metadata", err)
+		slog.Error("Failed reading package metadata", slog.String("atom", atom), slog.Any("err", err))
 		return nil
 	}
 	defer xmlFile.Close()
 	var pkgMetadata PkgMetadata
 	err = xml.NewDecoder(xmlFile).Decode(&pkgMetadata)
 	if err != nil {
-		logger.Error.Println("Error during package", changedFile, "decoding", err)
+		slog.Error("Failed decoding package metadata", slog.String("atom", atom), slog.Any("err", err))
 		return nil
 	}
 

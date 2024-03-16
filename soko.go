@@ -2,11 +2,17 @@ package main
 
 import (
 	"flag"
-	"io"
+	"log"
+	"log/slog"
 	"os"
+	"time"
+
+	"github.com/jasonlvhit/gocron"
+	"github.com/lmittmann/tint"
+	slogmulti "github.com/samber/slog-multi"
+
 	"soko/pkg/app"
 	"soko/pkg/config"
-	"soko/pkg/logger"
 	"soko/pkg/portage"
 	"soko/pkg/portage/bugs"
 	"soko/pkg/portage/dependencies"
@@ -16,18 +22,12 @@ import (
 	"soko/pkg/portage/projects"
 	"soko/pkg/portage/repology"
 	"soko/pkg/selfcheck"
-	"time"
-
-	"github.com/jasonlvhit/gocron"
 )
 
 func main() {
+	initLoggers()
 
 	waitForPostgres()
-
-	errorLogFile := logger.CreateLogFile(config.LogFile())
-	defer errorLogFile.Close()
-	initLoggers(os.Stdout, errorLogFile)
 
 	serve := flag.Bool("serve", false, "Start serving the application")
 	selfchecks := flag.Bool("enable-selfchecks", false, "Perform selfchecks periodicals to monitor the consistency of the data")
@@ -47,36 +47,36 @@ func main() {
 	flag.Parse()
 
 	if *selfchecks {
-		logger.Info.Println("Enabling periodical selfcheck")
+		slog.Info("Enabling periodical selfcheck")
 		go runSelfChecks()
 		selfcheck.Serve()
 	}
 	if *update {
-		logger.Info.Println("Updating package data")
+		slog.Info("Updating package data")
 		portage.Update()
 	}
 	if *fullupdate {
-		logger.Info.Println("Performing full update of the package data")
+		slog.Info("Performing full update of the package data")
 		portage.FullUpdate()
 	}
 	if *updateOutdatedPackages {
-		logger.Info.Println("Updating the repology data")
+		slog.Info("Updating the repology data")
 		repology.UpdateOutdated()
 	}
 	if *updatePkgcheckResults {
-		logger.Info.Println("Updating the qa-reports that is the pkgcheck data")
+		slog.Info("Updating the qa-reports that is the pkgcheck data")
 		pkgcheck.UpdatePkgCheckResults()
 	}
 	if *updatePullrequests {
-		logger.Info.Println("Updating the pull requests data")
+		slog.Info("Updating the pull requests data")
 		github.FullUpdatePullRequests()
 	}
 	if *updateBugs {
-		logger.Info.Println("Updating the bugs data")
+		slog.Info("Updating the bugs data")
 		bugs.UpdateBugs()
 	}
 	if *updateDependencies {
-		logger.Info.Println("Updating the dependencies data")
+		slog.Info("Updating the dependencies data")
 		dependencies.FullPackageDependenciesUpdate()
 	}
 	if *updateProjects {
@@ -85,7 +85,7 @@ func main() {
 	// updateMaintainers should always be executed last, as it is using
 	// the updated bugs, pullrequests and and outdated packages
 	if *updateMaintainers {
-		logger.Info.Println("Updating the maintainers data")
+		slog.Info("Updating the maintainers data")
 		maintainers.FullImport()
 	}
 
@@ -96,17 +96,42 @@ func main() {
 	if *help {
 		flag.PrintDefaults()
 	}
-
 }
 
 // initialize the loggers depending on whether
 // config.debug is set to true
-func initLoggers(infoHandler io.Writer, errorHandler io.Writer) {
-	if config.Debug() == "true" {
-		logger.Init(os.Stdout, infoHandler, errorHandler)
-	} else {
-		logger.Init(io.Discard, infoHandler, errorHandler)
+func initLoggers() {
+	errorHandler, err := os.OpenFile(config.LogFile(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println("failed to open error log file", config.LogFile(), "error:", err)
+		errorHandler = os.Stderr
 	}
+
+	var handler slog.Handler
+	if config.Debug() {
+		handler = tint.NewHandler(os.Stdout, &tint.Options{
+			Level:      slog.LevelDebug,
+			AddSource:  true,
+			TimeFormat: time.DateTime,
+		})
+	} else {
+		handler = slogmulti.Fanout(
+			tint.NewHandler(os.Stdout, &tint.Options{
+				Level:      slog.LevelInfo,
+				AddSource:  true,
+				TimeFormat: time.DateTime,
+				NoColor:    true,
+			}),
+			tint.NewHandler(errorHandler, &tint.Options{
+				Level:      slog.LevelError,
+				AddSource:  true,
+				TimeFormat: time.DateTime,
+				NoColor:    true,
+			}),
+		)
+	}
+	slog.SetLogLoggerLevel(slog.LevelInfo)
+	slog.SetDefault(slog.New(handler))
 }
 
 // TODO this has to be solved differently

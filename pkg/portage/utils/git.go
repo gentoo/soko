@@ -3,10 +3,10 @@
 package utils
 
 import (
+	"log/slog"
 	"os/exec"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"strings"
 )
@@ -23,7 +23,7 @@ func AllFiles() []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error.Println("cmd.Run() failed with:", err)
+		slog.Error("cmd.Run() failed", slog.Any("err", err))
 		return allFiles
 	}
 
@@ -44,7 +44,7 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error.Println("cmd.Run() failed with", err)
+		slog.Error("cmd.Run() failed", slog.Any("err", err))
 		return changedFiles
 	}
 
@@ -76,7 +76,7 @@ func GetCommits(startCommit string, endCommit string) []string {
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.Error.Println("cmd.Run() failed with", err)
+		slog.Error("cmd.Run() failed", slog.Any("err", err))
 		return commits
 	}
 

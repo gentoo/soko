@@ -1,31 +1,32 @@
 package selfcheck
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	"log/slog"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"soko/pkg/selfcheck/metrics"
 	"soko/pkg/selfcheck/repository"
 	"soko/pkg/selfcheck/storage"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 func AllPackages() {
-	logger.Info.Println("selfcheck: Preparing new check...")
-	logger.Info.Println("selfcheck: Updating selfcheck repository")
+	slog.Info("selfcheck: Preparing new check...")
+	slog.Info("selfcheck: Updating selfcheck repository")
 	repository.UpdateRepo()
-	logger.Info.Println("selfcheck: Importing data")
+	slog.Info("selfcheck: Importing data")
 	repository.Import()
-	logger.Info.Println("selfcheck: Resetting metrics")
+	slog.Info("selfcheck: Resetting metrics")
 	resetMetrics()
 
-	logger.Info.Println("selfcheck: Start check")
+	slog.Info("selfcheck: Start check")
 	for _, category := range storage.Categories {
-		//logger.Info.Println("Checking " + category.Name)
+		//slog.Info("Checking " + category.Name)
 		checkCategory(category)
 	}
-	logger.Info.Println("selfcheck: Finished check")
+	slog.Info("selfcheck: Finished check")
 }
 
 func resetMetrics() {
@@ -53,7 +54,7 @@ func checkCategory(category *models.Category) {
 		Select()
 
 	if err != nil {
-		logger.Error.Println(err)
+		slog.Error("Failed fetching category", slog.Any("err", err), slog.Any("category", category.Name))
 		return
 	}
 

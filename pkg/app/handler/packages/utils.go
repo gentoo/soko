@@ -3,9 +3,9 @@
 package packages
 
 import (
+	"log/slog"
 	"net/http"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"sort"
 	"strings"
@@ -23,7 +23,7 @@ func GetAddedPackages(n int) (addedPackages []*models.Package) {
 		Relation("Versions.Commits").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Error during fetching added packages from database", err)
+		slog.Error("Failed fetching added packages from database", slog.Any("err", err))
 	}
 	return
 }
@@ -161,7 +161,7 @@ func getPackageUseflags(gpackage *models.Package) ([]models.Useflag, []models.Us
 		Order("name ASC").
 		Select()
 	if err != nil && err != pg.ErrNoRows {
-		logger.Error.Println("Error during fetching added packages from database", err)
+		slog.Error("Failed fetching use flags", slog.Any("err", err))
 		return localUseflags, allGlobalUseflags, useExpands
 	}
 

@@ -2,12 +2,10 @@ package pkgcheck
 
 import (
 	"encoding/xml"
-	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"soko/pkg/config"
 	"soko/pkg/database"
-	"soko/pkg/logger"
 	"soko/pkg/models"
 	"time"
 )
@@ -30,18 +28,13 @@ type PkgCheckResult struct {
 
 // UpdatePkgCheckResults will update the database table that contains all pkgcheck results
 func UpdatePkgCheckResults() {
-
 	database.Connect()
 	defer database.DBCon.Close()
-
-	if config.Quiet() == "true" {
-		log.SetOutput(io.Discard)
-	}
 
 	// get the pkg check results from qa-reports.gentoo.org
 	pkgCheckResults, err := parseQAReport()
 	if err != nil {
-		logger.Error.Println("Error while parsing qa-reports data. Aborting...")
+		slog.Error("Failed parsing qa-reports data", slog.Any("err", err))
 		return
 	}
 
@@ -72,10 +65,10 @@ func UpdatePkgCheckResults() {
 	}
 	res, err := database.DBCon.Model(&rows).OnConflict("(id) DO NOTHING").Insert()
 	if err != nil {
-		logger.Error.Println("Error during inserting pkgcheck results", err)
+		slog.Error("Failed inserting pkgcheck results", slog.Any("err", err))
 		return
 	}
-	logger.Info.Println("Inserted", res.RowsAffected(), "pkgcheck results")
+	slog.Info("Inserted pkgcheck results", slog.Int("rows", res.RowsAffected()))
 
 	updateCategoriesInfo()
 
@@ -104,7 +97,7 @@ func updateCategoriesInfo() {
 		GroupExpr("SPLIT_PART(atom, '/', 1)").
 		Select(&categoriesInfoArr)
 	if err != nil {
-		logger.Error.Println("Error while parsing qa-reports data. Aborting...", err)
+		slog.Error("Failed collecting pkgcheck results stats", slog.Any("err", err))
 		return
 	}
 	categoriesInfo := make(map[string]int, len(categoriesInfoArr))
@@ -115,7 +108,7 @@ func updateCategoriesInfo() {
 	var categories []*models.CategoryPackagesInformation
 	err = database.DBCon.Model(&categories).Column("name").Select()
 	if err != nil {
-		logger.Error.Println("Error while fetching categories packages information", err)
+		slog.Error("Failed fetching categories packages information", slog.Any("err", err))
 		return
 	} else if len(categories) > 0 {
 		for _, category := range categories {
@@ -124,7 +117,7 @@ func updateCategoriesInfo() {
 		}
 		_, err = database.DBCon.Model(&categories).Set("stable_requests = ?stable_requests").Update()
 		if err != nil {
-			logger.Error.Println("Error while fetching categories packages information", err)
+			slog.Error("Failed updating categories packages information", slog.Any("err", err))
 		}
 		categories = make([]*models.CategoryPackagesInformation, 0, len(categoriesInfo))
 	}
@@ -138,7 +131,7 @@ func updateCategoriesInfo() {
 	if len(categories) > 0 {
 		_, err = database.DBCon.Model(&categories).Insert()
 		if err != nil {
-			logger.Error.Println("Error while inserting categories packages information", err)
+			slog.Error("Error while inserting categories packages information", slog.Any("err", err))
 		}
 	}
 }

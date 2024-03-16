@@ -37,12 +37,12 @@ func DevMode() string {
 	return getEnv("SOKO_DEVMODE", "false")
 }
 
-func Debug() string {
-	return getEnv("SOKO_DEBUG", "false")
+func Debug() bool {
+	return getEnv("SOKO_DEBUG", "false") == "true"
 }
 
-func Quiet() string {
-	return getEnv("SOKO_QUIET", "false")
+func Quiet() bool {
+	return getEnv("SOKO_QUIET", "false") == "true"
 }
 
 func LogFile() string {
