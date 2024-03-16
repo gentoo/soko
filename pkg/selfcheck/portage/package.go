@@ -37,7 +37,7 @@ func updateModifiedPackage(changedFile string) {
 	packagename := splitted[1]
 	atom := category + "/" + packagename
 
-	pkgmetadata := GetPkgMetadata(config.PortDir() + "/" + atom + "/metadata.xml")
+	pkgmetadata := GetPkgMetadata(config.SelfCheckPortDir() + "/" + atom + "/metadata.xml")
 	var maintainers []*models.Maintainer
 
 	for _, maintainer := range pkgmetadata.MaintainerList {

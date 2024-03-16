@@ -18,7 +18,7 @@ func UpdateUse(path string) {
 
 	if isLocalUseflag(path) || isGlobalUseflag(path) || isUseExpand(path) {
 
-		rawFlags, _ := utils.ReadLines(config.PortDir() + "/" + path)
+		rawFlags, _ := utils.ReadLines(config.SelfCheckPortDir() + "/" + path)
 
 		for _, rawFlag := range rawFlags {
 

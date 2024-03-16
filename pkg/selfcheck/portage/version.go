@@ -40,7 +40,7 @@ func updateModifiedVersion(changedFile string) {
 	atom := category + "/" + packagename
 	id := atom + "-" + version
 
-	version_metadata, _ := utils.ReadLines(config.PortDir() + "/metadata/md5-cache/" + id)
+	version_metadata, _ := utils.ReadLines(config.SelfCheckPortDir() + "/metadata/md5-cache/" + id)
 
 	slot := "0"
 	subslot := "0"
@@ -113,7 +113,7 @@ func updateModifiedVersion(changedFile string) {
 
 }
 
-func addVersion(newVersion *models.Version){
+func addVersion(newVersion *models.Version) {
 	found := false
 	for _, v := range storage.Versions {
 		if v.Id == newVersion.Id {

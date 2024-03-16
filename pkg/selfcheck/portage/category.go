@@ -35,7 +35,7 @@ func updateModifiedCategory(changedFile string) {
 	splitted := strings.Split(changedFile, "/")
 	id := splitted[0]
 
-	catmetadata := GetCatMetadata(config.PortDir() + "/" + changedFile)
+	catmetadata := GetCatMetadata(config.SelfCheckPortDir() + "/" + changedFile)
 	description := ""
 
 	for _, longdescription := range catmetadata.Longdescriptions {
