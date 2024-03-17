@@ -64,7 +64,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 					fmt.Sprintf(template, "Deleted") +
 					") AS changed_files"), atom+"/%", atom+"/%", atom+"/%").
 				Order("preceding_commits DESC").
-				Limit(userPreferences.Packages.Overview.ChangelogLength), nil
+				Limit(50), nil
 		})
 	case "changelog.json":
 		changelogJSON(w, r)
@@ -95,11 +95,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		query = query.Relation("Outdated").
 			Relation("Versions.Masks").
 			Relation("Versions.Deprecates")
-		if userPreferences.Packages.Overview.ChangelogType == "full" {
-			query = query.Relation("Commits", func(q *pg.Query) (*pg.Query, error) {
-				return q.Order("preceding_commits DESC").Limit(userPreferences.Packages.Overview.ChangelogLength), nil
-			})
-		}
 		currentSubTab = "Overview"
 	default:
 		http.NotFound(w, r)

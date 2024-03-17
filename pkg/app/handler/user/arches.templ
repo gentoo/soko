@@ -82,9 +82,7 @@ templ arches(preferences models.ArchesPreferences) {
 									for _, arch := range models.GetAllKeywords() {
 										<option
 											value={ arch }
-											if preferences.DefaultArch == arch {
-												selected
-											}
+											selected?={ preferences.DefaultArch == arch }
 										>{ arch }</option>
 									}
 								</select>
@@ -94,15 +92,11 @@ templ arches(preferences models.ArchesPreferences) {
 								<select class="form-control" style="max-width: 150px;display: inline;" name="arches-default-page" id="arches-default-page">
 									<option
 										value="keyworded"
-										if preferences.DefaultPage == "keyworded" {
-											selected
-										}
+										selected?={ preferences.DefaultPage == "keyworded" }
 									>keyworded</option>
 									<option
 										value="stable"
-										if preferences.DefaultPage == "stable" {
-											selected
-										}
+										selected?={ preferences.DefaultPage == "stable" }
 									>newly stable</option>
 								</select>
 							</div>

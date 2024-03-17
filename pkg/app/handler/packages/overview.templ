@@ -132,7 +132,7 @@ templ overviewVersions(pkg *models.Package, userPreferences *models.UserPreferen
 templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 	<div class="row">
 		<div class="col-md-9">
-			if userPreferences.Packages.Overview.ShowOutdated && len(pkg.Outdated) > 0 {
+			if len(pkg.Outdated) > 0 {
 				if !pkg.HasVersion(pkg.Outdated[0].NewestVersion) {
 					<div class="alert alert-info">
 						<strong><span class="fa fa-fw fa-lightbulb-o"></span> Version { pkg.Outdated[0].NewestVersion } is available upstream. Please consider updating!</strong>
@@ -220,195 +220,181 @@ templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 					<a href="https://wiki.gentoo.org/wiki/Project:Proxy_Maintainers" class="alert-link">Proxy Maintainers team</a>.
 				</div>
 			}
-			if len(userPreferences.Packages.Overview.MetadataFields) > 0 {
-				<h3 class="pt-3 mb-2">Package Metadata</h3>
-				<div class="card border-0 mb-3">
-					<ul class="list-group kk-metadata-list">
-						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "homepage") {
-							if len(pkg.Versions[0].Homepage) > 1 {
-								<li class="kk-metadata-item list-group-item">
-									<div class="row">
-										<div class="col-xs-12 col-md-3 kk-metadata-key">
-											<span class="fa fa-fw fa-home"></span>
-											Other homepage(s)
-										</div>
-										<div class="col-xs-12 col-md-9">
-											for i, url := range pkg.Versions[0].Homepage[1:] {
-												if i > 0 {
-													<br/>
-												}
-												<a href={ templ.URL(url) }>{ url }</a>
-											}
-										</div>
-									</div>
-								</li>
-							}
-						}
-						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "upstream") {
-							if len(pkg.Upstream.Doc) > 0 || len(pkg.Upstream.Changelog) > 0 || len(pkg.Upstream.BugsTo) > 0 || len(pkg.Upstream.RemoteIds) > 0 {
-								<li class="kk-metadata-item list-group-item">
-									<div class="row">
-										<div class="col-xs-12 col-md-3 kk-metadata-key">
-											<span class="fa fa-fw fa-code-fork"></span>
-											Upstream
-										</div>
-										<div class="col-xs-12 col-md-9">
-											<table>
-												for i, url := range pkg.Upstream.Doc {
-													<tr>
-														<td>
-															if i == 0 {
-																<span class="kk-useflag-group float-right mr-2">Documentation</span>
-															}
-														</td>
-														<td><a href={ templ.URL(url) }>{ url }</a></td>
-													</tr>
-												}
-												for i, url := range pkg.Upstream.Changelog {
-													<tr>
-														<td>
-															if i == 0 {
-																<span class="kk-useflag-group float-right mr-2">Changelog</span>
-															}
-														</td>
-														<td><a href={ templ.URL(url) }>{ url }</a></td>
-													</tr>
-												}
-												for i, url := range pkg.Upstream.BugsTo {
-													<tr>
-														<td>
-															if i == 0 {
-																<span class="kk-useflag-group float-right mr-2">Bugs-To</span>
-															}
-														</td>
-														<td><a href={ templ.URL(url) }>{ url }</a></td>
-													</tr>
-												}
-												for i, remote := range pkg.Upstream.RemoteIds {
-													<tr>
-														<td>
-															if i == 0 {
-																<span class="kk-useflag-group float-right mr-2">Remote-Id</span>
-															}
-														</td>
-														<td>
-															if url := remoteIdLink(remote); url != "" {
-																<a href={ templ.URL(url) }>{ url }</a>
-															} else {
-																<a>({ remote.Type }) { remote.Id }</a>
-															}
-														</td>
-													</tr>
-												}
-											</table>
-										</div>
-									</div>
-								</li>
-							}
-						}
-						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "longdescription") {
-							if pkg.Longdescription != "" {
-								<li class="kk-metadata-item list-group-item">
-									<div class="row">
-										<div class="col-xs-12 col-md-3 kk-metadata-key">
-											<span class="fa fa-fw fa-info"></span>Full description
-										</div>
-										<div class="col-xs-12 col-md-9">
-											{ pkg.Longdescription }
-										</div>
-									</div>
-								</li>
-							}
-						}
-						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "useflags") {
-							if localUseflags, globalUseflags, useExpands := getPackageUseflags(pkg); len(localUseflags) > 0 || len(globalUseflags) > 0 || len(useExpands) > 0 {
-								<li class="kk-metadata-item list-group-item">
-									<div class="row">
-										<div class="col-xs-12 col-md-3 kk-metadata-key">
-											<span class="fa fa-fw fa-sliders"></span>
-											USE flags
-										</div>
-										<div class="col-xs-12 col-md-9">
-											if len(localUseflags) > 0 {
-												<span class="kk-useflag-group">Local Use Flags</span>
-												<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
-													for _, use := range localUseflags {
-														<li class="kk-useflag">
-															<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
-														</li>
+			<h3 class="pt-3 mb-2">Package Metadata</h3>
+			<div class="card border-0 mb-3">
+				<ul class="list-group kk-metadata-list">
+					if len(pkg.Versions[0].Homepage) > 1 {
+						<li class="kk-metadata-item list-group-item">
+							<div class="row">
+								<div class="col-xs-12 col-md-3 kk-metadata-key">
+									<span class="fa fa-fw fa-home"></span>
+									Other homepage(s)
+								</div>
+								<div class="col-xs-12 col-md-9">
+									for i, url := range pkg.Versions[0].Homepage[1:] {
+										if i > 0 {
+											<br/>
+										}
+										<a href={ templ.URL(url) }>{ url }</a>
+									}
+								</div>
+							</div>
+						</li>
+					}
+					if len(pkg.Upstream.Doc) > 0 || len(pkg.Upstream.Changelog) > 0 || len(pkg.Upstream.BugsTo) > 0 || len(pkg.Upstream.RemoteIds) > 0 {
+						<li class="kk-metadata-item list-group-item">
+							<div class="row">
+								<div class="col-xs-12 col-md-3 kk-metadata-key">
+									<span class="fa fa-fw fa-code-fork"></span>
+									Upstream
+								</div>
+								<div class="col-xs-12 col-md-9">
+									<table>
+										for i, url := range pkg.Upstream.Doc {
+											<tr>
+												<td>
+													if i == 0 {
+														<span class="kk-useflag-group float-right mr-2">Documentation</span>
 													}
-												</ul>
-											}
-											if len(globalUseflags) > 0 {
-												<span class="kk-useflag-group">Global Use Flags</span>
-												<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
-													for _, use := range globalUseflags {
-														<li class="kk-useflag">
-															<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
-														</li>
+												</td>
+												<td><a href={ templ.URL(url) }>{ url }</a></td>
+											</tr>
+										}
+										for i, url := range pkg.Upstream.Changelog {
+											<tr>
+												<td>
+													if i == 0 {
+														<span class="kk-useflag-group float-right mr-2">Changelog</span>
 													}
-												</ul>
+												</td>
+												<td><a href={ templ.URL(url) }>{ url }</a></td>
+											</tr>
+										}
+										for i, url := range pkg.Upstream.BugsTo {
+											<tr>
+												<td>
+													if i == 0 {
+														<span class="kk-useflag-group float-right mr-2">Bugs-To</span>
+													}
+												</td>
+												<td><a href={ templ.URL(url) }>{ url }</a></td>
+											</tr>
+										}
+										for i, remote := range pkg.Upstream.RemoteIds {
+											<tr>
+												<td>
+													if i == 0 {
+														<span class="kk-useflag-group float-right mr-2">Remote-Id</span>
+													}
+												</td>
+												<td>
+													if url := remoteIdLink(remote); url != "" {
+														<a href={ templ.URL(url) }>{ url }</a>
+													} else {
+														<a>({ remote.Type }) { remote.Id }</a>
+													}
+												</td>
+											</tr>
+										}
+									</table>
+								</div>
+							</div>
+						</li>
+					}
+					if pkg.Longdescription != "" {
+						<li class="kk-metadata-item list-group-item">
+							<div class="row">
+								<div class="col-xs-12 col-md-3 kk-metadata-key">
+									<span class="fa fa-fw fa-info"></span>Full description
+								</div>
+								<div class="col-xs-12 col-md-9">
+									{ pkg.Longdescription }
+								</div>
+							</div>
+						</li>
+					}
+					if localUseflags, globalUseflags, useExpands := getPackageUseflags(pkg); len(localUseflags) > 0 || len(globalUseflags) > 0 || len(useExpands) > 0 {
+						<li class="kk-metadata-item list-group-item">
+							<div class="row">
+								<div class="col-xs-12 col-md-3 kk-metadata-key">
+									<span class="fa fa-fw fa-sliders"></span>
+									USE flags
+								</div>
+								<div class="col-xs-12 col-md-9">
+									if len(localUseflags) > 0 {
+										<span class="kk-useflag-group">Local Use Flags</span>
+										<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
+											for _, use := range localUseflags {
+												<li class="kk-useflag">
+													<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+												</li>
 											}
-											if len(useExpands) > 0 {
-												for groupName, flags := range useExpands {
-													<span class="kk-useflag-group">{ groupName } (Use Expand)</span>
-													<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
-														for _, use := range flags {
-															<li class="kk-useflag">
-																<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ strings.TrimPrefix(use.Name, use.UseExpand + "_") }</a>
-															</li>
-														}
-													</ul>
+										</ul>
+									}
+									if len(globalUseflags) > 0 {
+										<span class="kk-useflag-group">Global Use Flags</span>
+										<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
+											for _, use := range globalUseflags {
+												<li class="kk-useflag">
+													<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+												</li>
+											}
+										</ul>
+									}
+									if len(useExpands) > 0 {
+										for groupName, flags := range useExpands {
+											<span class="kk-useflag-group">{ groupName } (Use Expand)</span>
+											<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
+												for _, use := range flags {
+													<li class="kk-useflag">
+														<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ strings.TrimPrefix(use.Name, use.UseExpand + "_") }</a>
+													</li>
 												}
-											}
-										</div>
-									</div>
-								</li>
-							}
-						}
-						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "license") {
-							if pkg.Versions[0].License != "" {
-								<li class="kk-metadata-item list-group-item">
-									<div class="row">
-										<div class="col-xs-12 col-md-3 kk-metadata-key">
-											<span class="fa fa-fw fa-legal"></span>
-											License
-										</div>
-										<div class="col-xs-12 col-md-9">
-											{ pkg.Versions[0].License }
-										</div>
-									</div>
-								</li>
-							}
-						}
-						if slices.Contains(userPreferences.Packages.Overview.MetadataFields, "maintainers") {
-							if len(pkg.Maintainers) > 0 {
-								<li class="kk-metadata-item list-group-item">
-									<div class="row">
-										<div class="col-xs-12 col-md-3 kk-metadata-key">
-											<span class="fa fa-fw fa-user"></span>
-											Maintainer(s)
-										</div>
-										<div class="col-xs-12 col-md-9">
-											for i, maintainer := range pkg.Maintainers {
-												if i > 0 {
-													,&nbsp;
-												}
-												<a title={ maintainer.PrintName() } href={ templ.URL("/maintainer/" + maintainer.Email) }>
-													{ maintainer.PrintName() }
-												</a>
-												<a href={ templ.URL("mailto:" + maintainer.Email) }>
-													<i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i>
-												</a>
-											}
-										</div>
-									</div>
-								</li>
-							}
-						}
-					</ul>
-				</div>
-			}
+											</ul>
+										}
+									}
+								</div>
+							</div>
+						</li>
+					}
+					if pkg.Versions[0].License != "" {
+						<li class="kk-metadata-item list-group-item">
+							<div class="row">
+								<div class="col-xs-12 col-md-3 kk-metadata-key">
+									<span class="fa fa-fw fa-legal"></span>
+									License
+								</div>
+								<div class="col-xs-12 col-md-9">
+									{ pkg.Versions[0].License }
+								</div>
+							</div>
+						</li>
+					}
+					if len(pkg.Maintainers) > 0 {
+						<li class="kk-metadata-item list-group-item">
+							<div class="row">
+								<div class="col-xs-12 col-md-3 kk-metadata-key">
+									<span class="fa fa-fw fa-user"></span>
+									Maintainer(s)
+								</div>
+								<div class="col-xs-12 col-md-9">
+									for i, maintainer := range pkg.Maintainers {
+										if i > 0 {
+											,&nbsp;
+										}
+										<a title={ maintainer.PrintName() } href={ templ.URL("/maintainer/" + maintainer.Email) }>
+											{ maintainer.PrintName() }
+										</a>
+										<a href={ templ.URL("mailto:" + maintainer.Email) }>
+											<i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i>
+										</a>
+									}
+								</div>
+							</div>
+						</li>
+					}
+				</ul>
+			</div>
 			if userPreferences.Packages.Overview.Layout == "full" {
 				<div class="mt-4 pt-4"></div>
 				@components.Changelog(pkg.Atom, pkg.Commits)

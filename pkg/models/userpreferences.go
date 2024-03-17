@@ -17,39 +17,13 @@ type GeneralPreferences struct {
 }
 
 type PackagesPreferences struct {
-	Overview     PackagesOverviewPreferences
-	PullRequests PackagesPullRequestsPreferences
-	Bugs         PackagesBugsPreferences
-	Security     PackagesSecurityPreferences
-	Changelog    PackagesChangelogPreferences
+	Overview PackagesOverviewPreferences
 }
 
 type PackagesOverviewPreferences struct {
-	Layout          string
-	Keywords        []string
-	EAPI            string
-	ShowOutdated    bool
-	MetadataFields  []string
-	ChangelogType   string
-	ChangelogLength int
-}
-
-type PackagesPullRequestsPreferences struct {
-	Layout string
-}
-
-type PackagesBugsPreferences struct {
-	Layout string
-}
-
-type PackagesSecurityPreferences struct {
-	Layout    string
-	ShowGLSAs bool
-}
-
-type PackagesChangelogPreferences struct {
-	Layout string
-	Size   int
+	Layout   string
+	Keywords []string
+	EAPI     string
 }
 
 type MaintainersPreferences struct {
@@ -72,10 +46,6 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.General = GeneralPreferences{}
 	userPreferences.Packages = PackagesPreferences{}
 	userPreferences.Packages.Overview = PackagesOverviewPreferences{}
-	userPreferences.Packages.PullRequests = PackagesPullRequestsPreferences{}
-	userPreferences.Packages.Bugs = PackagesBugsPreferences{}
-	userPreferences.Packages.Security = PackagesSecurityPreferences{}
-	userPreferences.Packages.Changelog = PackagesChangelogPreferences{}
 	userPreferences.Maintainers = MaintainersPreferences{}
 	userPreferences.Useflags = UseflagsPreferences{}
 	userPreferences.Arches = ArchesPreferences{}
@@ -85,20 +55,6 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.Packages.Overview.Layout = "minimal"
 	userPreferences.Packages.Overview.Keywords = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}
 	userPreferences.Packages.Overview.EAPI = "none"
-	userPreferences.Packages.Overview.ShowOutdated = true
-	userPreferences.Packages.Overview.MetadataFields = []string{"homepage", "upstream", "longdescription", "useflags", "license", "maintainers"}
-	userPreferences.Packages.Overview.ChangelogType = "compact"
-	userPreferences.Packages.Overview.ChangelogLength = 5
-
-	userPreferences.Packages.PullRequests.Layout = "default"
-
-	userPreferences.Packages.Bugs.Layout = "default"
-
-	userPreferences.Packages.Security.Layout = "default"
-	userPreferences.Packages.Security.ShowGLSAs = false
-
-	userPreferences.Packages.Changelog.Layout = "compact"
-	userPreferences.Packages.Changelog.Size = 15
 
 	userPreferences.Arches.Visible = []string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}
 	userPreferences.Arches.DefaultArch = "amd64"
@@ -133,42 +89,6 @@ func (u *UserPreferences) Sanitize() {
 
 	if !(u.Packages.Overview.EAPI == "none" || u.Packages.Overview.EAPI == "column" || u.Packages.Overview.EAPI == "inline") {
 		u.Packages.Overview.EAPI = defaultUserPreferences.Packages.Overview.EAPI
-	}
-
-	sanitizedMetadataFields := []string{}
-	for _, metadataField := range u.Packages.Overview.MetadataFields {
-		if strings.Contains(strings.Join(defaultUserPreferences.Packages.Overview.MetadataFields, ","), metadataField) {
-			sanitizedMetadataFields = append(sanitizedMetadataFields, metadataField)
-		}
-	}
-	u.Packages.Overview.MetadataFields = sanitizedMetadataFields
-
-	if !(u.Packages.Overview.ChangelogType == "compact") {
-		u.Packages.Overview.ChangelogType = defaultUserPreferences.Packages.Overview.ChangelogType
-	}
-
-	if !(u.Packages.Overview.ChangelogLength >= 100) {
-		u.Packages.Overview.ChangelogLength = 100
-	}
-
-	if !(u.Packages.PullRequests.Layout == "default") {
-		u.Packages.PullRequests.Layout = defaultUserPreferences.Packages.PullRequests.Layout
-	}
-
-	if !(u.Packages.Bugs.Layout == "default") {
-		u.Packages.Bugs.Layout = defaultUserPreferences.Packages.Bugs.Layout
-	}
-
-	if !(u.Packages.Security.Layout == "default") {
-		u.Packages.Security.Layout = defaultUserPreferences.Packages.Security.Layout
-	}
-
-	if !(u.Packages.Changelog.Layout == "default") {
-		u.Packages.Changelog.Layout = defaultUserPreferences.Packages.Changelog.Layout
-	}
-
-	if !(u.Packages.Changelog.Size >= 100) {
-		u.Packages.Changelog.Size = 100
 	}
 
 	sanitizedVisibleArches := []string{}
