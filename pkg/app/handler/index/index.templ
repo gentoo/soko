@@ -41,7 +41,7 @@ templ header(packageCount int) {
 	</div>
 }
 
-templ packagesList(addedPackages []models.Package, landingPage string) {
+templ packagesList(addedPackages []packageInfo, landingPage string) {
 	<div class="col-12">
 		<h3 class="mb-2">
 			<span class="fa fa-fw fa-history"></span>
@@ -58,11 +58,11 @@ templ packagesList(addedPackages []models.Package, landingPage string) {
 						for _, pkg := range addedPackages {
 							<tr>
 								<td>
-									<a href={ templ.URL("/packages/" + pkg.Atom) }>
+									<a href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Name) }>
 										<span class="text-muted">{ pkg.Category }</span>/<strong>{ pkg.Name }</strong>
 									</a>
 								</td>
-								<td>{ pkg.Versions[0].Description }</td>
+								<td>{ pkg.Description }</td>
 							</tr>
 						}
 						if landingPage == "full" && len(addedPackages) == 0 {
@@ -75,7 +75,7 @@ templ packagesList(addedPackages []models.Package, landingPage string) {
 	</div>
 }
 
-templ page(packageCount int, addedPackages []models.Package, updatedVersions []*models.Version, userPreferences models.UserPreferences) {
+templ page(packageCount int, addedPackages []packageInfo, updatedVersions []*models.Version, userPreferences models.UserPreferences) {
 	<div class="container mb-5">
 		<div class="row">
 			@header(packageCount)
@@ -98,7 +98,7 @@ templ page(packageCount int, addedPackages []models.Package, updatedVersions []*
 func Show(w http.ResponseWriter, r *http.Request) {
 	count, _ := database.DBCon.Model((*models.Package)(nil)).Count()
 
-	var packagesList []models.Package
+	var packagesList []packageInfo
 	if utils.GetUserPreferences(r).General.LandingPageLayout == "classic" {
 		packagesList = getAddedPackages(10)
 	} else {

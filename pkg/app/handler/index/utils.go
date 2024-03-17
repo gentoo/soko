@@ -14,44 +14,58 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
-// getAddedPackages returns a list of a
-// given number of recently added Versions
-func getAddedPackages(n int) []models.Package {
-	var addedPackages []models.Package
-	err := database.DBCon.Model(&addedPackages).
-		Order("preceding_commits DESC").
-		Limit(n).
-		Relation("Versions").
-		Select()
-	if err != nil {
-		return addedPackages
-	}
-	return addedPackages
+type packageInfo struct {
+	Name        string
+	Category    string
+	Description string
 }
 
-func getSearchHistoryPackages(r *http.Request) []models.Package {
-	var searchedPackages []models.Package
+// getAddedPackages returns a list of a
+// given number of recently added Versions
+func getAddedPackages(n int) (packages []packageInfo) {
+	descriptionQuery := database.DBCon.Model((*models.Version)(nil)).
+		Column("description").
+		Where("atom = package.atom").
+		Limit(1)
+	err := database.DBCon.Model((*models.Package)(nil)).
+		Column("name", "category").
+		ColumnExpr("(?) AS description", descriptionQuery).
+		Order("preceding_commits DESC").
+		Limit(n).
+		Select(&packages)
+	if err != nil {
+		return nil
+	}
+	return
+}
+
+func getSearchHistoryPackages(r *http.Request) (packages []packageInfo) {
 	cookie, err := r.Cookie("search_history")
 	if err != nil {
-		return searchedPackages
+		return nil
 	}
 	packagesList := getSearchHistoryFromCookie(cookie)
 
-	err = database.DBCon.Model(&searchedPackages).
+	descriptionQuery := database.DBCon.Model((*models.Version)(nil)).
+		Column("description").
+		Where("atom = package.atom").
+		Limit(1)
+	err = database.DBCon.Model((*models.Package)(nil)).
+		Column("name", "category").
+		ColumnExpr("(?) AS description", descriptionQuery).
 		Where("atom in (?)", pg.In(packagesList)).
-		Relation("Versions").
-		Select()
+		Select(&packages)
 	if err != nil {
-		return searchedPackages
+		return nil
 	}
 
-	return getSortedSearchHistory(packagesList, searchedPackages)
+	return getSortedSearchHistory(packagesList, packages)
 }
 
-func getSortedSearchHistory(sortedPackagesList []string, packagesList []models.Package) (result []models.Package) {
+func getSortedSearchHistory(sortedPackagesList []string, packagesList []packageInfo) (result []packageInfo) {
 	for _, gpackage := range sortedPackagesList {
 		for _, gpackageObject := range packagesList {
-			if gpackageObject.Atom == gpackage {
+			if gpackageObject.Category+"/"+gpackageObject.Name == gpackage {
 				result = append(result, gpackageObject)
 			}
 		}
