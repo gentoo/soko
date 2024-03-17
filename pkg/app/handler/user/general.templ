@@ -23,9 +23,7 @@ templ general(preferences models.GeneralPreferences) {
 							id="classicLandingpageLayout"
 							name="landingpage-layout"
 							value="classic"
-							if preferences.LandingPageLayout == "classic" {
-								checked
-							}
+							checked?={ preferences.LandingPageLayout == "classic" }
 						/>
 						<label class="form-check-label ml-1" for="classicLandingpageLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Recently Added Packages (default)">Recently Added Packages <i>(default)</i></label>
 					</div>
@@ -44,9 +42,7 @@ templ general(preferences models.GeneralPreferences) {
 							id="fullLandingpageLayout"
 							name="landingpage-layout"
 							value="full"
-							if preferences.LandingPageLayout == "full" {
-								checked
-							}
+							checked?={ preferences.LandingPageLayout == "full" }
 						/>
 						<label class="form-check-label ml-1" for="fullLandingpageLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Recently Visited Packages">Recently Visited Packages</label>
 					</div>

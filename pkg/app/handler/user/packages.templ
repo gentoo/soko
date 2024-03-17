@@ -40,9 +40,7 @@ templ packages(preferences models.PackagesPreferences) {
 									id="minimalOverviewLayout"
 									name="overview-layout"
 									value="minimal"
-									if preferences.Overview.Layout == "minimal" {
-										checked
-									}
+									checked?={ preferences.Overview.Layout == "minimal" }
 								/>
 								<label class="form-check-label ml-1" for="minimalOverviewLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Versions + Metadata (default)">Versions + Metadata <i>(default)</i></label>
 							</div>
@@ -61,9 +59,7 @@ templ packages(preferences models.PackagesPreferences) {
 									id="fullOverviewLayout"
 									name="overview-layout"
 									value="full"
-									if preferences.Overview.Layout == "full" {
-										checked
-									}
+									checked?={ preferences.Overview.Layout == "full" }
 								/>
 								<label class="form-check-label ml-1" for="fullOverviewLayout" style="overflow:hidden;text-overflow: ellipsis;" title="Versions + Metadata + Changelog">Versions + Metadata + Changelog</label>
 							</div>
@@ -110,9 +106,7 @@ templ packages(preferences models.PackagesPreferences) {
 								id="overview-showOutdated"
 								name="overview-showOutdated"
 								value="true"
-								if preferences.Overview.ShowOutdated {
-									checked
-								}
+								checked?={ preferences.Overview.ShowOutdated }
 							/>
 							<label class="form-check-label ml-1" for="overview-showOutdated">Show Outdated warnings?</label>
 						</div>
@@ -129,9 +123,7 @@ templ packages(preferences models.PackagesPreferences) {
 										name="overview-metadata-fields"
 										id="overview-metadata-fields-homepage"
 										value="homepage"
-										if slices.Contains(preferences.Overview.MetadataFields, "homepage") {
-											checked
-										}
+										checked?={ slices.Contains(preferences.Overview.MetadataFields, "homepage") }
 									/>
 									<label class="form-check-label ml-1" for="overview-metadata-fields-homepage">Homepage</label>
 								</div>
@@ -143,9 +135,7 @@ templ packages(preferences models.PackagesPreferences) {
 										name="overview-metadata-fields"
 										id="overview-metadata-fields-upstream"
 										value="upstream"
-										if slices.Contains(preferences.Overview.MetadataFields, "upstream") {
-											checked
-										}
+										checked?={ slices.Contains(preferences.Overview.MetadataFields, "upstream") }
 									/>
 									<label class="form-check-label ml-1" for="overview-metadata-fields-upstream">Upstream</label>
 								</div>
@@ -157,9 +147,7 @@ templ packages(preferences models.PackagesPreferences) {
 										name="overview-metadata-fields"
 										id="overview-metadata-fields-longdescription"
 										value="longdescription"
-										if slices.Contains(preferences.Overview.MetadataFields, "longdescription") {
-											checked
-										}
+										checked?={ slices.Contains(preferences.Overview.MetadataFields, "longdescription") }
 									/>
 									<label class="form-check-label ml-1" for="overview-metadata-fields-longdescription">Longdescription</label>
 								</div>
@@ -171,9 +159,7 @@ templ packages(preferences models.PackagesPreferences) {
 										name="overview-metadata-fields"
 										id="overview-metadata-fields-useflags"
 										value="useflags"
-										if slices.Contains(preferences.Overview.MetadataFields, "useflags") {
-											checked
-										}
+										checked?={ slices.Contains(preferences.Overview.MetadataFields, "useflags") }
 									/>
 									<label class="form-check-label ml-1" for="overview-metadata-fields-useflags">USE flags</label>
 								</div>
@@ -185,9 +171,7 @@ templ packages(preferences models.PackagesPreferences) {
 										name="overview-metadata-fields"
 										id="overview-metadata-fields-license"
 										value="license"
-										if slices.Contains(preferences.Overview.MetadataFields, "license") {
-											checked
-										}
+										checked?={ slices.Contains(preferences.Overview.MetadataFields, "license") }
 									/>
 									<label class="form-check-label ml-1" for="overview-metadata-fields-license">License</label>
 								</div>
@@ -199,9 +183,7 @@ templ packages(preferences models.PackagesPreferences) {
 										name="overview-metadata-fields"
 										id="overview-metadata-fields-maintainers"
 										value="maintainers"
-										if slices.Contains(preferences.Overview.MetadataFields, "maintainers") {
-											checked
-										}
+										checked?={ slices.Contains(preferences.Overview.MetadataFields, "maintainers") }
 									/>
 									<label class="form-check-label ml-1" for="overview-metadata-fields-maintainers">Maintainers</label>
 								</div>

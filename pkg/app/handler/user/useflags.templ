@@ -23,9 +23,7 @@ templ useflags(preferences models.UseflagsPreferences) {
 							id="BubbleUseflagDefaultPage"
 							name="useflag-default-page"
 							value="bubble"
-							if preferences.Layout == "bubble" {
-								checked
-							}
+							checked?={ preferences.Layout == "bubble" }
 						/>
 						<label class="form-check-label ml-1" for="BubbleUseflagDefaultPage" style="overflow:hidden;text-overflow: ellipsis;" title="Popular USE flags (default)">Popular USE flags <i>(default)</i></label>
 					</div>
@@ -44,9 +42,7 @@ templ useflags(preferences models.UseflagsPreferences) {
 							id="SearchUseflagDefaultPage"
 							name="useflag-default-page"
 							value="search"
-							if preferences.Layout == "search" {
-								checked
-							}
+							checked?={ preferences.Layout == "search" }
 						/>
 						<label class="form-check-label ml-1" for="SearchUseflagDefaultPage" style="overflow:hidden;text-overflow: ellipsis;" title="USE flags search">USE flags search</label>
 					</div>
