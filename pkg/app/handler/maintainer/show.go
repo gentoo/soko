@@ -207,7 +207,7 @@ func ShowBugs(w http.ResponseWriter, r *http.Request) {
 	}
 	generalCount, stabilizationCount, keywordingCount := countBugsCategories(bugs)
 	layout.Layout(maintainer.Name, "maintainers",
-		show(packagesCount, &maintainer, "Bugs", components.Bugs(generalCount, stabilizationCount, keywordingCount, bugs)),
+		show(packagesCount, &maintainer, "Bugs", components.Bugs("", generalCount, stabilizationCount, keywordingCount, bugs)),
 	).Render(r.Context(), w)
 }
 
@@ -233,7 +233,7 @@ func ShowSecurity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, "maintainers",
-		show(packagesCount, &maintainer, "Security", components.SecurityBugs(len(bugs) > 0, bugs)),
+		show(packagesCount, &maintainer, "Security", components.SecurityBugs("", len(bugs) > 0, bugs)),
 	).Render(r.Context(), w)
 }
 

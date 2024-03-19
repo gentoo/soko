@@ -24,7 +24,14 @@ templ bugsList(title, component string, bugs []*models.Bug, titleClass, id strin
 	</ul>
 }
 
-templ Bugs(generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
+func bugAtomLink(atom string) templ.SafeURL {
+	if atom == "" {
+		return templ.URL("https://bugs.gentoo.org/")
+	}
+	return templ.URL("https://bugs.gentoo.org/enter_bug.cgi?product=Gentoo Linux&component=Current packages&short_desc=" + atom + ": <ADD SUMMARY HERE>")
+}
+
+templ Bugs(atom string, generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
 	<div class="row">
 		<div class="col-md-9">
 			if len(bugs) > 0 {
@@ -44,7 +51,7 @@ templ Bugs(generalCount, stabilizationCount, keywordingCount int, bugs []*models
 					</div>
 					<div class="col-md-8 pt-3">
 						<h2>Good job! There are no bugs.</h2>
-						<span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/enter_bug.cgi">new bug</a>.</span>
+						<span>You think something is missing here? <br/> Start with filling a <a href={ bugAtomLink(atom) }>new bug</a>.</span>
 					</div>
 				</div>
 			}
@@ -59,7 +66,7 @@ templ Bugs(generalCount, stabilizationCount, keywordingCount int, bugs []*models
 				<span class="text-muted">
 					Gentoo Bugzilla is where we track bugs of Gentoo and its packages; you are welcome to report, confirm and resolve bugs:
 					<ul>
-						<li><a href="https://bugs.gentoo.org/enter_bug.cgi">File a new Bug</a></li>
+						<li><a href={ bugAtomLink(atom) }>File a new Bug</a></li>
 						<li><a href="https://bugs.gentoo.org/">Confirm a bug</a></li>
 						<li><a href="https://wiki.gentoo.org/wiki/Bugday">Participate in our monthly Bugday</a></li>
 					</ul>
@@ -105,7 +112,14 @@ templ Bugs(generalCount, stabilizationCount, keywordingCount int, bugs []*models
 	</div>
 }
 
-templ SecurityBugs(hasSecurityBugs bool, bugs []*models.Bug) {
+func securityBugAtomLink(atom string) templ.SafeURL {
+	if atom == "" {
+		return templ.URL("https://bugs.gentoo.org/")
+	}
+	return templ.URL("https://bugs.gentoo.org/enter_bug.cgi?product=Gentoo Security&component=Vulnerabilities&short_desc=" + atom + ": <ADD SUMMARY HERE>")
+}
+
+templ SecurityBugs(atom string, hasSecurityBugs bool, bugs []*models.Bug) {
 	<div class="row">
 		<div class="col-md-9">
 			if hasSecurityBugs {
@@ -117,7 +131,7 @@ templ SecurityBugs(hasSecurityBugs bool, bugs []*models.Bug) {
 					</div>
 					<div class="col-md-8 pt-3">
 						<h2>There are no open security bugs.</h2>
-						<span>You think something is missing here? <br/> Start with filling a <a href="https://bugs.gentoo.org/">new security bug</a>.</span>
+						<span>You think something is missing here? <br/> Start with filling a <a href={ securityBugAtomLink(atom) }>new security bug</a>.</span>
 					</div>
 				</div>
 			}
@@ -130,7 +144,7 @@ templ SecurityBugs(hasSecurityBugs bool, bugs []*models.Bug) {
 			</h4>
 			<div class="collapse show" id="collapseDescription">
 				<span class="text-muted">
-					Please file new vulnerability reports on <a href="https://bugs.gentoo.org/">Gentoo Bugzilla</a> and assign them to the Gentoo Security product and Vulnerabilities component.
+					Please file new vulnerability reports on <a href={ securityBugAtomLink(atom) }>Gentoo Bugzilla</a> and assign them to the Gentoo Security product and Vulnerabilities component.
 				</span>
 			</div>
 		</div>

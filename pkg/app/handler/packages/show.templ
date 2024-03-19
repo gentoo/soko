@@ -93,7 +93,8 @@ templ tabbedHeader(pkg *models.Package, currentSubTab string) {
 	</div>
 }
 
-func collectAllBugs(pkg *models.Package) (generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
+func collectAllBugs(pkg *models.Package) (atom string, generalCount, stabilizationCount, keywordingCount int, bugs []*models.Bug) {
+	atom = pkg.Atom
 	bugs = make([]*models.Bug, 0, len(pkg.Bugs))
 	handled := make(map[string]struct{}, len(pkg.Bugs))
 	for _, bug := range pkg.Bugs {
@@ -121,14 +122,14 @@ func collectAllBugs(pkg *models.Package) (generalCount, stabilizationCount, keyw
 	return
 }
 
-func collectSecurityBugs(pkg *models.Package) (bool, []*models.Bug) {
+func collectSecurityBugs(pkg *models.Package) (string, bool, []*models.Bug) {
 	bugs := make([]*models.Bug, 0, len(pkg.Bugs))
 	for _, bug := range pkg.Bugs {
 		if bug.Component == "Vulnerabilities" {
 			bugs = append(bugs, bug)
 		}
 	}
-	return len(bugs) > 0, bugs
+	return pkg.Atom, len(bugs) > 0, bugs
 }
 
 templ show(pkg *models.Package, currentSubTab string, userPreferences models.UserPreferences) {
