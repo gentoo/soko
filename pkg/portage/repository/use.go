@@ -34,13 +34,13 @@ func UpdateUse(path string) {
 	if status != "D" && (isLocalUseflag(changedFile) || isGlobalUseflag(changedFile) || isUseExpand(changedFile)) {
 
 		rawFlags, _ := utils.ReadLines(config.PortDir() + "/" + changedFile)
+		scope := getScope(changedFile)
 
 		useFlags := make(map[string]*models.Useflag, len(rawFlags))
 		for _, rawFlag := range rawFlags {
 			if strings.TrimSpace(rawFlag) == "" || rawFlag[0] == '#' {
 				continue
 			}
-			scope := getScope(changedFile)
 			switch scope {
 			case "local", "global":
 				if flag := createUseflag(rawFlag, scope); flag != nil {

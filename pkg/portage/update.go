@@ -134,7 +134,7 @@ func FullUpdate() {
 		slog.Error("Error reading profiles/desc", slog.Any("err", err))
 	} else {
 		for _, entry := range entries {
-			repository.UpdateUse(config.PortDir() + "/profiles/desc/" + entry.Name())
+			repository.UpdateUse("profiles/desc/" + entry.Name())
 		}
 	}
 
