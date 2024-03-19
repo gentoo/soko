@@ -162,12 +162,16 @@ func FullUpdate() {
 // that are present in the database but not in the main tree.
 func deleteRemovedVersions() {
 	var versions, toDelete []*models.Version
-	database.DBCon.Model(&versions).Select()
+	err := database.DBCon.Model(&versions).Column("id", "atom", "package", "version").Select()
+	if err != nil {
+		slog.Error("Failed fetching versions", slog.Any("err", err))
+		return
+	}
 
 	for _, version := range versions {
 		path := config.PortDir() + "/" + version.Atom + "/" + version.Package + "-" + version.Version + ".ebuild"
 		if !utils.FileExists(path) {
-			slog.Error("Found ebuild version in the database that does not exist", slog.String("path", path))
+			slog.Error("Found ebuild version in the database that does not exist", slog.String("version", version.Id))
 			toDelete = append(toDelete, version)
 		}
 	}
@@ -186,18 +190,21 @@ func deleteRemovedVersions() {
 // that are present in the database but not in the main tree.
 func deleteRemovedPackages() {
 	var packages, toDelete []*models.Package
-	database.DBCon.Model(&packages).Column("atom").Select()
+	err := database.DBCon.Model(&packages).Column("atom").Select()
+	if err != nil {
+		slog.Error("Failed fetching packages", slog.Any("err", err))
+		return
+	}
 
 	for _, pkg := range packages {
-		path := config.PortDir() + "/" + pkg.Atom
-		if !utils.FileExists(path) {
-			slog.Error("Found package in the database that does not exist", slog.String("path", path))
+		if !utils.FileExists(config.PortDir() + "/" + pkg.Atom) {
+			slog.Error("Found package in the database that does not exist", slog.String("atom", pkg.Atom))
 			toDelete = append(toDelete, pkg)
 		}
 	}
 
 	if len(toDelete) > 0 {
-		res, err := database.DBCon.Model(&toDelete).WherePK().Delete()
+		res, err := database.DBCon.Model(&toDelete).Delete()
 		if err != nil {
 			slog.Error("Failed deleting packages", slog.Any("err", err))
 		} else {
@@ -210,12 +217,15 @@ func deleteRemovedPackages() {
 // that are present in the database but not in the main tree.
 func deleteRemovedCategories() {
 	var categories, toDelete []*models.Category
-	database.DBCon.Model(&categories).Select()
+	err := database.DBCon.Model(&categories).Column("name").Select()
+	if err != nil {
+		slog.Error("Failed fetching categories", slog.Any("err", err))
+		return
+	}
 
 	for _, category := range categories {
-		path := config.PortDir() + "/" + category.Name
-		if !utils.FileExists(path) {
-			slog.Error("Found category in the database that does not exist", slog.String("path", path))
+		if !utils.FileExists(config.PortDir() + "/" + category.Name) {
+			slog.Error("Found category in the database that does not exist", slog.String("name", category.Name))
 			toDelete = append(toDelete, category)
 		}
 	}

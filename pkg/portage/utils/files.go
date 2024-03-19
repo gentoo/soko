@@ -27,9 +27,6 @@ func ReadLines(path string) ([]string, error) {
 // FileExists checks whether the file
 // at the given path does exist
 func FileExists(path string) bool {
-	if _, err := os.Stat(path); err == nil {
-		return true
-	} else {
-		return false
-	}
+	_, err := os.Stat(path)
+	return err == nil
 }
