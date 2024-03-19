@@ -32,7 +32,7 @@ templ Changelog(atom string, commits []*models.Commit) {
 							if atom != "" {
 								href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/atom/" + atom + "?h=master") }
 							} else {
-								href={ templ.URL("./changelog.atom") }
+								href="./changelog.atom"
 							}
 							target="_blank"
 						>

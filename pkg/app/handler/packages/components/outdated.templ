@@ -9,7 +9,14 @@ templ Outdated(outdated []OutdatedItem) {
 	<div class="row">
 		<div class="col-md-9">
 			if len(outdated) > 0 {
-				<h3 class="mb-4">Outdated Packages</h3>
+				<span class="d-flex justify-content-between">
+					<h3 class="mb-4">Outdated Packages</h3>
+					<span>
+						<a href="./outdated.atom">
+							<span class="fa fa-fw fa-rss text-dark"></span> Atom feed
+						</a>
+					</span>
+				</span>
 				<ul class="list-group">
 					for _, pkg := range outdated {
 						<li class="list-group-item">

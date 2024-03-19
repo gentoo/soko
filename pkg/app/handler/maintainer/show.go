@@ -138,6 +138,23 @@ func ShowOutdated(w http.ResponseWriter, r *http.Request) {
 	).Render(r.Context(), w)
 }
 
+func ShowOutdatedFeed(w http.ResponseWriter, r *http.Request) {
+	maintainer, query, _, err := common(w, r)
+	if err != nil {
+		return
+	}
+	var outdated []models.OutdatedPackages
+	err = database.DBCon.Model(&outdated).
+		Where("atom IN (?)", query).
+		Order("atom").
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	utils.OutdatedFeed(w, "https://packages.gentoo.org/maintainer/"+maintainer.Email+"/outdated", maintainer.Name+" <"+maintainer.Email+">", outdated)
+}
+
 func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 	maintainer, query, packagesCount, err := common(w, r)
 	if err != nil {

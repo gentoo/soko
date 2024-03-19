@@ -69,6 +69,7 @@ func Serve() {
 	setRoute("GET /maintainer/{email}/changelog.atom", maintainer.ShowChangelogFeed)
 	setRoute("GET /maintainer/{email}/info.json", maintainer.ShowInfoJson)
 	setRoute("GET /maintainer/{email}/outdated", maintainer.ShowOutdated)
+	setRoute("GET /maintainer/{email}/outdated.atom", maintainer.ShowOutdatedFeed)
 	setRoute("GET /maintainer/{email}/pull-requests", maintainer.ShowPullRequests)
 	setRoute("GET /maintainer/{email}/security", maintainer.ShowSecurity)
 	setRoute("GET /maintainer/{email}/stabilization", maintainer.ShowStabilization)

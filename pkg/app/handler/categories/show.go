@@ -44,6 +44,18 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		pageName = "Outdated"
 		query = query.Relation("Packages.Versions").
 			Relation("Packages.Outdated")
+	case "outdated.atom":
+		var outdated []models.OutdatedPackages
+		err := database.DBCon.Model(&outdated).
+			Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+			Order("atom").
+			Select()
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		utils.OutdatedFeed(w, "https://packages.gentoo.org/categories/"+categoryName+"/outdated", "category "+categoryName, outdated)
+		return
 	case "pull-requests":
 		pageName = "Pull requests"
 		err := database.DBCon.Model(&pullRequests).
