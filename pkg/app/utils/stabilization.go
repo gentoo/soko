@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"soko/pkg/models"
 	"strings"
+	"time"
+
+	"github.com/a-h/templ"
+	"github.com/gorilla/feeds"
 )
 
 type stabilization struct {
@@ -64,4 +68,23 @@ func StabilizationExport(w http.ResponseWriter, pageUrl string, gpackages []*mod
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(lines))
 	}
+}
+
+func StabilizationFeed(w http.ResponseWriter, link, title string, results []*models.PkgCheckResult) {
+	feed := &feeds.Feed{
+		Title:   "Stabilization candidates for " + title,
+		Author:  &feeds.Author{Name: "Gentoo Packages Database"},
+		Created: time.Now(),
+		Link:    &feeds.Link{Href: link},
+	}
+
+	for _, pkgcheck := range results {
+		feed.Add(&feeds.Item{
+			Title:       pkgcheck.CPV,
+			Description: templ.EscapeString(pkgcheck.Message),
+			Link:        &feeds.Link{Href: "https://packages.gentoo.org/packages/" + pkgcheck.Atom, Type: "text/html", Rel: "alternate"},
+			Id:          pkgcheck.CPV,
+		})
+	}
+	feed.WriteAtom(w)
 }

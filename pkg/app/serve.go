@@ -75,6 +75,7 @@ func Serve() {
 	setRoute("GET /maintainer/{email}/stabilization.json", maintainer.ShowStabilizationFile)
 	setRoute("GET /maintainer/{email}/stabilization.list", maintainer.ShowStabilizationFile)
 	setRoute("GET /maintainer/{email}/stabilization.xml", maintainer.ShowStabilizationFile)
+	setRoute("GET /maintainer/{email}/stabilization.atom", maintainer.ShowStabilizationFeed)
 
 	setRoute("GET /packages/search", packages.Search)
 	setRoute("GET /packages/suggest.json", packages.Suggest)

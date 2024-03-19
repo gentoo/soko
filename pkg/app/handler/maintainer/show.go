@@ -257,6 +257,26 @@ func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
 	utils.StabilizationExport(w, pageName, gpackages)
 }
 
+func ShowStabilizationFeed(w http.ResponseWriter, r *http.Request) {
+	maintainer, query, _, err := common(w, r)
+	if err != nil {
+		return
+	}
+
+	var results []*models.PkgCheckResult
+	err = database.DBCon.Model(&results).
+		Column("atom", "cpv", "message").
+		Where("class = ?", "StableRequest").
+		Where("atom IN (?)", query).
+		OrderExpr("cpv").
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	utils.StabilizationFeed(w, "https://packages.gentoo.org/maintainer/"+maintainer.Email+"/stabilization", maintainer.Name+" <"+maintainer.Email+">", results)
+}
+
 func ShowPackages(w http.ResponseWriter, r *http.Request) {
 	maintainer, query, packagesCount, err := common(w, r)
 	if err != nil {

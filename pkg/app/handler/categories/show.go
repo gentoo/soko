@@ -67,6 +67,20 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		}
 		utils.StabilizationExport(w, pageUrl, category.Packages)
 		return
+	case "stabilization.atom":
+		var results []*models.PkgCheckResult
+		err := database.DBCon.Model(&results).
+			Column("atom", "cpv", "message").
+			Where("class = ?", "StableRequest").
+			Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+			OrderExpr("cpv").
+			Select()
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		utils.StabilizationFeed(w, "https://packages.gentoo.org/categories/"+categoryName+"/stabilization", "category "+categoryName, results)
+		return
 	case "", "packages":
 		query = query.Relation("Packages.Versions")
 	default:
