@@ -27,14 +27,20 @@ import (
 
 // Serve is used to serve the web application
 func Serve() {
-
 	database.Connect()
 	defer database.DBCon.Close()
 
 	setRoute("GET /categories", categories.Index)
 	setRoute("GET /categories.json", categories.JSONCategories)
-	setRoute("GET /categories/{category}", categories.Show)
-	setRoute("GET /categories/{category}/{pageName}", categories.Show)
+	setRoute("GET /categories/{category}", categories.ShowPackages)
+	setRoute("GET /categories/{category}/outdated", categories.ShowOutdated)
+	setRoute("GET /categories/{category}/outdated.atom", categories.OutdatedFeed)
+	setRoute("GET /categories/{category}/pull-requests", categories.ShowPullRequests)
+	setRoute("GET /categories/{category}/stabilization", categories.ShowStabilizations)
+	setRoute("GET /categories/{category}/stabilization.atom", categories.StabilizationFeed)
+	setRoute("GET /categories/{category}/stabilization.json", categories.ShowStabilizationFile)
+	setRoute("GET /categories/{category}/stabilization.list", categories.ShowStabilizationFile)
+	setRoute("GET /categories/{category}/stabilization.xml", categories.ShowStabilizationFile)
 
 	setRoute("GET /useflags/popular.json", useflags.Popular)
 	setRoute("GET /useflags/suggest.json", useflags.Suggest)

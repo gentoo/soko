@@ -261,17 +261,18 @@ func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
 	}
 	pageName := r.URL.Path[strings.LastIndexByte(r.URL.Path, '/')+1:]
 
-	var gpackages []*models.Package
-	err = query.Model(&gpackages).
-		Relation("Versions").
-		Relation("Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
-			return q.Where("class = ?", "StableRequest"), nil
-		}).Select()
+	var results []*models.PkgCheckResult
+	err = database.DBCon.Model(&results).
+		Column("atom", "cpv", "message").
+		Where("class = ?", "StableRequest").
+		Where("atom IN (?)", query).
+		OrderExpr("cpv").
+		Select()
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	utils.StabilizationExport(w, pageName, gpackages)
+	utils.StabilizationExport(w, pageName, results)
 }
 
 func ShowStabilizationFeed(w http.ResponseWriter, r *http.Request) {

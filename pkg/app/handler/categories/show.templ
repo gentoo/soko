@@ -3,7 +3,6 @@ package categories
 import "net/http"
 import "strconv"
 import "strings"
-import "soko/pkg/app/handler/packages/components"
 import "soko/pkg/app/layout"
 import "soko/pkg/models"
 
@@ -11,7 +10,7 @@ func packageLetter(name string) string {
 	return strings.ToLower(strings.TrimLeft(name, "_")[:1])
 }
 
-templ showPackages(packages []*models.Package) {
+templ showPackages(categoryName string, packages []packageInfo) {
 	<div class="row">
 		<div class="col-12">
 			<div class="row">
@@ -23,12 +22,12 @@ templ showPackages(packages []*models.Package) {
 						<table class="table mb-0 rounded">
 							for i, pkg := range packages {
 								<tr
-									if i == 0 || packageLetter(pkg.Name) != packageLetter(packages[i-1].Name) {
-										id={ packageLetter(pkg.Name) }
+									if i == 0 || packageLetter(pkg.Package) != packageLetter(packages[i-1].Package) {
+										id={ packageLetter(pkg.Package) }
 									}
 								>
-									<th class="kk-nobreak-cell"><a href={ templ.URL("/packages/" + pkg.Atom) }>{ pkg.Name }</a></th>
-									<td>{ pkg.Versions[0].Description }</td>
+									<th class="kk-nobreak-cell"><a href={ templ.URL("/packages/" + categoryName + "/" + pkg.Package) }>{ pkg.Package }</a></th>
+									<td>{ pkg.Description }</td>
 								</tr>
 							}
 						</table>
@@ -42,10 +41,10 @@ templ showPackages(packages []*models.Package) {
 					<h4 class="mt-4">Filter by Category</h4>
 					<div class="row pl-4 pr-5 mr-5">
 						for i, pkg := range packages {
-							if i == 0 || packageLetter(pkg.Name) != packageLetter(packages[i-1].Name) {
+							if i == 0 || packageLetter(pkg.Package) != packageLetter(packages[i-1].Package) {
 								<div class="col-md-2 px-2">
-									<a href={ templ.URL("#" + packageLetter(pkg.Name)) } class="text-muted text-capitalize">
-										{ packageLetter(pkg.Name) }
+									<a href={ templ.URL("#" + packageLetter(pkg.Package)) } class="text-muted text-capitalize">
+										{ packageLetter(pkg.Package) }
 									</a>
 								</div>
 							}
@@ -57,54 +56,18 @@ templ showPackages(packages []*models.Package) {
 	</div>
 }
 
-func collectStabilizations(packages []*models.Package) (stabilizations []*models.PkgCheckResult) {
-	for _, pkg := range packages {
-		for _, ver := range pkg.Versions {
-			for _, res := range ver.PkgCheckResults {
-				if res.Class == "StableRequest" {
-					stabilizations = append(stabilizations, res)
-					break
-				}
-			}
-		}
-	}
-	return
-}
-
-func collectOutdated(packages []*models.Package) (outdated []components.OutdatedItem) {
-	for _, pkg := range packages {
-		if len(pkg.Outdated) > 0 {
-			outdated = append(outdated, components.OutdatedItem{
-				Atom:        pkg.Atom,
-				Description: pkg.Description(),
-			})
-		}
-	}
-	return
-}
-
-templ show(pageName string, category *models.Category, pullRequests []*models.GithubPullRequest) {
+templ show(component templ.Component) {
 	<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-		switch pageName {
-			case "Packages":
-				@showPackages(category.Packages)
-			case "Stabilization":
-				@components.Stabilizations(category.PackagesInformation.StableRequests > 0, collectStabilizations(category.Packages))
-			case "Outdated":
-				@components.Outdated(collectOutdated(category.Packages))
-			case "Pull requests":
-				@components.PullRequests(category.PackagesInformation.PullRequests > 0, pullRequests)
-		}
+		@component
 	</div>
 }
 
-func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, category *models.Category, pullRequests []*models.GithubPullRequest) {
+func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, category *models.Category, component templ.Component) {
 	layout.TabbedLayout(category.Name, "packages", category.Name, "fa fa-fw fa-cubes", category.Description, []layout.SubTab{
 		{
-			Name:       "Packages",
-			Link:       templ.URL("/categories/" + category.Name),
-			Icon:       "fa fa-list-ul mr-1",
-			BadgeValue: strconv.Itoa(len(category.Packages)),
+			Name: "Packages",
+			Link: templ.URL("/categories/" + category.Name),
+			Icon: "fa fa-list-ul mr-1",
 		},
 		{
 			Name:       "Stabilization",
@@ -124,5 +87,5 @@ func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, c
 			Icon:       "octicon octicon-git-pull-request opticon-resource-icon ml-1",
 			BadgeValue: strconv.Itoa(category.PackagesInformation.PullRequests),
 		},
-	}, currentTab, show(currentTab, category, pullRequests)).Render(r.Context(), w)
+	}, currentTab, show(component)).Render(r.Context(), w)
 }

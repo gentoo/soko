@@ -24,18 +24,14 @@ func (s stabilization) String() string {
 	return s.Category + "/" + s.Package + "-" + s.Version + " # " + s.Message
 }
 
-func StabilizationExport(w http.ResponseWriter, pageUrl string, gpackages []*models.Package) {
-	result := make([]stabilization, 0)
-	for _, gpackage := range gpackages {
-		for _, version := range gpackage.Versions {
-			for _, pkgcheck := range version.PkgCheckResults {
-				result = append(result, stabilization{
-					Category: pkgcheck.Category,
-					Package:  pkgcheck.Package,
-					Version:  pkgcheck.Version,
-					Message:  pkgcheck.Message,
-				})
-			}
+func StabilizationExport(w http.ResponseWriter, pageUrl string, results []*models.PkgCheckResult) {
+	result := make([]stabilization, len(results))
+	for i, pkgcheck := range results {
+		result[i] = stabilization{
+			Category: pkgcheck.Category,
+			Package:  pkgcheck.Package,
+			Version:  pkgcheck.Version,
+			Message:  pkgcheck.Message,
 		}
 	}
 
