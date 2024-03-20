@@ -6,11 +6,13 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"soko/pkg/config"
-	"soko/pkg/models"
+	"time"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
+
+	"soko/pkg/config"
+	"soko/pkg/models"
 )
 
 // DBCon is the connection handle
@@ -77,7 +79,7 @@ func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Cont
 func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
 	query, err := q.FormattedQuery()
 	if err == nil {
-		slog.Debug(string(query))
+		slog.Debug(string(query), slog.Duration("duration", time.Since(q.StartTime)))
 	}
 	return nil
 }
