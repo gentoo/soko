@@ -112,10 +112,28 @@ templ show(packagesCount int, maintainer *models.Maintainer, currentSubTab strin
 	</div>
 }
 
+script filter() {
+	const value = document.querySelector("#filter").value.toLowerCase();
+	const groups = document.querySelectorAll("#pkglist .list-group");
+	for (let i = 0; i < groups.length; i++) {
+		let visible = false;
+		const rows = groups[i].querySelectorAll(".list-group-item");
+		for (let j = 0; j < rows.length; j++) {
+			const flag = rows[j].children[0].children[0].innerText.toLowerCase().includes(value);
+			rows[j].style.display = flag ? "" : "none";
+			visible ||= flag;
+		}
+		groups[i].style.display = visible ? "" : "none";
+	}
+}
+
 templ showPackages(packages []*models.Package, maintainer *models.Maintainer) {
 	<div class="row">
-		<div class="col-md-9">
+		<div class="col-md-9" id="pkglist">
 			if len(packages) > 0 {
+				<p>
+					<input onKeyup={ filter() } id="filter" type="text" class="form-control form-control-xl" placeholder={ "Search packages maintained by " + maintainer.Email }/>
+				</p>
 				<ul class="list-group">
 					<h3 id={ packages[0].Category }>{ packages[0].Category }</h3>
 					for i, pkg := range packages {
@@ -136,6 +154,7 @@ templ showPackages(packages []*models.Package, maintainer *models.Maintainer) {
 						</li>
 					}
 				</ul>
+				@filter()
 			} else {
 				<div class="row">
 					<div class="col-md-8"></div>
