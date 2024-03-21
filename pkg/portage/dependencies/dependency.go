@@ -29,7 +29,7 @@ func FullPackageDependenciesUpdate() {
 
 	slog.Info("collected dependencies", slog.Int("count", dependencyCounter))
 
-	database.TruncateTable[models.ReverseDependency]("id")
+	database.TruncateTable((*models.ReverseDependency)(nil))
 	// because we removed all previous rows in table, we aren't concerned about
 	// duplicates, so we can use bulk insert
 	res, err := database.DBCon.Model(&Dependencies).Insert()

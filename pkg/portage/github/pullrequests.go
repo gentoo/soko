@@ -108,8 +108,8 @@ func FullUpdatePullRequests() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	database.TruncateTable[models.GithubPullRequest]("id")
-	database.TruncateTable[models.PackageToGithubPullRequest]("id")
+	database.TruncateTable((*models.GithubPullRequest)(nil))
+	database.TruncateTable((*models.PackageToGithubPullRequest)(nil))
 
 	// year of the git migration
 	updatePullRequestsAfter(true, "2015-01-01", "")

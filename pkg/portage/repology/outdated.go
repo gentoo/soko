@@ -43,7 +43,7 @@ func UpdateOutdated() {
 
 	// Update the database
 	if len(outdated.outdatedVersions) > 0 {
-		database.TruncateTable[models.OutdatedPackages]("atom")
+		database.TruncateTable((*models.OutdatedPackages)(nil))
 
 		res, err := database.DBCon.Model(&outdated.outdatedVersions).Insert()
 		if err != nil {

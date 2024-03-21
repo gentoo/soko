@@ -56,7 +56,7 @@ func UpdatePkgCheckResults() {
 	}
 
 	// clean up the database
-	database.TruncateTable[models.PkgCheckResult]("id")
+	database.TruncateTable((*models.PkgCheckResult)(nil))
 
 	// update the database with the new results
 	rows := make([]*models.PkgCheckResult, 0, len(collected))

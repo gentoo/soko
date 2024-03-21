@@ -133,9 +133,9 @@ func importAllOpenBugs() {
 		return
 	}
 
-	database.TruncateTable[models.Bug]("id")
-	database.TruncateTable[models.PackageToBug]("id")
-	database.TruncateTable[models.VersionToBug]("id")
+	database.TruncateTable((*models.Bug)(nil))
+	database.TruncateTable((*models.PackageToBug)(nil))
+	database.TruncateTable((*models.VersionToBug)(nil))
 
 	processApiBugs(bugs)
 }

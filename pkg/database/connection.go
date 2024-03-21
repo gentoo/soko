@@ -105,8 +105,8 @@ func Connect() {
 	}
 }
 
-func TruncateTable[K any](_ string) {
-	query := DBCon.Model((*K)(nil))
+func TruncateTable(model any) {
+	query := DBCon.Model(model)
 	tableName := string(query.TableModel().Table().TypeName)
 	_, err := query.Exec("TRUNCATE TABLE ?TableName")
 	if err != nil {

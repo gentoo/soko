@@ -117,7 +117,7 @@ func FullImport() {
 	// TODO in future we want an incremental update here
 	// but for now we delete everything and insert it again
 	// this is currently acceptable as it takes less than 2 seconds
-	database.TruncateTable[models.Maintainer]("email")
+	database.TruncateTable((*models.Maintainer)(nil))
 
 	rows := make([]*models.Maintainer, 0, len(maintainers))
 	for _, row := range maintainers {

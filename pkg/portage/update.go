@@ -127,7 +127,7 @@ func FullUpdate() {
 	slog.Info("Update all present files")
 
 	// update useflags
-	database.TruncateTable[models.Useflag]("id")
+	database.TruncateTable((*models.Useflag)(nil))
 	repository.UpdateUse("profiles/use.desc")
 	repository.UpdateUse("profiles/use.local.desc")
 	if entries, err := os.ReadDir(config.PortDir() + "/profiles/desc"); err != nil {

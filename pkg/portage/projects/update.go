@@ -40,8 +40,8 @@ func UpdateProjects() {
 	}
 
 	// clean up the database
-	database.TruncateTable[models.Project]("email")
-	database.TruncateTable[models.MaintainerToProject]("id")
+	database.TruncateTable((*models.Project)(nil))
+	database.TruncateTable((*models.MaintainerToProject)(nil))
 
 	// insert new project list
 	_, err = database.DBCon.Model(&projectList).Insert()

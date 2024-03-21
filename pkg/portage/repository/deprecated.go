@@ -52,7 +52,7 @@ func UpdatePackagesDeprecated(path string) {
 
 		// delete all existing entries before parsing the file again
 		// in future we might implement a incremental version here
-		database.TruncateTable[models.DeprecatedPackage]("versions")
+		database.TruncateTable((*models.DeprecatedPackage)(nil))
 
 		for _, entry := range getDeprecatedPackages(changedFile) {
 			parsePackagesDeprecated(entry)
@@ -124,7 +124,7 @@ func getDeprecatedPackages(path string) []string {
 // Calculate all versions that are currently
 // deprecated and update the DeprecatedToVersion Table
 func CalculateDeprecatedToVersion() {
-	database.TruncateTable[models.DeprecatedToVersion]("id")
+	database.TruncateTable((*models.DeprecatedToVersion)(nil))
 
 	var deprecates []*models.DeprecatedPackage
 	err := database.DBCon.Model(&deprecates).Select()

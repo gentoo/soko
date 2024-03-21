@@ -56,7 +56,7 @@ func UpdateMask(path string) {
 
 		// delete all existing masks before parsing the file again
 		// in future we might implement a incremental version here
-		database.TruncateTable[models.Mask]("versions")
+		database.TruncateTable((*models.Mask)(nil))
 
 		for _, packageMask := range getMasks(changedFile) {
 			parsePackageMask(packageMask)
@@ -170,7 +170,7 @@ func getMasks(path string) []string {
 // masked and update the MaskToVersion Table
 func CalculateMaskedVersions() {
 	// clean up all masked versions before recalculating them
-	database.TruncateTable[models.MaskToVersion]("id")
+	database.TruncateTable((*models.MaskToVersion)(nil))
 
 	var masks []*models.Mask
 	err := database.DBCon.Model(&masks).Select()
