@@ -88,18 +88,18 @@ func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
 // and turn on logging if desired
 func Connect() {
 	DBCon = pg.Connect(&pg.Options{
-		User:     config.PostgresUser(),
-		Password: config.PostgresPass(),
-		Database: config.PostgresDb(),
-		Addr:     config.PostgresHost() + ":" + config.PostgresPort(),
+		User:        config.PostgresUser(),
+		Password:    config.PostgresPass(),
+		Database:    config.PostgresDb(),
+		Addr:        config.PostgresHost() + ":" + config.PostgresPort(),
+		DialTimeout: 10 * time.Second,
 	})
 
 	if !config.Quiet() {
 		DBCon.AddQueryHook(dbLogger{})
 	}
 
-	err := CreateSchema()
-	if err != nil {
+	if err := CreateSchema(); err != nil {
 		slog.Error("Failed creating database schema", slog.Any("err", err))
 		os.Exit(1)
 	}

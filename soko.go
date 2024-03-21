@@ -27,8 +27,6 @@ import (
 func main() {
 	initLoggers()
 
-	waitForPostgres()
-
 	serve := flag.Bool("serve", false, "Start serving the application")
 	selfchecks := flag.Bool("enable-selfchecks", false, "Perform selfchecks periodicals to monitor the consistency of the data")
 	update := flag.Bool("update", false, "Perform an incremental update of the package data")
@@ -132,12 +130,6 @@ func initLoggers() {
 	}
 	slog.SetLogLoggerLevel(slog.LevelInfo)
 	slog.SetDefault(slog.New(handler))
-}
-
-// TODO this has to be solved differently
-// wait for postgres to come up
-func waitForPostgres() {
-	time.Sleep(5 * time.Second)
 }
 
 func runSelfChecks() {
