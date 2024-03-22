@@ -104,7 +104,7 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	renderShowPage(w, r, "Pull requests", &category,
-		components.PullRequests(category.PackagesInformation.PullRequests > 0, pullRequests))
+		components.PullRequests(pullRequests))
 }
 
 func ShowStabilizations(w http.ResponseWriter, r *http.Request) {

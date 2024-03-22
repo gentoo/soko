@@ -144,7 +144,7 @@ templ show(pkg *models.Package, currentSubTab string, userPreferences models.Use
 				case "QA report":
 					@qaReport(pkg)
 				case "Pull requests":
-					@components.PullRequests(len(pkg.PullRequests) > 0, pkg.PullRequests)
+					@components.PullRequests(pkg.PullRequests)
 				case "Bugs":
 					@components.Bugs(collectAllBugs(pkg))
 				case "Security":

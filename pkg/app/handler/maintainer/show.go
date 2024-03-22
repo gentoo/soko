@@ -172,7 +172,7 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, "maintainers",
-		show(packagesCount, &maintainer, "Pull requests", components.PullRequests(len(pullRequests) > 0, pullRequests)),
+		show(packagesCount, &maintainer, "Pull requests", components.PullRequests(pullRequests)),
 	).Render(r.Context(), w)
 }
 

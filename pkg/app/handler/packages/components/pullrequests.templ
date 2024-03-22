@@ -12,10 +12,10 @@ func isDarkBadgeColor(color string) bool {
 	return color == "5319e7" || color == "0052cc" || color == "b60205"
 }
 
-templ PullRequests(hasPullRequests bool, pullRequests []*models.GithubPullRequest) {
+templ PullRequests(pullRequests []*models.GithubPullRequest) {
 	<div class="row">
 		<div class="col-md-9">
-			if hasPullRequests {
+			if len(pullRequests) > 0 {
 				<h3 class="mb-4">Pull Requests</h3>
 				<ul class="list-group">
 					for _, pr := range pullRequests {
