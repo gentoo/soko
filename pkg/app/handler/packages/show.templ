@@ -122,14 +122,14 @@ func collectAllBugs(pkg *models.Package) (atom string, generalCount, stabilizati
 	return
 }
 
-func collectSecurityBugs(pkg *models.Package) (string, bool, []*models.Bug) {
+func collectSecurityBugs(pkg *models.Package) (string, []*models.Bug) {
 	bugs := make([]*models.Bug, 0, len(pkg.Bugs))
 	for _, bug := range pkg.Bugs {
 		if bug.Component == "Vulnerabilities" {
 			bugs = append(bugs, bug)
 		}
 	}
-	return pkg.Atom, len(bugs) > 0, bugs
+	return pkg.Atom, bugs
 }
 
 templ show(pkg *models.Package, currentSubTab string, userPreferences models.UserPreferences) {

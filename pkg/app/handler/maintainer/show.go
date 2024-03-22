@@ -193,7 +193,7 @@ func ShowStabilization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, "maintainers",
-		show(packagesCount, &maintainer, "Stabilization", components.Stabilizations(len(results) > 0, results)),
+		show(packagesCount, &maintainer, "Stabilization", components.Stabilizations(results)),
 	).Render(r.Context(), w)
 }
 
@@ -222,7 +222,7 @@ func ShowBugs(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	generalCount, stabilizationCount, keywordingCount := countBugsCategories(bugs)
+	generalCount, stabilizationCount, keywordingCount := utils.CountBugsCategories(bugs)
 	layout.Layout(maintainer.Name, "maintainers",
 		show(packagesCount, &maintainer, "Bugs", components.Bugs("", generalCount, stabilizationCount, keywordingCount, bugs)),
 	).Render(r.Context(), w)
@@ -250,7 +250,7 @@ func ShowSecurity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, "maintainers",
-		show(packagesCount, &maintainer, "Security", components.SecurityBugs("", len(bugs) > 0, bugs)),
+		show(packagesCount, &maintainer, "Security", components.SecurityBugs("", bugs)),
 	).Render(r.Context(), w)
 }
 

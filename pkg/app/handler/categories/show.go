@@ -75,7 +75,7 @@ func ShowOutdated(w http.ResponseWriter, r *http.Request) {
 		Limit(1)
 	err = database.DBCon.Model((*models.OutdatedPackages)(nil)).
 		Column("atom").ColumnExpr("(?) AS description", descriptionQuery).
-		Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+		Where("atom LIKE ?", categoryName+"/%").
 		Order("atom").
 		Select(&outdated)
 	if err != nil {
@@ -107,6 +107,59 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 		components.PullRequests(pullRequests))
 }
 
+func ShowBugs(w http.ResponseWriter, r *http.Request) {
+	categoryName, category, err := common(w, r)
+	if err != nil {
+		return
+	}
+	var bugs []*models.Bug
+	err = database.DBCon.Model(&bugs).
+		DistinctOn("id::INT").
+		Column("id", "summary", "component", "assignee").
+		OrderExpr("id::INT").
+		Where("id IN (?)",
+			database.DBCon.Model((*models.PackageToBug)(nil)).
+				Column("bug_id").
+				Where("package_atom LIKE ?", categoryName+"/%")).
+		WhereOr("id IN (?)",
+			database.DBCon.Model((*models.VersionToBug)(nil)).
+				Column("bug_id").
+				Join("JOIN versions").JoinOn("version_id = versions.id").
+				Where("versions.atom LIKE ?", categoryName+"/%")).
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	generalCount, stabilizationCount, keywordingCount := utils.CountBugsCategories(bugs)
+	renderShowPage(w, r, "Bugs", &category,
+		components.Bugs("", generalCount, stabilizationCount, keywordingCount, bugs))
+}
+
+func ShowSecurity(w http.ResponseWriter, r *http.Request) {
+	categoryName, category, err := common(w, r)
+	if err != nil {
+		return
+	}
+	var bugs []*models.Bug
+	err = database.DBCon.Model(&bugs).
+		DistinctOn("id::INT").
+		Column("id", "summary", "component", "assignee").
+		OrderExpr("id::INT").
+		Where("component = ?", "Vulnerabilities").
+		Where("id IN (?)",
+			database.DBCon.Model((*models.PackageToBug)(nil)).
+				Column("bug_id").
+				Where("package_atom LIKE ?", categoryName+"/%")).
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	renderShowPage(w, r, "Security", &category,
+		components.SecurityBugs("", bugs))
+}
+
 func ShowStabilizations(w http.ResponseWriter, r *http.Request) {
 	categoryName, category, err := common(w, r)
 	if err != nil {
@@ -117,7 +170,7 @@ func ShowStabilizations(w http.ResponseWriter, r *http.Request) {
 	err = database.DBCon.Model(&results).
 		Column("atom", "cpv", "message").
 		Where("class = ?", "StableRequest").
-		Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+		Where("atom LIKE ?", categoryName+"/%").
 		OrderExpr("cpv").
 		Select()
 	if err != nil {
@@ -125,7 +178,7 @@ func ShowStabilizations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	renderShowPage(w, r, "Stabilization", &category,
-		components.Stabilizations(category.PackagesInformation.StableRequests > 0, results))
+		components.Stabilizations(results))
 }
 
 func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +187,7 @@ func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
 	err := database.DBCon.Model(&results).
 		Column("category", "package", "version", "message").
 		Where("class = ?", "StableRequest").
-		Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+		Where("atom LIKE ?", categoryName+"/%").
 		OrderExpr("cpv").
 		Select()
 	if err != nil {

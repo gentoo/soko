@@ -1,10 +1,10 @@
-package maintainer
+package utils
 
 import (
 	"soko/pkg/models"
 )
 
-func countBugsCategories(bugs []*models.Bug) (generalCount, stabilizationCount, keywordingCount int) {
+func CountBugsCategories(bugs []*models.Bug) (generalCount, stabilizationCount, keywordingCount int) {
 	for _, bug := range bugs {
 		switch bug.Component {
 		case "Current packages":

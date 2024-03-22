@@ -11,7 +11,7 @@ func OutdatedFeed(w http.ResponseWriter, r *http.Request) {
 	categoryName := r.PathValue("category")
 	var outdated []models.OutdatedPackages
 	err := database.DBCon.Model(&outdated).
-		Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+		Where("atom LIKE ?", categoryName+"/%").
 		Order("atom").
 		Select()
 	if err != nil {
@@ -27,7 +27,7 @@ func StabilizationFeed(w http.ResponseWriter, r *http.Request) {
 	err := database.DBCon.Model(&results).
 		Column("atom", "cpv", "message").
 		Where("class = ?", "StableRequest").
-		Where("SPLIT_PART(atom, '/', 1) = ?", categoryName).
+		Where("atom LIKE ?", categoryName+"/%").
 		OrderExpr("cpv").
 		Select()
 	if err != nil {

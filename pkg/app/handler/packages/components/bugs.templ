@@ -114,15 +114,15 @@ templ Bugs(atom string, generalCount, stabilizationCount, keywordingCount int, b
 
 func securityBugAtomLink(atom string) templ.SafeURL {
 	if atom == "" {
-		return templ.URL("https://bugs.gentoo.org/")
+		return templ.URL("https://bugs.gentoo.org/enter_bug.cgi?product=Gentoo Security&component=Vulnerabilities")
 	}
 	return templ.URL("https://bugs.gentoo.org/enter_bug.cgi?product=Gentoo Security&component=Vulnerabilities&short_desc=" + atom + ": <ADD SUMMARY HERE>")
 }
 
-templ SecurityBugs(atom string, hasSecurityBugs bool, bugs []*models.Bug) {
+templ SecurityBugs(atom string, bugs []*models.Bug) {
 	<div class="row">
 		<div class="col-md-9">
-			if hasSecurityBugs {
+			if len(bugs) > 0 {
 				@bugsList("Security Bug Reports", "Vulnerabilities", bugs, "mb-4", "security")
 			} else {
 				<div class="row pt-5">

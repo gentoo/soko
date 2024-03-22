@@ -2,7 +2,7 @@ package components
 
 import "soko/pkg/models"
 
-templ Stabilizations(hasStabilizations bool, results []*models.PkgCheckResult) {
+templ Stabilizations(results []*models.PkgCheckResult) {
 	<div class="row">
 		<div class="col-md-9">
 			<span class="d-flex justify-content-between">
@@ -22,7 +22,7 @@ templ Stabilizations(hasStabilizations bool, results []*models.PkgCheckResult) {
 					</span>
 				</span>
 			</span>
-			if hasStabilizations {
+			if len(results) > 0 {
 				<ul class="timeline">
 					for _, res := range results {
 						<li>

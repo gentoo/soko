@@ -96,5 +96,17 @@ func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, c
 			Icon:       "octicon octicon-git-pull-request opticon-resource-icon ml-1",
 			BadgeValue: strconv.Itoa(category.PackagesInformation.PullRequests),
 		},
+		{
+			Name:       "Bugs",
+			Link:       templ.URL("/categories/" + category.Name + "/bugs"),
+			Icon:       "fa fa-bug",
+			BadgeValue: strconv.Itoa(category.PackagesInformation.Bugs),
+		},
+		{
+			Name:       "Security",
+			Link:       templ.URL("/categories/" + category.Name + "/security"),
+			Icon:       "fa fa-shield",
+			BadgeValue: strconv.Itoa(category.PackagesInformation.SecurityBugs),
+		},
 	}, currentTab, show(component)).Render(r.Context(), w)
 }
