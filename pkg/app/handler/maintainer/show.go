@@ -263,7 +263,7 @@ func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
 
 	var results []*models.PkgCheckResult
 	err = database.DBCon.Model(&results).
-		Column("atom", "cpv", "message").
+		Column("category", "package", "version", "message").
 		Where("class = ?", "StableRequest").
 		Where("atom IN (?)", query).
 		OrderExpr("cpv").
