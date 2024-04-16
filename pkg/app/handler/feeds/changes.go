@@ -2,6 +2,7 @@ package feeds
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"soko/pkg/models"
 	"time"
@@ -29,7 +30,7 @@ func addFeedItems(f *feeds.Feed, versions []*models.Version) {
 		item := &feeds.Item{
 			Title:       cpv,
 			Link:        &feeds.Link{Href: "https://packages.gentoo.org/package/" + version.Atom},
-			Description: version.Description,
+			Description: html.EscapeString(version.Description),
 			Author:      &feeds.Author{Name: "unknown"},
 			Created:     time.Now(),
 		}

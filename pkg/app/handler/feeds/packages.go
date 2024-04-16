@@ -2,6 +2,7 @@ package feeds
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"soko/pkg/models"
 	"time"
@@ -28,7 +29,7 @@ func addPackageFeedItems(f *feeds.Feed, gpackages []models.Package) {
 		item := &feeds.Item{
 			Title:       gpackage.Atom,
 			Link:        &feeds.Link{Href: "https://packages.gentoo.org/package/" + gpackage.Atom},
-			Description: gpackage.Longdescription,
+			Description: html.EscapeString(gpackage.Longdescription),
 			Author:      &feeds.Author{Name: "unknown"},
 			Created:     time.Now(),
 		}

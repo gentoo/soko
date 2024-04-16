@@ -3,12 +3,12 @@ package utils
 import (
 	"encoding/json"
 	"encoding/xml"
+	"html"
 	"net/http"
 	"soko/pkg/models"
 	"strings"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/gorilla/feeds"
 )
 
@@ -77,7 +77,7 @@ func StabilizationFeed(w http.ResponseWriter, link, title string, results []*mod
 	for _, pkgcheck := range results {
 		feed.Add(&feeds.Item{
 			Title:       pkgcheck.CPV,
-			Description: templ.EscapeString(pkgcheck.Message),
+			Description: html.EscapeString(pkgcheck.Message),
 			Link:        &feeds.Link{Href: "https://packages.gentoo.org/packages/" + pkgcheck.Atom, Type: "text/html", Rel: "alternate"},
 			Id:          pkgcheck.CPV,
 		})

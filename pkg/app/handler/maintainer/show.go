@@ -2,6 +2,7 @@ package maintainer
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 	"soko/pkg/app/handler/packages/components"
 	"soko/pkg/app/layout"
@@ -103,7 +104,7 @@ func ShowChangelogFeed(w http.ResponseWriter, r *http.Request) {
 
 	for _, commit := range commits {
 		feed.Add(&feeds.Item{
-			Title:   commit.Message,
+			Title:   html.EscapeString(commit.Message),
 			Updated: commit.CommitterDate,
 			Created: commit.AuthorDate,
 			Author:  &feeds.Author{Name: commit.CommitterName, Email: commit.CommitterEmail},
