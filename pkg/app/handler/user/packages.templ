@@ -51,10 +51,6 @@ templ packages(preferences models.PackagesPreferences) {
 					</div>
 				</div>
 			</div>
-			<h4 class="mt-4 mb-1">Keywords</h4>
-			<div class="row pl-3">
-				@archesTwoColumns(preferences.Overview.Keywords)
-			</div>
 			<h4 class="mt-4 mb-1">EAPI version</h4>
 			<div class="card">
 				<div class="card-body">
@@ -101,10 +97,6 @@ func EditPackagesPreferences(w http.ResponseWriter, r *http.Request) {
 	if overviewLayout == "minimal" || overviewLayout == "full" {
 		userPreferences.Packages.Overview.Layout = overviewLayout
 	}
-
-	// Overview: Keywords
-	overviewKeywords := r.Form["overview-keywords"]
-	userPreferences.Packages.Overview.Keywords = overviewKeywords
 
 	// EAPI
 	showEAPI := r.Form.Get("overview-eapi")

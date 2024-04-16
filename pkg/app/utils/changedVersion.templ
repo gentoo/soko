@@ -5,7 +5,7 @@ import "soko/pkg/models"
 import "strings"
 import "time"
 
-templ ChangedVersionsTable(versions []*models.Version, userPreferences models.ArchesPreferences) {
+templ ChangedVersionsTable(versions []*models.Version) {
 	for _, version := range versions {
 		<li class="list-group-item kk-package-detailed">
 			<div class="row">
@@ -106,7 +106,7 @@ templ ChangedVersionsTable(versions []*models.Version, userPreferences models.Ar
 							}
 						</p>
 						<p>
-							for _, arch := range userPreferences.Visible {
+							for _, arch := range models.ArchesToShow {
 								if slices.Contains(strings.Fields(version.Keywords), arch) {
 									<span style="margin-right: 4px;" class="label kk-keyword-stable" title={ version.Version + " is stable on " + arch }>
 										{ arch }

@@ -6,7 +6,7 @@ import "net/http"
 import "soko/pkg/app/handler/categories"
 import "soko/pkg/app/handler/feeds"
 
-templ changedVersionsPage(pageType string, versions []*models.Version, userPreferences models.ArchesPreferences) {
+templ changedVersionsPage(pageType string, versions []*models.Version) {
 	<div class="container mb-5">
 		<div class="row">
 			<div class="col-12">
@@ -21,7 +21,7 @@ templ changedVersionsPage(pageType string, versions []*models.Version, userPrefe
 					</a>
 				</h3>
 				<li class="list-group rounded">
-					@utils.ChangedVersionsTable(versions, userPreferences)
+					@utils.ChangedVersionsTable(versions)
 				</li>
 			</div>
 		</div>
@@ -31,7 +31,7 @@ templ changedVersionsPage(pageType string, versions []*models.Version, userPrefe
 // Added renders a template containing a list of 50 recently added versions.
 func Added(w http.ResponseWriter, r *http.Request) {
 	addedVersions := GetAddedVersions(50)
-	categories.RenderPage(w, r, "Added Packages", "Added", changedVersionsPage("added", addedVersions, utils.GetUserPreferences(r).Arches))
+	categories.RenderPage(w, r, "Added Packages", "Added", changedVersionsPage("added", addedVersions))
 }
 
 func AddedFeed(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +43,7 @@ func AddedFeed(w http.ResponseWriter, r *http.Request) {
 // a list of 50 recently updated versions
 func Updated(w http.ResponseWriter, r *http.Request) {
 	updatedVersions := GetUpdatedVersions(50)
-	categories.RenderPage(w, r, "Updated Packages", "Updated", changedVersionsPage("updated", updatedVersions, utils.GetUserPreferences(r).Arches))
+	categories.RenderPage(w, r, "Updated Packages", "Updated", changedVersionsPage("updated", updatedVersions))
 }
 
 func UpdatedFeed(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +55,7 @@ func UpdatedFeed(w http.ResponseWriter, r *http.Request) {
 // a list of 50 recently stabilized versions
 func Stabilized(w http.ResponseWriter, r *http.Request) {
 	stabilizedVersions := GetStabilizedVersions(50)
-	categories.RenderPage(w, r, "Stabilized Packages", "Newly Stable", changedVersionsPage("stabilized", stabilizedVersions, utils.GetUserPreferences(r).Arches))
+	categories.RenderPage(w, r, "Stabilized Packages", "Newly Stable", changedVersionsPage("stabilized", stabilizedVersions))
 }
 
 func StabilizedFeed(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +67,7 @@ func StabilizedFeed(w http.ResponseWriter, r *http.Request) {
 // a list of 50 recently keyworded versions
 func Keyworded(w http.ResponseWriter, r *http.Request) {
 	keywordedVersions := GetKeywordedVersions(50)
-	categories.RenderPage(w, r, "Keyworded Packages", "Keyworded", changedVersionsPage("keyworded", keywordedVersions, utils.GetUserPreferences(r).Arches))
+	categories.RenderPage(w, r, "Keyworded Packages", "Keyworded", changedVersionsPage("keyworded", keywordedVersions))
 }
 
 func KeywordedFeed(w http.ResponseWriter, r *http.Request) {

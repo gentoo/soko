@@ -43,7 +43,7 @@ templ overviewVersionRow(version *models.Version, userPreferences *models.UserPr
 				{ version.EAPI }
 			</td>
 		}
-		for _, arch := range userPreferences.Packages.Overview.Keywords {
+		for _, arch := range models.ArchesToShow {
 			if keywords := strings.Fields(version.Keywords); slices.Contains(keywords, "~"+arch) {
 				if len(version.Masks) > 0 {
 					<td class="kk-keyword kk-keyword-masked" title={ version.Version + " is masked (testing) on " + arch }>
@@ -114,7 +114,7 @@ templ overviewVersions(pkg *models.Package, userPreferences *models.UserPreferen
 						if userPreferences.Packages.Overview.EAPI == "column" {
 							<th class="kk-keyword-header kk-keyword border-left-0 border-top-0">EAPI</th>
 						}
-						for _, arch := range userPreferences.Packages.Overview.Keywords {
+						for _, arch := range models.ArchesToShow {
 							<th class="kk-keyword-header kk-keyword border-left-0 border-top-0">{ arch }</th>
 						}
 					</tr>

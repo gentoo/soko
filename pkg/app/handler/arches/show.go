@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"soko/pkg/app/handler/feeds"
 	"soko/pkg/app/layout"
-	"soko/pkg/app/utils"
 	"strings"
 )
 
@@ -16,7 +15,7 @@ func ShowStable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout("Architectures", "arches", changedVersions(
-		arch, "Newly Stable", "stable", stabilizedVersions, utils.GetUserPreferences(r).Arches,
+		arch, "Newly Stable", "stable", stabilizedVersions,
 	)).Render(r.Context(), w)
 }
 
@@ -40,7 +39,7 @@ func ShowKeyworded(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout("Architectures", "arches", changedVersions(
-		arch, "Keyworded", "keyworded", keywordedVersions, utils.GetUserPreferences(r).Arches,
+		arch, "Keyworded", "keyworded", keywordedVersions,
 	)).Render(r.Context(), w)
 }
 

@@ -86,7 +86,7 @@ templ page(packageCount int, addedPackages []packageInfo, updatedVersions []*mod
 					<a class="text-dark" href="/packages/updated">Updated Packages</a>
 				</h3>
 				<ul class="list-group">
-					@utils.ChangedVersionsTable(updatedVersions, userPreferences.Arches)
+					@utils.ChangedVersionsTable(updatedVersions)
 				</ul>
 			</div>
 		</div>

@@ -54,7 +54,7 @@ func Serve() {
 	setRoute("GET /useflags", useflags.Default)
 	setRoute("GET /useflags/{useflag}", useflags.Show)
 
-	setRoute("GET /arches", arches.Index)
+	redirect("GET /arches", "/arches/amd64/keyworded")
 	setRoute("GET /arches/{arch}/stable", arches.ShowStable)
 	setRoute("GET /arches/{arch}/stable.atom", arches.ShowStableFeed)
 	setRoute("GET /arches/{arch}/keyworded", arches.ShowKeyworded)
@@ -115,9 +115,6 @@ func Serve() {
 
 	setRoute("/user/preferences/general/layout", user.General)
 	setRoute("/user/preferences/general/reset", user.ResetGeneral)
-
-	setRoute("/user/preferences/arches/visible", user.Arches)
-	setRoute("/user/preferences/arches/reset", user.ResetArches)
 
 	setRoute("/user/preferences/packages/edit", user.EditPackagesPreferences)
 	setRoute("/user/preferences/packages/reset", user.ResetPackages)
