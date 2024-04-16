@@ -1,85 +1,49 @@
 package arches
 
+import "net/http"
+import "soko/pkg/app/layout"
 import "soko/pkg/app/utils"
 import "soko/pkg/models"
 
-func activeClass(flag bool) string {
-	if flag {
-		return "nav-link active"
-	}
-	return "nav-link"
-}
-
-templ archesHeader(currentArch string) {
-	<div class="kk-header-container">
-		<div class="container">
-			<div class="row">
-				<div class="col-12">
-					<div class="row mt-3">
-						<div class="col-md-5 pt-2">
-							<h1 class="stick-top kk-package-title" id="package-title">
-								<div>
-									<div class="kk-package-name" style="margin-left: 0px!important;">
-										<span class="fa fa-fw fa-server"></span>
-										<span class="ml-2">Architectures</span>
-									</div>
-								</div>
-							</h1>
-						</div>
-						<div class="col-md-7"></div>
-						<div class="col-md-12 pt-4 mt-1">
-							<nav class="nav kk-package-nav">
-								for _, arch := range models.ArchesToShow {
-									<a
-										class={ activeClass(arch == currentArch) }
-										href={ templ.URL("/arches/" + arch + "/keyworded") }
-									>
-										{ arch }
-									</a>
-								}
-							</nav>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-}
-
-templ changedVersions(
-	currentArch string,
-	name string,
-	feedName string,
-	versions []*models.Version,
-) {
-	@archesHeader(currentArch)
-	<div class="tab-content" id="myTabContent">
-		<div class="container mb-5">
-			<div class="row">
-				<div class="col-11">
-					if name == "Keyworded" {
-						<h3>
-							<a class="text-dark"><i class="fa fa-circle-o" aria-hidden="true"></i> Keyworded Packages</a>
-							<a href={ templ.URL("/arches/" + currentArch + "/stable") } class="ml-3 text-muted"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Newly Stable Packages</a>
-						</h3>
-					} else {
-						<h3>
-							<a href={ templ.URL("/arches/" + currentArch + "/keyworded") } class="text-muted"><i class="fa fa-circle-o" aria-hidden="true"></i> Keyworded Packages</a>
-							<a class="ml-3 text-dark"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Newly Stable Packages</a>
-						</h3>
-					}
-				</div>
-				<div class="col-1 text-right">
+templ changedVersions(currentArch string, feedName string, versions []*models.Version) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-11">
+				if feedName == "keyworded" {
 					<h3>
-						<a title="Atom feed" href={ templ.URL("/arches/" + currentArch + "/" + feedName + ".atom") } class="kk-feed-icon"><span class="fa fa-fw fa-rss-square"></span></a>
+						<a class="text-dark"><i class="fa fa-circle-o" aria-hidden="true"></i> Keyworded Packages</a>
+						<a href={ templ.URL("/arches/" + currentArch + "/stable") } class="ml-3 text-muted"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Newly Stable Packages</a>
 					</h3>
-				</div>
-				<div class="col-12">
-					<li class="list-group">
-						@utils.ChangedVersionsTable(versions)
-					</li>
-				</div>
+				} else {
+					<h3>
+						<a href={ templ.URL("/arches/" + currentArch + "/keyworded") } class="text-muted"><i class="fa fa-circle-o" aria-hidden="true"></i> Keyworded Packages</a>
+						<a class="ml-3 text-dark"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Newly Stable Packages</a>
+					</h3>
+				}
+			</div>
+			<div class="col-1 text-right">
+				<h3>
+					<a title="Atom feed" href={ templ.URL("/arches/" + currentArch + "/" + feedName + ".atom") } class="kk-feed-icon"><span class="fa fa-fw fa-rss-square"></span></a>
+				</h3>
+			</div>
+			<div class="col-12">
+				<li class="list-group">
+					@utils.ChangedVersionsTable(versions)
+				</li>
 			</div>
 		</div>
 	</div>
+}
+
+var tabs []layout.SubTab
+
+func init() {
+	tabs = make([]layout.SubTab, len(models.AllArches))
+	for i, arch := range models.AllArches {
+		tabs[i] = layout.SubTab{Name: arch, Link: templ.URL("/arches/" + arch + "/keyworded")}
+	}
+}
+
+func renderPage(w http.ResponseWriter, r *http.Request, arch string, content templ.Component) {
+	layout.TabbedLayout("Architectures", "arches", "Architectures", "fa fa-fw fa-server", "", tabs, arch, content).Render(r.Context(), w)
 }

@@ -162,7 +162,10 @@ templ tabbedHeader(subTitle string, icon string, description string, tabs []SubT
 							<nav class="nav kk-package-nav">
 								for _, tab := range tabs {
 									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
-										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
+										if tab.Icon != "" {
+											<i class={ tab.Icon } aria-hidden="true"></i>
+										}
+										{ tab.Name }
 										if tab.BadgeValue != "" {
 											<span class="ml-1 badge badge-pill kk-misc-badge">{ tab.BadgeValue }</span>
 										}

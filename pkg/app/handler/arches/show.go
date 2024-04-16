@@ -3,7 +3,6 @@ package arches
 import (
 	"net/http"
 	"soko/pkg/app/handler/feeds"
-	"soko/pkg/app/layout"
 	"strings"
 )
 
@@ -14,9 +13,7 @@ func ShowStable(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	layout.Layout("Architectures", "arches", changedVersions(
-		arch, "Newly Stable", "stable", stabilizedVersions,
-	)).Render(r.Context(), w)
+	renderPage(w, r, arch, changedVersions(arch, "stable", stabilizedVersions))
 }
 
 func ShowStableFeed(w http.ResponseWriter, r *http.Request) {
@@ -38,9 +35,7 @@ func ShowKeyworded(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	layout.Layout("Architectures", "arches", changedVersions(
-		arch, "Keyworded", "keyworded", keywordedVersions,
-	)).Render(r.Context(), w)
+	renderPage(w, r, arch, changedVersions(arch, "keyworded", keywordedVersions))
 }
 
 func ShowKeywordedFeed(w http.ResponseWriter, r *http.Request) {
