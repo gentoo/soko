@@ -287,7 +287,7 @@ func dumpToDatabase() {
 		if err != nil {
 			slog.Error("Failed inserting Package", slog.Any("err", err))
 		}
-		clear(packages)
+		packages = packages[:0]
 	}
 
 	if len(packagesCommit) > 0 {
@@ -295,7 +295,7 @@ func dumpToDatabase() {
 		if err != nil {
 			slog.Error("Failed inserting CommitToPackage", slog.Any("err", err))
 		}
-		clear(packagesCommit)
+		packagesCommit = packagesCommit[:0]
 	}
 
 	if len(versionsCommits) > 0 {
@@ -303,7 +303,7 @@ func dumpToDatabase() {
 		if err != nil {
 			slog.Error("Failed inserting CommitToVersion", slog.Any("err", err))
 		}
-		clear(versionsCommits)
+		versionsCommits = versionsCommits[:0]
 	}
 
 	if len(commits) > 0 {
@@ -311,6 +311,6 @@ func dumpToDatabase() {
 		if err != nil {
 			slog.Error("Failed inserting Commit", slog.Any("err", err))
 		}
-		clear(commits)
+		commits = commits[:0]
 	}
 }
