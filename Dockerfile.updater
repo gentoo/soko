@@ -1,4 +1,4 @@
-FROM golang:1.22.0 AS builder
+FROM golang:1.22.2 AS builder
 RUN go install github.com/a-h/templ/cmd/templ@v0.2.663
 WORKDIR /go/src/soko
 COPY . /go/src/soko
