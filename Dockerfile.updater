@@ -5,22 +5,7 @@ COPY . /go/src/soko
 RUN templ generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
 
-FROM gentoo/stage3:latest as gentoobuilder
-# Need a portage tree to build, use last nights.
-COPY --from=gentoo/portage:latest /var/db/repos/gentoo /var/db/repos/gentoo
-# Sandbox doesn't work well in docker.
-ENV FEATURES="-userpriv -usersandbox -sandbox binpkg-ignore-signature"
-ENV USE="-bindist"
-ENV PORTAGE_BINHOST="https://gentoo.osuosl.org/releases/amd64/binpackages/17.1/x86-64/"
-RUN emerge -C openssh
-RUN emerge -v -g --quiet-build dev-vcs/git
-RUN echo 'FEATURES="-userpriv -usersandbox -sandbox binpkg-ignore-signature"' >> /etc/portage/make.conf
-RUN rm -rf /var/db/repos/gentoo
-
-# We can't start from scratch and copy / due to:
-# https://github.com/GoogleContainerTools/kaniko/issues/2033
-# FROM scratch
-# COPY --from=gentoobuilder / /
+FROM ghcr.io/pkgcore/pkgcheck:latest
 
 COPY --from=builder /go/src/soko/assets /go/src/soko/assets
 COPY --from=builder /go/src/soko/bin /go/src/soko/bin

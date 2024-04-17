@@ -27,15 +27,8 @@ update_repository(){
 
 update_md5cache(){
   mkdir -p /var/cache/pgo-egencache
-  cd /mnt/packages-tree/gentoo/ || exit 1
 
-  #echo 'FEATURES="-userpriv -usersandbox -sandbox"' >> /etc/portage/make.conf
-
-  egencache -j "${JOBS}" --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
-  location = /mnt/packages-tree/gentoo' --update
-
-  egencache -j "${JOBS}" --cache-dir /var/cache/pgo-egencache --repo gentoo --repositories-configuration '[gentoo]
-  location = /mnt/packages-tree/gentoo' --update-use-local-desc
+  pmaint regen --threads "${JOBS}" --use-local-desc --pkg-desc-index /mnt/packages-tree/gentoo/
 }
 
 fullupdate_database(){
