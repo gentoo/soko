@@ -6,7 +6,6 @@ type UserPreferences struct {
 	General     GeneralPreferences
 	Packages    PackagesPreferences
 	Maintainers MaintainersPreferences
-	Useflags    UseflagsPreferences
 }
 
 type GeneralPreferences struct {
@@ -27,10 +26,6 @@ type MaintainersPreferences struct {
 	ExcludedProjects       []string
 }
 
-type UseflagsPreferences struct {
-	Layout string
-}
-
 var ArchesToShow = [...]string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}
 var AllArches = [...]string{"alpha", "amd64", "arm", "arm64", "hppa", "ia64", "mips", "ppc", "ppc64", "riscv", "s390", "sparc", "x86"}
 
@@ -40,14 +35,11 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.Packages = PackagesPreferences{}
 	userPreferences.Packages.Overview = PackagesOverviewPreferences{}
 	userPreferences.Maintainers = MaintainersPreferences{}
-	userPreferences.Useflags = UseflagsPreferences{}
 
 	userPreferences.General.LandingPageLayout = "classic"
 
 	userPreferences.Packages.Overview.Layout = "minimal"
 	userPreferences.Packages.Overview.EAPI = "none"
-
-	userPreferences.Useflags.Layout = "bubble"
 
 	userPreferences.Maintainers.IncludeProjectPackages = false
 	userPreferences.Maintainers.ExcludedProjects = []string{}
@@ -68,9 +60,5 @@ func (u *UserPreferences) Sanitize() {
 
 	if !(u.Packages.Overview.EAPI == "none" || u.Packages.Overview.EAPI == "column" || u.Packages.Overview.EAPI == "inline") {
 		u.Packages.Overview.EAPI = defaultUserPreferences.Packages.Overview.EAPI
-	}
-
-	if !(u.Useflags.Layout == "bubble" || u.Useflags.Layout == "search") {
-		u.Useflags.Layout = defaultUserPreferences.Useflags.Layout
 	}
 }

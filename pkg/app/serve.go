@@ -44,6 +44,7 @@ func Serve() {
 	setRoute("GET /categories/{category}/stabilization.list", categories.ShowStabilizationFile)
 	setRoute("GET /categories/{category}/stabilization.xml", categories.ShowStabilizationFile)
 
+	redirect("GET /useflags", "/useflags/popular")
 	setRoute("GET /useflags/popular.json", useflags.Popular)
 	setRoute("GET /useflags/suggest.json", useflags.Suggest)
 	setRoute("GET /useflags/search", useflags.Search)
@@ -51,7 +52,6 @@ func Serve() {
 	setRoute("GET /useflags/local", useflags.Local)
 	setRoute("GET /useflags/expand", useflags.Expand)
 	setRoute("GET /useflags/popular", useflags.PopularPage)
-	setRoute("GET /useflags", useflags.Default)
 	setRoute("GET /useflags/{useflag}", useflags.Show)
 
 	redirect("GET /arches", "/arches/amd64/keyworded")
@@ -110,17 +110,12 @@ func Serve() {
 	setRoute("GET /user/preferences/general", user.Preferences("General"))
 	setRoute("GET /user/preferences/packages", user.Preferences("Packages"))
 	setRoute("GET /user/preferences/maintainers", user.Preferences("Maintainers"))
-	setRoute("GET /user/preferences/useflags", user.Preferences("USE flags"))
-	setRoute("GET /user/preferences/arches", user.Preferences("Architectures"))
 
 	setRoute("/user/preferences/general/layout", user.General)
 	setRoute("/user/preferences/general/reset", user.ResetGeneral)
 
 	setRoute("/user/preferences/packages/edit", user.EditPackagesPreferences)
 	setRoute("/user/preferences/packages/reset", user.ResetPackages)
-
-	setRoute("/user/preferences/useflags/edit", user.Useflags)
-	setRoute("/user/preferences/useflags/reset", user.ResetUseflags)
 
 	setRoute("/user/preferences/maintainers/edit", user.Maintainers)
 	setRoute("/user/preferences/maintainers/reset", user.ResetMaintainers)

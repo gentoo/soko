@@ -38,14 +38,7 @@ func GetUserPreferences(r *http.Request) models.UserPreferences {
 		}
 	}
 
-	cookie, err = r.Cookie("userpref_useflags")
-	if err == nil {
-		cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
-		if err == nil {
-			json.Unmarshal(cookieValue, &userPreferences.Useflags)
-		}
-	}
-
+	// old cookie: userpref_useflags
 	// old cookie: userpref_arches
 
 	userPreferences.Sanitize()

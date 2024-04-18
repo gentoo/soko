@@ -23,11 +23,6 @@ var viewTabs = []layout.SubTab{
 		Link: "/user/preferences/maintainers",
 		Icon: "fa fa-users mr-1",
 	},
-	{
-		Name: "USE flags",
-		Link: "/user/preferences/useflags",
-		Icon: "fa fa-sliders mr-1",
-	},
 }
 
 templ show(currentSubTab string, preferences models.UserPreferences) {
@@ -39,8 +34,6 @@ templ show(currentSubTab string, preferences models.UserPreferences) {
 				@packages(preferences.Packages)
 			case "Maintainers":
 				@maintainers(preferences.Maintainers)
-			case "USE flags":
-				@useflags(preferences.Useflags)
 		}
 	</div>
 	<script src="/assets/userpref.js"></script>
