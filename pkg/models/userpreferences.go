@@ -18,7 +18,6 @@ type PackagesPreferences struct {
 
 type PackagesOverviewPreferences struct {
 	Layout string
-	EAPI   string
 }
 
 type MaintainersPreferences struct {
@@ -39,7 +38,6 @@ func GetDefaultUserPreferences() UserPreferences {
 	userPreferences.General.LandingPageLayout = "classic"
 
 	userPreferences.Packages.Overview.Layout = "minimal"
-	userPreferences.Packages.Overview.EAPI = "none"
 
 	userPreferences.Maintainers.IncludeProjectPackages = false
 	userPreferences.Maintainers.ExcludedProjects = []string{}
@@ -56,9 +54,5 @@ func (u *UserPreferences) Sanitize() {
 
 	if !(u.Packages.Overview.Layout == "minimal" || u.Packages.Overview.Layout == "full") {
 		u.Packages.Overview.Layout = defaultUserPreferences.Packages.Overview.Layout
-	}
-
-	if !(u.Packages.Overview.EAPI == "none" || u.Packages.Overview.EAPI == "column" || u.Packages.Overview.EAPI == "inline") {
-		u.Packages.Overview.EAPI = defaultUserPreferences.Packages.Overview.EAPI
 	}
 }

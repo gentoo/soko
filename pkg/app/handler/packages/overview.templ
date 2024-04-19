@@ -14,9 +14,9 @@ func overviewSlotText(version *models.Version) string {
 	return version.Slot
 }
 
-templ overviewVersionRow(version *models.Version, userPreferences *models.UserPreferences) {
+templ overviewVersionRow(version *models.Version, keywords []string) {
 	<tr>
-		<td class="kk-version ">
+		<td class="kk-version">
 			<strong>
 				<a
 					class="kk-ebuild-link"
@@ -25,7 +25,7 @@ templ overviewVersionRow(version *models.Version, userPreferences *models.UserPr
 					{ version.Version }
 				</a>
 			</strong>
-			<span class="kk-slot"> : { overviewSlotText(version) }</span>
+			<span class="kk-slot" title={ "SLOT=\"" + overviewSlotText(version) + "\"" }> : { overviewSlotText(version) }</span>
 			if len(version.Restricts) > 0 {
 				<span
 					class="badge badge-danger kk-restrict-label"
@@ -34,17 +34,10 @@ templ overviewVersionRow(version *models.Version, userPreferences *models.UserPr
 					{ utils.FormatRestricts(version.Restricts) }
 				</span>
 			}
-			if userPreferences.Packages.Overview.EAPI == "inline" {
-				<span style="background-color: white;border:1px solid grey;color: grey;" class="badge badge-danger kk-restrict-label" title="The following features are restricted:">EAPI { version.EAPI }</span>
-			}
+			<span class="badge badge-light kk-eapi-label">EAPI { version.EAPI }</span>
 		</td>
-		if userPreferences.Packages.Overview.EAPI == "column" {
-			<td class="text-center">
-				{ version.EAPI }
-			</td>
-		}
 		for _, arch := range models.ArchesToShow {
-			if keywords := strings.Fields(version.Keywords); slices.Contains(keywords, "~"+arch) {
+			if slices.Contains(keywords, "~"+arch) {
 				if len(version.Masks) > 0 {
 					<td class="kk-keyword kk-keyword-masked" title={ version.Version + " is masked (testing) on " + arch }>
 						<svg height="16" class="octicon octicon-diff-modified" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-mask" xlink:href="#svg-ver-mask"></use></svg>
@@ -87,7 +80,7 @@ templ overviewVersionRow(version *models.Version, userPreferences *models.UserPr
 	</tr>
 }
 
-templ overviewVersions(pkg *models.Package, userPreferences *models.UserPreferences) {
+templ overviewVersions(pkg *models.Package) {
 	<h3 class="mb-2">Available Versions</h3>
 	<div class="card mb-4 rounded">
 		<svg style="display: none" version="1.1">
@@ -111,9 +104,6 @@ templ overviewVersions(pkg *models.Package, userPreferences *models.UserPreferen
 				<thead class="border-0">
 					<tr class="border-0">
 						<th class="kk-version border-left-0 border-top-0">Version</th>
-						if userPreferences.Packages.Overview.EAPI == "column" {
-							<th class="kk-keyword-header kk-keyword border-left-0 border-top-0">EAPI</th>
-						}
 						for _, arch := range models.ArchesToShow {
 							<th class="kk-keyword-header kk-keyword border-left-0 border-top-0">{ arch }</th>
 						}
@@ -121,7 +111,7 @@ templ overviewVersions(pkg *models.Package, userPreferences *models.UserPreferen
 				</thead>
 				<tbody>
 					for _, version := range pkg.Versions {
-						@overviewVersionRow(version, userPreferences)
+						@overviewVersionRow(version, strings.Fields(version.Keywords))
 					}
 				</tbody>
 			</table>
@@ -143,7 +133,7 @@ templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 					</div>
 				}
 			}
-			@overviewVersions(pkg, userPreferences)
+			@overviewVersions(pkg)
 			if mask := getMask(pkg.Versions); mask != nil {
 				<h3 class="pt-3 mb-2">Masks</h3>
 				<div class="card kk-mask mb-3">

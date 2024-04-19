@@ -51,26 +51,6 @@ templ packages(preferences models.PackagesPreferences) {
 					</div>
 				</div>
 			</div>
-			<h4 class="mt-4 mb-1">EAPI version</h4>
-			<div class="card">
-				<div class="card-body">
-					Show
-					<select class="form-control form-control-sm ml-2" style="max-width: 100px;display: inline;" name="overview-eapi" id="overview-eapi">
-						<option
-							value="none"
-							selected?={ preferences.Overview.EAPI == "none" }
-						>none</option>
-						<option
-							value="column"
-							selected?={ preferences.Overview.EAPI == "column" }
-						>in column</option>
-						<option
-							value="inline"
-							selected?={ preferences.Overview.EAPI == "inline" }
-						>inline</option>
-					</select>
-				</div>
-			</div>
 			<div class="row">
 				<div class="col-12 mt-4">
 					<button type="submit" class="float-right btn btn-sm btn-primary">Save</button>
@@ -96,12 +76,6 @@ func EditPackagesPreferences(w http.ResponseWriter, r *http.Request) {
 	overviewLayout := r.Form.Get("overview-layout")
 	if overviewLayout == "minimal" || overviewLayout == "full" {
 		userPreferences.Packages.Overview.Layout = overviewLayout
-	}
-
-	// EAPI
-	showEAPI := r.Form.Get("overview-eapi")
-	if showEAPI == "none" || showEAPI == "column" || showEAPI == "inline" {
-		userPreferences.Packages.Overview.EAPI = showEAPI
 	}
 
 	//

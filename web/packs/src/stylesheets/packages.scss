@@ -148,8 +148,7 @@
 }
 
 .kk-versions-table {
-  .kk-restrict-label,
-  .kk-properties-label {
+  .kk-restrict-label, .kk-eapi-label {
     float: right;
 
     @media screen and (max-width: 767px) {
