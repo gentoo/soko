@@ -14,6 +14,12 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
+type searchResults struct {
+	Name        string `json:"name"`
+	Category    string `json:"category"`
+	Description string `json:"description"`
+}
+
 // Search renders a template containing a list of search results
 // for a given query of packages
 func Search(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +35,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/maintainer/"+searchTerm, http.StatusMovedPermanently)
 			return
 		}
+	} else if searchTerm[len(searchTerm)-1] == '/' {
+		categoryName := searchTerm[:len(searchTerm)-1]
+		count, err := database.DBCon.Model((*models.Category)(nil)).Where("name = ?", categoryName).Count()
+		if err == nil && count > 0 {
+			http.Redirect(w, r, "/categories/"+categoryName, http.StatusMovedPermanently)
+			return
+		}
 	} else if strings.Contains(searchTerm, "/") {
 		var packages []models.Package
 		database.DBCon.Model(&packages).Where("atom = ?", searchTerm).Select()
@@ -38,9 +51,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var packages []models.Package
-	query := database.DBCon.Model(&packages).
-		Relation("Versions")
+	var results []searchResults
+	descriptionQuery := database.DBCon.Model((*models.Version)(nil)).
+		Column("description").
+		Where("atom = package.atom").
+		Limit(1)
+	query := database.DBCon.Model((*models.Package)(nil)).
+		Column("name", "category").
+		ColumnExpr("(?) AS description", descriptionQuery)
 
 	if strings.Contains(searchTerm, "*") {
 		// if the query contains wildcards
@@ -55,18 +73,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := query.OrderExpr("name <-> ?", searchTerm).
-		Select()
+		Select(&results)
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-	if len(packages) == 1 {
-		http.Redirect(w, r, "/packages/"+packages[0].Atom, http.StatusMovedPermanently)
+	if len(results) == 1 {
+		http.Redirect(w, r, "/packages/"+results[0].Category+"/"+results[0].Name, http.StatusMovedPermanently)
 		return
 	}
 
-	layout.Layout(searchTerm, "packages", search(searchTerm, packages)).Render(r.Context(), w)
+	layout.Layout(searchTerm, "packages", search(searchTerm, results)).Render(r.Context(), w)
 }
 
 // Search renders a template containing a list of search results

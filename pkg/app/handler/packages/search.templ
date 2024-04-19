@@ -1,9 +1,8 @@
 package packages
 
 import "strconv"
-import "soko/pkg/models"
 
-templ search(query string, packages []models.Package) {
+templ search(query string, packages []searchResults) {
 	<div class="container mb-5">
 		<div class="row">
 			<div class="col-12">
@@ -20,9 +19,9 @@ templ search(query string, packages []models.Package) {
 						</div>
 						<div class="list-group">
 							for _, pkg := range packages {
-								<a class="list-group-item list-group-item-action" href={ templ.URL("/packages/" + pkg.Atom) }>
+								<a class="list-group-item list-group-item-action" href={ templ.URL("/packages/" + pkg.Category+"/"+pkg.Name) }>
 									<h3 class="kk-search-result-header"><span class="text-muted">{ pkg.Category }/</span>{ pkg.Name }</h3>
-									{ pkg.Versions[0].Description }
+									{ pkg.Description }
 								</a>
 							}
 						</div>

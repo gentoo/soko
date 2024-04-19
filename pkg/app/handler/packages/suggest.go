@@ -17,11 +17,7 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	searchTerm := getParameterValue("q", r)
 
 	var suggestions struct {
-		Results []struct {
-			Name        string `json:"name"`
-			Category    string `json:"category"`
-			Description string `json:"description"`
-		} `json:"results"`
+		Results []searchResults `json:"results"`
 	}
 
 	descriptionQuery := database.DBCon.Model((*models.Version)(nil)).
