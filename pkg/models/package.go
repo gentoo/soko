@@ -15,6 +15,7 @@ type Package struct {
 	Longdescription     string
 	Maintainers         []*Maintainer
 	Upstream            Upstream
+	AnityaInfo          *AnityaInfo
 	Commits             []*Commit            `pg:"many2many:commit_to_packages,join_fk:commit_id"`
 	PrecedingCommits    int                  `pg:",use_zero"`
 	PkgCheckResults     []*PkgCheckResult    `pg:",fk:atom,rel:has-many"`
@@ -61,6 +62,10 @@ type Upstream struct {
 type RemoteId struct {
 	Type string
 	Id   string
+}
+
+type AnityaInfo struct {
+	Project string
 }
 
 type packageDepMap struct {

@@ -13,7 +13,9 @@ import (
 
 	"soko/pkg/app"
 	"soko/pkg/config"
+	"soko/pkg/database"
 	"soko/pkg/portage"
+	"soko/pkg/portage/anitya"
 	"soko/pkg/portage/bugs"
 	"soko/pkg/portage/dependencies"
 	"soko/pkg/portage/github"
@@ -58,8 +60,7 @@ func main() {
 		portage.FullUpdate()
 	}
 	if *updateOutdatedPackages {
-		slog.Info("Updating the repology data")
-		repology.UpdateOutdated()
+		updateOutdated()
 	}
 	if *updatePkgcheckResults {
 		slog.Info("Updating the qa-reports that is the pkgcheck data")
@@ -94,6 +95,18 @@ func main() {
 	if *help {
 		flag.PrintDefaults()
 	}
+}
+
+func updateOutdated() {
+	database.Connect()
+	defer database.DBCon.Close()
+
+	slog.Info("Updating the anitya data")
+	anitya.UpdateAnitya()
+	slog.Info("Updating the repology data")
+	repology.UpdateOutdated()
+
+	repology.UpdateCategoriesMetadata()
 }
 
 // initialize the loggers depending on whether

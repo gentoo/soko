@@ -32,9 +32,6 @@ var clientRateLimiter = rate.NewLimiter(rate.Every(2*time.Second), 1)
 
 // UpdateOutdated will update the database table that contains all outdated gentoo versions
 func UpdateOutdated() {
-	database.Connect()
-	defer database.DBCon.Close()
-
 	// Get all outdated Versions
 	outdated := newOutdatedCheck()
 	for letter := 'a'; letter <= 'z'; letter++ {
@@ -43,44 +40,13 @@ func UpdateOutdated() {
 
 	// Update the database
 	if len(outdated.outdatedVersions) > 0 {
-		database.TruncateTable((*models.OutdatedPackages)(nil))
+		_, _ = database.DBCon.Model((*models.OutdatedPackages)(nil)).Where("source = ?", models.OutdatedSourceRepology).Delete()
 
-		res, err := database.DBCon.Model(&outdated.outdatedVersions).Insert()
+		res, err := database.DBCon.Model(&outdated.outdatedVersions).OnConflict("(atom) DO NOTHING").Insert()
 		if err != nil {
 			slog.Error("Error while inserting outdated packages", slog.Any("err", err))
 		} else {
 			slog.Info("Inserted outdated packages", slog.Int("res", res.RowsAffected()))
-		}
-	}
-
-	// Updated the outdated status of categories
-	var categories []*models.CategoryPackagesInformation
-	err := database.DBCon.Model(&categories).Column("name").Select()
-	if err != nil {
-		slog.Error("Failed fetching categories packages information", slog.Any("err", err))
-		return
-	} else if len(categories) > 0 {
-		for _, category := range categories {
-			category.Outdated = outdated.outdatedCategories[category.Name]
-			delete(outdated.outdatedCategories, category.Name)
-		}
-		_, err = database.DBCon.Model(&categories).Set("outdated = ?outdated").Update()
-		if err != nil {
-			slog.Error("Failed updating categories packages information", slog.Any("err", err))
-		}
-		categories = make([]*models.CategoryPackagesInformation, 0, len(outdated.outdatedCategories))
-	}
-
-	for category, count := range outdated.outdatedCategories {
-		categories = append(categories, &models.CategoryPackagesInformation{
-			Name:     category,
-			Outdated: count,
-		})
-	}
-	if len(categories) > 0 {
-		_, err = database.DBCon.Model(&categories).Insert()
-		if err != nil {
-			slog.Error("Error while inserting categories packages information", slog.Any("err", err))
 		}
 	}
 
@@ -131,8 +97,7 @@ type outdatedCheck struct {
 	blockedCategories map[string]struct{}
 	atomRules         map[string]*atomOutdatedRules
 
-	outdatedCategories map[string]int
-	outdatedVersions   []*models.OutdatedPackages
+	outdatedVersions []*models.OutdatedPackages
 }
 
 func newOutdatedCheck() outdatedCheck {
@@ -140,8 +105,6 @@ func newOutdatedCheck() outdatedCheck {
 		blockedRepos:      readBlockList("ignored-repositories"),
 		blockedCategories: readBlockList("ignored-categories"),
 		atomRules:         buildAtomRules(),
-
-		outdatedCategories: make(map[string]int),
 	}
 }
 
@@ -206,12 +169,8 @@ func (o *outdatedCheck) getOutdatedStartingWith(letter rune) {
 					Atom:          atom,
 					GentooVersion: currentVersion[atom],
 					NewestVersion: newestVersion,
+					Source:        models.OutdatedSourceRepology,
 				})
-
-				category, _, found := strings.Cut(atom, "/")
-				if found {
-					o.outdatedCategories[category]++
-				}
 			}
 		}
 	}

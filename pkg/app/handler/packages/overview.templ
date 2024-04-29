@@ -129,7 +129,11 @@ templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 						<br/>
 						It seems that version { pkg.Outdated[0].NewestVersion } is available upstream, while the latest version in the Gentoo tree is { pkg.Outdated[0].GentooVersion }.
 						<br/>
-						<small><i>You think this warning is false? Read more about it <a href="https://archives.gentoo.org/gentoo-dev/message/b793f4da5a5b5e20a063ea431500a820">here</a>.</i></small>
+						if pkg.Outdated[0].Source == models.OutdatedSourceRepology {
+							<small><i>You think this warning is false? Read more about it <a href="https://archives.gentoo.org/gentoo-dev/message/b793f4da5a5b5e20a063ea431500a820">here</a>.</i></small>
+						} else {
+							<small>This information is provided from <a href="https://release-monitoring.org">Release-Monitoring</a>, so fix association issues there.</small>
+						}
 					</div>
 				}
 			}
@@ -415,6 +419,14 @@ templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 							Repology
 						</a>
 					</dd>
+					if pkg.AnityaInfo != nil {
+						<dd>
+							<span class="fa fa-fw fa-sort-numeric-desc"></span>
+							<a href={ templ.URL("https://release-monitoring.org/projects/search/?pattern=" + pkg.AnityaInfo.Project) } target="_blank">
+								Release-Monitoring
+							</a>
+						</dd>
+					}
 					<dd>
 						<span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span>
 						<a href={ templ.URL("https://github.com/gentoo/gentoo/pulls?q=is%3Apr+is%3Aopen+in%3Atitle+" + pkg.Atom) } target="_blank">
