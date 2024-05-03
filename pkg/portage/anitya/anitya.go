@@ -57,6 +57,12 @@ func UpdateAnitya() {
 
 nextPackage:
 	for _, p := range packages {
+		if p.Category == "dev-perl" || p.Category == "perl-core" {
+			// Skip dev-perl packages, since they have a special versioning scheme in Gentoo
+			// and Anitya does not know about it
+			// https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme
+			continue
+		}
 		anitya := anityaPackages[packagesMap[p.Atom]]
 		p.AnityaInfo = &models.AnityaInfo{
 			Project: anitya.Project,
