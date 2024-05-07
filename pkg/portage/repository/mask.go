@@ -120,6 +120,9 @@ func parsePackageMask(packageMask string) {
 			} else {
 				reason = reason + " " + templ.EscapeString(strings.TrimPrefix(packageMaskLine, "# "))
 			}
+			if len(packageMaskLines) == 0 {
+				break
+			}
 			packageMaskLine, packageMaskLines = packageMaskLines[0], packageMaskLines[1:]
 		}
 

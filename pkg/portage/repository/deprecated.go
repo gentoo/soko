@@ -76,6 +76,9 @@ func parsePackagesDeprecated(entry string) {
 			} else {
 				reason = reason + " " + templ.EscapeString(strings.TrimPrefix(packageLine, "# "))
 			}
+			if len(packageLines) == 0 {
+				break
+			}
 			packageLine, packageLines = packageLines[0], packageLines[1:]
 		}
 
