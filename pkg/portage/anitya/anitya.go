@@ -72,6 +72,10 @@ nextPackage:
 		}
 
 		latest := models.Version{Version: anitya.LatestVersion()}
+		if latest.Version == "" {
+			continue
+		}
+
 		currentLatest := p.Versions[0]
 		for _, v := range p.Versions {
 			if slices.Contains(v.Properties, "live") {
