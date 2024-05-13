@@ -1,0 +1,112 @@
+package packages
+
+import "net/http"
+import "strconv"
+import "soko/pkg/database"
+import "soko/pkg/models"
+import "soko/pkg/app/handler/categories"
+
+type eapiPackage struct {
+	Category            string
+	Package             string
+	Version             string
+	Maintainers         []*models.Maintainer
+	ReverseDependencies uint64
+	Bugs                uint64
+	IsMasked            bool
+	IsRedundant         bool
+	HasStable           bool
+}
+
+templ eapiOverview(packages []eapiPackage) {
+	<div class="container mb-5">
+		<div class="row">
+			<div class="col-12">
+				<h3 class="mb-2">
+					EAPI 6 Overview
+				</h3>
+				<table class="table table-bordered kk-versions-table mb-0 overflow-hidden border-0">
+					<thead class="border-0">
+						<tr class="border-0">
+							<th>Version</th>
+							<th>Rev-deps</th>
+							<th>Bugs</th>
+							<th>Maintainers</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, pkg := range packages {
+							<tr>
+								<td>
+									<a class="kk-ebuild-link" href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Package) }>
+										<strong>{ pkg.Category + "/" + pkg.Package }</strong>{ "-" + pkg.Version }
+									</a>
+                                    if pkg.IsMasked {
+			                            <span class="badge badge-danger kk-eapi-label" title="Package is masked">M</span>
+                                    } else if pkg.IsRedundant {
+                                        <span class="badge badge-success kk-eapi-label" title="Version is redundant">R</span>
+                                    } else if pkg.HasStable {
+                                        <span class="badge badge-warning kk-eapi-label" title="Package has stabilization candidate">S</span>
+                                    }
+								</td>
+								<td>
+									<a href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Package + "/reverse-dependencies") }>
+										{ strconv.FormatUint(pkg.ReverseDependencies, 10) }
+									</a>
+								</td>
+								<td>
+									<a href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Package + "/bugs") }>
+										{ strconv.FormatUint(pkg.Bugs, 10) }
+									</a>
+								</td>
+								<td>
+                                    if len(pkg.Maintainers) > 0 {
+									    @maintainersList(pkg.Maintainers)
+                                    } else {
+                                        Maintainer-needed
+                                    }
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}
+
+func Eapi(w http.ResponseWriter, r *http.Request) {
+	var result []eapiPackage
+	err := database.DBCon.Model((*models.Version)(nil)).
+		Column("version.category", "version.package", "version.version").
+		ColumnExpr("(?) AS maintainers",
+			database.DBCon.Model((*models.Package)(nil)).
+				Column("maintainers").
+				Where("atom = version.atom").
+				Limit(1)).
+		Join("LEFT JOIN reverse_dependencies").JoinOn("version.atom = reverse_dependencies.atom").
+		ColumnExpr("COALESCE(COUNT(DISTINCT reverse_dependencies.reverse_dependency_atom),0) AS reverse_dependencies").
+		Join("LEFT JOIN package_to_bugs").JoinOn("version.atom = package_to_bugs.package_atom").
+		ColumnExpr("COALESCE(COUNT(DISTINCT package_to_bugs.id),0) AS bugs").
+		ColumnExpr("EXISTS(?) AS is_masked",
+			database.DBCon.Model((*models.MaskToVersion)(nil)).
+				ColumnExpr("1").
+				Where("version_id = version.id")).
+		ColumnExpr("EXISTS(?) AS is_redundant",
+			database.DBCon.Model((*models.PkgCheckResult)(nil)).
+				ColumnExpr("1").
+				Where("cpv = version.id").Where("class = ?", "RedundantVersion")).
+		ColumnExpr("EXISTS(?) AS has_stable",
+			database.DBCon.Model((*models.PkgCheckResult)(nil)).
+				ColumnExpr("1").
+				Where("atom = version.atom").Where("class = ?", "StableRequest")).
+		Where("version.eapi = ?", "6").
+		Group("version.id").
+		Order("version.atom").
+		Select(&result)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	categories.RenderPage(w, r, "EAPI 6 Overview", "EAPI", eapiOverview(result))
+}

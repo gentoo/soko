@@ -119,6 +119,20 @@ templ overviewVersions(pkg *models.Package) {
 	</div>
 }
 
+templ maintainersList(maintainers []*models.Maintainer) {
+	for i, maintainer := range maintainers {
+		if i > 0 {
+			,&nbsp;
+		}
+		<a title={ maintainer.PrintName() } href={ templ.URL("/maintainer/" + maintainer.Email) }>
+			{ maintainer.PrintName() }
+		</a>
+		<a href={ templ.URL("mailto:" + maintainer.Email) }>
+			<i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i>
+		</a>
+	}
+}
+
 templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 	<div class="row">
 		<div class="col-md-9">
@@ -372,17 +386,7 @@ templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 									Maintainer(s)
 								</div>
 								<div class="col-xs-12 col-md-9">
-									for i, maintainer := range pkg.Maintainers {
-										if i > 0 {
-											,&nbsp;
-										}
-										<a title={ maintainer.PrintName() } href={ templ.URL("/maintainer/" + maintainer.Email) }>
-											{ maintainer.PrintName() }
-										</a>
-										<a href={ templ.URL("mailto:" + maintainer.Email) }>
-											<i class="fa fa-envelope-o" style="font-size: .925em;" aria-hidden="true"></i>
-										</a>
-									}
+									@maintainersList(pkg.Maintainers)
 								</div>
 							</div>
 						</li>

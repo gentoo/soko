@@ -86,6 +86,7 @@ func Serve() {
 	setRoute("GET /maintainer/{email}/stabilization.xml", maintainer.ShowStabilizationFile)
 	setRoute("GET /maintainer/{email}/stabilization.atom", maintainer.ShowStabilizationFeed)
 
+	setRoute("GET /packages/eapi6", packages.Eapi)
 	setRoute("GET /packages/search", packages.Search)
 	setRoute("GET /packages/suggest.json", packages.Suggest)
 	setRoute("GET /packages/resolve.json", packages.Resolve)
