@@ -23,11 +23,11 @@ templ eapiOverview(packages []eapiPackage) {
 		<div class="row">
 			<div class="col-12">
 				<h3 class="mb-2">
-					EAPI 6 Overview ({ strconv.FormatUint(uint64(len(packages)), 10)} packages)
+					EAPI 6 Overview ({ strconv.Itoa(len(packages)) } packages)
 				</h3>
-				<table class="table table-bordered kk-versions-table mb-0 overflow-hidden border-0">
-					<thead class="border-0">
-						<tr class="border-0">
+				<table class="table table-striped table-hover table-bordered kk-versions-table mb-0 overflow-hidden border-0">
+					<thead class="sticky-top">
+						<tr>
 							<th>Version</th>
 							<th>Rev-deps</th>
 							<th>Bugs</th>
@@ -41,13 +41,13 @@ templ eapiOverview(packages []eapiPackage) {
 									<a class="kk-ebuild-link" href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Package) }>
 										<strong>{ pkg.Category + "/" + pkg.Package }</strong>{ "-" + pkg.Version }
 									</a>
-                                    if pkg.IsMasked {
-			                            <span class="badge badge-danger kk-eapi-label" title="Package is masked">M</span>
-                                    } else if pkg.IsRedundant {
-                                        <span class="badge badge-success kk-eapi-label" title="Version is redundant">R</span>
-                                    } else if pkg.HasStable {
-                                        <span class="badge badge-warning kk-eapi-label" title="Package has stabilization candidate">S</span>
-                                    }
+									if pkg.IsMasked {
+										<span class="badge badge-danger kk-eapi-label" title="Package is masked">M</span>
+									} else if pkg.IsRedundant {
+										<span class="badge badge-success kk-eapi-label" title="Version is redundant">R</span>
+									} else if pkg.HasStable {
+										<span class="badge badge-warning kk-eapi-label" title="Package has stabilization candidate">S</span>
+									}
 								</td>
 								<td>
 									<a href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Package + "/reverse-dependencies") }>
@@ -60,11 +60,11 @@ templ eapiOverview(packages []eapiPackage) {
 									</a>
 								</td>
 								<td>
-                                    if len(pkg.Maintainers) > 0 {
-									    @maintainersList(pkg.Maintainers)
-                                    } else {
-                                        Maintainer-needed
-                                    }
+									if len(pkg.Maintainers) > 0 {
+										@maintainersList(pkg.Maintainers)
+									} else {
+										Maintainer-needed
+									}
 								</td>
 							</tr>
 						}
