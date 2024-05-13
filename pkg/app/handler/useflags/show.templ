@@ -170,6 +170,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		localUseFlags = useflags
 	}
 
-	layout.Layout(useFlagName, "useflags",
+	layout.Layout(useFlagName, layout.UseFlags,
 		show(useflag, localUseFlags, otherUseExpands, packages)).Render(r.Context(), w)
 }

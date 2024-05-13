@@ -36,6 +36,6 @@ var categoriesViewTabs = []layout.SubTab{
 }
 
 func RenderPage(w http.ResponseWriter, r *http.Request, title string, currentTab string, content templ.Component) {
-	layout.TabbedLayout(title, "packages", "Packages", "fa fa-fw fa-cubes", "", categoriesViewTabs,
+	layout.TabbedLayout(title, layout.Packages, "Packages", "fa fa-fw fa-cubes", "", categoriesViewTabs,
 		currentTab, content).Render(r.Context(), w)
 }

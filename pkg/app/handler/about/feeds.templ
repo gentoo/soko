@@ -34,5 +34,5 @@ templ feeds() {
 
 // Feeds shows the feeds about page
 func Feeds(w http.ResponseWriter, r *http.Request) {
-	layout.Layout("About", "about", feeds()).Render(r.Context(), w)
+	layout.Layout("About", layout.About, feeds()).Render(r.Context(), w)
 }

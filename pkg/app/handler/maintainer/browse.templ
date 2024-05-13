@@ -77,7 +77,7 @@ func renderBrowsePage(w http.ResponseWriter, r *http.Request, title string, dbTy
 		return
 	}
 
-	layout.TabbedLayout(title, "maintainers", "Maintainers", "fa fa-fw fa-users", "", browseViewTabs,
+	layout.TabbedLayout(title, layout.Maintainers, "Maintainers", "fa fa-fw fa-users", "", browseViewTabs,
 		title, browsePage(maintainers)).Render(r.Context(), w)
 }
 

@@ -109,7 +109,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	sortVersionsDesc(gpackage.Versions)
 
-	layout.Layout(gpackage.Atom, "packages",
+	layout.Layout(gpackage.Atom, layout.Packages,
 		show(&gpackage, currentSubTab, utils.GetUserPreferences(r)),
 	).Render(r.Context(), w)
 }

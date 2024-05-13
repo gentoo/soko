@@ -45,5 +45,5 @@ templ status(applications []*models.Application) {
 func Status(w http.ResponseWriter, r *http.Request) {
 	var applicationData []*models.Application
 	database.DBCon.Model(&applicationData).Order("id").Column("id", "last_update").Select()
-	layout.Layout("About", "about", status(applicationData)).Render(r.Context(), w)
+	layout.Layout("About", layout.About, status(applicationData)).Render(r.Context(), w)
 }

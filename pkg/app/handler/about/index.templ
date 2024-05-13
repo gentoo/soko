@@ -55,5 +55,5 @@ templ index() {
 
 // Index shows the landing page of the about pages
 func Index(w http.ResponseWriter, r *http.Request) {
-	layout.Layout("About", "about", index()).Render(r.Context(), w)
+	layout.Layout("About", layout.About, index()).Render(r.Context(), w)
 }

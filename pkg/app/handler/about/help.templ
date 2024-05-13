@@ -38,5 +38,5 @@ templ help() {
 
 // Help shows the help about page
 func Help(w http.ResponseWriter, r *http.Request) {
-	layout.Layout("About", "about", help()).Render(r.Context(), w)
+	layout.Layout("About", layout.About, help()).Render(r.Context(), w)
 }

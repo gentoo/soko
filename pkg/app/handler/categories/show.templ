@@ -72,7 +72,7 @@ templ show(component templ.Component) {
 }
 
 func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, category *models.Category, component templ.Component) {
-	layout.TabbedLayout(category.Name, "packages", category.Name, "fa fa-fw fa-cubes", category.Description, []layout.SubTab{
+	layout.TabbedLayout(category.Name, layout.Packages, category.Name, "fa fa-fw fa-cubes", category.Description, []layout.SubTab{
 		{
 			Name: "Packages",
 			Link: templ.URL("/categories/" + category.Name),

@@ -107,7 +107,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	updatedVersions := getUpdatedVersions(10)
 
-	layout.Layout("", "home", page(
+	layout.Layout("", layout.Home, page(
 		count, packagesList, updatedVersions, utils.GetUserPreferences(r),
 	)).Render(r.Context(), w)
 }

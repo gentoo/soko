@@ -59,7 +59,7 @@ templ sortableScript() {
 
 func Preferences(currentSubTab string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		layout.TabbedLayout("User", "preferences", "Preferences", "fa fa-fw fa-cog", "You can customize the page contents to your needs here", viewTabs,
+		layout.TabbedLayout("User", layout.About, "Preferences", "fa fa-fw fa-cog", "You can customize the page contents to your needs here", viewTabs,
 			currentSubTab, show(currentSubTab, utils.GetUserPreferences(r))).Render(r.Context(), w)
 	}
 }

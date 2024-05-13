@@ -2,6 +2,17 @@ package layout
 
 import "soko/pkg/config"
 
+type Page uint
+
+const (
+	Home Page = iota
+	Packages
+	Maintainers
+	UseFlags
+	Arches
+	About
+)
+
 templ head(title string) {
 	<head>
 		<title>
@@ -59,7 +70,7 @@ templ siteTitle() {
 	</div>
 }
 
-templ navigationBar(tab string) {
+templ navigationBar(tab Page) {
 	<nav class="tyrian-navbar navbar navbar-dark navbar-expand-lg bg-primary" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
@@ -69,14 +80,14 @@ templ navigationBar(tab string) {
 			</div>
 			<div class="collapse navbar-collapse navbar-main-collapse" id="navbar-main-collapse">
 				<ul class="navbar-nav mr-auto">
-					<li class={ "nav-item", templ.KV("active", tab == "home") }><a class="nav-link" href="/">Home</a></li>
-					<li class={ "nav-item", templ.KV("active", tab == "packages") }><a class="nav-link" href="/categories">Packages</a></li>
-					<li class={ "nav-item", templ.KV("active", tab == "maintainers") }><a class="nav-link" href="/maintainers">Maintainers</a></li>
-					<li class={ "nav-item", templ.KV("active", tab == "useflags") }><a class="nav-link" href="/useflags">USE flags</a></li>
-					<li class={ "nav-item", templ.KV("active", tab == "arches") }><a class="nav-link" href="/arches">Architectures</a></li>
-					<li class={ "nav-item", templ.KV("active", tab == "about") }><a class="nav-link" href="/about">About</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == Home) }><a class="nav-link" href="/">Home</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == Packages) }><a class="nav-link" href="/categories">Packages</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == Maintainers) }><a class="nav-link" href="/maintainers">Maintainers</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == UseFlags) }><a class="nav-link" href="/useflags">USE flags</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == Arches) }><a class="nav-link" href="/arches">Architectures</a></li>
+					<li class={ "nav-item", templ.KV("active", tab == About) }><a class="nav-link" href="/about">About</a></li>
 				</ul>
-				if tab != "home" {
+				if tab != Home {
 					<form class="form-inline inlinesearch" role="search" action="/packages/search" method="get">
 						<div class="input-group">
 							<div class="input-group-prepend">
@@ -122,7 +133,7 @@ templ footer() {
 	</footer>
 }
 
-templ Layout(title string, tab string, contents templ.Component) {
+templ Layout(title string, tab Page, contents templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		@head(title)
@@ -183,6 +194,6 @@ templ tabbedHeader(subTitle string, icon string, description string, tabs []SubT
 	</div>
 }
 
-templ TabbedLayout(title string, tab string, subTitle string, icon string, description string, tabs []SubTab, currentSubTab string, contents templ.Component) {
+templ TabbedLayout(title string, tab Page, subTitle string, icon string, description string, tabs []SubTab, currentSubTab string, contents templ.Component) {
 	@Layout(title, tab, tabbedHeader(subTitle, icon, description, tabs, currentSubTab, contents))
 }

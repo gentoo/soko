@@ -76,5 +76,5 @@ templ feedback() {
 
 // Feedback shows the feedback about page
 func Feedback(w http.ResponseWriter, r *http.Request) {
-	layout.Layout("About", "about", feedback()).Render(r.Context(), w)
+	layout.Layout("About", layout.About, feedback()).Render(r.Context(), w)
 }

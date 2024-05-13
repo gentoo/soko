@@ -84,7 +84,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	layout.Layout(searchTerm, "packages", search(searchTerm, results)).Render(r.Context(), w)
+	layout.Layout(searchTerm, layout.Packages, search(searchTerm, results)).Render(r.Context(), w)
 }
 
 // Search renders a template containing a list of search results

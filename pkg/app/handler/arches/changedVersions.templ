@@ -45,5 +45,5 @@ func init() {
 }
 
 func renderPage(w http.ResponseWriter, r *http.Request, arch string, content templ.Component) {
-	layout.TabbedLayout("Architectures", "arches", "Architectures", "fa fa-fw fa-server", "", tabs, arch, content).Render(r.Context(), w)
+	layout.TabbedLayout("Architectures", layout.Arches, "Architectures", "fa fa-fw fa-server", "", tabs, arch, content).Render(r.Context(), w)
 }
