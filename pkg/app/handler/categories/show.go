@@ -146,7 +146,7 @@ func ShowSecurity(w http.ResponseWriter, r *http.Request) {
 		DistinctOn("id::INT").
 		Column("id", "summary", "component", "assignee").
 		OrderExpr("id::INT").
-		Where("component = ?", "Vulnerabilities").
+		Where("component = ?", models.BugComponentVulnerabilities).
 		Where("id IN (?)",
 			database.DBCon.Model((*models.PackageToBug)(nil)).
 				Column("bug_id").

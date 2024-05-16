@@ -7,14 +7,14 @@ import (
 func CountBugsCategories(bugs []*models.Bug) (generalCount, stabilizationCount, keywordingCount int) {
 	for _, bug := range bugs {
 		switch bug.Component {
-		case "Current packages":
-			generalCount++
-		case "Stabilization":
+		case string(models.BugComponentVulnerabilities):
+			continue
+		case string(models.BugComponentStabilization):
 			stabilizationCount++
-		case "Keywording":
+		case string(models.BugComponentKeywording):
 			keywordingCount++
 		default:
-			continue
+			generalCount++
 		}
 	}
 	return

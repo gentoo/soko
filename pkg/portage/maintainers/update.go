@@ -142,7 +142,7 @@ func countBugs(packages []*models.Package) (securityBugs, nonSecurityBugs int) {
 	}
 
 	for _, bug := range allBugs {
-		if bug.Component == "Vulnerabilities" {
+		if bug.Component == string(models.BugComponentVulnerabilities) {
 			securityBugs++
 		} else {
 			nonSecurityBugs++

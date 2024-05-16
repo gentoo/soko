@@ -240,7 +240,7 @@ func ShowSecurity(w http.ResponseWriter, r *http.Request) {
 		Column("id", "summary", "component", "assignee").
 		OrderExpr("id::INT").
 		With("wanted", query).
-		Where("component = ?", "Vulnerabilities").
+		Where("component = ?", models.BugComponentVulnerabilities).
 		Where("id IN (?)",
 			database.DBCon.Model((*models.PackageToBug)(nil)).
 				Column("bug_id").

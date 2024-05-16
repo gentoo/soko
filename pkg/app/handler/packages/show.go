@@ -216,7 +216,7 @@ func changelogJSON(w http.ResponseWriter, r *http.Request) {
 
 func countBugs(gpackage *models.Package) (securityBugs, nonSecurityBugs int) {
 	for _, bug := range gpackage.Bugs {
-		if bug.Component == "Vulnerabilities" {
+		if bug.Component == string(models.BugComponentVulnerabilities) {
 			securityBugs++
 		} else {
 			nonSecurityBugs++

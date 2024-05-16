@@ -98,7 +98,7 @@ func collectAllBugs(pkg *models.Package) (atom string, generalCount, stabilizati
 	bugs = make([]*models.Bug, 0, len(pkg.Bugs))
 	handled := make(map[string]struct{}, len(pkg.Bugs))
 	for _, bug := range pkg.Bugs {
-		if bug.Component == "Current packages" {
+		if bug.Component != string(models.BugComponentVulnerabilities) {
 			generalCount++
 			bugs = append(bugs, bug)
 			handled[bug.Id] = struct{}{}
@@ -109,10 +109,10 @@ func collectAllBugs(pkg *models.Package) (atom string, generalCount, stabilizati
 			if _, found := handled[bug.Id]; found {
 				continue
 			}
-			if bug.Component == "Stabilization" {
+			if bug.Component == string(models.BugComponentStabilization) {
 				stabilizationCount++
 				bugs = append(bugs, bug)
-			} else if bug.Component == "Keywording" {
+			} else if bug.Component == string(models.BugComponentKeywording) {
 				keywordingCount++
 				bugs = append(bugs, bug)
 			}
@@ -125,7 +125,7 @@ func collectAllBugs(pkg *models.Package) (atom string, generalCount, stabilizati
 func collectSecurityBugs(pkg *models.Package) (string, []*models.Bug) {
 	bugs := make([]*models.Bug, 0, len(pkg.Bugs))
 	for _, bug := range pkg.Bugs {
-		if bug.Component == "Vulnerabilities" {
+		if bug.Component == string(models.BugComponentVulnerabilities) {
 			bugs = append(bugs, bug)
 		}
 	}

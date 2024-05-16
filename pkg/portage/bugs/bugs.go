@@ -271,7 +271,7 @@ func updateCategoriesInfo() {
 	err := database.DBCon.Model((*models.PackageToBug)(nil)).
 		ColumnExpr("SPLIT_PART(package_atom, '/', 1) as name").
 		ColumnExpr("COUNT(DISTINCT bug_id) as bugs").
-		ColumnExpr("COUNT(DISTINCT bug_id) FILTER(WHERE component = ?) as security_bugs", "Vulnerabilities").
+		ColumnExpr("COUNT(DISTINCT bug_id) FILTER(WHERE component = ?) as security_bugs", models.BugComponentVulnerabilities).
 		Join("JOIN bugs").JoinOn("package_to_bug.bug_id = bugs.id").
 		Where("NULLIF(package_atom, '') IS NOT NULL").
 		Where(`package_atom LIKE '%/%'`).
