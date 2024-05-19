@@ -60,9 +60,11 @@ func getLeafPackagesForArch(arch string) ([]string, error) {
 	atomsWithReverse := database.DBCon.Model((*models.ReverseDependency)(nil)).
 		Join("JOIN versions").JoinOn("reverse_dependency.reverse_dependency_atom = versions.atom").
 		Where("? = ANY(STRING_TO_ARRAY(keywords, ' '))", arch).
+		WhereOr("? = ANY(STRING_TO_ARRAY(keywords, ' '))", "~"+arch).
 		ColumnExpr("DISTINCT reverse_dependency.atom")
 	err := database.DBCon.Model((*models.Version)(nil)).
 		Where("? = ANY(STRING_TO_ARRAY(keywords, ' '))", arch).
+		WhereOr("? = ANY(STRING_TO_ARRAY(keywords, ' '))", "~"+arch).
 		Where("atom NOT IN (?)", atomsWithReverse).
 		Order("atom").
 		ColumnExpr("DISTINCT atom").
