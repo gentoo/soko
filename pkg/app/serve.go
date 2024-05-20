@@ -115,9 +115,6 @@ func Serve() {
 	setRoute("/user/preferences/general/layout", user.General)
 	setRoute("/user/preferences/general/reset", user.ResetGeneral)
 
-	setRoute("/user/preferences/packages/edit", user.EditPackagesPreferences)
-	setRoute("/user/preferences/packages/reset", user.ResetPackages)
-
 	setRoute("/user/preferences/maintainers/edit", user.Maintainers)
 	setRoute("/user/preferences/maintainers/reset", user.ResetMaintainers)
 

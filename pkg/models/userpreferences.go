@@ -4,20 +4,11 @@ package models
 
 type UserPreferences struct {
 	General     GeneralPreferences
-	Packages    PackagesPreferences
 	Maintainers MaintainersPreferences
 }
 
 type GeneralPreferences struct {
 	LandingPageLayout string
-}
-
-type PackagesPreferences struct {
-	Overview PackagesOverviewPreferences
-}
-
-type PackagesOverviewPreferences struct {
-	Layout string
 }
 
 type MaintainersPreferences struct {
@@ -31,13 +22,9 @@ var AllArches = [...]string{"alpha", "amd64", "arm", "arm64", "hppa", "ia64", "m
 func GetDefaultUserPreferences() UserPreferences {
 	userPreferences := UserPreferences{}
 	userPreferences.General = GeneralPreferences{}
-	userPreferences.Packages = PackagesPreferences{}
-	userPreferences.Packages.Overview = PackagesOverviewPreferences{}
 	userPreferences.Maintainers = MaintainersPreferences{}
 
 	userPreferences.General.LandingPageLayout = "classic"
-
-	userPreferences.Packages.Overview.Layout = "minimal"
 
 	userPreferences.Maintainers.IncludeProjectPackages = false
 	userPreferences.Maintainers.ExcludedProjects = []string{}
@@ -50,9 +37,5 @@ func (u *UserPreferences) Sanitize() {
 
 	if !(u.General.LandingPageLayout == "classic" || u.General.LandingPageLayout == "full") {
 		u.General.LandingPageLayout = defaultUserPreferences.General.LandingPageLayout
-	}
-
-	if !(u.Packages.Overview.Layout == "minimal" || u.Packages.Overview.Layout == "full") {
-		u.Packages.Overview.Layout = defaultUserPreferences.Packages.Overview.Layout
 	}
 }

@@ -30,8 +30,6 @@ templ show(currentSubTab string, preferences models.UserPreferences) {
 		switch currentSubTab {
 			case "General":
 				@general(preferences.General)
-			case "Packages":
-				@packages(preferences.Packages)
 			case "Maintainers":
 				@maintainers(preferences.Maintainers)
 		}

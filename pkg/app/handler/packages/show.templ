@@ -132,7 +132,7 @@ func collectSecurityBugs(pkg *models.Package) (string, []*models.Bug) {
 	return pkg.Atom, bugs
 }
 
-templ show(pkg *models.Package, currentSubTab string, userPreferences models.UserPreferences) {
+templ show(pkg *models.Package, currentSubTab string) {
 	if currentSubTab == "Reverse Dependencies" {
 		@tabbedHeader(pkg, "Dependencies")
 	} else {
@@ -156,7 +156,7 @@ templ show(pkg *models.Package, currentSubTab string, userPreferences models.Use
 				case "Reverse Dependencies":
 					@reverseDependencies(pkg)
 				default:
-					@overview(pkg, &userPreferences)
+					@overview(pkg)
 			}
 		</div>
 	</div>

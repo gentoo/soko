@@ -3,7 +3,6 @@ package packages
 import "slices"
 import "strings"
 import "time"
-import "soko/pkg/app/handler/packages/components"
 import "soko/pkg/app/utils"
 import "soko/pkg/models"
 
@@ -133,7 +132,7 @@ templ maintainersList(maintainers []*models.Maintainer) {
 	}
 }
 
-templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
+templ overview(pkg *models.Package) {
 	<div class="row">
 		<div class="col-md-9">
 			if len(pkg.Outdated) > 0 {
@@ -393,10 +392,6 @@ templ overview(pkg *models.Package, userPreferences *models.UserPreferences) {
 					}
 				</ul>
 			</div>
-			if userPreferences.Packages.Overview.Layout == "full" {
-				<div class="mt-4 pt-4"></div>
-				@components.Changelog(pkg.Atom, pkg.Commits)
-			}
 		</div>
 		<div class="col-md-3 pl-4 pt-4 mt-2">
 			<h4 class="mb-2 ml-1">
