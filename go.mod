@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/99designs/gqlgen v0.17.45
-	github.com/a-h/templ v0.2.663
+	github.com/a-h/templ v0.2.697
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-pg/pg/v10 v10.12.0
