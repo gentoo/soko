@@ -109,5 +109,5 @@ func Eapi(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	categories.RenderPage(w, r, "EAPI 6 Overview", "EAPI", eapiOverview(result))
+	categories.RenderPage(w, r, "EAPI 6 Overview", "EAPI cleanup", eapiOverview(result))
 }

@@ -33,6 +33,16 @@ var categoriesViewTabs = []layout.SubTab{
 		Link: "/packages/keyworded",
 		Icon: "fa fa-circle-o mr-1",
 	},
+	{
+		Name: "Stable Requests",
+		Link: templ.URL("/packages/stabilization"),
+		Icon: "fa fa-check-circle-o",
+	},
+	{
+		Name: "EAPI cleanup",
+		Link: templ.URL("/packages/eapi6"),
+		Icon: "fa fa-trash-o",
+	},
 }
 
 func RenderPage(w http.ResponseWriter, r *http.Request, title string, currentTab string, content templ.Component) {

@@ -1,10 +1,12 @@
 package packages
 
-import "soko/pkg/app/utils"
-import "soko/pkg/models"
 import "net/http"
 import "soko/pkg/app/handler/categories"
 import "soko/pkg/app/handler/feeds"
+import "soko/pkg/app/handler/packages/components"
+import "soko/pkg/app/utils"
+import "soko/pkg/database"
+import "soko/pkg/models"
 
 templ changedVersionsPage(pageType string, versions []*models.Version) {
 	<div class="container mb-5">
@@ -73,4 +75,38 @@ func Keyworded(w http.ResponseWriter, r *http.Request) {
 func KeywordedFeed(w http.ResponseWriter, r *http.Request) {
 	keywordedVersions := GetKeywordedVersions(250)
 	feeds.Changes("Keyworded packages in Gentoo.", "Keyworded packages in Gentoo.", keywordedVersions, w)
+}
+
+templ allStableRequests(results []*models.PkgCheckResult) {
+	<div class="container mb-5">
+		@components.Stabilizations(results)
+	</div>
+}
+
+func AllStableRequests(w http.ResponseWriter, r *http.Request) {
+	var results []*models.PkgCheckResult
+	err := database.DBCon.Model(&results).
+		Column("atom", "cpv", "message").
+		Where("class = ?", "StableRequest").
+		OrderExpr(`substring(message,' \d+ ')::INT DESC`).
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	categories.RenderPage(w, r, "All Stable Requests", "Stable Requests", allStableRequests(results))
+}
+
+func AllStableRequestsFeed(w http.ResponseWriter, r *http.Request) {
+	var results []*models.PkgCheckResult
+	err := database.DBCon.Model(&results).
+		Column("atom", "cpv", "message").
+		Where("class = ?", "StableRequest").
+		OrderExpr(`substring(message,' \d+ ')::INT DESC`).
+		Select()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	utils.StabilizationFeed(w, "https://packages.gentoo.org/packages/stabilization", "All Stable Requests", results)
 }
