@@ -19,7 +19,7 @@ templ search(query string, packages []searchResults) {
 						</div>
 						<div class="list-group">
 							for _, pkg := range packages {
-								<a class="list-group-item list-group-item-action" href={ templ.URL("/packages/" + pkg.Category+"/"+pkg.Name) }>
+								<a class="list-group-item list-group-item-action" href={ templ.URL("/packages/" + pkg.Category + "/" + pkg.Name) }>
 									<h3 class="kk-search-result-header"><span class="text-muted">{ pkg.Category }/</span>{ pkg.Name }</h3>
 									{ pkg.Description }
 								</a>
