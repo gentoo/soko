@@ -72,8 +72,12 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	case "qa-report":
 		currentSubTab = "QA report"
 		query = query.
-			Relation("PkgCheckResults").
-			Relation("Versions.PkgCheckResults")
+			Relation("PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
+				return q.Where("version IS NULL").Order("class", "message"), nil
+			}).
+			Relation("Versions.PkgCheckResults", func(q *pg.Query) (*pg.Query, error) {
+				return q.Order("version", "class", "message"), nil
+			})
 	case "pull-requests":
 		atom = strings.ReplaceAll(atom, "/pull-requests", "")
 		currentSubTab = "Pull requests"
