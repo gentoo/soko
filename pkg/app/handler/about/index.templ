@@ -9,20 +9,11 @@ func getCommitId() string {
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, setting := range info.Settings {
 			if setting.Key == "vcs.revision" {
-				return setting.Value[:8]
+				return setting.Value
 			}
 		}
 	}
 	return ""
-}
-
-func versionText() string {
-	commitId := getCommitId()
-	version := config.Version()
-	if commitId == "" {
-		return "Currently " + version + " is running."
-	}
-	return "Currently " + version + " is running, based on commit " + commitId + "."
 }
 
 templ index() {
@@ -40,7 +31,13 @@ templ index() {
 				<h2>FAQ</h2>
 				<dl>
 					<dt>Which version is currently running?</dt>
-					<dd>{ versionText() }</dd>
+					<dd>
+						if commitId := getCommitId(); commitId == "" {
+							Currently { config.Version() } is running.
+						} else {
+							Currently { config.Version() } is running, based on commit <a href={ templ.URL("https://gitweb.gentoo.org/sites/soko.git/commit/?id=" + commitId) }>{ commitId[:8] }</a>.
+						}
+					</dd>
 					<br/>
 					<dt>How often is the site updated?</dt>
 					<dd>
