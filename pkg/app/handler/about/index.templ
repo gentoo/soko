@@ -22,7 +22,7 @@ func versionText() string {
 	if commitId == "" {
 		return "Currently " + version + " is running."
 	}
-	return "Currently " + version + " is running, based on commit " + commitId + "."
+	return "Currently " + version + " is running, based on commit <a href=\"https://gitweb.gentoo.org/sites/soko.git/commit/?id=" + commitId + "\">" + commitId + "</a>."
 }
 
 templ index() {
