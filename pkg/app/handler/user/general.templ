@@ -1,11 +1,13 @@
 package user
 
-import "encoding/base64"
-import "encoding/json"
-import "net/http"
-import "time"
-import "soko/pkg/app/utils"
-import "soko/pkg/models"
+import (
+	"encoding/base64"
+	"encoding/json"
+	"net/http"
+	"soko/pkg/app/utils"
+	"soko/pkg/models"
+	"time"
+)
 
 templ general(preferences models.GeneralPreferences) {
 	<form method="post" action="/user/preferences/general/layout">

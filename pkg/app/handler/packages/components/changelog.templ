@@ -1,9 +1,11 @@
 package components
 
-import "crypto/md5"
-import "encoding/hex"
-import "time"
-import "soko/pkg/models"
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"soko/pkg/models"
+	"time"
+)
 
 func gravatar(email string) string {
 	hasher := md5.Sum([]byte(email))

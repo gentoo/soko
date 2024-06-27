@@ -1,7 +1,9 @@
 package components
 
-import "soko/pkg/models"
-import "strconv"
+import (
+	"soko/pkg/models"
+	"strconv"
+)
 
 templ bugsList(title string, component models.BugComponent, bugs []*models.Bug, titleClass, id string) {
 	<h3 id={ id } class={ titleClass }>{ title }</h3>

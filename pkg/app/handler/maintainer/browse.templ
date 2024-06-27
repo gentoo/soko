@@ -1,9 +1,11 @@
 package maintainer
 
-import "soko/pkg/models"
-import "soko/pkg/app/layout"
-import "net/http"
-import "soko/pkg/database"
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/database"
+	"soko/pkg/models"
+)
 
 templ browsePage(maintainers []*models.Maintainer) {
 	<div class="container mb-5">

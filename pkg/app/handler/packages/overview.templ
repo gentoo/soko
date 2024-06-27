@@ -1,10 +1,12 @@
 package packages
 
-import "slices"
-import "strings"
-import "time"
-import "soko/pkg/app/utils"
-import "soko/pkg/models"
+import (
+	"slices"
+	"soko/pkg/app/utils"
+	"soko/pkg/models"
+	"strings"
+	"time"
+)
 
 func overviewSlotText(version *models.Version) string {
 	if version.Subslot != "" {

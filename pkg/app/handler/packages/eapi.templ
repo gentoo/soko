@@ -1,10 +1,12 @@
 package packages
 
-import "net/http"
-import "strconv"
-import "soko/pkg/database"
-import "soko/pkg/models"
-import "soko/pkg/app/handler/categories"
+import (
+	"net/http"
+	"soko/pkg/app/handler/categories"
+	"soko/pkg/database"
+	"soko/pkg/models"
+	"strconv"
+)
 
 type eapiPackage struct {
 	Category            string

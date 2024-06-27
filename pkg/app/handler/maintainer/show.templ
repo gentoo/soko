@@ -1,9 +1,11 @@
 package maintainer
 
-import "strconv"
-import "strings"
-import "soko/pkg/app/layout"
-import "soko/pkg/models"
+import (
+	"soko/pkg/app/layout"
+	"soko/pkg/models"
+	"strconv"
+	"strings"
+)
 
 func showViewTabs(email string, packagesCount int, info *models.MaintainerPackagesInformation) []layout.SubTab {
 	return []layout.SubTab{

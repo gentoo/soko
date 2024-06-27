@@ -1,8 +1,10 @@
 package categories
 
-import "net/http"
-import "soko/pkg/database"
-import "soko/pkg/models"
+import (
+	"net/http"
+	"soko/pkg/database"
+	"soko/pkg/models"
+)
 
 templ index(categories []*models.Category) {
 	<div class="container mb-5">

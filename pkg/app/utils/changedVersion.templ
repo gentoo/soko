@@ -1,9 +1,11 @@
 package utils
 
-import "slices"
-import "soko/pkg/models"
-import "strings"
-import "time"
+import (
+	"slices"
+	"soko/pkg/models"
+	"strings"
+	"time"
+)
 
 templ ChangedVersionsTable(versions []*models.Version) {
 	for _, version := range versions {

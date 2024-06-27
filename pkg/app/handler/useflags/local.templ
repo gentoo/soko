@@ -1,9 +1,11 @@
 package useflags
 
-import "net/http"
-import "soko/pkg/database"
-import "soko/pkg/models"
-import "github.com/go-pg/pg/v10"
+import (
+	"github.com/go-pg/pg/v10"
+	"net/http"
+	"soko/pkg/database"
+	"soko/pkg/models"
+)
 
 templ local(useflags []models.Useflag) {
 	<div class="container mb-5">

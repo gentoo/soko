@@ -1,10 +1,12 @@
 package about
 
-import "net/http"
-import "soko/pkg/app/layout"
-import "soko/pkg/database"
-import "soko/pkg/models"
-import "time"
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/database"
+	"soko/pkg/models"
+	"time"
+)
 
 templ status(applications []*models.Application) {
 	<div class="container mb-5">

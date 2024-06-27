@@ -1,12 +1,14 @@
 package useflags
 
-import "net/http"
-import "strconv"
-import "strings"
-import "soko/pkg/app/layout"
-import "soko/pkg/database"
-import "soko/pkg/models"
-import "github.com/go-pg/pg/v10"
+import (
+	"github.com/go-pg/pg/v10"
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/database"
+	"soko/pkg/models"
+	"strconv"
+	"strings"
+)
 
 templ showUseflagHeader(useflag models.Useflag) {
 	<div class="kk-header-container">

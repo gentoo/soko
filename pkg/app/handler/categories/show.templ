@@ -1,10 +1,12 @@
 package categories
 
-import "net/http"
-import "strconv"
-import "strings"
-import "soko/pkg/app/layout"
-import "soko/pkg/models"
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/models"
+	"strconv"
+	"strings"
+)
 
 func packageLetter(name string) string {
 	return strings.ToLower(strings.TrimLeft(name, "_")[:1])

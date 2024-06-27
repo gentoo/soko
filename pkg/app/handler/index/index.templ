@@ -1,10 +1,12 @@
 package index
 
-import "net/http"
-import "soko/pkg/app/layout"
-import "soko/pkg/app/utils"
-import "soko/pkg/database"
-import "soko/pkg/models"
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/app/utils"
+	"soko/pkg/database"
+	"soko/pkg/models"
+)
 
 templ header(packageCount int) {
 	<div class="col-12">

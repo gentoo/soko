@@ -1,9 +1,11 @@
 package arches
 
-import "net/http"
-import "soko/pkg/app/layout"
-import "soko/pkg/app/utils"
-import "soko/pkg/models"
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/app/utils"
+	"soko/pkg/models"
+)
 
 templ changedVersions(currentArch string, feedName string, versions []*models.Version) {
 	<div class="container mb-5">

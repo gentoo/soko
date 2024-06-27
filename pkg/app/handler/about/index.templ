@@ -1,9 +1,11 @@
 package about
 
-import "net/http"
-import "runtime/debug"
-import "soko/pkg/app/layout"
-import "soko/pkg/config"
+import (
+	"net/http"
+	"runtime/debug"
+	"soko/pkg/app/layout"
+	"soko/pkg/config"
+)
 
 func getCommitId() string {
 	if info, ok := debug.ReadBuildInfo(); ok {

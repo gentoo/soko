@@ -1,9 +1,11 @@
 package packages
 
-import "strconv"
-import "soko/pkg/app/handler/packages/components"
-import "soko/pkg/app/layout"
-import "soko/pkg/models"
+import (
+	"soko/pkg/app/handler/packages/components"
+	"soko/pkg/app/layout"
+	"soko/pkg/models"
+	"strconv"
+)
 
 func showViewTabs(pkg *models.Package) []layout.SubTab {
 	securityBugs, nonSecurityBugs := countBugs(pkg)

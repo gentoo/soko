@@ -1,11 +1,13 @@
 package user
 
-import "net/http"
-import "time"
-import "soko/pkg/app/layout"
-import "soko/pkg/app/utils"
-import "soko/pkg/config"
-import "soko/pkg/models"
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+	"soko/pkg/app/utils"
+	"soko/pkg/config"
+	"soko/pkg/models"
+	"time"
+)
 
 var viewTabs = []layout.SubTab{
 	{

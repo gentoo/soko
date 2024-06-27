@@ -1,13 +1,15 @@
 package user
 
-import "encoding/base64"
-import "encoding/json"
-import "net/http"
-import "time"
-import "soko/pkg/app/utils"
-import "soko/pkg/models"
-import "slices"
-import "soko/pkg/database"
+import (
+	"encoding/base64"
+	"encoding/json"
+	"net/http"
+	"slices"
+	"soko/pkg/app/utils"
+	"soko/pkg/database"
+	"soko/pkg/models"
+	"time"
+)
 
 func splitAllProjects() [][]models.Project {
 	var projects []models.Project

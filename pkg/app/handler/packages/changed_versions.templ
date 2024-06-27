@@ -1,12 +1,14 @@
 package packages
 
-import "net/http"
-import "soko/pkg/app/handler/categories"
-import "soko/pkg/app/handler/feeds"
-import "soko/pkg/app/handler/packages/components"
-import "soko/pkg/app/utils"
-import "soko/pkg/database"
-import "soko/pkg/models"
+import (
+	"net/http"
+	"soko/pkg/app/handler/categories"
+	"soko/pkg/app/handler/feeds"
+	"soko/pkg/app/handler/packages/components"
+	"soko/pkg/app/utils"
+	"soko/pkg/database"
+	"soko/pkg/models"
+)
 
 templ changedVersionsPage(pageType string, versions []*models.Version) {
 	<div class="container mb-5">
