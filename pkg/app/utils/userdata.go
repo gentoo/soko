@@ -22,11 +22,5 @@ func GetUserPreferences(r *http.Request) models.UserPreferences {
 		}
 	}
 
-	// old cookie: search_history
-	// old cookie: userpref_general
-	// old cookie: userpref_packages
-	// old cookie: userpref_useflags
-	// old cookie: userpref_arches
-
 	return userPreferences
 }

@@ -89,8 +89,24 @@ templ page(packageCount int) {
 	<script src="assets/index.js"></script>
 }
 
+func deleteCookie(w http.ResponseWriter, r *http.Request, name string) {
+	if _, err := r.Cookie(name); err != http.ErrNoCookie {
+		cookie := http.Cookie{
+			Name:     name,
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+		}
+		http.SetCookie(w, &cookie)
+	}
+}
+
 // Show renders a template to show the landing page of the application
 func Show(w http.ResponseWriter, r *http.Request) {
+	for _, cookie := range models.OldCookieNames {
+		deleteCookie(w, r, cookie)
+	}
 	count, _ := database.DBCon.Model((*models.Package)(nil)).Count()
 	layout.Layout("", layout.Home, page(count)).Render(r.Context(), w)
 }
