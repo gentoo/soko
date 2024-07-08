@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"slices"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -37,6 +38,7 @@ func UpdateOutdated() {
 	for letter := 'a'; letter <= 'z'; letter++ {
 		outdated.getOutdatedStartingWith(letter)
 	}
+	outdated.compareAgainstVersions()
 
 	// Update the database
 	if len(outdated.outdatedVersions) > 0 {
@@ -110,6 +112,7 @@ func newOutdatedCheck() outdatedCheck {
 
 // getOutdatedStartingWith gets all outdated packages starting with the given letter
 func (o *outdatedCheck) getOutdatedStartingWith(letter rune) {
+	slog.Debug("Fetching outdated packages", slog.String("letter", string(letter)))
 	repoPackages, err := parseRepologyData(letter)
 	if err != nil {
 		slog.Error("Error while fetching repology data", slog.String("letter", string(letter)), slog.Any("err", err))
@@ -174,6 +177,50 @@ func (o *outdatedCheck) getOutdatedStartingWith(letter rune) {
 			}
 		}
 	}
+}
+
+func (o *outdatedCheck) compareAgainstVersions() {
+	packagesMap := make(map[string]*models.OutdatedPackages, len(o.outdatedVersions))
+	packages := make([]*models.Package, len(o.outdatedVersions))
+	for i, p := range o.outdatedVersions {
+		packages[i] = &models.Package{Atom: p.Atom}
+		packagesMap[p.Atom] = p
+	}
+
+	err := database.DBCon.Model(&packages).WherePK().Relation("Versions").Select()
+	if err != nil {
+		slog.Error("Failed fetching packages", slog.Any("err", err))
+		return
+	}
+
+	o.outdatedVersions = make([]*models.OutdatedPackages, 0, len(packages))
+nextPackage:
+	for _, p := range packages {
+		pkg := packagesMap[p.Atom]
+		if len(p.Versions) == 0 {
+			continue
+		}
+
+		latest := models.Version{Version: pkg.NewestVersion}
+		if latest.Version == "" {
+			continue
+		}
+		currentLatest := p.Versions[0]
+		for _, v := range p.Versions {
+			if slices.Contains(v.Properties, "live") {
+				continue
+			}
+			if strings.HasPrefix(v.Version, latest.Version) || !latest.GreaterThan(*v) {
+				continue nextPackage
+			}
+			if v.GreaterThan(*currentLatest) {
+				currentLatest = v
+			}
+		}
+		pkg.GentooVersion = currentLatest.Version
+		o.outdatedVersions = append(o.outdatedVersions, pkg)
+	}
+	slog.Debug("Filtered outdated", slog.Int("before", len(packagesMap)), slog.Int("after", len(o.outdatedVersions)))
 }
 
 // parseRepologyData gets the json from given url and parses it
