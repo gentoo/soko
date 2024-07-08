@@ -3,12 +3,10 @@
 package packages
 
 import (
-	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"soko/pkg/app/layout"
-	"soko/pkg/app/utils"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strings"
@@ -30,11 +28,6 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var currentSubTab string
-
-	userPreferences := utils.GetUserPreferences(r)
-	if userPreferences.General.LandingPageLayout == "full" {
-		updateSearchHistory(atom, w, r)
-	}
 
 	var gpackage models.Package
 	query := database.DBCon.Model(&gpackage).
@@ -116,46 +109,8 @@ func Show(w http.ResponseWriter, r *http.Request) {
 	layout.Layout(gpackage.Atom, layout.Packages, show(&gpackage, currentSubTab)).Render(r.Context(), w)
 }
 
-func updateSearchHistory(atom string, w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("search_history")
-	var packages string
-	if err == nil {
-		cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
-		if err == nil {
-			packagesList := strings.Split(string(cookieValue), ",")
-			if strings.Contains(string(cookieValue), atom) {
-				newPackagesList := make([]string, 0, len(packagesList)-1)
-				for _, gpackage := range packagesList {
-					if gpackage != atom {
-						newPackagesList = append(newPackagesList, gpackage)
-					}
-				}
-				packagesList = newPackagesList
-			}
-			packagesList = append(packagesList, atom)
-			if len(packagesList) > 10 {
-				packagesList = packagesList[len(packagesList)-10:]
-			}
-			packages = strings.Join(packagesList, ",")
-		} else {
-			packages = atom
-		}
-	} else {
-		packages = atom
-	}
-
-	updatedCookie := http.Cookie{
-		Name:    "search_history",
-		Path:    "/",
-		Value:   b64.StdEncoding.EncodeToString([]byte(packages)),
-		Expires: time.Now().Add(365 * 24 * time.Hour),
-	}
-	http.SetCookie(w, &updatedCookie)
-}
-
 // changelog renders a json version of the changelog
 func changelogJSON(w http.ResponseWriter, r *http.Request) {
-
 	atom := getAtom(r)
 	gpackage := new(models.Package)
 	err := database.DBCon.Model(gpackage).

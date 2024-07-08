@@ -113,12 +113,7 @@ func Serve() {
 
 	redirect("GET /user", "/user/preferences/general")
 	redirect("GET /user/preferences", "/user/preferences/general")
-	setRoute("GET /user/preferences/general", user.Preferences("General"))
-	setRoute("GET /user/preferences/packages", user.Preferences("Packages"))
 	setRoute("GET /user/preferences/maintainers", user.Preferences("Maintainers"))
-
-	setRoute("/user/preferences/general/layout", user.General)
-	setRoute("/user/preferences/general/reset", user.ResetGeneral)
 
 	setRoute("/user/preferences/maintainers/edit", user.Maintainers)
 	setRoute("/user/preferences/maintainers/reset", user.ResetMaintainers)

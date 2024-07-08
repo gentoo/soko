@@ -11,16 +11,6 @@ import (
 
 var viewTabs = []layout.SubTab{
 	{
-		Name: "General",
-		Link: "/user/preferences/general",
-		Icon: "fa fa-globe mr-1",
-	},
-	{
-		Name: "Packages",
-		Link: "/user/preferences/packages",
-		Icon: "fa fa-cube mr-1",
-	},
-	{
 		Name: "Maintainers",
 		Link: "/user/preferences/maintainers",
 		Icon: "fa fa-users mr-1",
@@ -30,31 +20,11 @@ var viewTabs = []layout.SubTab{
 templ show(currentSubTab string, preferences models.UserPreferences) {
 	<div class="container mb-5">
 		switch currentSubTab {
-			case "General":
-				@general(preferences.General)
 			case "Maintainers":
 				@maintainers(preferences.Maintainers)
 		}
 	</div>
 	<script src="/assets/userpref.js"></script>
-}
-
-templ sortableScript() {
-	<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-	<script>
-        if(document.getElementById("example1") != null && document.getElementById("example2") != null) {
-            new Sortable(example1, {
-                group: 'shared',
-                animation: 150,
-                ghostClass: 'bg-info'
-            });
-            new Sortable(example2, {
-                group: 'shared',
-                animation: 150,
-                ghostClass: 'bg-info'
-            });
-        }
-    </script>
 }
 
 func Preferences(currentSubTab string) http.HandlerFunc {

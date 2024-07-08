@@ -14,15 +14,7 @@ func GetDefaultUserPreferences() models.UserPreferences {
 func GetUserPreferences(r *http.Request) models.UserPreferences {
 	userPreferences := models.GetDefaultUserPreferences()
 
-	var cookie, err = r.Cookie("userpref_general")
-	if err == nil {
-		cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
-		if err == nil {
-			json.Unmarshal(cookieValue, &userPreferences.General)
-		}
-	}
-
-	cookie, err = r.Cookie("userpref_maintainers")
+	cookie, err := r.Cookie("userpref_maintainers")
 	if err == nil {
 		cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
 		if err == nil {
@@ -30,11 +22,11 @@ func GetUserPreferences(r *http.Request) models.UserPreferences {
 		}
 	}
 
+	// old cookie: search_history
+	// old cookie: userpref_general
 	// old cookie: userpref_packages
 	// old cookie: userpref_useflags
 	// old cookie: userpref_arches
-
-	userPreferences.Sanitize()
 
 	return userPreferences
 }

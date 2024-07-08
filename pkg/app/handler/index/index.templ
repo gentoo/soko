@@ -43,15 +43,11 @@ templ header(packageCount int) {
 	</div>
 }
 
-templ packagesList(addedPackages []packageInfo, landingPage string) {
+templ packagesList(addedPackages []packageInfo) {
 	<div class="col-12">
 		<h3 class="mb-2">
 			<span class="fa fa-fw fa-history"></span>
-			if landingPage == "classic" {
-				<a class="text-dark" href="/packages/added">Added Packages</a>
-			} else {
-				<a class="text-dark">Search History</a>
-			}
+			<a class="text-dark" href="/packages/added">Added Packages</a>
 		</h3>
 		<div class="card border-top-0 mb-4">
 			<div class="table-responsive rounded">
@@ -67,9 +63,6 @@ templ packagesList(addedPackages []packageInfo, landingPage string) {
 								<td>{ pkg.Description }</td>
 							</tr>
 						}
-						if landingPage == "full" && len(addedPackages) == 0 {
-							<tr><td class="text-center"><i>Visited packages will be displayed here in future</i></td></tr>
-						}
 					</tbody>
 				</table>
 			</div>
@@ -77,18 +70,18 @@ templ packagesList(addedPackages []packageInfo, landingPage string) {
 	</div>
 }
 
-templ page(packageCount int, addedPackages []packageInfo, updatedVersions []*models.Version, userPreferences models.UserPreferences) {
+templ page(packageCount int) {
 	<div class="container mb-5">
 		<div class="row">
 			@header(packageCount)
-			@packagesList(addedPackages, userPreferences.General.LandingPageLayout)
+			@packagesList(getAddedPackages(10))
 			<div class="col-12">
 				<h3 class="pt-3 mb-2">
 					<span class="fa fa-fw fa-asterisk"></span>
 					<a class="text-dark" href="/packages/updated">Updated Packages</a>
 				</h3>
 				<ul class="list-group">
-					@utils.ChangedVersionsTable(updatedVersions)
+					@utils.ChangedVersionsTable(getUpdatedVersions(10))
 				</ul>
 			</div>
 		</div>
@@ -99,17 +92,5 @@ templ page(packageCount int, addedPackages []packageInfo, updatedVersions []*mod
 // Show renders a template to show the landing page of the application
 func Show(w http.ResponseWriter, r *http.Request) {
 	count, _ := database.DBCon.Model((*models.Package)(nil)).Count()
-
-	var packagesList []packageInfo
-	if utils.GetUserPreferences(r).General.LandingPageLayout == "classic" {
-		packagesList = getAddedPackages(10)
-	} else {
-		packagesList = getSearchHistoryPackages(r)
-	}
-
-	updatedVersions := getUpdatedVersions(10)
-
-	layout.Layout("", layout.Home, page(
-		count, packagesList, updatedVersions, utils.GetUserPreferences(r),
-	)).Render(r.Context(), w)
+	layout.Layout("", layout.Home, page(count)).Render(r.Context(), w)
 }

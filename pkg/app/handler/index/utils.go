@@ -3,13 +3,9 @@
 package index
 
 import (
-	b64 "encoding/base64"
-	"net/http"
-	"slices"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"strconv"
-	"strings"
 
 	"github.com/go-pg/pg/v10"
 )
@@ -35,52 +31,6 @@ func getAddedPackages(n int) (packages []packageInfo) {
 		Select(&packages)
 	if err != nil {
 		return nil
-	}
-	return
-}
-
-func getSearchHistoryPackages(r *http.Request) (packages []packageInfo) {
-	cookie, err := r.Cookie("search_history")
-	if err != nil {
-		return nil
-	}
-	packagesList := getSearchHistoryFromCookie(cookie)
-
-	descriptionQuery := database.DBCon.Model((*models.Version)(nil)).
-		Column("description").
-		Where("atom = package.atom").
-		Limit(1)
-	err = database.DBCon.Model((*models.Package)(nil)).
-		Column("name", "category").
-		ColumnExpr("(?) AS description", descriptionQuery).
-		Where("atom in (?)", pg.In(packagesList)).
-		Select(&packages)
-	if err != nil {
-		return nil
-	}
-
-	return getSortedSearchHistory(packagesList, packages)
-}
-
-func getSortedSearchHistory(sortedPackagesList []string, packagesList []packageInfo) (result []packageInfo) {
-	for _, gpackage := range sortedPackagesList {
-		for _, gpackageObject := range packagesList {
-			if gpackageObject.Category+"/"+gpackageObject.Name == gpackage {
-				result = append(result, gpackageObject)
-			}
-		}
-	}
-	slices.Reverse(result)
-	return
-}
-
-func getSearchHistoryFromCookie(cookie *http.Cookie) (packagesList []string) {
-	cookieValue, err := b64.StdEncoding.DecodeString(cookie.Value)
-	if err == nil {
-		packagesList = strings.Split(string(cookieValue), ",")
-		if len(packagesList) > 10 {
-			packagesList = packagesList[len(packagesList)-10:]
-		}
 	}
 	return
 }
