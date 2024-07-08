@@ -37,15 +37,11 @@ func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintaine
 		return
 	}
 
-	userPreferences := utils.GetUserPreferences(r)
-	if userPreferences.Maintainers.IncludeProjectPackages && maintainer.Projects != nil && len(maintainer.Projects) > 0 {
-		excludeList := strings.Join(userPreferences.Maintainers.ExcludedProjects, ",")
-		for _, proj := range maintainer.Projects {
-			if !strings.Contains(excludeList, proj.Email) {
-				packagesQuery = packagesQuery.WhereOr("maintainers @> ?", `[{"Email": "`+proj.Email+`"}]`)
-			}
-		}
-	}
+	// if IncludeProjectPackages {
+	// 	for _, proj := range maintainer.Projects {
+	// 		packagesQuery = packagesQuery.WhereOr("maintainers @> ?", `[{"Email": "`+proj.Email+`"}]`)
+	// 	}
+	// }
 
 	packagesCount, err = packagesQuery.Clone().Count()
 	if err != nil {

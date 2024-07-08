@@ -17,7 +17,6 @@ import (
 	"soko/pkg/app/handler/maintainer"
 	"soko/pkg/app/handler/packages"
 	"soko/pkg/app/handler/useflags"
-	"soko/pkg/app/handler/user"
 	"soko/pkg/config"
 	"soko/pkg/database"
 
@@ -110,13 +109,6 @@ func Serve() {
 	// Added for backwards compatibility
 	redirect("GET /packages/stabilized.atom", "/packages/stable.atom")
 	setRoute("GET /packages/search.atom", packages.SearchFeed)
-
-	redirect("GET /user", "/user/preferences/general")
-	redirect("GET /user/preferences", "/user/preferences/general")
-	setRoute("GET /user/preferences/maintainers", user.Preferences("Maintainers"))
-
-	setRoute("/user/preferences/maintainers/edit", user.Maintainers)
-	setRoute("/user/preferences/maintainers/reset", user.ResetMaintainers)
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
