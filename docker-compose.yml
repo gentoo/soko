@@ -76,4 +76,10 @@ services:
     #   --host=unix:///var/run/docker.sock --host=unix:///var/run/docker-watchtower/docker.sock
       - /var/run/docker-watchtower:/var/run/docker-watchtower
       - /root/.docker/config.json:/config.json
-    command: --label-enable --host unix:///var/run/docker-watchtower/docker.sock
+    command:
+      - --label-enable
+      - --cleanup
+      - --schedule
+      - "0 0 * * * *"
+      - --host
+      - unix:///var/run/docker-watchtower/docker.sock
