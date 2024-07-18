@@ -9,7 +9,6 @@ module.exports = {
         graphiql:    './web/packs/graphiql.js',
         index:       './web/packs/index.js',
         useflags:    './web/packs/useflags.js',
-        userpref:    './web/packs/userpref.js',
     },
     mode: 'production',
     output: {
