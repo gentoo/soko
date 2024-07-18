@@ -44,12 +44,6 @@ module.exports = {
             jQuery: 'jquery',
             'window.jQuery': 'jquery',
             'windows.jQuery': 'jquery',
-            tether: 'tether',
-            Tether: 'tether',
-            'window.Tether': 'tether',
-            Popper: ['popper.js', 'default'],
-            'window.Tether': 'tether',
-            Modal: 'exports-loader?Modal!bootstrap/js/dist/modal',
         }),
         new MiniCssExtractPlugin({
             filename: '[name].css',
