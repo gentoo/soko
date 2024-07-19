@@ -79,13 +79,13 @@ td .alert {
 }
 
 .kk-col-list {
+  padding: 0;
+
   @media screen and (max-width: 767px) {
     columns: 1;
     -webkit-columns: 1;
     -moz-columns: 1;
   }
-
-  padding: 0;
 
   li {
     list-style-type: none;
