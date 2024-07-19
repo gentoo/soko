@@ -7,9 +7,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"soko/pkg/api/graphql/generated"
-	"soko/pkg/api/graphql/graphiql"
-	"soko/pkg/api/graphql/resolvers"
 	"soko/pkg/app/handler/about"
 	"soko/pkg/app/handler/arches"
 	"soko/pkg/app/handler/categories"
@@ -19,9 +16,6 @@ import (
 	"soko/pkg/app/handler/useflags"
 	"soko/pkg/config"
 	"soko/pkg/database"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
 )
 
 // Serve is used to serve the web application
@@ -112,19 +106,6 @@ func Serve() {
 
 	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
 	http.Handle("/assets/", fs)
-
-	// api: graphql
-	schema := generated.NewExecutableSchema(generated.Config{
-		Resolvers:  &resolvers.Resolver{},
-		Directives: generated.DirectiveRoot{},
-		Complexity: generated.ComplexityRoot{},
-	})
-	srv := handler.NewDefaultServer(schema)
-	srv.Use(extension.FixedComplexityLimit(300))
-	http.Handle("/api/graphql/", cors(srv))
-
-	// graphiql: api explorer
-	setRoute("/api/explore/", graphiql.Show)
 
 	address := ":" + config.Port()
 	slog.Info("Serving HTTP", "address", address)

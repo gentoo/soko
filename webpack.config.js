@@ -6,7 +6,6 @@ module.exports = {
     entry: {
         stylesheets: './web/packs/stylesheets.js',
         application: './web/packs/application.js',
-        graphiql:    './web/packs/graphiql.js',
         index:       './web/packs/index.js',
         useflags:    './web/packs/useflags.js',
     },
