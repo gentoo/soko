@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Used to show a specific package
 
 package packages

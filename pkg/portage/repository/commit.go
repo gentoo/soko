@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Contains functions to parse, import and process commits
 
 package repository

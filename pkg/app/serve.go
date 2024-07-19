@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Entrypoint for the web application
 
 package app

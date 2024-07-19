@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // miscellaneous utility functions used for packages
 
 package packages

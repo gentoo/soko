@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Contains utility functions to execute commands and parse the output
 
 package storage

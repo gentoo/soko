@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Contains the model of a commit
 
 package models

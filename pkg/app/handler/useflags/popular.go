@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // USE to show popular USE flags
 
 package useflags

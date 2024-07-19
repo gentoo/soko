@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Contains functions to import the list of arches into the database
 
 package repository

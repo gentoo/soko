@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 package models
 
 var ArchesToShow = [...]string{"amd64", "x86", "alpha", "arm", "arm64", "hppa", "ia64", "ppc", "ppc64", "riscv", "sparc"}

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Contains utility functions to parse the output of git commands
 
 package repository
