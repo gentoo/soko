@@ -89,7 +89,7 @@ func Eapi(w http.ResponseWriter, r *http.Request) {
 				Where("atom = version.atom").
 				Limit(1)).
 		Join("LEFT JOIN reverse_dependencies").JoinOn("version.atom = reverse_dependencies.atom").
-		ColumnExpr("COALESCE(COUNT(DISTINCT reverse_dependencies.reverse_dependency_atom),0) AS reverse_dependencies").
+		ColumnExpr("COALESCE(COUNT(DISTINCT reverse_dependencies.reverse_dependency_atom) FILTER(WHERE reverse_dependency_atom NOT LIKE '[B]%'),0) AS reverse_dependencies").
 		Join("LEFT JOIN package_to_bugs").JoinOn("version.atom = package_to_bugs.package_atom").
 		ColumnExpr("COALESCE(COUNT(DISTINCT package_to_bugs.id),0) AS bugs").
 		ColumnExpr("EXISTS(?) AS is_masked",
