@@ -139,13 +139,13 @@ func getParameterValue(parameterName string, r *http.Request) string {
 
 // getPackageUseflags retrieves all local USE flags, global USE
 // flags and use expands for a given package
-func getPackageUseflags(gpackage *models.Package) (localUseflags []models.Useflag, filteredGlobalUseflags []models.Useflag, useExpands map[string][]models.Useflag) {
+func getPackageUseflags(gpackage *models.Package) (localUseflags []*models.Useflag, filteredGlobalUseflags []*models.Useflag, useExpands map[string][]*models.Useflag) {
 	rawUseFlags := gpackage.AllUseflags()
 	if len(rawUseFlags) == 0 {
 		return
 	}
 
-	var tmp_useflags []models.Useflag
+	var tmp_useflags []*models.Useflag
 	err := database.DBCon.Model(&tmp_useflags).
 		WhereGroup(func(q *pg.Query) (*pg.Query, error) {
 			return q.Where("scope = ?", "local").Where("package = ?", gpackage.Atom), nil
@@ -160,8 +160,8 @@ func getPackageUseflags(gpackage *models.Package) (localUseflags []models.Usefla
 		return
 	}
 
-	var allGlobalUseflags []models.Useflag
-	useExpands = make(map[string][]models.Useflag)
+	var allGlobalUseflags []*models.Useflag
+	useExpands = make(map[string][]*models.Useflag)
 	for _, useflag := range tmp_useflags {
 		if useflag.Scope == "global" {
 			allGlobalUseflags = append(allGlobalUseflags, useflag)
@@ -170,6 +170,7 @@ func getPackageUseflags(gpackage *models.Package) (localUseflags []models.Usefla
 				localUseflags = append(localUseflags, useflag)
 			}
 		} else {
+			useflag.Name = strings.TrimPrefix(useflag.Name, useflag.UseExpand+"_")
 			useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], useflag)
 		}
 	}
@@ -283,7 +284,7 @@ func sortVersionsDesc(versions []*models.Version) {
 
 // containsUseflag returns true if the given list of useflags contains the
 // given userflag. Otherwise false will be returned.
-func containsUseflag(useflag models.Useflag, useflags []models.Useflag) bool {
+func containsUseflag(useflag *models.Useflag, useflags []*models.Useflag) bool {
 	for _, flag := range useflags {
 		if useflag.Name == flag.Name {
 			return true

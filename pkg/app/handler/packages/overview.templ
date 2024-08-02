@@ -135,6 +135,17 @@ templ maintainersList(maintainers []*models.Maintainer) {
 	}
 }
 
+templ useFlagsGroup(title string, useflags []*models.Useflag) {
+	<span class="kk-useflag-group">{ title }</span>
+	<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(useflags) >= 10), templ.KV("kk-useflag-container-few", len(useflags) < 10) }>
+		for _, use := range useflags {
+			<li class="kk-useflag">
+				<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+			</li>
+		}
+	</ul>
+}
+
 templ overview(pkg *models.Package) {
 	<div class="row">
 		<div class="col-md-9">
@@ -332,36 +343,13 @@ templ overview(pkg *models.Package) {
 								</div>
 								<div class="col-xs-12 col-md-9">
 									if len(localUseflags) > 0 {
-										<span class="kk-useflag-group">Local Use Flags</span>
-										<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
-											for _, use := range localUseflags {
-												<li class="kk-useflag">
-													<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
-												</li>
-											}
-										</ul>
+										@useFlagsGroup("Local Use Flags", localUseflags)
 									}
 									if len(globalUseflags) > 0 {
-										<span class="kk-useflag-group">Global Use Flags</span>
-										<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
-											for _, use := range globalUseflags {
-												<li class="kk-useflag">
-													<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
-												</li>
-											}
-										</ul>
+										@useFlagsGroup("Global Use Flags", globalUseflags)
 									}
-									if len(useExpands) > 0 {
-										for groupName, flags := range useExpands {
-											<span class="kk-useflag-group">{ groupName } (Use Expand)</span>
-											<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(localUseflags) >= 10), templ.KV("kk-useflag-container-few", len(localUseflags) < 10) }>
-												for _, use := range flags {
-													<li class="kk-useflag">
-														<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Name) }>{ strings.TrimPrefix(use.Name, use.UseExpand + "_") }</a>
-													</li>
-												}
-											</ul>
-										}
+									for groupName, flags := range useExpands {
+										@useFlagsGroup(groupName + " (Use Expand)", flags)
 									}
 								</div>
 							</div>
