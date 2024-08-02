@@ -6,6 +6,7 @@ package packages
 import (
 	"log/slog"
 	"net/http"
+	"slices"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"sort"
@@ -140,7 +141,7 @@ func getParameterValue(parameterName string, r *http.Request) string {
 // getPackageUseflags retrieves all local USE flags, global USE
 // flags and use expands for a given package
 func getPackageUseflags(gpackage *models.Package) (localUseflags []*models.Useflag, filteredGlobalUseflags []*models.Useflag, useExpands map[string][]*models.Useflag) {
-	rawUseFlags := gpackage.AllUseflags()
+	rawUseFlags, defaultOn := gpackage.AllUseflags()
 	if len(rawUseFlags) == 0 {
 		return
 	}
@@ -163,6 +164,7 @@ func getPackageUseflags(gpackage *models.Package) (localUseflags []*models.Usefl
 	var allGlobalUseflags []*models.Useflag
 	useExpands = make(map[string][]*models.Useflag)
 	for _, useflag := range tmp_useflags {
+		isDefaultOn := slices.Contains(defaultOn, useflag.Name)
 		if useflag.Scope == "global" {
 			allGlobalUseflags = append(allGlobalUseflags, useflag)
 		} else if useflag.Scope == "local" {
@@ -172,6 +174,9 @@ func getPackageUseflags(gpackage *models.Package) (localUseflags []*models.Usefl
 		} else {
 			useflag.Name = strings.TrimPrefix(useflag.Name, useflag.UseExpand+"_")
 			useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], useflag)
+		}
+		if isDefaultOn {
+			useflag.Name = "+" + useflag.Name
 		}
 	}
 

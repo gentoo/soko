@@ -145,17 +145,27 @@ func (p Package) AllBugs() []*Bug {
 	return allBugsList
 }
 
-func (p *Package) AllUseflags() []string {
-	useflags := make(map[string]struct{})
+func (p *Package) AllUseflags() (useflags []string, defaultOn []string) {
+	useflagsSet := make(map[string]struct{})
+	defaultOnSet := make(map[string]struct{})
 	for _, version := range p.Versions {
 		for _, useflag := range version.Useflags {
-			useflags[strings.TrimPrefix(useflag, "+")] = struct{}{}
+			if useflag[0] == '+' {
+				defaultOnSet[useflag[1:]] = struct{}{}
+				useflagsSet[useflag[1:]] = struct{}{}
+			} else {
+				useflagsSet[useflag] = struct{}{}
+			}
 		}
 	}
 
-	useflagsList := make([]string, 0, len(useflags))
-	for useflag := range useflags {
-		useflagsList = append(useflagsList, useflag)
+	useflags = make([]string, 0, len(useflagsSet))
+	for useflag := range useflagsSet {
+		useflags = append(useflags, useflag)
 	}
-	return useflagsList
+	defaultOn = make([]string, 0, len(defaultOnSet))
+	for useflag := range defaultOnSet {
+		defaultOn = append(defaultOn, useflag)
+	}
+	return
 }
