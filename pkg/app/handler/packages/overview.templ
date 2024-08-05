@@ -135,12 +135,12 @@ templ maintainersList(maintainers []*models.Maintainer) {
 	}
 }
 
-templ useFlagsGroup(title string, useflags []*models.Useflag) {
+templ useFlagsGroup(title string, useflags []packageUseFlags) {
 	<span class="kk-useflag-group">{ title }</span>
 	<ul class={ "kk-useflag-container", templ.KV("kk-useflag-container-many", len(useflags) >= 10), templ.KV("kk-useflag-container-few", len(useflags) < 10) }>
 		for _, use := range useflags {
 			<li class="kk-useflag">
-				<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + strings.TrimPrefix(use.Name, "+")) }>{ use.Name }</a>
+				<a title={ use.Description } data-toggle="tooltip" href={ templ.URL("/useflags/" + use.Href) }>{ use.Name }</a>
 			</li>
 		}
 	</ul>
@@ -349,7 +349,7 @@ templ overview(pkg *models.Package) {
 										@useFlagsGroup("Global Use Flags", globalUseflags)
 									}
 									for groupName, flags := range useExpands {
-										@useFlagsGroup(groupName + " (Use Expand)", flags)
+										@useFlagsGroup(groupName+" (Use Expand)", flags)
 									}
 								</div>
 							</div>

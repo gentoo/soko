@@ -138,9 +138,15 @@ func getParameterValue(parameterName string, r *http.Request) string {
 	return results[0]
 }
 
+type packageUseFlags struct {
+	Name        string
+	Description string
+	Href        string
+}
+
 // getPackageUseflags retrieves all local USE flags, global USE
 // flags and use expands for a given package
-func getPackageUseflags(gpackage *models.Package) (localUseflags []*models.Useflag, filteredGlobalUseflags []*models.Useflag, useExpands map[string][]*models.Useflag) {
+func getPackageUseflags(gpackage *models.Package) (localUseflags []packageUseFlags, filteredGlobalUseflags []packageUseFlags, useExpands map[string][]packageUseFlags) {
 	rawUseFlags, defaultOn := gpackage.AllUseflags()
 	if len(rawUseFlags) == 0 {
 		return
@@ -161,22 +167,27 @@ func getPackageUseflags(gpackage *models.Package) (localUseflags []*models.Usefl
 		return
 	}
 
-	var allGlobalUseflags []*models.Useflag
-	useExpands = make(map[string][]*models.Useflag)
+	var allGlobalUseflags []packageUseFlags
+	useExpands = make(map[string][]packageUseFlags)
 	for _, useflag := range tmp_useflags {
-		isDefaultOn := slices.Contains(defaultOn, useflag.Name)
+		var namePrefix string
+		if slices.Contains(defaultOn, useflag.Name) {
+			namePrefix = "+"
+		}
+
 		if useflag.Scope == "global" {
-			allGlobalUseflags = append(allGlobalUseflags, useflag)
+			allGlobalUseflags = append(allGlobalUseflags,
+				packageUseFlags{Name: namePrefix + useflag.Name, Description: useflag.Description, Href: useflag.Name})
 		} else if useflag.Scope == "local" {
 			if useflag.Package == gpackage.Atom {
-				localUseflags = append(localUseflags, useflag)
+				localUseflags = append(localUseflags,
+					packageUseFlags{Name: namePrefix + useflag.Name, Description: useflag.Description, Href: useflag.Name})
 			}
 		} else {
-			useflag.Name = strings.TrimPrefix(useflag.Name, useflag.UseExpand+"_")
-			useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], useflag)
-		}
-		if isDefaultOn {
-			useflag.Name = "+" + useflag.Name
+			useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], packageUseFlags{
+				Name:        namePrefix + strings.TrimPrefix(useflag.Name, useflag.UseExpand+"_"),
+				Description: useflag.Description, Href: useflag.Name,
+			})
 		}
 	}
 
@@ -289,7 +300,7 @@ func sortVersionsDesc(versions []*models.Version) {
 
 // containsUseflag returns true if the given list of useflags contains the
 // given userflag. Otherwise false will be returned.
-func containsUseflag(useflag *models.Useflag, useflags []*models.Useflag) bool {
+func containsUseflag(useflag packageUseFlags, useflags []packageUseFlags) bool {
 	for _, flag := range useflags {
 		if useflag.Name == flag.Name {
 			return true
