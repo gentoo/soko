@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0-only
 package utils
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 // Deduplicate accepts a slice of strings and returns
 // a slice which only contains unique items.
 func Deduplicate(items []string) []string {
-	if items != nil && len(items) > 1 {
+	if len(items) > 1 {
 		sort.Strings(items)
 		j := 0
 		for i := 1; i < len(items); i++ {
@@ -24,4 +27,12 @@ func Deduplicate(items []string) []string {
 	} else {
 		return items
 	}
+}
+
+func SliceTrimSpaces(items []string) (res []string) {
+	res = make([]string, len(items))
+	for i, item := range items {
+		res[i] = strings.TrimSpace(item)
+	}
+	return res
 }

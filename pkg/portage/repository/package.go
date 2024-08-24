@@ -11,6 +11,7 @@ import (
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"soko/pkg/utils"
 	"strings"
 )
 
@@ -125,30 +126,30 @@ func updateModifiedPackage(changedFile string) *models.Package {
 			Name:     strings.TrimSpace(maintainer.Name),
 			Type:     strings.TrimSpace(maintainer.Type),
 			Email:    strings.TrimSpace(maintainer.Email),
-			Restrict: maintainer.Restrict,
+			Restrict: strings.TrimSpace(maintainer.Restrict),
 		}
 	}
 
 	var longDescription string
 	for _, l := range pkgMetadata.LongDescriptionList {
 		if l.Language == "" || l.Language == "en" {
-			longDescription = l.Content
+			longDescription = strings.TrimSpace(l.Content)
 		}
 	}
 
 	remoteIds := make([]models.RemoteId, len(pkgMetadata.Upstream.RemoteIds))
 	for i, r := range pkgMetadata.Upstream.RemoteIds {
 		remoteIds[i] = models.RemoteId{
-			Type: r.Type,
-			Id:   r.Content,
+			Type: strings.TrimSpace(r.Type),
+			Id:   strings.TrimSpace(r.Content),
 		}
 	}
 
 	upstream := models.Upstream{
 		RemoteIds: remoteIds,
-		Doc:       pkgMetadata.Upstream.Doc,
-		BugsTo:    pkgMetadata.Upstream.BugsTo,
-		Changelog: pkgMetadata.Upstream.Changelog,
+		Doc:       utils.SliceTrimSpaces(pkgMetadata.Upstream.Doc),
+		BugsTo:    utils.SliceTrimSpaces(pkgMetadata.Upstream.BugsTo),
+		Changelog: utils.SliceTrimSpaces(pkgMetadata.Upstream.Changelog),
 	}
 
 	return &models.Package{
