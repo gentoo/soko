@@ -20,7 +20,6 @@ func AllFiles() []string {
 		"ls-tree",
 		"-r", "master",
 		"--name-only")
-
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -95,24 +94,18 @@ func GetLatestCommit() string {
 // GetLatestCommitAndPreceding retrieves the latest
 // commit in the database. The hash of the latest commit
 // as well as the number of preceding commits is returned
-func GetLatestCommitAndPreceding() (string, int) {
-	latestCommit := EmptyTree()
-	PrecedingCommitsOffset := 0
-
+func GetLatestCommitAndPreceding() (latestCommit string, precedingCommitsOffset int) {
 	var commits []*models.Commit
 	err := database.DBCon.Model(&commits).
 		Order("preceding_commits DESC").
 		Limit(1).
 		Select()
 	if err == nil && len(commits) == 1 {
-		latestCommit = commits[0].Id
-		PrecedingCommitsOffset = commits[0].PrecedingCommits
+		return commits[0].Id, commits[0].PrecedingCommits
 	}
 
-	return latestCommit, PrecedingCommitsOffset
+	return EmptyTree, 0
 }
 
 // EmptyTree returns the hash of the empty tree
-func EmptyTree() string {
-	return "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
-}
+const EmptyTree = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
