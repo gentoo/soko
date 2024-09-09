@@ -3,7 +3,7 @@
 
 <p align="center">
 <a href="https://gitlab.com/gentoo/soko/-/pipelines"> <img src="https://gitlab.com/gentoo/soko/badges/master/pipeline.svg"></a>
-<a href="https://blog.golang.org/go1.22" ><img src="https://img.shields.io/badge/Go-v1.22-blue"></a>
+<a href="https://blog.golang.org/go1.23" ><img src="https://img.shields.io/badge/Go-v1.23-blue"></a>
 <a href="#contributing"> <img src="https://img.shields.io/badge/contributions-welcome-orange.svg"></a>
 <a href="https://packagestest.gentoo.org"><img src="https://img.shields.io/badge/staging%20environment-develop-blue" /></a>
 <a href="https://opensource.org/licenses/TBD"><img src="https://img.shields.io/badge/license-TBD-blue.svg"></a>

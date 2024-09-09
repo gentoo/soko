@@ -1,4 +1,4 @@
-FROM golang:1.22.2
+FROM golang:1.23.1
 RUN apt update && apt install -y ca-certificates ntp ntpdate git
 WORKDIR /go/src/soko
 COPY . /go/src/soko
