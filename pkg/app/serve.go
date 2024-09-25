@@ -17,6 +17,7 @@ import (
 	"soko/pkg/app/handler/useflags"
 	"soko/pkg/config"
 	"soko/pkg/database"
+	"time"
 )
 
 // Serve is used to serve the web application
@@ -137,6 +138,7 @@ func mw(handler http.HandlerFunc) http.HandlerFunc {
 // setDefaultHeaders sets the default headers that apply for all pages
 func setDefaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Cache-Control", config.CacheControl())
+	w.Header().Set("Expires", time.Now().UTC().Add(config.CacheTime).Format(http.TimeFormat))
 }
 
 func cors(h http.Handler) http.HandlerFunc {

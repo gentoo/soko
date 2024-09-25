@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func PortDir() string {
@@ -69,6 +70,8 @@ func GraphiqlEndpoint() string {
 func CacheControl() string {
 	return getEnv("SOKO_CACHE_CONTROL", "max-age=300")
 }
+
+const CacheTime = 5 * time.Minute
 
 func UserAgent() string {
 	return fmt.Sprintf("Gentoo Soko %s/packages.gentoo.org/gpackages@gentoo.org", Version())
