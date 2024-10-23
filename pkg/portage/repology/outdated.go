@@ -22,7 +22,7 @@ import (
 type Package struct {
 	Repo        string `json:"repo"`
 	Name        string `json:"name"`
-	VisibleName string `json:"visiblename"`
+	SrcName     string `json:"srcname"`
 	Version     string `json:"version"`
 	Status      string `json:"status"`
 }
@@ -128,29 +128,29 @@ func (o *outdatedCheck) getOutdatedStartingWith(letter rune) {
 		gentooPackages := make(map[string]struct{})
 		for _, v := range repoPackages[packagename] {
 			if v.Repo == "gentoo" {
-				gentooPackages[v.VisibleName] = struct{}{}
+				gentooPackages[v.SrcName] = struct{}{}
 			}
 		}
 	mainLoop:
 		for _, v := range repoPackages[packagename] {
-			category, _, _ := strings.Cut(v.VisibleName, "/")
+			category, _, _ := strings.Cut(v.SrcName, "/")
 			if v.Repo == "gentoo" {
 				if v.Status == "newest" {
-					outdated[v.VisibleName] = false
+					outdated[v.SrcName] = false
 				} else if v.Status == "outdated" {
-					if contains(o.blockedCategories, category) || o.atomRules[v.VisibleName].isIgnored(v.Version, v.Repo) {
+					if contains(o.blockedCategories, category) || o.atomRules[v.SrcName].isIgnored(v.Version, v.Repo) {
 						continue
 					}
-					if _, found := outdated[v.VisibleName]; !found {
-						outdated[v.VisibleName] = true
+					if _, found := outdated[v.SrcName]; !found {
+						outdated[v.SrcName] = true
 					}
-					if latest, found := currentVersion[v.VisibleName]; found {
+					if latest, found := currentVersion[v.SrcName]; found {
 						current := models.Version{Version: v.Version}
 						if current.GreaterThan(models.Version{Version: latest}) {
-							currentVersion[v.VisibleName] = v.Version
+							currentVersion[v.SrcName] = v.Version
 						}
 					} else {
-						currentVersion[v.VisibleName] = v.Version
+						currentVersion[v.SrcName] = v.Version
 					}
 				}
 			} else if len(newestVersion) == 0 && v.Status == "newest" && !contains(o.blockedRepos, v.Repo) {
