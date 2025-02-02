@@ -26,8 +26,8 @@ templ eapiOverview(packages []eapiPackage) {
 		<div class="row">
 			<div class="col-12">
 				<h3 class="mb-2">
-					EAPI 6 Overview ({ strconv.Itoa(len(packages)) } packages)
-					<a href="https://bugs.gentoo.org/770247" target="_blank"><i class="fa fa-bug"></i></a>
+					EAPI 7 Overview ({ strconv.Itoa(len(packages)) } packages)
+					<a href="https://bugs.gentoo.org/803521" target="_blank"><i class="fa fa-bug"></i></a>
 				</h3>
 				<table class="table table-striped table-hover table-bordered kk-versions-table mb-0 overflow-hidden border-0">
 					<thead class="sticky-top">
@@ -104,7 +104,7 @@ func Eapi(w http.ResponseWriter, r *http.Request) {
 			database.DBCon.Model((*models.PkgCheckResult)(nil)).
 				ColumnExpr("1").
 				Where("atom = version.atom").Where("class = ?", "StableRequest")).
-		Where("version.eapi = ?", "6").
+		Where("version.eapi = ?", "7").
 		Group("version.id").
 		Order("version.atom").
 		Select(&result)
@@ -112,5 +112,5 @@ func Eapi(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	categories.RenderPage(w, r, "EAPI 6 Overview", "EAPI cleanup", eapiOverview(result))
+	categories.RenderPage(w, r, "EAPI 7 Overview", "EAPI cleanup", eapiOverview(result))
 }

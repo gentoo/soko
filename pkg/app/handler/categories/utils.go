@@ -41,7 +41,7 @@ var categoriesViewTabs = []layout.SubTab{
 	},
 	{
 		Name: "EAPI cleanup",
-		Link: templ.URL("/packages/eapi6"),
+		Link: templ.URL("/packages/eapi7"),
 		Icon: "fa fa-trash-o",
 	},
 }
