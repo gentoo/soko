@@ -2,7 +2,7 @@ FROM golang:1.23.1 AS builder
 RUN go install github.com/a-h/templ/cmd/templ@v0.3.833
 WORKDIR /go/src/soko
 COPY . /go/src/soko
-RUN templ generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
+RUN touch assets/keep && templ generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
 
 FROM ghcr.io/pkgcore/pkgcheck:latest
