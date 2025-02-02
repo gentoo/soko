@@ -6,10 +6,6 @@ RUN templ generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin .
 
 
 FROM ghcr.io/pkgcore/pkgcheck:latest
-
-COPY --from=builder /go/src/soko/assets /go/src/soko/assets
 COPY --from=builder /go/src/soko/bin /go/src/soko/bin
-COPY --from=builder /go/src/soko/pkg /go/src/soko/pkg
-COPY --from=builder /go/src/soko/web /go/src/soko/web
 WORKDIR /go/src/soko
 ENTRYPOINT ["/go/src/soko/bin/update.sh"]

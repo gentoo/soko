@@ -2,6 +2,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"log"
 	"log/slog"
@@ -26,6 +27,9 @@ import (
 	"soko/pkg/portage/repology"
 	"soko/pkg/selfcheck"
 )
+
+//go:embed assets
+var staticAssets embed.FS
 
 func main() {
 	initLoggers()
@@ -90,7 +94,7 @@ func main() {
 	}
 
 	if *serve {
-		app.Serve()
+		app.Serve(staticAssets)
 	}
 
 	if *help {

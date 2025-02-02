@@ -4,6 +4,7 @@
 package app
 
 import (
+	"io/fs"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
@@ -21,7 +22,7 @@ import (
 )
 
 // Serve is used to serve the web application
-func Serve() {
+func Serve(staticAssets fs.FS) {
 	database.Connect()
 	defer database.DBCon.Close()
 
@@ -106,7 +107,7 @@ func Serve() {
 	redirect("GET /packages/stabilized.atom", "/packages/stable.atom")
 	setRoute("GET /packages/search.atom", packages.SearchFeed)
 
-	fs := http.StripPrefix("/assets/", http.FileServer(http.Dir("/go/src/soko/assets")))
+	fs := http.StripPrefix("/", http.FileServerFS(staticAssets))
 	http.Handle("/assets/", fs)
 
 	address := ":" + config.Port()
