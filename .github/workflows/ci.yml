@@ -22,15 +22,6 @@ jobs:
     needs: ["test-go"]
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - file: Dockerfile
-            type: web
-          - file: Dockerfile.updater
-            type: updater
-
     permissions:
       contents: read
       packages: write
@@ -49,20 +40,40 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker meta
-        id: meta
+      - name: Docker meta (web)
+        id: web
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/gentoo/soko
           tags: |
-            type=sha,prefix={{branch}}-${{ matrix.type }}-
-            type=raw,value={{branch}}-${{ matrix.type }}-latest
+            type=sha,prefix={{branch}}-web-
+            type=raw,value={{branch}}-web-latest
 
-      - name: Build and push
+      - name: Docker meta (updater)
+        id: updater
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/gentoo/soko
+          tags: |
+            type=sha,prefix={{branch}}-updater-
+            type=raw,value={{branch}}-updater-latest
+
+      - name: Build and push (web)
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ${{ matrix.file }}
+          file: Dockerfile
+          target: web
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.web.outputs.tags }}
+          labels: ${{ steps.web.outputs.labels }}
+
+      - name: Build and push (updater)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          target: updater
+          push: true
+          tags: ${{ steps.updater.outputs.tags }}
+          labels: ${{ steps.updater.outputs.labels }}

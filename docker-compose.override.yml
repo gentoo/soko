@@ -23,7 +23,7 @@ services:
   updater:
     build:
       context: .
-      dockerfile: Dockerfile.updater.dev
+      dockerfile: Dockerfile.dev
     volumes:
       - type: "bind"
         source: "/mnt/packages-tree"
