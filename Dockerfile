@@ -3,7 +3,7 @@ WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN npm install && npx webpack
 
-FROM golang:1.23.1 AS builder
+FROM golang:1.24.0 AS builder
 RUN go install github.com/a-h/templ/cmd/templ@v0.3.833
 WORKDIR /go/src/soko
 COPY . /go/src/soko
