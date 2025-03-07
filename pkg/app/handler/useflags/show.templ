@@ -131,6 +131,14 @@ templ show(useflag models.Useflag, localUseflags, otherUseExpands []models.Usefl
 func Show(w http.ResponseWriter, r *http.Request) {
 	useFlagName := r.PathValue("useflag")
 
+	if useFlagName == "" {
+		http.NotFound(w, r)
+		return
+	} else if useFlagName[0] == '-' || useFlagName[0] == '+' {
+		http.Redirect(w, r, "/useflags/"+useFlagName[1:], http.StatusMovedPermanently)
+		return
+	}
+
 	var useflags []models.Useflag
 	err := database.DBCon.Model(&useflags).
 		Where("name = ?", useFlagName).
