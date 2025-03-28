@@ -30,9 +30,10 @@ func UpdateUse(path string) {
 			scope := getScope(path)
 
 			var err error
-			if scope == "local" || scope == "global" {
+			switch scope {
+			case "local", "global":
 				err = createUseflag(rawFlag, scope)
-			} else if scope == "use_expand" {
+			case "use_expand":
 				file := strings.Split(path, "/")[2]
 				err = createUseExpand(rawFlag, file)
 			}

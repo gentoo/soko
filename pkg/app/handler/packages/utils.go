@@ -175,15 +175,16 @@ func getPackageUseflags(gpackage *models.Package) (localUseflags []packageUseFla
 			namePrefix = "+"
 		}
 
-		if useflag.Scope == "global" {
+		switch useflag.Scope {
+		case "global":
 			allGlobalUseflags = append(allGlobalUseflags,
 				packageUseFlags{Name: namePrefix + useflag.Name, Description: useflag.Description, Href: useflag.Name})
-		} else if useflag.Scope == "local" {
+		case "local":
 			if useflag.Package == gpackage.Atom {
 				localUseflags = append(localUseflags,
 					packageUseFlags{Name: namePrefix + useflag.Name, Description: useflag.Description, Href: useflag.Name})
 			}
-		} else {
+		default:
 			useExpands[useflag.UseExpand] = append(useExpands[useflag.UseExpand], packageUseFlags{
 				Name:        namePrefix + strings.TrimPrefix(useflag.Name, useflag.UseExpand+"_"),
 				Description: useflag.Description, Href: useflag.Name,

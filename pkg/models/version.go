@@ -287,17 +287,17 @@ func isRevision(str string) bool {
 //
 // as defined in the Package Manager Specification (PMS)
 func getSuffixOrder(suffix string) int {
-	if suffix == "p" {
+	switch suffix {
+	case "p":
 		return 4
-	} else if suffix == "rc" {
+	case "rc":
 		return 3
-	} else if suffix == "pre" {
+	case "pre":
 		return 2
-	} else if suffix == "beta" {
+	case "beta":
 		return 1
-	} else if suffix == "alpha" {
+	case "alpha":
 		return 0
-	} else {
-		return 9999
 	}
+	return 9999
 }

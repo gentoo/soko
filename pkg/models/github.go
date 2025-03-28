@@ -44,11 +44,11 @@ func (res *GitHubPullRequestQueryResult) AppendPullRequest(pullRequests map[int]
 	for _, rawObject := range res.Data.Search.Edges {
 		pullRequest := rawObject.Node
 		var ciState, ciStateLink string
-		if pullRequest.Commits.Nodes != nil && len(pullRequest.Commits.Nodes) > 0 {
-			ciState = pullRequest.Commits.Nodes[0].Commit.Status.State
+		if nodes := pullRequest.Commits.Nodes; len(nodes) > 0 {
+			ciState = nodes[0].Commit.Status.State
 
-			if pullRequest.Commits.Nodes[0].Commit.Status.Contexts != nil && len(pullRequest.Commits.Nodes[0].Commit.Status.Contexts) > 0 {
-				ciStateLink = pullRequest.Commits.Nodes[0].Commit.Status.Contexts[0].TargetUrl
+			if contexts := nodes[0].Commit.Status.Contexts; len(contexts) > 0 {
+				ciStateLink = contexts[0].TargetUrl
 			}
 		}
 

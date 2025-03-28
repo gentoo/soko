@@ -176,19 +176,20 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 
 	for _, v := range versions {
 		givenVersion := models.Version{Version: versionSpecifier}
-		if operator == ">" {
+		switch operator {
+		case ">":
 			if v.GreaterThan(givenVersion) {
 				results = append(results, v)
 			}
-		} else if operator == ">=" {
+		case ">=":
 			if v.GreaterThan(givenVersion) || v.EqualTo(givenVersion) {
 				results = append(results, v)
 			}
-		} else if operator == "<" {
+		case "<":
 			if v.SmallerThan(givenVersion) {
 				results = append(results, v)
 			}
-		} else if operator == "<=" {
+		case "<=":
 			if v.SmallerThan(givenVersion) || v.EqualTo(givenVersion) {
 				results = append(results, v)
 			}

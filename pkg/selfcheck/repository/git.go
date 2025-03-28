@@ -4,27 +4,27 @@
 package repository
 
 import (
+	"os"
+	"soko/pkg/config"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"os"
-	"soko/pkg/config"
 )
-
 
 func UpdateRepo() error {
 
 	r, err := git.PlainOpen(config.SelfCheckPortDir())
 
 	if err != nil {
-		r, err = git.PlainClone(config.SelfCheckPortDir(), false, &git.CloneOptions{
+		r, _ = git.PlainClone(config.SelfCheckPortDir(), false, &git.CloneOptions{
 			URL:      "https://github.com/gentoo-mirror/gentoo",
 			Depth:    5,
 			Progress: os.Stdout,
 		})
 	}
 
-	w, err := r.Worktree()
+	w, _ := r.Worktree()
 	err = w.Pull(&git.PullOptions{RemoteName: "origin", ReferenceName: "stable"})
 
 	return err
@@ -52,4 +52,3 @@ func AllFiles() []string {
 
 	return allFiles
 }
-
