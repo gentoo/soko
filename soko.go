@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/jasonlvhit/gocron"
 	"github.com/lmittmann/tint"
 	slogmulti "github.com/samber/slog-multi"
 
@@ -25,7 +24,6 @@ import (
 	"soko/pkg/portage/pkgcheck"
 	"soko/pkg/portage/projects"
 	"soko/pkg/portage/repology"
-	"soko/pkg/selfcheck"
 )
 
 //go:embed assets
@@ -35,7 +33,6 @@ func main() {
 	initLoggers()
 
 	serve := flag.Bool("serve", false, "Start serving the application")
-	selfchecks := flag.Bool("enable-selfchecks", false, "Perform selfchecks periodicals to monitor the consistency of the data")
 	update := flag.Bool("update", false, "Perform an incremental update of the package data")
 	fullupdate := flag.Bool("fullupdate", false, "Perform a full update of the package data")
 	updateOutdatedPackages := flag.Bool("update-outdated-packages", false, "Update the repology.org data of outdated packages")
@@ -51,11 +48,6 @@ func main() {
 
 	flag.Parse()
 
-	if *selfchecks {
-		slog.Info("Enabling periodical selfcheck")
-		go runSelfChecks()
-		selfcheck.Serve()
-	}
 	if *update {
 		slog.Info("Updating package data")
 		portage.Update()
@@ -148,9 +140,4 @@ func initLoggers() {
 	}
 	slog.SetLogLoggerLevel(slog.LevelInfo)
 	slog.SetDefault(slog.New(handler))
-}
-
-func runSelfChecks() {
-	gocron.Every(1).Hour().From(gocron.NextTick()).Do(selfcheck.AllPackages)
-	<-gocron.Start()
 }

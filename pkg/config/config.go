@@ -11,10 +11,6 @@ func PortDir() string {
 	return getEnv("SOKO_PORT_DIR", "/mnt/packages-tree/gentoo")
 }
 
-func SelfCheckPortDir() string {
-	return getEnv("SOKO_SELFCHECK_PORT_DIR", "/mnt/selfcheck-packages-tree")
-}
-
 func PostgresUser() string {
 	return getEnv("SOKO_POSTGRES_USER", "root")
 }
@@ -33,10 +29,6 @@ func PostgresHost() string {
 
 func PostgresPort() string {
 	return getEnv("SOKO_POSTGRES_PORT", "5432")
-}
-
-func DevMode() string {
-	return getEnv("SOKO_DEVMODE", "false")
 }
 
 func Debug() bool {
@@ -61,10 +53,6 @@ func Port() string {
 
 func GithubAPIToken() string {
 	return getEnv("SOKO_GITHUB_TOKEN", "")
-}
-
-func GraphiqlEndpoint() string {
-	return getEnv("GRAPHIQL_ENDPOINT", "https://packages.gentoo.org/api/graphql/")
 }
 
 func CacheControl() string {
