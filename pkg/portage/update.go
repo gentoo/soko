@@ -247,17 +247,13 @@ func deleteRemovedCategories() {
 // package does not mistakenly appears in the 'lately added
 // packages' section.
 func fixPrecedingCommitsOfPackages() {
-	var packages []*models.Package
-	database.DBCon.Model(&packages).Where("preceding_commits = 0").Select()
-	if len(packages) == 0 {
-		return
+	_, err := database.DBCon.Model((*models.Package)(nil)).
+		Set("preceding_commits = 1").
+		Where("preceding_commits = 0").
+		Update()
+	if err != nil {
+		slog.Error("Failed updating packages with preceding commits == 0", slog.Any("err", err))
 	}
-
-	slog.Error("Found packages with preceding commits == 0. This should not happen. Fixing...", slog.Int("count", len(packages)))
-	for _, pkg := range packages {
-		pkg.PrecedingCommits = 1
-	}
-	database.DBCon.Model(&packages).Update()
 }
 
 // GetApplicationData is used to retrieve the
