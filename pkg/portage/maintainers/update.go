@@ -8,9 +8,14 @@ import (
 	"soko/pkg/models"
 	"strings"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const maintainerNeededEmail = "maintainer-needed@gentoo.org"
+
+var caser = cases.Title(language.English)
 
 func FullImport() {
 	database.Connect()
@@ -103,7 +108,7 @@ func FullImport() {
 
 		if maintainer.Name == "" {
 			name, _, _ := strings.Cut(maintainer.Email, "@")
-			maintainer.Name = strings.Title(name)
+			maintainer.Name = caser.String(name)
 		}
 
 		if maintainer.Type == "project" && strings.HasPrefix(maintainer.Name, "Gentoo ") {
