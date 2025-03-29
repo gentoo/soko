@@ -5,6 +5,23 @@ on:
     branches: [master,develop]
 
 jobs:
+  lint-go:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.0
+          cache-dependency-path: go.sum
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.0
+
   test-go:
     runs-on: ubuntu-latest
     steps:

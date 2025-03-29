@@ -1,0 +1,17 @@
+version: "2"
+
+linters:
+  enable:
+    - sloglint
+  settings:
+    errcheck:
+      exclude-functions:
+        - (*os.File).Close
+        - (io.Closer).Close
+        - (net/http.ResponseWriter).Write
+        - (github.com/a-h/templ.Component).Render
+        - (*github.com/go-pg/pg/v10.baseDB).Close
+        - (*github.com/gorilla/feeds.Feed).WriteAtom
+    sloglint:
+      attr-only: true
+      static-msg: true
