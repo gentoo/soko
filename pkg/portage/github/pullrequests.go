@@ -243,9 +243,12 @@ func updateCategoriesPullRequests(categoriesPullRequests map[string]map[string]s
 }
 
 func updateStatus() {
-	database.DBCon.Model(&models.Application{
+	_, err := database.DBCon.Model(&models.Application{
 		Id:         "pullrequests",
 		LastUpdate: time.Now(),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		slog.Error("Failed updating status", slog.Any("err", err))
+	}
 }

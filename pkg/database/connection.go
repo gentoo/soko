@@ -80,7 +80,7 @@ func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Cont
 func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
 	query, err := q.FormattedQuery()
 	if err == nil {
-		slog.Debug(string(query), slog.Duration("duration", time.Since(q.StartTime)))
+		slog.Debug(string(query), slog.Duration("duration", time.Since(q.StartTime))) //nolint: sloglint
 	}
 	return nil
 }

@@ -138,9 +138,12 @@ func updateCategoriesInfo() {
 }
 
 func updateStatus() {
-	database.DBCon.Model(&models.Application{
+	_, err := database.DBCon.Model(&models.Application{
 		Id:         "pkgcheck",
 		LastUpdate: time.Now(),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		slog.Error("Failed updating status", slog.Any("err", err))
+	}
 }

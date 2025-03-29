@@ -20,11 +20,11 @@ import (
 )
 
 type Package struct {
-	Repo        string `json:"repo"`
-	Name        string `json:"name"`
-	SrcName     string `json:"srcname"`
-	Version     string `json:"version"`
-	Status      string `json:"status"`
+	Repo    string `json:"repo"`
+	Name    string `json:"name"`
+	SrcName string `json:"srcname"`
+	Version string `json:"version"`
+	Status  string `json:"status"`
 }
 
 type Packages = map[string][]Package
@@ -327,9 +327,12 @@ func contains(list map[string]struct{}, item string) bool {
 }
 
 func updateStatus() {
-	database.DBCon.Model(&models.Application{
+	_, err := database.DBCon.Model(&models.Application{
 		Id:         "repology",
 		LastUpdate: time.Now(),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		slog.Error("Failed updating status", slog.Any("err", err))
+	}
 }

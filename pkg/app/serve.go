@@ -111,9 +111,9 @@ func Serve(staticAssets fs.FS) {
 	http.Handle("/assets/", fs)
 
 	address := ":" + config.Port()
-	slog.Info("Serving HTTP", "address", address)
+	slog.Info("Serving HTTP", slog.String("address", address))
 	err := http.ListenAndServe(address, nil)
-	slog.Error("exited server", "err", err)
+	slog.Error("exited server", slog.Any("err", err))
 	os.Exit(1)
 }
 
@@ -140,13 +140,4 @@ func mw(handler http.HandlerFunc) http.HandlerFunc {
 func setDefaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Cache-Control", config.CacheControl())
 	w.Header().Set("Expires", time.Now().UTC().Add(config.CacheTime).Format(http.TimeFormat))
-}
-
-func cors(h http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		h.ServeHTTP(w, r)
-	}
 }

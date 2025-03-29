@@ -174,9 +174,12 @@ func (p *ApiPackage) LatestVersion() (result string) {
 }
 
 func updateStatus() {
-	database.DBCon.Model(&models.Application{
+	_, err := database.DBCon.Model(&models.Application{
 		Id:         "anitya",
 		LastUpdate: time.Now(),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		slog.Error("Failed updating status", slog.Any("err", err))
+	}
 }

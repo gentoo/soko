@@ -31,7 +31,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if strings.Contains(searchTerm, "@") {
 		var maintainers []models.Maintainer
-		database.DBCon.Model(&maintainers).Where("email = ?", searchTerm).Select()
+		_ = database.DBCon.Model(&maintainers).Where("email = ?", searchTerm).Select()
 		if len(maintainers) > 0 {
 			http.Redirect(w, r, "/maintainer/"+searchTerm, http.StatusMovedPermanently)
 			return
@@ -45,7 +45,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if strings.Contains(searchTerm, "/") {
 		var packages []models.Package
-		database.DBCon.Model(&packages).Where("atom = ?", searchTerm).Select()
+		_ = database.DBCon.Model(&packages).Where("atom = ?", searchTerm).Select()
 		if len(packages) > 0 {
 			http.Redirect(w, r, "/packages/"+searchTerm, http.StatusMovedPermanently)
 			return

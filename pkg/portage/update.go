@@ -61,7 +61,6 @@ func updateMetadata(changed []string) {
 		repository.UpdateUse(path)
 		repository.UpdateMask(path)
 		repository.UpdatePackagesDeprecated(path)
-		repository.UpdateArch(path)
 	}
 }
 

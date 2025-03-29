@@ -170,7 +170,7 @@ func linkCommitToVersion(commitLine, path, id string) {
 }
 
 func createKeywordChange(id, path, commitLine string) {
-	if !strings.HasSuffix(path, ".ebuild") || !(strings.Count(commitLine, "/") >= 2) {
+	if !strings.HasSuffix(path, ".ebuild") || strings.Count(commitLine, "/") < 2 {
 		return
 	}
 

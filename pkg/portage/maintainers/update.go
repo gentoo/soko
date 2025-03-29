@@ -13,13 +13,12 @@ import (
 const maintainerNeededEmail = "maintainer-needed@gentoo.org"
 
 func FullImport() {
-
 	database.Connect()
 	defer database.DBCon.Close()
 
 	slog.Info("Loading all raw maintainers from the database")
 	var allMaintainerInformation []*models.Maintainer
-	database.DBCon.Model((*models.Package)(nil)).ColumnExpr("jsonb_array_elements(maintainers)->>'Name' as name, jsonb_array_elements(maintainers) ->> 'Email' as email, jsonb_array_elements(maintainers) ->> 'Type' as type").Select(&allMaintainerInformation)
+	_ = database.DBCon.Model((*models.Package)(nil)).ColumnExpr("jsonb_array_elements(maintainers)->>'Name' as name, jsonb_array_elements(maintainers) ->> 'Email' as email, jsonb_array_elements(maintainers) ->> 'Type' as type").Select(&allMaintainerInformation)
 
 	maintainers := map[string]*models.Maintainer{
 		maintainerNeededEmail: {
@@ -40,7 +39,7 @@ func FullImport() {
 
 	slog.Info("Loading all packages from the database")
 	var gpackages []*models.Package
-	database.DBCon.Model(&gpackages).
+	err := database.DBCon.Model(&gpackages).
 		Relation("Outdated").
 		Relation("PullRequests").
 		Relation("Bugs").
@@ -48,6 +47,10 @@ func FullImport() {
 		Relation("Versions.Bugs").
 		Relation("Versions.PkgCheckResults").
 		Select()
+	if err != nil {
+		slog.Error("Failed fetching packages", slog.Any("err", err))
+		return
+	}
 
 	for _, maintainer := range maintainers {
 		var outdated, stableRequests int
@@ -154,9 +157,12 @@ func countBugs(packages []*models.Package) (securityBugs, nonSecurityBugs int) {
 }
 
 func updateStatus() {
-	database.DBCon.Model(&models.Application{
+	_, err := database.DBCon.Model(&models.Application{
 		Id:         "maintainers",
 		LastUpdate: time.Now(),
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
+	if err != nil {
+		slog.Error("Failed updating status", slog.Any("err", err))
+	}
 }

@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"log/slog"
 	"regexp"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -57,23 +58,28 @@ func comparedVersions(operator string, versionSpecifier string, packageAtom stri
 	if len(slots) == 2 {
 		q = q.Where("subslot = ?", slots[1])
 	}
-	q.Select()
+	err := q.Select()
+	if err != nil {
+		slog.Error("Failed fetching versions", slog.Any("err", err))
+		return nil
+	}
 
 	for _, v := range versions {
 		givenVersion := models.Version{Version: versionSpecifier}
-		if operator == ">" {
+		switch operator {
+		case ">":
 			if v.GreaterThan(givenVersion) {
 				results = append(results, v)
 			}
-		} else if operator == ">=" {
+		case ">=":
 			if v.GreaterThan(givenVersion) || v.EqualTo(givenVersion) {
 				results = append(results, v)
 			}
-		} else if operator == "<" {
+		case "<":
 			if v.SmallerThan(givenVersion) {
 				results = append(results, v)
 			}
-		} else if operator == "<=" {
+		case "<=":
 			if v.SmallerThan(givenVersion) || v.EqualTo(givenVersion) {
 				results = append(results, v)
 			}
@@ -97,7 +103,10 @@ func allRevisions(versionSpecifier string, packageAtom string) []*models.Version
 	if len(slots) == 2 {
 		q = q.Where("subslot = ?", slots[1])
 	}
-	q.Select()
+	err := q.Select()
+	if err != nil {
+		slog.Error("Failed fetching versions", slog.Any("err", err))
+	}
 
 	return versions
 }
@@ -115,7 +124,10 @@ func exactVersion(versionSpecifier string, packageAtom string) []*models.Version
 	if len(slots) == 2 {
 		q = q.Where("subslot = ?", slots[1])
 	}
-	q.Select()
+	err := q.Select()
+	if err != nil {
+		slog.Error("Failed fetching versions", slog.Any("err", err))
+	}
 
 	return versions
 }
@@ -131,7 +143,10 @@ func versionsWithSlot(versionSpecifier string, packageAtom string) []*models.Ver
 	if len(slots) == 2 {
 		q = q.Where("subslot = ?", slots[1])
 	}
-	q.Select()
+	err := q.Select()
+	if err != nil {
+		slog.Error("Failed fetching versions", slog.Any("err", err))
+	}
 
 	return versions
 }
@@ -139,7 +154,7 @@ func versionsWithSlot(versionSpecifier string, packageAtom string) []*models.Ver
 // allVersions returns all versions of the given package
 func allVersions(versionSpecifier string, packageAtom string) []*models.Version {
 	var versions []*models.Version
-	database.DBCon.Model(&versions).
+	_ = database.DBCon.Model(&versions).
 		Where("atom = ?", packageAtom).
 		Select()
 	return versions
