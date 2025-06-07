@@ -26,15 +26,7 @@ templ search(query string, packages []searchResults) {
 								</a>
 							}
 						</div>
-						// TODO paging
-						// <div class="panel-footer">
-						//     <div class="btn-group" role="group" aria-label="Result navigation">
-						//         <%= link_to '< Prev', search_packages_path(q: params[:q], o: [@offset - PackageRepository.default_search_size, 0].max), class: 'btn btn-default' + (@offset > 0 ? '' : ' disabled') %>
-						//         <%= link_to 'Next >', search_packages_path(q: params[:q], o: @offset + PackageRepository.default_search_size), class: 'btn btn-default ' + ((@offset + PackageRepository.default_search_size) > @packages.total ? 'disabled' : '') %>
-						//     </div>
-						// </div>
 					</div>
-					// TODO in head: alternate_feed_link(search_packages_url(format: :atom, params: request.query_parameters), t(:atom_feed))
 				} else {
 					<div class="jumbotron">
 						<h2 class="site-welcome stick-top">Nothing found. :( Try again?</h2>
