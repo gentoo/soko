@@ -399,6 +399,12 @@ templ overview(pkg *models.Package) {
 						</a>
 					</dd>
 					<dd>
+						<span class="fa fa-fw fa-list"></span>
+						<a href={ templ.URL("https://www.portagefilelist.de/index.php?p=packages&ps=" + pkg.Name) } class="" target="_blank">
+							Package Contents
+						</a>
+					</dd>
+					<dd>
 						<span class="fa fa-fw fa-chain-broken"></span>
 						<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.html;pkg=" + pkg.Category + ":" + pkg.Name) } title="CI report" target="_blank">CI Report</a>
 						(<a href={ templ.URL("https://qa-reports.gentoo.org/output/gentoo-ci/output.verbose.html;pkg=" + pkg.Category + ":" + pkg.Name) } title="Verbose CI report" target="_blank">verbose</a>)
