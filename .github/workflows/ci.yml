@@ -21,6 +21,9 @@ jobs:
       - name: templ generate
         run: go tool github.com/a-h/templ/cmd/templ generate
 
+      - name: touch assets
+        run: mkdir -p assets && touch assets/empty
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
