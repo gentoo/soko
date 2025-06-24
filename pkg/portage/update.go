@@ -48,6 +48,7 @@ func Update() {
 //   - profiles/package.mask
 //   - profiles/package.deprecated
 //   - profiles/arch.list
+//   - profiles/updates/*
 //
 // It works incrementally so that files are only parsed and updated whenever the
 // file has been modified within the new commits. New commits are determined by
@@ -57,6 +58,7 @@ func Update() {
 func updateMetadata(changed []string) {
 	slog.Info("Start updating changed metadata")
 	slog.Info("Iterating changed files", slog.Int("count", len(changed)))
+	repository.UpdatePkgMoves(changed)
 	for _, path := range changed {
 		repository.UpdateUse(path)
 		repository.UpdateMask(path)

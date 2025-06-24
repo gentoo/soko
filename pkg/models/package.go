@@ -169,3 +169,8 @@ func (p *Package) AllUseflags() (useflags []string, defaultOn []string) {
 	}
 	return
 }
+
+type PkgMove struct {
+	Source      string `pg:",pk"`
+	Destination string
+}

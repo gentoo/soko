@@ -101,6 +101,13 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	err := query.Where("atom = ?", atom).Select()
 	if err != nil || len(gpackage.Versions) == 0 {
+		var pkgmove models.PkgMove
+		err = database.DBCon.Model(&pkgmove).Where("source = ?", atom).Select()
+		if err == nil {
+			http.Redirect(w, r, strings.Replace(r.URL.String(), atom, pkgmove.Destination, 1), http.StatusMovedPermanently)
+			return
+		}
+
 		http.NotFound(w, r)
 		return
 	}

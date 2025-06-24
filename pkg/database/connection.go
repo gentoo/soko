@@ -34,6 +34,7 @@ func CreateSchema() error {
 		(*models.MaskToVersion)(nil),
 		(*models.DeprecatedToVersion)(nil),
 		(*models.Package)(nil),
+		(*models.PkgMove)(nil),
 		(*models.CategoryPackagesInformation)(nil),
 		(*models.Category)(nil),
 		(*models.Version)(nil),
