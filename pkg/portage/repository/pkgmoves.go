@@ -17,7 +17,6 @@ func UpdatePkgMoves(paths []string) {
 		status, changedFile, twoParts := strings.Cut(path, "\t")
 		if !twoParts {
 			changedFile = path
-			status = "A"
 		} else if status == "D" {
 			continue
 		}

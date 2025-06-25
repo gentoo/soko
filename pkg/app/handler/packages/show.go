@@ -32,7 +32,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 
 	var gpackage models.Package
 	query := database.DBCon.Model(&gpackage).
-		Relation("Bugs").
+		Relation("Bugs", func(q *pg.Query) (*pg.Query, error) {
+			return q.OrderExpr("bug.id::INT DESC"), nil
+		}).
 		Relation("PullRequests").
 		Relation("Versions", func(q *pg.Query) (*pg.Query, error) {
 			// performs mostly correct ordering of versions, which is perfected by sortVersionsDesc
