@@ -39,6 +39,7 @@ func UpdateAnitya() {
 		return
 	} else if len(anityaPackages) == 0 {
 		slog.Error("No anitya packages found")
+		return
 	}
 
 	packagesMap := make(map[string]int, len(anityaPackages))

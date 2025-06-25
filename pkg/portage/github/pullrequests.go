@@ -4,6 +4,7 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"soko/pkg/config"
@@ -140,6 +141,12 @@ func updatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
 			return
 		}
 		defer response.Body.Close()
+
+		if response.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(response.Body)
+			slog.Error("The HTTP request failed with status code", slog.Int("status", response.StatusCode), slog.String("body", string(body)))
+			return
+		}
 
 		var prData models.GitHubPullRequestQueryResult
 		err = json.NewDecoder(response.Body).Decode(&prData)
