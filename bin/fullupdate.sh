@@ -26,8 +26,6 @@ update_repository(){
 }
 
 update_md5cache(){
-  mkdir -p /var/cache/pgo-egencache
-
   pmaint regen --threads "${JOBS}" --use-local-desc --pkg-desc-index /mnt/packages-tree/gentoo/
 }
 
