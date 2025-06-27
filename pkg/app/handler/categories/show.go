@@ -75,7 +75,7 @@ func ShowOutdated(w http.ResponseWriter, r *http.Request) {
 		Where("atom = outdated_packages.atom").
 		Limit(1)
 	err = database.DBCon.Model((*models.OutdatedPackages)(nil)).
-		Column("atom").ColumnExpr("(?) AS description", descriptionQuery).
+		Column("atom").Column("newest_version").ColumnExpr("(?) AS description", descriptionQuery).
 		Where("atom LIKE ?", categoryName+"/%").
 		Order("atom").
 		Select(&outdated)

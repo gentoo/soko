@@ -2,8 +2,9 @@
 package components
 
 type OutdatedItem struct {
-	Atom        string
-	Description string
+	Atom          string
+	Description   string
+	NewestVersion string
 }
 
 templ Outdated(outdated []OutdatedItem) {
@@ -23,7 +24,7 @@ templ Outdated(outdated []OutdatedItem) {
 						<li class="list-group-item">
 							<div class="row">
 								<div class="col-md-4">
-									<a href={ templ.URL("/packages/" + pkg.Atom) } class="text-dark"><b>{ pkg.Atom }</b></a>
+									<a href={ templ.URL("/packages/" + pkg.Atom) } class="text-dark"><b>{ pkg.Atom }</b></a><span class="text-muted">-{ pkg.NewestVersion }</span>
 								</div>
 								<div class="col-md-8 text-muted">{ pkg.Description }</div>
 							</div>
