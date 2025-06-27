@@ -9,8 +9,8 @@ type OutdatedItem struct {
 
 templ Outdated(outdated []OutdatedItem) {
 	<div class="row">
-		<div class="col-md-9">
-			if len(outdated) > 0 {
+		if len(outdated) > 0 {
+			<div class="col-md-9">
 				<span class="d-flex justify-content-between">
 					<h3 class="mb-4">Outdated Packages</h3>
 					<span>
@@ -31,38 +31,36 @@ templ Outdated(outdated []OutdatedItem) {
 						</li>
 					}
 				</ul>
-			} else {
-				<div class="row pt-5">
-					<div class="col-md-4">
-						<img
-							style="width: 100%;"
-							src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"
-						/>
-					</div>
-					<div class="col-md-8 pt-3">
-						<h2>Good job!</h2>
-						<span>
-							According to repology.org there are no outdated packages here.
-							<br/>
-							Please use this information with care though. The repology data might not be accurate.
-						</span>
-					</div>
-				</div>
-			}
-		</div>
-		<div class="col-md-3 pt-4">
-			<h4 class="">
-				<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
-					Description
-				</a>
-			</h4>
-			<div class="collapse show" id="collapseDescription">
-				<span class="text-muted">
-					Based on the data of <a href="https://repology.org/">repology.org</a>, there might be a new version available for these packages.
-					<br/>
-					Please don't solely rely on this information, as the repology data might not be accurate.
-				</span>
 			</div>
-		</div>
+			<div class="col-md-3 pt-4">
+				<h4 class="">
+					<a class="collapseLink" style="color:#000000;" data-toggle="collapse" href="#collapseDescription" role="button" aria-expanded="false" aria-controls="collapseDescription">
+						Description
+					</a>
+				</h4>
+				<div class="collapse show" id="collapseDescription">
+					<span class="text-muted">
+						<p>Based on the data of <a href="https://repology.org/">repology.org</a> and <a href="https://release-monitoring.org/">release-monitoring.org</a>, there might be a new version available for these packages.</p>
+						<p>Please don't solely rely on this information, as the data from repology and release-monitoring might not be accurate.</p>
+					</span>
+				</div>
+			</div>
+		} else {
+			<div class="row pt-5 col-md-9">
+				<div class="col-md-4">
+					<img
+						style="width: 100%;"
+						src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Larry-the-cow-full.svg/1200px-Larry-the-cow-full.svg.png"
+					/>
+				</div>
+				<div class="col-md-8 pt-3">
+					<h2>Good job!</h2>
+					<span>
+						<p>According to <a href="https://repology.org/">repology.org</a> and <a href="https://release-monitoring.org/">release-monitoring.org</a> there are no outdated packages here.</p>
+						<p>Please use this information with care though. The data from repology and release-monitoring might not be accurate.</p>
+					</span>
+				</div>
+			</div>
+		}
 	</div>
 }
