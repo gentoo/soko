@@ -2,11 +2,13 @@
 package packages
 
 import (
+	"encoding/json"
 	"net/http"
+	"strconv"
+
 	"soko/pkg/app/handler/categories"
 	"soko/pkg/database"
 	"soko/pkg/models"
-	"strconv"
 )
 
 type eapiPackage struct {
@@ -81,7 +83,7 @@ templ eapiOverview(packages []eapiPackage) {
 
 func Eapi(w http.ResponseWriter, r *http.Request) {
 	var result []eapiPackage
-	err := database.DBCon.Model((*models.Version)(nil)).
+	query := database.DBCon.Model((*models.Version)(nil)).
 		Column("version.category", "version.package", "version.version").
 		ColumnExpr("(?) AS maintainers",
 			database.DBCon.Model((*models.Package)(nil)).
@@ -106,8 +108,18 @@ func Eapi(w http.ResponseWriter, r *http.Request) {
 				Where("atom = version.atom").Where("class = ?", "StableRequest")).
 		Where("version.eapi = ?", "7").
 		Group("version.id").
-		Order("version.atom").
-		Select(&result)
+		Order("version.atom")
+	if category := getParameterValue("category", r); category != "" {
+		query.Where("version.category = ?", category)
+	}
+	if maintainer := getParameterValue("maintainer", r); maintainer != "" {
+		marshal, _ := json.Marshal(maintainer)
+		query.Where("version.atom IN (?)",
+			database.DBCon.Model((*models.Package)(nil)).
+				Column("atom").
+				Where("maintainers @> ?", `[{"Email": `+string(marshal)+`}]`))
+	}
+	err := query.Select(&result)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
