@@ -70,13 +70,14 @@ func getUpdatedVersions(n int) []*models.Version {
 // packages containing a thousands comma
 func formatPackageCount(packageCount int) string {
 	packages := strconv.Itoa(packageCount)
-	if len(packages) == 6 {
+	switch len(packages) {
+	case 6:
 		return packages[:3] + "," + packages[3:]
-	} else if len(packages) == 5 {
+	case 5:
 		return packages[:2] + "," + packages[2:]
-	} else if len(packages) == 4 {
+	case 4:
 		return packages[:1] + "," + packages[1:]
-	} else {
+	default:
 		return packages
 	}
 }

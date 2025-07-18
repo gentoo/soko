@@ -113,11 +113,12 @@ func createUseExpand(rawFlag string, file string) *models.Useflag {
 // getScope returns either "local", "global", "use_expand"
 // or "" based on the file that the path points to
 func getScope(path string) string {
-	if isLocalUseflag(path) {
+	switch {
+	case isLocalUseflag(path):
 		return "local"
-	} else if isGlobalUseflag(path) {
+	case isGlobalUseflag(path):
 		return "global"
-	} else if isUseExpand(path) {
+	case isUseExpand(path):
 		return "use_expand"
 	}
 	return ""

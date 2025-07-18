@@ -2,6 +2,7 @@ version: "2"
 
 linters:
   enable:
+    - gocritic
     - sloglint
   settings:
     errcheck:
@@ -12,6 +13,9 @@ linters:
         - (github.com/a-h/templ.Component).Render
         - (*github.com/go-pg/pg/v10.baseDB).Close
         - (*github.com/gorilla/feeds.Feed).WriteAtom
+    gocritic:
+      disabled-checks:
+        - exitAfterDefer
     sloglint:
       attr-only: true
       static-msg: true

@@ -14,21 +14,22 @@ var (
 )
 
 func CalculateAffectedVersions(versionSpecifier, packageAtom string) []*models.Version {
-	if strings.HasPrefix(versionSpecifier, "=") {
+	switch {
+	case strings.HasPrefix(versionSpecifier, "="):
 		return exactVersion(versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, "<=") {
+	case strings.HasPrefix(versionSpecifier, "<="):
 		return comparedVersions("<=", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, "<") {
+	case strings.HasPrefix(versionSpecifier, "<"):
 		return comparedVersions("<", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, ">=") {
+	case strings.HasPrefix(versionSpecifier, ">="):
 		return comparedVersions(">=", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, ">") {
+	case strings.HasPrefix(versionSpecifier, ">"):
 		return comparedVersions(">", versionSpecifier, packageAtom)
-	} else if strings.HasPrefix(versionSpecifier, "~") {
+	case strings.HasPrefix(versionSpecifier, "~"):
 		return allRevisions(versionSpecifier, packageAtom)
-	} else if strings.Contains(versionSpecifier, ":") {
+	case strings.Contains(versionSpecifier, ":"):
 		return versionsWithSlot(versionSpecifier, packageAtom)
-	} else {
+	default:
 		return allVersions(versionSpecifier, packageAtom)
 	}
 }

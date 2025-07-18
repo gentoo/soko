@@ -44,10 +44,12 @@ func UpdateCategories(paths []string) {
 
 		if !isCategory(changedFile) {
 			continue
-		} else if status == "D" {
+		}
+		switch status {
+		case "D":
 			cat := updateDeletedCategory(changedFile)
 			deleted[cat.Name] = cat
-		} else if status == "A" || status == "M" {
+		case "A", "M":
 			if cat := updateModifiedCategory(changedFile); cat != nil {
 				modified[cat.Name] = cat
 			}

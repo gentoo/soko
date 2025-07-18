@@ -47,14 +47,14 @@ func UpdateCommits() string {
 }
 
 // processCommit parses a single commit log output and updates it into the database
-func processCommit(PrecedingCommits, PrecedingCommitsOffset int, rawCommit string) string {
+func processCommit(precedingCommits, precedingCommitsOffset int, rawCommit string) string {
 	commitLines := strings.Split(rawCommit, "\n")
 
 	if len(commitLines) < 8 {
 		return ""
 	}
 
-	logProgress(PrecedingCommits)
+	logProgress(precedingCommits)
 
 	id := strings.TrimSpace(strings.ReplaceAll(commitLines[0], "commit ", ""))
 	authorName := strings.TrimSpace(strings.Split(strings.ReplaceAll(commitLines[1], "Author: ", ""), "<")[0])
@@ -71,11 +71,11 @@ func processCommit(PrecedingCommits, PrecedingCommitsOffset int, rawCommit strin
 
 	commitLines = commitLines[7:]
 
-	changedFiles := processChangedFiles(PrecedingCommits, PrecedingCommitsOffset, commitLines, id)
+	changedFiles := processChangedFiles(precedingCommits, precedingCommitsOffset, commitLines, id)
 
 	commits = append(commits, &models.Commit{
 		Id:               id,
-		PrecedingCommits: PrecedingCommitsOffset + PrecedingCommits + 1,
+		PrecedingCommits: precedingCommitsOffset + precedingCommits + 1,
 		AuthorName:       authorName,
 		AuthorEmail:      authorEmail,
 		AuthorDate:       authorDate,
@@ -90,7 +90,7 @@ func processCommit(PrecedingCommits, PrecedingCommitsOffset int, rawCommit strin
 
 // processChangedFiles parses files that have changed in the commit and links the
 // commit to packages and package versions
-func processChangedFiles(PrecedingCommits, PrecedingCommitsOffset int, commitLines []string, id string) *models.ChangedFiles {
+func processChangedFiles(precedingCommits, precedingCommitsOffset int, commitLines []string, id string) *models.ChangedFiles {
 	var addedFiles, modifiedFiles, deletedFiles []*models.ChangedFile
 
 	for _, commitLine := range commitLines {
@@ -102,14 +102,15 @@ func processChangedFiles(PrecedingCommits, PrecedingCommitsOffset int, commitLin
 		status := strings.TrimSpace(line[0])
 		path := strings.TrimSpace(line[1])
 
-		if strings.HasPrefix(status, "M") {
+		switch {
+		case strings.HasPrefix(status, "M"):
 			modifiedFiles = append(modifiedFiles, &models.ChangedFile{Path: path, ChangeType: "M"})
 			createKeywordChange(id, path, commitLine)
-		} else if strings.HasPrefix(commitLine, "D") {
+		case strings.HasPrefix(commitLine, "D"):
 			deletedFiles = append(deletedFiles, &models.ChangedFile{Path: path, ChangeType: "D"})
-		} else if strings.HasPrefix(commitLine, "A") {
+		case strings.HasPrefix(commitLine, "A"):
 			addedFiles = append(addedFiles, &models.ChangedFile{Path: path, ChangeType: "A"})
-			updateFirstCommitOfPackage(path, commitLine, PrecedingCommitsOffset+PrecedingCommits+1)
+			updateFirstCommitOfPackage(path, commitLine, precedingCommitsOffset+precedingCommits+1)
 			createAddedKeywords(id, path, commitLine)
 		}
 

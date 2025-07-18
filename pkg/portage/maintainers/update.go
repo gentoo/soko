@@ -35,10 +35,8 @@ func FullImport() {
 		_, ok := maintainers[rawMaintainer.Email]
 		if !ok {
 			maintainers[rawMaintainer.Email] = rawMaintainer
-		} else {
-			if maintainers[rawMaintainer.Email].Name == "" {
-				maintainers[rawMaintainer.Email].Name = rawMaintainer.Name
-			}
+		} else if maintainers[rawMaintainer.Email].Name == "" {
+			maintainers[rawMaintainer.Email].Name = rawMaintainer.Name
 		}
 	}
 
@@ -77,7 +75,7 @@ func FullImport() {
 			if found {
 				maintainerPackages = append(maintainerPackages, gpackage)
 
-				outdated = outdated + len(gpackage.Outdated)
+				outdated += len(gpackage.Outdated)
 
 				for _, pullRequest := range gpackage.PullRequests {
 					pullRequestIds[pullRequest.Id] = struct{}{}

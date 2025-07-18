@@ -26,24 +26,25 @@ type searchResults struct {
 func Search(w http.ResponseWriter, r *http.Request) {
 	searchTerm := getParameterValue("q", r)
 
-	if searchTerm == "" {
+	switch {
+	case searchTerm == "":
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
-	} else if strings.Contains(searchTerm, "@") {
+	case strings.Contains(searchTerm, "@"):
 		var maintainers []models.Maintainer
 		_ = database.DBCon.Model(&maintainers).Where("email = ?", searchTerm).Select()
 		if len(maintainers) > 0 {
 			http.Redirect(w, r, "/maintainer/"+searchTerm, http.StatusMovedPermanently)
 			return
 		}
-	} else if searchTerm[len(searchTerm)-1] == '/' {
+	case len(searchTerm) > 0 && searchTerm[len(searchTerm)-1] == '/':
 		categoryName := searchTerm[:len(searchTerm)-1]
 		count, err := database.DBCon.Model((*models.Category)(nil)).Where("name = ?", categoryName).Count()
 		if err == nil && count > 0 {
 			http.Redirect(w, r, "/categories/"+categoryName, http.StatusMovedPermanently)
 			return
 		}
-	} else if strings.Contains(searchTerm, "/") {
+	case strings.Contains(searchTerm, "/"):
 		var packages []models.Package
 		_ = database.DBCon.Model(&packages).Where("atom = ?", searchTerm).Select()
 		if len(packages) > 0 {

@@ -42,10 +42,13 @@ func UpdateVersions(paths []string) {
 
 		if !isVersion(changedFile) {
 			continue
-		} else if status == "D" {
+		}
+
+		switch status {
+		case "D":
 			ver := updateDeletedVersion(changedFile)
 			deleted[ver.Id] = ver
-		} else if status == "A" || status == "M" {
+		case "A", "M":
 			ver := updateModifiedVersion(changedFile)
 			modified[ver.Id] = ver
 		}

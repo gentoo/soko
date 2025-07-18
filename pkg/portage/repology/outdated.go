@@ -294,11 +294,12 @@ func buildAtomRules() map[string]*atomOutdatedRules {
 			rule = &atomOutdatedRules{}
 			atomRules[atom] = rule
 		}
-		if hasRepo && repo != "" {
+		switch {
+		case hasRepo && repo != "":
 			rule.ignoreRepos = append(rule.ignoreRepos, repo)
-		} else if atom != cpv {
+		case atom != cpv:
 			rule.ignoreVersions = append(rule.ignoreVersions, strings.TrimPrefix(cpv, atom+"-"))
-		} else {
+		default:
 			rule.ignore = true
 		}
 	}

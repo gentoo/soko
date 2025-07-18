@@ -77,8 +77,7 @@ func UpdateDependencies() (int, error) {
 			slog.Error("Failed reading dependencies tar", slog.Any("err", err))
 			return 0, err
 		}
-		switch hdr.Typeflag {
-		case tar.TypeReg:
+		if hdr.Typeflag == tar.TypeReg {
 			nameParts := strings.SplitN(hdr.Name, "/", 2)
 
 			rawResponse, err := io.ReadAll(tr)

@@ -45,10 +45,13 @@ func UpdatePackages(paths []string) {
 
 		if !isPackage(changedFile) {
 			continue
-		} else if status == "D" {
+		}
+
+		switch status {
+		case "D":
 			pkg := updateDeletedPackage(changedFile)
 			deleted[pkg.Atom] = pkg
-		} else if status == "A" || status == "M" {
+		case "A", "M":
 			if pkg := updateModifiedPackage(changedFile); pkg != nil {
 				modified[pkg.Atom] = pkg
 			}
