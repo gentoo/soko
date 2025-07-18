@@ -57,20 +57,47 @@ func UpdateAnitya() {
 
 	outdatedEntries := make([]*models.OutdatedPackages, 0, len(packages))
 
+	perlConvertor, err := NewPerlVersion()
+	if err != nil {
+		slog.Error("Failed creating PerlVersion", slog.Any("err", err))
+		return
+	}
+	defer func() {
+		err := perlConvertor.Close()
+		if err != nil {
+			slog.Error("Failed closing PerlVersion", slog.Any("err", err))
+		}
+	}()
+
 nextPackage:
 	for _, p := range packages {
-		if p.Category == "dev-perl" || p.Category == "perl-core" {
-			// Skip dev-perl packages, since they have a special versioning scheme in Gentoo
-			// and Anitya does not know about it
-			// https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme
-			continue
-		}
 		anitya := anityaPackages[packagesMap[p.Atom]]
 		p.AnityaInfo = &models.AnityaInfo{
 			Project: anitya.Project,
 		}
 		if len(p.Versions) == 0 {
 			continue
+		}
+		if p.Category == "dev-perl" || p.Category == "perl-core" {
+			newVersion, err := perlConvertor.Query(anitya.Version)
+			if err != nil {
+				slog.Error("Failed querying perl-version.pl", slog.String("version", anitya.Version), slog.Any("err", err))
+				continue nextPackage
+			}
+
+			if anitya.StableVersion == anitya.Version {
+				anitya.StableVersion = newVersion
+				anitya.Version = newVersion
+			} else {
+				anitya.Version = newVersion
+
+				newStableVersion, err := perlConvertor.Query(anitya.StableVersion)
+				if err != nil {
+					slog.Error("Failed querying perl-version.pl", slog.String("version", anitya.StableVersion), slog.Any("err", err))
+					continue nextPackage
+				}
+				anitya.StableVersion = newStableVersion
+			}
 		}
 
 		latest := models.Version{Version: anitya.LatestVersion()}
