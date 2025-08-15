@@ -73,6 +73,11 @@ templ overviewVersionRow(version *models.Version, keywords []string) {
 					<svg height="16" class="octicon octicon-diff-removed" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-unavailable" xlink:href="#svg-ver-unavailable"></use></svg>
 					<span class="sr-only">-{ arch }</span>
 				</td>
+			} else if len(version.Masks) > 0 {
+				<td class="kk-keyword kk-keyword-masked" title={ version.Version + " is masked on " + arch }>
+					<svg height="16" class="octicon octicon-diff-modified" version="1.1" width="14" aria-hidden="true"><use href="#svg-ver-mask" xlink:href="#svg-ver-mask"></use></svg>
+					<span class="sr-only">~{ arch }</span>
+				</td>
 			} else {
 				<td class="kk-keyword kk-keyword-unkown" title={ version.Version + " is unknown on " + arch }>
 					<span class="sr-only">?{ arch }</span>
