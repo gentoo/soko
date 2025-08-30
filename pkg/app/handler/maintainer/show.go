@@ -17,7 +17,7 @@ import (
 	"github.com/gorilla/feeds"
 )
 
-func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintainer, packagesQuery *pg.Query, packagesCount int, err error) {
+func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintainer, packagesQuery *pg.Query, packagesCount int, includeProjects bool, err error) {
 	maintainerEmail := r.PathValue("email")
 	if !strings.Contains(maintainerEmail, "@") {
 		maintainerEmail += "@gentoo.org"
@@ -29,6 +29,7 @@ func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintaine
 		packagesQuery = packagesQuery.Where("NULLIF(maintainers, '[]') IS null")
 	} else {
 		packagesQuery = packagesQuery.Where("maintainers @> ?", `[{"Email": "`+maintainerEmail+`"}]`)
+		includeProjects = r.FormValue("include-projects") == "true"
 	}
 
 	maintainer = models.Maintainer{Email: maintainerEmail}
@@ -38,11 +39,11 @@ func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintaine
 		return
 	}
 
-	// if IncludeProjectPackages {
-	// 	for _, proj := range maintainer.Projects {
-	// 		packagesQuery = packagesQuery.WhereOr("maintainers @> ?", `[{"Email": "`+proj.Email+`"}]`)
-	// 	}
-	// }
+	if includeProjects {
+		for _, proj := range maintainer.Projects {
+			packagesQuery = packagesQuery.WhereOr("maintainers @> ?", `[{"Email": "`+proj.Email+`"}]`)
+		}
+	}
 
 	packagesCount, err = packagesQuery.Clone().Count()
 	if err != nil {
@@ -54,7 +55,7 @@ func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintaine
 }
 
 func ShowChangelog(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -70,12 +71,12 @@ func ShowChangelog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Changelog", components.Changelog("", commits)),
+		show(packagesCount, &maintainer, "Changelog", includeProjects, components.Changelog("", commits)),
 	).Render(r.Context(), w)
 }
 
 func ShowChangelogFeed(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, _, err := common(w, r)
+	maintainer, query, _, _, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -113,7 +114,7 @@ func ShowChangelogFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowOutdated(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -132,12 +133,12 @@ func ShowOutdated(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Outdated", components.Outdated(outdated)),
+		show(packagesCount, &maintainer, "Outdated", includeProjects, components.Outdated(outdated)),
 	).Render(r.Context(), w)
 }
 
 func ShowOutdatedFeed(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, _, err := common(w, r)
+	maintainer, query, _, _, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -154,7 +155,7 @@ func ShowOutdatedFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -170,12 +171,12 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Pull requests", components.PullRequests(pullRequests)),
+		show(packagesCount, &maintainer, "Pull requests", includeProjects, components.PullRequests(pullRequests)),
 	).Render(r.Context(), w)
 }
 
 func ShowStabilization(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -191,12 +192,12 @@ func ShowStabilization(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Stabilization", components.Stabilizations(results)),
+		show(packagesCount, &maintainer, "Stabilization", includeProjects, components.Stabilizations(results)),
 	).Render(r.Context(), w)
 }
 
 func ShowBugs(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -222,12 +223,12 @@ func ShowBugs(w http.ResponseWriter, r *http.Request) {
 	}
 	generalCount, stabilizationCount, keywordingCount := utils.CountBugsCategories(bugs)
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Bugs", components.Bugs("", generalCount, stabilizationCount, keywordingCount, bugs)),
+		show(packagesCount, &maintainer, "Bugs", includeProjects, components.Bugs("", generalCount, stabilizationCount, keywordingCount, bugs)),
 	).Render(r.Context(), w)
 }
 
 func ShowSecurity(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -248,12 +249,12 @@ func ShowSecurity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Security", components.SecurityBugs("", bugs)),
+		show(packagesCount, &maintainer, "Security", includeProjects, components.SecurityBugs("", bugs)),
 	).Render(r.Context(), w)
 }
 
 func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
-	_, query, _, err := common(w, r)
+	_, query, _, _, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -274,7 +275,7 @@ func ShowStabilizationFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowStabilizationFeed(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, _, err := common(w, r)
+	maintainer, query, _, _, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -294,7 +295,7 @@ func ShowStabilizationFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowPackages(w http.ResponseWriter, r *http.Request) {
-	maintainer, query, packagesCount, err := common(w, r)
+	maintainer, query, packagesCount, includeProjects, err := common(w, r)
 	if err != nil {
 		return
 	}
@@ -308,12 +309,12 @@ func ShowPackages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	layout.Layout(maintainer.Name, layout.Maintainers,
-		show(packagesCount, &maintainer, "Packages", showPackages(gpackages, &maintainer)),
+		show(packagesCount, &maintainer, "Packages", includeProjects, showPackages(gpackages, &maintainer)),
 	).Render(r.Context(), w)
 }
 
 func ShowInfoJson(w http.ResponseWriter, r *http.Request) {
-	maintainer, _, _, err := common(w, r)
+	maintainer, _, _, _, err := common(w, r)
 	if err != nil {
 		return
 	}

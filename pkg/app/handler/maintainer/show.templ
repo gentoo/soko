@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func showViewTabs(email string, packagesCount int, info *models.MaintainerPackagesInformation) []layout.SubTab {
-	return []layout.SubTab{
+func showViewTabs(email string, packagesCount int, includeProjects bool, info *models.MaintainerPackagesInformation) []layout.SubTab {
+	tabs := []layout.SubTab{
 		{
 			Name:       "Packages",
 			Link:       templ.URL("/maintainer/" + email),
@@ -52,9 +52,18 @@ func showViewTabs(email string, packagesCount int, info *models.MaintainerPackag
 			Icon: "fa fa-fw fa-history",
 		},
 	}
+	if includeProjects {
+		for i, tab := range tabs {
+			tab.Link += "?include-projects=true"
+			// Remove badge when including projects to avoid confusion, since we currently compute them only for direct maintainership.
+			tab.BadgeValue = ""
+			tabs[i] = tab
+		}
+	}
+	return tabs
 }
 
-templ tabbedHeader(maintainer *models.Maintainer, packagesCount int, currentSubTab string) {
+templ tabbedHeader(maintainer *models.Maintainer, packagesCount int, currentSubTab string, includeProjects bool) {
 	<div class="kk-header-container">
 		<div class="container">
 			<div class="row">
@@ -86,10 +95,27 @@ templ tabbedHeader(maintainer *models.Maintainer, packagesCount int, currentSubT
 								</div>
 							</h1>
 						</div>
-						<div class="col-md-7"></div>
+						<div class="col-md-7">
+							if maintainer.Type != "project" && len(maintainer.Projects) > 0 {
+								<form method="get">
+									<label>
+										<input
+											type="checkbox"
+											name="include-projects"
+											value={ !includeProjects }
+											onchange="this.form.submit()"
+											if includeProjects {
+												checked="checked"
+											}
+										/>
+										Include Projects
+									</label>
+								</form>
+							}
+						</div>
 						<div class="col-md-12 pt-4 mt-1">
 							<nav class="nav kk-package-nav">
-								for _, tab := range showViewTabs(maintainer.Email, packagesCount, &maintainer.PackagesInformation) {
+								for _, tab := range showViewTabs(maintainer.Email, packagesCount, includeProjects, &maintainer.PackagesInformation) {
 									<a class={ "nav-link", templ.KV("active", tab.Name == currentSubTab) } href={ tab.Link }>
 										<i class={ tab.Icon } aria-hidden="true"></i> { tab.Name }
 										if tab.BadgeValue != "" {
@@ -106,8 +132,8 @@ templ tabbedHeader(maintainer *models.Maintainer, packagesCount int, currentSubT
 	</div>
 }
 
-templ show(packagesCount int, maintainer *models.Maintainer, currentSubTab string, component templ.Component) {
-	@tabbedHeader(maintainer, packagesCount, currentSubTab)
+templ show(packagesCount int, maintainer *models.Maintainer, currentSubTab string, includeProjects bool, component templ.Component) {
+	@tabbedHeader(maintainer, packagesCount, currentSubTab, includeProjects)
 	<div class="tab-content" id="myTabContent">
 		<div class="container mb-5 tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
 			@component
