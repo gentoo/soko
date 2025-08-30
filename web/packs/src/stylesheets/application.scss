@@ -1,11 +1,11 @@
-@import "~@gentoo/tyrian/dist/tyrian";
-@import "~@gentoo/tyrian/dist/components/searchbars";
+@use "~@gentoo/tyrian/dist/tyrian";
+@use "~@gentoo/tyrian/dist/components/searchbars";
 
-@import "index";
-@import "keywords";
-@import "misc";
-@import "packages";
-@import "sprockets-octicons";
-@import "useflags";
+@use "index";
+@use "keywords";
+@use "misc";
+@use "packages";
+@use "sprockets-octicons";
+@use "useflags";
 
-@import "~jquery-typeahead/dist/jquery.typeahead.min"
+@use "~jquery-typeahead/dist/jquery.typeahead.min"
