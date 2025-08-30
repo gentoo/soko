@@ -2,7 +2,11 @@
   "dependencies": {
     "@gentoo/tyrian": "git+https://anongit.gentoo.org/git/sites/tyrian-theme.git#v2.0.2",
     "core-js": "^3.40.0",
-    "d3": "3.5.17",
+    "d3-selection": "^3.0.0",
+    "d3-fetch": "^3.0.1",
+    "d3-format": "^3.1.0",
+    "d3-scale": "^4.0.2",
+    "d3-hierarchy": "^3.1.2",
     "jquery-typeahead": "^2.11.1",
     "jquery-ujs": "^1.2.3",
     "regenerator-runtime": "^0.14.1",

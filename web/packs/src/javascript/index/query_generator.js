@@ -1,11 +1,11 @@
-function buildAdvancedQuery(){
+function buildAdvancedQuery() {
     var query = ""
-    document.querySelectorAll('#search-container > .row').forEach(function(element) {
+    document.querySelectorAll('#search-container > .row').forEach(function (element) {
         var term = element.querySelector('.form-control').value;
 
-        if(!term.replace(/\s/g, '').length){
+        if (!term.replace(/\s/g, '').length) {
             return;
-        }else{
+        } else {
             term = parseSearchTerm(term);
         }
 
@@ -17,8 +17,8 @@ function buildAdvancedQuery(){
     document.getElementById('q').value = query;
 }
 
-function parseOperator(operator){
-    switch(operator) {
+function parseOperator(operator) {
+    switch (operator) {
         case "should match":
             return "";
         case "must match":
@@ -30,15 +30,15 @@ function parseOperator(operator){
     }
 }
 
-function parseSearchTerm(term){
+function parseSearchTerm(term) {
     if (/\s/.test(term) && !/^\".*\"$/.test(term)) {
         return "\"" + term + "\""
-    }else{
+    } else {
         return term
     }
 }
 
-function addInput(self){
+function addInput(self) {
     var new_input = document.querySelector('#search-container > .row').cloneNode(true);
     setEventListener(new_input);
     resetInput(new_input);
@@ -53,26 +53,26 @@ function resetInput(input) {
     input.querySelector('.pgo-query-field').value = 'name';
 }
 
-function deleteInput(self){
+function deleteInput(self) {
     getThirdParent(self).removeChild(getSecondParent(self));
     checkDeleteButtons();
     checkAddButtons();
 }
 
-function checkDeleteButtons(){
-    if(document.querySelectorAll('#search-container > .row').length == 1){
-        document.querySelectorAll('.pgo-query-delete-btn').forEach(function(element) {
+function checkDeleteButtons() {
+    if (document.querySelectorAll('#search-container > .row').length == 1) {
+        document.querySelectorAll('.pgo-query-delete-btn').forEach(function (element) {
             element.style.display = 'none';
         });
-    }else{
-        document.querySelectorAll('.pgo-query-delete-btn').forEach(function(element) {
+    } else {
+        document.querySelectorAll('.pgo-query-delete-btn').forEach(function (element) {
             element.style.display = 'block';
         });
     }
 }
 
-function checkAddButtons(){
-    document.querySelectorAll('.pgo-query-add-btn').forEach(function(element) {
+function checkAddButtons() {
+    document.querySelectorAll('.pgo-query-add-btn').forEach(function (element) {
         element.style.display = 'none';
     });
 
@@ -87,13 +87,13 @@ function getSecondParent(self) {
     return self.parentElement.parentElement;
 }
 
-function setEventListener(element){
-    element.querySelector(".pgo-query-add-btn").addEventListener("click", addInput);
-    element.querySelector(".pgo-query-delete-btn").addEventListener("click", function(){ deleteInput(this); });
+function setEventListener(element) {
+    element.querySelector(".pgo-query-add-btn")?.addEventListener("click", addInput);
+    element.querySelector(".pgo-query-delete-btn")?.addEventListener("click", function () { deleteInput(this); });
 }
 
 checkDeleteButtons();
 
 setEventListener(document);
 
-document.getElementById("buildAdvancedQuery").addEventListener("click", function(){ buildAdvancedQuery(); });
+document.getElementById("buildAdvancedQuery").addEventListener("click", function () { buildAdvancedQuery(); });

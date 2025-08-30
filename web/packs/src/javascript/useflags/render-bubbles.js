@@ -1,16 +1,28 @@
+import { select as d3Select } from 'd3-selection';
+import { json as d3Json } from 'd3-fetch';
+import { format as d3Format } from 'd3-format';
+import { scaleOrdinal as d3ScaleOrdinal } from 'd3-scale';
+import { pack as d3Pack, hierarchy as d3Hierarchy } from 'd3-hierarchy';
+
+const schemeCategory20c = [
+    "#3182bd", "#6baed6", "#9ecae1", "#c6dbef",
+    "#e6550d", "#fd8d3c", "#fdae6b", "#fdd0a2",
+    "#31a354", "#74c476", "#a1d99b", "#c7e9c0",
+    "#756bb1", "#9e9ac8", "#bcbddc", "#dadaeb",
+    "#636363", "#969696", "#bdbdbd", "#d9d9d9",
+];
+
 var useflagChartCreated = false;
 
 // wait for d3 and render the bubb
-var checkD3 = setInterval(function() {
-    if (typeof d3 !== 'undefined') {
-        clearInterval(checkD3);
+var checkD3 = setInterval(function () {
+    clearInterval(checkD3);
 
-        if(!useflagChartCreated){
-            createUseflagChart();
-        }
-
-        useflagChartCreated = true;
+    if (!useflagChartCreated) {
+        createUseflagChart();
     }
+
+    useflagChartCreated = true;
 }, 100);
 
 // TODO this is a workaround for now
@@ -19,7 +31,7 @@ var checkD3 = setInterval(function() {
 // to turbolinks.
 function deleteDuplicate() {
     var bubbles = document.querySelectorAll(".bubble");
-    while(bubbles.length > 1){
+    while (bubbles.length > 1) {
         bubbles[1].remove();
         bubbles = document.querySelectorAll(".bubble");
     }
@@ -31,68 +43,55 @@ setTimeout(deleteDuplicate, 500);
 setTimeout(deleteDuplicate, 1000);
 
 function createUseflagChart() {
-
-    if(!useflagChartCreated) {
-
+    if (!useflagChartCreated) {
         $('#bubble-placeholder').show();
 
-        var width = 600;
-        height = 600;
+        const width = 600;
+        const height = 600;
 
-        var diameter = 960,
-            format = d3.format(",d"),
-            color = d3.scale.category20c();
+        const fmt = d3Format(",d"),
+            color = d3ScaleOrdinal(schemeCategory20c);
 
-        var bubble = d3.layout.pack()
-            .sort(null)
+        const bubble = d3Pack()
             .size([width, height])
             .padding(1.5);
 
-        var svg = d3.select("#bubble-placeholder").append("svg")
+        const svg = d3Select("#bubble-placeholder").append("svg")
             .attr("width", width)
             .attr("height", height)
             .attr("class", "bubble");
 
-        d3.json("/useflags/popular.json", function (error, root) {
-            if (error) throw error;
+        d3Json("/useflags/popular.json").then(function (root) {
+            const useflags = root.map(function (d) {
+                return { packageName: "flags", className: d.name, value: d.size };
+            });
+            const hier = d3Hierarchy({ children: useflags });
+            hier.sum(function (d) { return d.value; });
 
-            var node = svg.selectAll(".node")
-                .data(bubble.nodes(classes(root))
-                    .filter(function (d) {
-                        return !d.children;
-                    }))
+            const nodes = bubble(hier).leaves();
+
+            const node = svg.selectAll(".node")
+                .data(nodes)
                 .enter().append("g")
                 .attr("class", "node")
-                .attr("transform", function (d) {
-                    return "translate(" + d.x + "," + d.y + ")";
-                });
+                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
             node.append("title")
-                .text(function (d) {
-                    return d.className + ": " + format(d.value);
-                });
+                .text(function (d) { return d.data.className + ": " + fmt(d.value); });
 
             node.append("circle")
-                .attr("r", function (d) {
-                    return d.r;
-                })
+                .attr("r", function (d) { return d.r; })
                 .attr("class", "kk-useflag-circle")
-                .attr("onclick", function (d) {
-                    return "location.href='/useflags/" + d.className + "';";
-                })
-                .style("fill", function (d) {
-                    return color(d.className);
-                });
+                .attr("onclick", function (d) { return "location.href='/useflags/" + d.data.className + "';"; })
+                .style("fill", function (d) { return color(d.data.className); });
 
             node.append("text")
                 .attr("dy", ".3em")
                 .attr('class', 'kk-useflag-circle')
-                .attr("onclick", function (d) {
-                    return "location.href='/useflags/" + d.className + "';";
-                })
+                .attr("onclick", function (d) { return "location.href='/useflags/" + d.data.className + "';"; })
                 .style("text-anchor", "middle")
                 .style("font-size", function (d) {
-                    var len = d.className.substring(0, d.r / 3).length;
+                    var len = d.data.className.substring(0, d.r / 3).length;
                     var size = d.r / 3;
                     size *= 8 / len;
                     if (len == 1) {
@@ -101,26 +100,8 @@ function createUseflagChart() {
                     size += 1;
                     return Math.round(size) + 'px';
                 })
-                .text(function (d) {
-                    return d.className.substring(0, d.r / 3);
-                });
+                .text(function (d) { return d.data.className.substring(0, d.r / 3); });
+            d3Select(self.frameElement).style("height", height + "px");
         });
-
-        // Returns a flattened hierarchy containing all leaf nodes under the root.
-        function classes(root) {
-            var classes = [];
-
-            function recurse(name, node) {
-                if (node.children) node.children.forEach(function (child) {
-                    recurse(node.name, child);
-                });
-                else classes.push({packageName: name, className: node.name, value: node.size});
-            }
-
-            recurse(null, root);
-            return {children: classes};
-        }
-
-        d3.select(self.frameElement).style("height", height + "px");
     }
 }

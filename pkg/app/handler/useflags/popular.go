@@ -5,7 +5,6 @@ package useflags
 
 import (
 	"encoding/json"
-	"go/types"
 	"net/http"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -17,15 +16,9 @@ var excludePopularUseflags = []string{"test", "doc", "debug"}
 
 // Popular shows a json encoded list of popular USE flags
 func Popular(w http.ResponseWriter, r *http.Request) {
-	popular := struct {
-		Name     string `json:"name"`
-		Useflags []struct {
-			Useflag  string       `pg:"useflag" json:"name"`
-			Count    int          `pg:"count" json:"size"`
-			Children types.Object `pg:"-" json:"children"`
-		} `json:"children"`
-	}{
-		Name: "flags",
+	var popular []struct {
+		Useflag string `pg:"useflag" json:"name"`
+		Count   int    `pg:"count" json:"size"`
 	}
 
 	err := database.DBCon.Model((*models.Version)(nil)).
@@ -37,8 +30,8 @@ func Popular(w http.ResponseWriter, r *http.Request) {
 		Where("useflag NOT IN (?)", pg.In(excludePopularUseflags)).
 		Group("useflag").
 		Order("count DESC").
-		Limit(66).
-		Select(&popular.Useflags)
+		Limit(70).
+		Select(&popular)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
