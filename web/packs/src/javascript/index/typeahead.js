@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
   $('#q').typeahead({
     order: 'asc',
     dynamic: true,
@@ -6,7 +6,7 @@ $(function() {
     source: {
       packages: {
         display: 'name',
-        href: function(item) { return '/packages/' + item.category + '/' + item.name; },
+        href: function (item) { return '/packages/' + item.category + '/' + item.name; },
         url: [{
           type: 'GET',
           url: "/packages/suggest.json",
@@ -18,7 +18,7 @@ $(function() {
       }
     },
     callback: {
-      onClick: function(node, a, item, event) {
+      onClick: function (node, a, item, event) {
         window.location = item.href;
       }
     }
