@@ -59,7 +59,6 @@ func Serve(staticAssets fs.FS) {
 
 	setRoute("GET /about", about.Index)
 	redirect("GET /about/feedback", "/about")
-	setRoute("GET /about/feeds", about.Feeds)
 	setRoute("GET /about/status", about.Status)
 
 	setRoute("GET /maintainers", maintainer.BrowseProjects)
