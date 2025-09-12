@@ -41,7 +41,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:12
+    image: docker.io/postgres:12
     restart: always
     environment:
       POSTGRES_USER: ${SOKO_POSTGRES_USER:-root}
@@ -50,7 +50,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
   pgadmin:
-    image: dpage/pgadmin4
+    image: docker.io/dpage/pgadmin4
     logging:
       driver: none
     environment:
