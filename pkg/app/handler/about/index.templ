@@ -4,11 +4,13 @@ package about
 import (
 	"net/http"
 	"runtime/debug"
+	"sync"
+
 	"soko/pkg/app/layout"
 	"soko/pkg/config"
 )
 
-func getCommitId() string {
+var commitID = sync.OnceValue(func() string {
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, setting := range info.Settings {
 			if setting.Key == "vcs.revision" {
@@ -17,7 +19,7 @@ func getCommitId() string {
 		}
 	}
 	return ""
-}
+})
 
 templ index() {
 	<div class="container mb-5">
@@ -33,7 +35,7 @@ templ index() {
 				<dl>
 					<dt>Which version is currently running?</dt>
 					<dd>
-						if commitId := getCommitId(); commitId == "" {
+						if commitId := commitID(); commitId == "" {
 							Currently { config.Version() } is running.
 						} else {
 							Currently { config.Version() } is running, based on commit <a href={ templ.URL("https://gitweb.gentoo.org/sites/soko.git/commit/?id=" + commitId) }>{ commitId[:8] }</a>.
