@@ -58,7 +58,6 @@ func Serve(staticAssets fs.FS) {
 	setRoute("GET /arches/{arch}/leaf-packages", arches.ShowLeafPackages)
 
 	setRoute("GET /about", about.Index)
-	setRoute("GET /about/help", about.Help)
 	setRoute("GET /about/feedback", about.Feedback)
 	setRoute("GET /about/feeds", about.Feeds)
 	setRoute("GET /about/status", about.Status)
