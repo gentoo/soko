@@ -2,7 +2,7 @@ version: '2.4'
 
 services:
   http-serving:
-    image: ${SOKO_IMAGE:-gentoo/soko:latest}
+    image: ${SOKO_IMAGE:-docker.io/gentoo/soko:latest}
     volumes:
       - type: "bind"
         source: "/var/log/soko"
@@ -18,7 +18,7 @@ services:
       - db
     mem_limit: 4G
   updater:
-    image: ${SOKO_UPDATER_IMAGE:-gentoo/soko-updater:latest}
+    image: ${SOKO_UPDATER_IMAGE:-docker.io/gentoo/soko-updater:latest}
     volumes:
       - type: "bind"
         source: "/mnt/packages-tree"
@@ -34,7 +34,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:12
+    image: docker.io/postgres:12
     restart: always
     environment:
       POSTGRES_USER: ${SOKO_POSTGRES_USER:-root}
@@ -44,7 +44,7 @@ services:
     volumes:
       - ${POSTGRES_DATA_PATH:-/var/lib/postgresql/data}:/var/lib/postgresql/data
   watchtower:
-    image: containrrr/watchtower:1.7.1
+    image: docker.io/containrrr/watchtower:1.7.1
     restart: always
     volumes:
     # docker has an issue, that if it mounts a socket directly, upon daemon restart,
