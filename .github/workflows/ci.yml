@@ -106,4 +106,5 @@ jobs:
         uses: actions/delete-package-versions@v5
         with:
           package-name: 'soko'
+          package-type: 'container'
           min-versions-to-keep: 18
