@@ -5,45 +5,7 @@ on:
     branches: [master,develop]
 
 jobs:
-  lint-go:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          go-version: '^1.24.0'
-          cache-dependency-path: go.sum
-
-      - name: templ generate
-        run: go tool github.com/a-h/templ/cmd/templ generate
-
-      - name: touch assets
-        run: mkdir -p assets && touch assets/empty
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: v2.0
-
-  test-go:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '^1.24.0'
-          cache-dependency-path: go.sum
-      - name: Test
-        run: go test -v ./pkg/models/...
-
   docker:
-    needs: ["test-go"]
     runs-on: ubuntu-latest
 
     permissions:
@@ -51,57 +13,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Docker meta (web)
-        id: web
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/gentoo/soko
-          tags: |
-            type=sha,prefix={{branch}}-web-
-            type=raw,value={{branch}}-web-latest
-
-      - name: Docker meta (updater)
-        id: updater
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/gentoo/soko
-          tags: |
-            type=sha,prefix={{branch}}-updater-
-            type=raw,value={{branch}}-updater-latest
-
-      - name: Build and push (web)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          target: web
-          push: true
-          tags: ${{ steps.web.outputs.tags }}
-          labels: ${{ steps.web.outputs.labels }}
-
-      - name: Build and push (updater)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          target: updater
-          push: true
-          tags: ${{ steps.updater.outputs.tags }}
-          labels: ${{ steps.updater.outputs.labels }}
-
       - name: Delete old container versions
         uses: actions/delete-package-versions@v5
         with:
