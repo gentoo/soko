@@ -453,6 +453,12 @@ templ overview(pkg *models.Package) {
 						</a>
 					</dd>
 					<dd>
+						<span class="fa fa-fw fa-github"></span>
+						<a href={ templ.URL("https://github.com/gentoo/gentoo/tree/master/" + pkg.Atom) } target="_blank">
+							GitHub repository browser
+						</a>
+					</dd>
+					<dd>
 						<span class="fa fa-fw fa-history"></span>
 						<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/log/" + pkg.Atom + "?showmsg=1") } title="Git log" target="_blank">Git log</a>
 						(<a href={ templ.URL("https://gitweb.gentoo.org/repo/gentoo.git/log/" + pkg.Atom) } title="Short git log" target="_blank">short</a>)
