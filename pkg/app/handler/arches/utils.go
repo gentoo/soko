@@ -64,9 +64,8 @@ func getLeafPackagesForArch(arch string) ([]string, error) {
 		WhereOr("? = ANY(STRING_TO_ARRAY(keywords, ' '))", "~"+arch).
 		ColumnExpr("DISTINCT reverse_dependency.atom")
 	err := database.DBCon.Model((*models.Version)(nil)).
-		Where("? = ANY(STRING_TO_ARRAY(keywords, ' '))", arch).
-		WhereOr("? = ANY(STRING_TO_ARRAY(keywords, ' '))", "~"+arch).
-		Where("atom NOT IN (?)", atomsWithReverse).
+		Where("((? = ANY(STRING_TO_ARRAY(keywords, ' '))) OR (? = ANY(STRING_TO_ARRAY(keywords, ' ')))) AND (atom NOT IN (?))",
+			arch, "~"+arch, atomsWithReverse).
 		Order("atom").
 		ColumnExpr("DISTINCT atom").
 		Select(&atoms)
