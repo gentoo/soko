@@ -4,8 +4,11 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"iter"
 	"log/slog"
+	"maps"
 	"net/http"
 	"soko/pkg/config"
 	"soko/pkg/database"
@@ -113,57 +116,115 @@ func FullUpdatePullRequests() {
 	database.TruncateTable((*models.GithubPullRequest)(nil))
 	database.TruncateTable((*models.PackageToGithubPullRequest)(nil))
 
-	// year of the git migration
-	updatePullRequestsAfter(true, "2015-01-01", "")
+	updatePullRequestsAfter()
 
 	updateStatus()
 }
 
-func updatePullRequestsAfter(isOpen bool, lastUpdated, after string) {
-	pullRequests := make(map[int]*models.GithubPullRequest)
-	client := &http.Client{Timeout: time.Second * 30}
+var client = &http.Client{Timeout: time.Second * 30}
 
-	for {
-		slog.Info("Requesting pull requests", slog.Int("index", len(pullRequests)))
-		jsonData := buildQuery(100, isOpen, lastUpdated, after)
-		jsonValue, _ := json.Marshal(jsonData)
+func fetchPullRequests(
+	token string, limit int, isOpen bool, lastUpdated, after string,
+) (data models.GitHubPullRequestQueryResult, statusCode int, err error) {
+	jsonData := buildQuery(limit, isOpen, lastUpdated, after)
+	jsonValue, _ := json.Marshal(jsonData)
 
-		request, err := http.NewRequest(http.MethodPost, "https://api.github.com/graphql", bytes.NewBuffer(jsonValue))
-		if err != nil {
-			slog.Error("Failed querying github graphql", slog.Any("err", err))
-			return
-		}
+	request, err := http.NewRequest(http.MethodPost, "https://api.github.com/graphql", bytes.NewBuffer(jsonValue))
+	if err != nil {
+		slog.Error("Failed querying github graphql", slog.Any("err", err))
+		return
+	}
 
-		request.Header.Set("Authorization", "bearer "+config.GithubAPIToken())
-		response, err := client.Do(request)
-		if err != nil {
-			slog.Error("The HTTP request failed", slog.Any("err", err))
-			return
-		}
-		defer response.Body.Close()
+	request.Header.Set("Authorization", "bearer "+token)
+	response, err := client.Do(request)
+	if err != nil {
+		slog.Error("The HTTP request failed", slog.Any("err", err))
+		return
+	}
+	defer response.Body.Close()
 
-		if response.StatusCode != http.StatusOK {
-			body, _ := io.ReadAll(response.Body)
-			slog.Error("The HTTP request failed with status code", slog.Int("status", response.StatusCode), slog.String("body", string(body)))
-			return
-		}
+	statusCode = response.StatusCode
+	if statusCode != http.StatusOK {
+		body, _ := io.ReadAll(response.Body)
+		slog.Error("The HTTP request failed with status code", slog.Int("status", response.StatusCode), slog.String("body", string(body)))
+		err = fmt.Errorf("status code: %d", statusCode)
+		return
+	}
 
-		var prData models.GitHubPullRequestQueryResult
-		err = json.NewDecoder(response.Body).Decode(&prData)
-		if err != nil {
-			slog.Error("Failed to parse JSON", slog.Any("err", err))
-			return
-		}
-		prData.AppendPullRequest(pullRequests)
+	err = json.NewDecoder(response.Body).Decode(&data)
+	if err != nil {
+		slog.Error("Failed to parse JSON", slog.Any("err", err))
+		return
+	}
+	return
+}
 
-		// If there is a next page, import it as well
-		if prData.HasNextPage() {
-			time.Sleep(2 * time.Second)
-			after = prData.EndCursor()
-		} else {
-			break
+func fetchAllPullRequests() iter.Seq2[int, *models.GithubPullRequest] {
+	const isOpen = true
+	const lastUpdated = "2015-01-01" // year of the git migration
+
+	token := config.GithubAPIToken()
+
+	return func(yield func(int, *models.GithubPullRequest) bool) {
+		var after string
+		index := 0
+		for {
+			for limit := 100; limit >= 8; limit /= 2 {
+				time.Sleep(2 * time.Second)
+				slog.Info("Requesting pull requests", slog.Int("index", index), slog.Int("limit", limit))
+				data, statusCode, err := fetchPullRequests(token, limit, isOpen, lastUpdated, after)
+				if err != nil {
+					if statusCode == http.StatusGatewayTimeout || statusCode == http.StatusBadGateway {
+						slog.Warn("Query too big, reducing limit", slog.Int("limit", limit))
+						continue
+					}
+					slog.Error("Failed to fetch pull requests", slog.Any("err", err))
+					return
+				}
+
+				for _, rawObject := range data.Data.Search.Edges {
+					pullRequest := rawObject.Node
+					var ciState, ciStateLink string
+					if nodes := pullRequest.Commits.Nodes; len(nodes) > 0 {
+						ciState = nodes[0].Commit.Status.State
+
+						if contexts := nodes[0].Commit.Status.Contexts; len(contexts) > 0 {
+							ciStateLink = contexts[0].TargetUrl
+						}
+					}
+
+					if !yield(pullRequest.Number, &models.GithubPullRequest{
+						Id:          strconv.Itoa(pullRequest.Number),
+						Closed:      pullRequest.Closed,
+						Url:         pullRequest.Url,
+						Title:       pullRequest.Title,
+						CreatedAt:   pullRequest.CreatedAt,
+						UpdatedAt:   pullRequest.UpdatedAt,
+						CiState:     ciState,
+						CiStateLink: ciStateLink,
+						Labels:      pullRequest.CreateLabelsArray(),
+						Comments:    pullRequest.Comments.TotalCount,
+						Files:       pullRequest.CreateFilesArray(),
+						Author:      pullRequest.Author.Login,
+					}) {
+						return
+					}
+				}
+				index += len(data.Data.Search.Edges)
+
+				if !data.HasNextPage() {
+					return // Finished
+				}
+				after = data.EndCursor()
+				break
+			}
 		}
 	}
+}
+
+func updatePullRequestsAfter() {
+	pullRequests := make(map[int]*models.GithubPullRequest, 1_000)
+	maps.Insert(pullRequests, fetchAllPullRequests())
 
 	if len(pullRequests) == 0 {
 		slog.Info("No pull requests to insert")
