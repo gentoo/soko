@@ -102,9 +102,9 @@ jobs:
           tags: ${{ steps.updater.outputs.tags }}
           labels: ${{ steps.updater.outputs.labels }}
 
-      - name: Delete old container versions
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: 'soko'
-          package-type: 'container'
-          min-versions-to-keep: 18
+      # - name: Delete old container versions
+      #   uses: actions/delete-package-versions@v5
+      #   with:
+      #     package-name: 'soko'
+      #     package-type: 'container'
+      #     min-versions-to-keep: 18
