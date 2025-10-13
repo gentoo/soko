@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 package anitya
 
 // dev-perl packages have a special versioning scheme in Gentoo
