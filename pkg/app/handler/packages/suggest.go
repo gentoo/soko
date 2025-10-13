@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+
 // Used to create package suggestions
 
 package packages

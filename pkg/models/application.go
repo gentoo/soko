@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+
 // Contains the model of the application data
 
 package models

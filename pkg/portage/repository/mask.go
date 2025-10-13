@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+
 // Contains functions to import package mask entries into the database
 //
 // Example

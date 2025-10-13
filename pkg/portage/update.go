@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+
 // Update the portage data in the database
 
 package portage

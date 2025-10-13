@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+
 // Contains utility functions around the database
 
 package database

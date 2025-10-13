@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
+
 // Contains functions to import package deprecated entries into the database
 //
 // Example

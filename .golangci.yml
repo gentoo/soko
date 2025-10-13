@@ -4,6 +4,7 @@ linters:
   enable:
     - gocritic
     - sloglint
+    - goheader
   settings:
     errcheck:
       exclude-functions:
@@ -19,3 +20,6 @@ linters:
     sloglint:
       attr-only: true
       static-msg: true
+    goheader:
+      template: |-
+        SPDX-License-Identifier: GPL-2.0-only
