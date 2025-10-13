@@ -111,7 +111,7 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func BuildSearchQuery(query *pg.Query, searchString string) *pg.Query {
-	for _, searchTerm := range strings.Split(searchString, " ") {
+	for searchTerm := range strings.SplitSeq(searchString, " ") {
 		if searchTerm != "" {
 			marshal, err := json.Marshal(searchTerm)
 			if err != nil {

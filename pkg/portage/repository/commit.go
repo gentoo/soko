@@ -186,10 +186,10 @@ func createKeywordChange(id, path, commitLine string) {
 	var keywords_old, keywords_new []string
 
 	for _, line := range raw_lines {
-		if strings.HasPrefix(line, "-KEYWORDS=") {
-			keywords_old = strings.Split(strings.ReplaceAll(strings.TrimPrefix(line, "-KEYWORDS="), "\"", ""), " ")
-		} else if strings.HasPrefix(line, "+KEYWORDS") {
-			keywords_new = strings.Split(strings.ReplaceAll(strings.TrimPrefix(line, "+KEYWORDS="), "\"", ""), " ")
+		if after, ok := strings.CutPrefix(line, "-KEYWORDS="); ok {
+			keywords_old = strings.Split(strings.ReplaceAll(after, "\"", ""), " ")
+		} else if after, ok := strings.CutPrefix(line, "+KEYWORDS="); ok {
+			keywords_new = strings.Split(strings.ReplaceAll(after, "\"", ""), " ")
 		}
 	}
 

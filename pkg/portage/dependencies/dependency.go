@@ -93,7 +93,7 @@ func UpdateDependencies() (int, error) {
 }
 
 func parseDependencies(rawResponse, atom, kind string) {
-	for _, rawDependency := range strings.Split(rawResponse, "\n") {
+	for rawDependency := range strings.SplitSeq(rawResponse, "\n") {
 		dependencyParts := strings.Split(rawDependency, ":")
 
 		if strings.TrimSpace(dependencyParts[0]) == "" {

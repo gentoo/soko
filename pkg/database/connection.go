@@ -25,7 +25,7 @@ var (
 // CreateSchema creates the tables in the database
 // in case they don't already exist
 func CreateSchema() error {
-	for _, model := range []interface{}{
+	for _, model := range []any{
 		(*models.CommitToPackage)(nil),
 		(*models.CommitToVersion)(nil),
 		(*models.PackageToBug)(nil),
