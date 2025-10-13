@@ -3,6 +3,7 @@ package bugs
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -97,12 +98,12 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 		params.Set("offset", strconv.Itoa(offset))
 		resp, err := http.Get("https://bugs.gentoo.org/rest/bug?" + params.Encode())
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to fetch bugs, offset=%d: %w", offset, err)
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			slog.Error("Failed to fetch bugs", slog.Int("status", resp.StatusCode))
+			slog.Error("Failed to fetch bugs", slog.Int("status", resp.StatusCode), slog.Int("offset", offset))
 			return bugs, nil
 		}
 
@@ -111,7 +112,7 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 		}
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
-			slog.Error("Failed to decode bugs", slog.Any("err", err))
+			slog.Error("Failed to decode bugs", slog.Any("err", err), slog.Int("offset", offset))
 			return bugs, nil
 		}
 
@@ -126,6 +127,7 @@ func fetchBugs(changedSince *time.Time, bugStatus []string) (bugs []restAPIBug, 
 }
 
 func importAllOpenBugs() {
+	slog.Info("Importing all open bugs")
 	bugs, err := fetchBugs(nil, []string{"UNCONFIRMED", "CONFIRMED", "IN_PROGRESS"})
 	if err != nil {
 		slog.Error("Failed to fetch bugs",
@@ -142,6 +144,7 @@ func importAllOpenBugs() {
 }
 
 func updateChangedBugs(changedSince time.Time) {
+	slog.Info("Updating changed bugs", slog.Time("changed_since", changedSince))
 	bugs, err := fetchBugs(&changedSince, []string{"UNCONFIRMED", "CONFIRMED", "IN_PROGRESS", "RESOLVED"})
 	if err != nil {
 		slog.Error("Failed to fetch bugs",
@@ -167,9 +170,9 @@ func processApiBugs(bugs []restAPIBug) {
 			dbBugs = append(dbBugs, bug.ToDBType())
 			processedBugs[bug.Id] = struct{}{}
 			bugId := bug.BugId()
-			if strings.TrimSpace(bug.StabilizationAtoms) != "" {
+			if atomsList := strings.Trim(strings.TrimSpace(bug.StabilizationAtoms), `"'`); atomsList != "" {
 				versions := make(map[string]struct{})
-				for _, gpackage := range strings.Split(bug.StabilizationAtoms, "\n") {
+				for gpackage := range strings.Lines(atomsList) {
 					affectedVersions, _, _ := strings.Cut(strings.TrimSpace(gpackage), " ")
 					if strings.TrimSpace(affectedVersions) != "" {
 						for _, version := range calculateAffectedVersions(affectedVersions) {
