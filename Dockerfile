@@ -3,7 +3,7 @@ WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN npm install --no-audit && npx webpack
 
-FROM golang:1.24 AS builder
+FROM golang:1.25 AS builder
 WORKDIR /go/src/soko
 COPY . /go/src/soko
 COPY --from=assetsbuilder /go/src/soko/assets /go/src/soko/assets
