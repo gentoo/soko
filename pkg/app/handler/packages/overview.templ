@@ -162,7 +162,7 @@ templ overview(pkg *models.Package) {
 						It seems that version { pkg.Outdated[0].NewestVersion } is available upstream, while the latest version in the Gentoo tree is { pkg.Outdated[0].GentooVersion }.
 						<br/>
 						if pkg.Outdated[0].Source == models.OutdatedSourceRepology {
-							<small><i>You think this warning is false? Read more about it <a href="https://archives.gentoo.org/gentoo-dev/message/b793f4da5a5b5e20a063ea431500a820">here</a>.</i></small>
+							<small><i>You think this warning is false? Read more about it <a href="/about/repology">here</a>.</i></small>
 						} else {
 							<small>This information is provided from <a href="https://release-monitoring.org">Release-Monitoring</a>, so fix association issues there.</small>
 						}

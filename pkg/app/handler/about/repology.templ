@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: GPL-2.0-only
+package about
+
+import (
+	"net/http"
+	"soko/pkg/app/layout"
+)
+
+templ repologyExpl() {
+	<div class="kk-header-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<div class="row mt-3  pt-2">
+						<div class="col-md-5">
+							<h1 class="stick-top kk-package-title" id="package-title">
+								<div>
+									<div class="kk-package-name" style="margin-left: 0px!important;">
+										<span class="ml-2">Repology Ignore List</span>
+									</div>
+								</div>
+							</h1>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tab-content" id="myTabContent">
+		<div class="container mb-3 col-md-6">
+			<p>
+				One of the backends used by soko is <a href="https://repology.org">Repology</a>.
+				While mostly good, it might create false positives on reports of outdated packages.
+				To avoid these false warnings, it is possible to filter the repology checks.
+				To do so, there is git repository called
+                <a href="https://gitweb.gentoo.org/sites/soko-metadata.git/">soko-metadata</a>.
+				The repository contains a folder called <code>repology</code>, which in turn contains files:
+			</p>
+			<ol>
+				<li>
+					<code>ignored-repositories</code>:
+					You can add repositories that should be globally ignored for the repology checks for <i>all</i> packages.
+					E.g. Windows only repositories as <code>appget</code> might be disabled globally here.
+				</li>
+				<li>
+					<code>ignored-categories</code>:
+					You can disable the repology check for whole categories here.
+					The check will be disabled for all packages in this category.
+				</li>
+				<li>
+					<code>ignored-packages</code>:
+					You can either disable the repology check for a single package here (e.g. <code>sys-auth/pambase</code>),
+					or disable a repository for the repology check for a single package here using <code>cat/pkg::repo</code>
+					(e.g. <code>net-misc/dropbox::void_x86_64</code>). The later option is especially useful if another
+					distribution creates a non-standard version for a single package and all versions of other distributions
+					are marked as outdated because of this (as in the case of <code>dropbox::void linux</code>).
+				</li>
+                <li>
+                    <code>selected-packages</code>:
+                    You can specify for packages which exact distributions should be followed by repology here using
+                    <code>cat/pkg::repo1</code> syntax (e.g. <code>sys-boot/shim::fedora</code>).
+				</li>
+			</ol>
+		</div>
+	</div>
+}
+
+func RepologyExpl(w http.ResponseWriter, r *http.Request) {
+	layout.Layout("About", layout.About, repologyExpl()).Render(r.Context(), w)
+}

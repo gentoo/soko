@@ -61,6 +61,7 @@ func Serve(staticAssets fs.FS) {
 	setRoute("GET /about", about.Index)
 	redirect("GET /about/feedback", "/about")
 	setRoute("GET /about/status", about.Status)
+	setRoute("GET /about/repology", about.RepologyExpl)
 
 	setRoute("GET /maintainers", maintainer.BrowseProjects)
 	redirect("GET /maintainers/gentoo-projects", "/maintainers")
