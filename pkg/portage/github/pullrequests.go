@@ -146,6 +146,9 @@ func fetchPullRequests(
 	statusCode = response.StatusCode
 	if statusCode != http.StatusOK {
 		body, _ := io.ReadAll(response.Body)
+		if len(body) > 100 {
+			body = body[:100]
+		}
 		slog.Error("The HTTP request failed with status code", slog.Int("status", response.StatusCode), slog.String("body", string(body)))
 		err = fmt.Errorf("status code: %d", statusCode)
 		return
