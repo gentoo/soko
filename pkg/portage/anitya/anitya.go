@@ -145,12 +145,14 @@ nextPackage:
 var client = http.Client{Timeout: 1 * time.Minute}
 
 func fetchResults(page int, params url.Values) (int, []ApiPackage, error) {
-	req, err := http.NewRequest("GET", "https://release-monitoring.org/api/v2/packages/?"+params.Encode(), nil)
+	url := "https://release-monitoring.org/api/v2/packages/?" + params.Encode()
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		slog.Error("Failed creating request", slog.Int("page", page), slog.Any("err", err))
 		return 0, nil, err
 	}
 	req.Header.Set("User-Agent", config.UserAgent())
+	req.Header.Set("Accept", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
