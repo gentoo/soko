@@ -264,6 +264,7 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	gpackage = strings.ReplaceAll(gpackage, "~", "")
 
 	gpackage, _, _ = strings.Cut(gpackage, ":")
+	gpackage, _, _ = strings.Cut(gpackage, "[")
 
 	gpackage = versionNumber.Split(gpackage, 2)[0]
 
