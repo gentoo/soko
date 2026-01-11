@@ -44,6 +44,10 @@ func UpdatePkgCheckResults() {
 		catpkg := pkgCheckResult.Category + "/" + pkgCheckResult.Package
 		catpkgver := catpkg + "-" + pkgCheckResult.Version
 		id := catpkgver + "-" + pkgCheckResult.Class + "-" + pkgCheckResult.Message
+		if len(id) > 512 {
+			// truncate to fit in the database, I assume 512 characters is enough to be unique
+			id = id[:512]
+		}
 		collected[id] = &models.PkgCheckResult{
 			Id:       id,
 			Atom:     catpkg,
