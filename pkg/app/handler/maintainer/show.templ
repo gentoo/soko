@@ -16,12 +16,12 @@ func showViewTabs(email string, packagesCount int, includeProjects bool, info *m
 			Icon:       "fa fa-info mr-1",
 			BadgeValue: strconv.Itoa(packagesCount),
 		},
-		{
-			Name:       "Stabilization",
-			Link:       templ.URL("/maintainer/" + email + "/stabilization"),
-			Icon:       "fa fa-check-circle-o mr-1",
-			BadgeValue: strconv.Itoa(info.StableRequests),
-		},
+		// {
+		// 	Name:       "Stabilization",
+		// 	Link:       templ.URL("/maintainer/" + email + "/stabilization"),
+		// 	Icon:       "fa fa-check-circle-o mr-1",
+		// 	BadgeValue: strconv.Itoa(info.StableRequests),
+		// },
 		{
 			Name:       "Outdated",
 			Link:       templ.URL("/maintainer/" + email + "/outdated"),

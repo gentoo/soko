@@ -81,12 +81,12 @@ func renderShowPage(w http.ResponseWriter, r *http.Request, currentTab string, c
 			Link: templ.URL("/categories/" + category.Name),
 			Icon: "fa fa-list-ul mr-1",
 		},
-		{
-			Name:       "Stabilization",
-			Link:       templ.URL("/categories/" + category.Name + "/stabilization"),
-			Icon:       "fa fa-check-circle-o mr-1",
-			BadgeValue: strconv.Itoa(category.PackagesInformation.StableRequests),
-		},
+		// {
+		// 	Name:       "Stabilization",
+		// 	Link:       templ.URL("/categories/" + category.Name + "/stabilization"),
+		// 	Icon:       "fa fa-check-circle-o mr-1",
+		// 	BadgeValue: strconv.Itoa(category.PackagesInformation.StableRequests),
+		// },
 		{
 			Name:       "Outdated",
 			Link:       templ.URL("/categories/" + category.Name + "/outdated"),
