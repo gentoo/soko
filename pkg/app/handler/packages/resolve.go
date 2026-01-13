@@ -36,7 +36,7 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 
 	versions := getJSONVersions(&gpackage)
 	maintainers := getJSONMaintainers(&gpackage)
-	useflags := getJSONUseflag(&gpackage)
+	useflags, useExpand := getJSONUseflag(&gpackage)
 
 	jsonPackage := Package{
 		Atom:        gpackage.Atom,
@@ -46,6 +46,7 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 		Herds:       []string{},
 		Maintainers: maintainers,
 		Use:         useflags,
+		UseExpand:   useExpand,
 		UpdatedAt:   gpackage.Commits[0].CommitterDate,
 	}
 

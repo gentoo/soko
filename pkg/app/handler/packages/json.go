@@ -14,7 +14,6 @@ import (
 
 // build the json for the package
 func buildJson(w http.ResponseWriter, r *http.Request) {
-
 	atom := getAtom(r)
 	gpackage := new(models.Package)
 	err := database.DBCon.Model(gpackage).
@@ -44,7 +43,7 @@ func buildJson(w http.ResponseWriter, r *http.Request) {
 
 	versions := getJSONVersions(gpackage)
 	maintainers := getJSONMaintainers(gpackage)
-	useflags := getJSONUseflag(gpackage)
+	useflags, useExpand := getJSONUseflag(gpackage)
 
 	jsonPackage := Package{
 		Atom:        gpackage.Atom,
@@ -54,6 +53,7 @@ func buildJson(w http.ResponseWriter, r *http.Request) {
 		Herds:       []string{},
 		Maintainers: maintainers,
 		Use:         useflags,
+		UseExpand:   useExpand,
 		UpdatedAt:   gpackage.Commits[0].CommitterDate,
 	}
 
@@ -115,34 +115,45 @@ func getJSONMaintainers(gpackage *models.Package) []Maintainer {
 
 // get all useflags in a format that is
 // intended to be used to convert it to json
-func getJSONUseflag(gpackage *models.Package) Use {
-	useflags := Use{
+func getJSONUseflag(gpackage *models.Package) (Use, []UseExpand) {
+	useFlags := Use{
 		Local:     []Useflag{},
 		Global:    []Useflag{},
 		UseExpand: []Useflag{},
 	}
+	useExpand := []UseExpand{}
 	localUseflags, globalUseflags, useExpands := getPackageUseflags(gpackage)
 	for _, useflag := range localUseflags {
-		useflags.Local = append(useflags.Local, Useflag{
+		useFlags.Local = append(useFlags.Local, Useflag{
 			Name:        useflag.Name,
 			Description: useflag.Description,
 		})
 	}
 	for _, useflag := range globalUseflags {
-		useflags.Global = append(useflags.Global, Useflag{
+		useFlags.Global = append(useFlags.Global, Useflag{
 			Name:        useflag.Name,
 			Description: useflag.Description,
 		})
 	}
 	for expandGroup, flags := range useExpands {
+		expandedFlags := make([]Useflag, 0, len(flags))
 		for _, flag := range flags {
-			useflags.UseExpand = append(useflags.UseExpand, Useflag{
-				Name:        expandGroup + "_" + flag.Name,
+			expandedFlags = append(expandedFlags, Useflag{
+				Name:        flag.Name,
+				Description: flag.Description,
+			})
+			prefix := ""
+			if len(flag.Name) > 0 && flag.Name[0] == '+' {
+				prefix, flag.Name = "+", flag.Name[1:]
+			}
+			useFlags.UseExpand = append(useFlags.UseExpand, Useflag{
+				Name:        prefix + expandGroup + "_" + flag.Name,
 				Description: flag.Description,
 			})
 		}
+		useExpand = append(useExpand, UseExpand{Name: expandGroup, Flags: expandedFlags})
 	}
-	return useflags
+	return useFlags, useExpand
 }
 
 type Package struct {
@@ -153,6 +164,7 @@ type Package struct {
 	Herds       []string     `json:"herds"`
 	Maintainers []Maintainer `json:"maintainers"`
 	Use         Use          `json:"use"`
+	UseExpand   []UseExpand  `json:"use_expand"`
 	UpdatedAt   time.Time    `json:"updated_at"`
 }
 
@@ -187,6 +199,11 @@ type Use struct {
 	Local     []Useflag `json:"local"`
 	Global    []Useflag `json:"global"`
 	UseExpand []Useflag `json:"use_expand"`
+}
+
+type UseExpand struct {
+	Name  string    `json:"name"`
+	Flags []Useflag `json:"flags"`
 }
 
 type Useflag struct {
