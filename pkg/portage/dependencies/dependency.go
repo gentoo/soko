@@ -14,59 +14,77 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-pg/pg"
 	"github.com/ulikunitz/xz"
 )
-
-var Dependencies []*models.ReverseDependency
 
 func FullPackageDependenciesUpdate() {
 	database.Connect()
 	defer database.DBCon.Close()
 
-	dependencyCounter, err := UpdateDependencies()
-	if err != nil {
+	update := models.Application{Id: "dependencies"}
+	err := database.DBCon.Model(&update).WherePK().Select()
+	if err != nil && err != pg.ErrNoRows {
+		slog.Error("Failed to fetch last update time for dependencies", slog.Any("err", err))
 		return
 	}
 
-	slog.Info("collected dependencies", slog.Int("count", dependencyCounter))
+	newLastModified, dependencies, err := UpdateDependencies(update.LastCommit)
+	if err != nil {
+		return
+	} else if len(dependencies) == 0 {
+		slog.Info("No new dependencies to update")
+		return
+	}
+
+	slog.Info("collected dependencies", slog.Int("count", len(dependencies)))
 
 	database.TruncateTable((*models.ReverseDependency)(nil))
 	// because we removed all previous rows in table, we aren't concerned about
 	// duplicates, so we can use bulk insert
-	res, err := database.DBCon.Model(&Dependencies).Insert()
+	res, err := database.DBCon.Model(&dependencies).Insert()
 	if err != nil {
 		slog.Error("Error during inserting dependencies", slog.Any("err", err))
 	} else {
 		slog.Info("Inserted dependencies", slog.Int("rows", res.RowsAffected()))
 	}
 
-	updateStatus()
+	updateStatus(newLastModified)
 }
 
-func UpdateDependencies() (int, error) {
+func UpdateDependencies(lastModified string) (newLastModified string, dependencies []*models.ReverseDependency, err error) {
 	client := http.Client{
 		Timeout: 600 * time.Second,
 	}
 
-	resp, err := client.Get("https://qa-reports.gentoo.org/output/genrdeps/rdeps.tar.xz")
+	req, _ := http.NewRequest("GET", "https://qa-reports.gentoo.org/output/genrdeps/rdeps.tar.xz", nil)
+	if lastModified != "" {
+		req.Header.Set("If-Modified-Since", lastModified)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		slog.Error("Failed fetching dependencies", slog.Any("err", err))
-		return 0, err
+		return "", nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == http.StatusNotModified {
+		slog.Info("Dependencies are up to date", slog.String("lastModified", lastModified))
+		return "", nil, nil
+	} else if resp.StatusCode != 200 {
 		slog.Error("Got bad status code", slog.Int("code", resp.StatusCode))
-		return 0, fmt.Errorf("status code: %d", resp.StatusCode)
+		return "", nil, fmt.Errorf("status code: %d", resp.StatusCode)
 	}
+
+	newLastModified = resp.Header.Get("Last-Modified")
 
 	xz, err := xz.NewReader(resp.Body)
 	if err != nil {
 		slog.Error("Failed decompressing dependencies", slog.Any("err", err))
-		return 0, err
+		return "", nil, err
 	}
 
-	var dependencyCounter int
 	tr := tar.NewReader(xz)
 	for {
 		hdr, err := tr.Next()
@@ -75,7 +93,7 @@ func UpdateDependencies() (int, error) {
 		}
 		if err != nil {
 			slog.Error("Failed reading dependencies tar", slog.Any("err", err))
-			return 0, err
+			return "", nil, err
 		}
 		if hdr.Typeflag == tar.TypeReg {
 			nameParts := strings.SplitN(hdr.Name, "/", 2)
@@ -83,37 +101,35 @@ func UpdateDependencies() (int, error) {
 			rawResponse, err := io.ReadAll(tr)
 			if err != nil {
 				slog.Error("Failed reading file from tar", slog.Any("err", err))
-				return 0, err
+				return "", nil, err
 			}
-			parseDependencies(string(rawResponse), nameParts[1], nameParts[0])
-			dependencyCounter++
+
+			atom, kind := nameParts[1], nameParts[0]
+
+			for rawDependency := range strings.SplitSeq(string(rawResponse), "\n") {
+				dependencyParts := strings.Split(rawDependency, ":")
+
+				if strings.TrimSpace(dependencyParts[0]) == "" {
+					continue
+				}
+
+				condition := ""
+				if len(dependencyParts) > 1 {
+					condition = dependencyParts[1]
+				}
+
+				dependencies = append(dependencies, &models.ReverseDependency{
+					Id:                       atom + "-" + kind + "-" + rawDependency,
+					Atom:                     atom,
+					Type:                     kind,
+					ReverseDependencyAtom:    versionSpecifierToPackageAtom(dependencyParts[0]),
+					ReverseDependencyVersion: dependencyParts[0],
+					Condition:                condition,
+				})
+			}
 		}
 	}
-	return dependencyCounter, nil
-}
-
-func parseDependencies(rawResponse, atom, kind string) {
-	for rawDependency := range strings.SplitSeq(rawResponse, "\n") {
-		dependencyParts := strings.Split(rawDependency, ":")
-
-		if strings.TrimSpace(dependencyParts[0]) == "" {
-			continue
-		}
-
-		condition := ""
-		if len(dependencyParts) > 1 {
-			condition = dependencyParts[1]
-		}
-
-		Dependencies = append(Dependencies, &models.ReverseDependency{
-			Id:                       atom + "-" + kind + "-" + rawDependency,
-			Atom:                     atom,
-			Type:                     kind,
-			ReverseDependencyAtom:    versionSpecifierToPackageAtom(dependencyParts[0]),
-			ReverseDependencyVersion: dependencyParts[0],
-			Condition:                condition,
-		})
-	}
+	return newLastModified, dependencies, nil
 }
 
 func versionSpecifierToPackageAtom(versionSpecifier string) string {
@@ -130,10 +146,11 @@ func versionSpecifierToPackageAtom(versionSpecifier string) string {
 	return gpackage
 }
 
-func updateStatus() {
+func updateStatus(lastModified string) {
 	_, err := database.DBCon.Model(&models.Application{
 		Id:         "dependencies",
 		LastUpdate: time.Now(),
+		LastCommit: lastModified,
 		Version:    config.Version(),
 	}).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
