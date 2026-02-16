@@ -27,7 +27,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.5
+          version: v2.9.0
 
   test-go:
     runs-on: ubuntu-slim
