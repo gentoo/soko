@@ -125,7 +125,7 @@ var client = &http.Client{Timeout: time.Second * 30}
 
 func fetchPullRequests(
 	token string, limit int, isOpen bool, lastUpdated, after string,
-) (data models.GitHubPullRequestQueryResult, statusCode int, err error) {
+) (data GitHubPullRequestQueryResult, statusCode int, err error) {
 	jsonData := buildQuery(limit, isOpen, lastUpdated, after)
 	jsonValue, _ := json.Marshal(jsonData)
 
@@ -178,7 +178,7 @@ func fetchAllPullRequests() iter.Seq2[int, *models.GithubPullRequest] {
 				data, statusCode, err := fetchPullRequests(token, limit, isOpen, lastUpdated, after)
 				if err != nil {
 					if statusCode == http.StatusGatewayTimeout || statusCode == http.StatusBadGateway {
-						slog.Warn("Query too big, reducing limit", slog.Int("limit", limit))
+						slog.Warn("Query too big, reducing from limit", slog.Int("limit", limit))
 						continue
 					}
 					slog.Error("Failed to fetch pull requests", slog.Any("err", err))
