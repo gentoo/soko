@@ -94,12 +94,12 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var pullRequests []*models.GithubPullRequest
+	var pullRequests []*models.PullRequest
 	err = database.DBCon.Model(&pullRequests).
-		Join("JOIN package_to_github_pull_requests ON package_to_github_pull_requests.github_pull_request_id = github_pull_request.id").
-		Where("package_to_github_pull_requests.package_atom LIKE ?", categoryName+"/%").
-		Group("github_pull_request.id").
-		Order("github_pull_request.created_at DESC").
+		Join("JOIN package_to_pull_requests ON package_to_pull_requests.pull_request_id = pull_request.id").
+		Where("package_to_pull_requests.package_atom LIKE ?", categoryName+"/%").
+		Group("pull_request.id").
+		Order("pull_request.created_at DESC").
 		Select()
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

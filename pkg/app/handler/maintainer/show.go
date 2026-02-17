@@ -159,11 +159,11 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	var pullRequests []*models.GithubPullRequest
+	var pullRequests []*models.PullRequest
 	err = database.DBCon.Model(&pullRequests).
-		DistinctOn("github_pull_request.id").
-		OrderExpr("github_pull_request.id DESC").
-		Join("JOIN package_to_github_pull_requests").JoinOn("github_pull_request.id = package_to_github_pull_requests.github_pull_request_id").
+		DistinctOn("pull_request.id").
+		OrderExpr("pull_request.id DESC").
+		Join("JOIN package_to_pull_requests").JoinOn("pull_request.id = package_to_pull_requests.pull_request_id").
 		Where("package_atom IN (?)", query).
 		Select()
 	if err != nil {

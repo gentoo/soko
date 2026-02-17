@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 package models
 
-type GithubPullRequest struct {
+import "iter"
+
+type PullRequest struct {
 	Id          string `pg:",pk"`
 	Closed      bool
 	Url         string
@@ -10,18 +12,23 @@ type GithubPullRequest struct {
 	UpdatedAt   string
 	CiState     string
 	CiStateLink string
-	Labels      []GitHubPullRequestLabelNode
+	Labels      []PullRequestLabel
 	Comments    int
 	Author      string
 }
 
-type PackageToGithubPullRequest struct {
-	Id                  string `pg:",pk"`
-	PackageAtom         string
-	GithubPullRequestId string
+type PackageToPullRequest struct {
+	Id            string `pg:",pk"`
+	PackageAtom   string
+	PullRequestId string
 }
 
-type GitHubPullRequestLabelNode struct {
+type PullRequestLabel struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`
+}
+
+type PullRequestProvider interface {
+	ToPullRequest() *PullRequest
+	GetFiles() iter.Seq[string]
 }

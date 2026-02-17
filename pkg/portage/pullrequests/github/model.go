@@ -2,7 +2,9 @@
 package github
 
 import (
+	"iter"
 	"soko/pkg/models"
+	"strconv"
 )
 
 type GitHubPullRequestQueryResult struct {
@@ -15,14 +17,6 @@ func (res *GitHubPullRequestQueryResult) HasNextPage() bool {
 
 func (res *GitHubPullRequestQueryResult) EndCursor() string {
 	return res.Data.Search.PageInfo.EndCursor
-}
-
-func (node *GitHubPullRequestSearchNode) CreateLabelsArray() []models.GitHubPullRequestLabelNode {
-	labels := make([]models.GitHubPullRequestLabelNode, len(node.Labels.Edges))
-	for i, label := range node.Labels.Edges {
-		labels[i] = label.Node
-	}
-	return labels
 }
 
 type GitHubPullRequestQueryResultData struct {
@@ -58,6 +52,46 @@ type GitHubPullRequestSearchNode struct {
 	Commits   GitHubPullRequestCommits  `json:"commits"`
 }
 
+func (pr *GitHubPullRequestSearchNode) ToPullRequest() *models.PullRequest {
+	var ciState, ciStateLink string
+	if nodes := pr.Commits.Nodes; len(nodes) > 0 {
+		ciState = nodes[0].Commit.Status.State
+
+		if contexts := nodes[0].Commit.Status.Contexts; len(contexts) > 0 {
+			ciStateLink = contexts[0].TargetUrl
+		}
+	}
+
+	labels := make([]models.PullRequestLabel, len(pr.Labels.Edges))
+	for i, label := range pr.Labels.Edges {
+		labels[i] = models.PullRequestLabel{Name: label.Node.Name, Color: label.Node.Color}
+	}
+
+	return &models.PullRequest{
+		Id:          "github/" + strconv.Itoa(pr.Number),
+		Closed:      pr.Closed,
+		Url:         pr.Url,
+		Title:       pr.Title,
+		CreatedAt:   pr.CreatedAt,
+		UpdatedAt:   pr.UpdatedAt,
+		CiState:     ciState,
+		CiStateLink: ciStateLink,
+		Labels:      labels,
+		Comments:    pr.Comments.TotalCount,
+		Author:      pr.Author.Login,
+	}
+}
+
+func (pr *GitHubPullRequestSearchNode) GetFiles() iter.Seq[string] {
+	return func(yield func(string) bool) {
+		for _, file := range pr.Files.Edges {
+			if !yield(file.Node.Path) {
+				return
+			}
+		}
+	}
+}
+
 type GitHubPullRequestCommits struct {
 	Nodes []GitHubPullRequestCommitNode `json:"nodes"`
 }
@@ -89,7 +123,12 @@ type GitHubPullRequestLabels struct {
 }
 
 type GitHubPullRequestLabelEdge struct {
-	Node models.GitHubPullRequestLabelNode `json:"node"`
+	Node GitHubPullRequestLabelNode `json:"node"`
+}
+
+type GitHubPullRequestLabelNode struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
 
 type GitHubPullRequestAuthor struct {

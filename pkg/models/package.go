@@ -23,7 +23,7 @@ type Package struct {
 	PkgCheckResults     []*PkgCheckResult    `pg:",fk:atom,rel:has-many"`
 	Outdated            []*OutdatedPackages  `pg:",fk:atom,rel:has-many"`
 	Bugs                []*Bug               `pg:"many2many:package_to_bugs,join_fk:bug_id"`
-	PullRequests        []*GithubPullRequest `pg:"many2many:package_to_github_pull_requests,join_fk:github_pull_request_id"`
+	PullRequests        []*PullRequest       `pg:"many2many:package_to_pull_requests,join_fk:pull_request_id"`
 	ReverseDependencies []*ReverseDependency `pg:",fk:atom,rel:has-many"`
 }
 

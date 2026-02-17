@@ -4,6 +4,7 @@ package components
 import (
 	"soko/pkg/models"
 	"strconv"
+	"strings"
 )
 
 css badgeColor(color string) {
@@ -15,7 +16,11 @@ func isDarkBadgeColor(color string) bool {
 	return color == "5319e7" || color == "0052cc" || color == "b60205"
 }
 
-templ PullRequests(pullRequests []*models.GithubPullRequest) {
+var prTypeToURL = map[string]string{
+	"github": "https://github.com/gentoo/gentoo/pull/",
+}
+
+templ PullRequests(pullRequests []*models.PullRequest) {
 	<div class="row">
 		<div class="col-md-9">
 			if len(pullRequests) > 0 {
@@ -26,7 +31,8 @@ templ PullRequests(pullRequests []*models.GithubPullRequest) {
 							<div class="row">
 								<div class="col-md-11">
 									<span class="octicon octicon-git-pull-request opticon-resource-icon ml-1" style="color:SeaGreen;"></span>
-									<a href={ templ.URL("https://github.com/gentoo/gentoo/pull/" + pr.Id) } class="text-dark">
+									{{ prType, id, _ := strings.Cut(pr.Id, "/") }}
+									<a href={ templ.URL(prTypeToURL[prType] + id) } class="text-dark">
 										<b>{ pr.Title }</b>
 									</a>
 									<a href={ templ.URL(pr.CiStateLink) }>
@@ -50,14 +56,14 @@ templ PullRequests(pullRequests []*models.GithubPullRequest) {
 									}
 								</div>
 								<div class="col-md-1 text-right">
-									<a href={ templ.URL("https://github.com/gentoo/gentoo/pull/" + pr.Id) } class="text-muted">
+									<a href={ templ.URL(prTypeToURL[prType] + id) } class="text-muted">
 										<i class="fa fa-comment-o" aria-hidden="true"></i>
 										{ strconv.Itoa(pr.Comments) }
 									</a>
 								</div>
 								<div class="col-md-12 text-muted">
 									<span style="font-size: 90%;">
-										#{ pr.Id } opened { pr.CreatedAt } by { pr.Author }
+										#{ id } opened { pr.CreatedAt } by { pr.Author }
 									</span>
 								</div>
 							</div>

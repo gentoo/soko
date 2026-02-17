@@ -19,10 +19,10 @@ import (
 	"soko/pkg/portage/anitya"
 	"soko/pkg/portage/bugs"
 	"soko/pkg/portage/dependencies"
-	"soko/pkg/portage/github"
 	"soko/pkg/portage/maintainers"
 	"soko/pkg/portage/pkgcheck"
 	"soko/pkg/portage/projects"
+	"soko/pkg/portage/pullrequests"
 	"soko/pkg/portage/repology"
 )
 
@@ -65,7 +65,7 @@ func main() {
 	}
 	if *updatePullrequests {
 		slog.Info("Updating the pull requests data")
-		github.FullUpdatePullRequests()
+		pullrequests.FullUpdatePullRequests()
 	}
 	if *updateBugs {
 		slog.Info("Updating the bugs data")
