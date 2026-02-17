@@ -8,8 +8,8 @@ import (
 	"io"
 	"iter"
 	"log/slog"
-	"maps"
 	"net/http"
+	"slices"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
@@ -162,13 +162,13 @@ func fetchPullRequests(
 	return
 }
 
-func fetchAllPullRequests() iter.Seq2[int, *models.GithubPullRequest] {
+func fetchAllPullRequests() iter.Seq[*GitHubPullRequestSearchNode] {
 	const isOpen = true
 	const lastUpdated = "2015-01-01" // year of the git migration
 
 	token := config.GithubAPIToken()
 
-	return func(yield func(int, *models.GithubPullRequest) bool) {
+	return func(yield func(*GitHubPullRequestSearchNode) bool) {
 		var after string
 		index := 0
 		for {
@@ -186,30 +186,7 @@ func fetchAllPullRequests() iter.Seq2[int, *models.GithubPullRequest] {
 				}
 
 				for _, rawObject := range data.Data.Search.Edges {
-					pullRequest := rawObject.Node
-					var ciState, ciStateLink string
-					if nodes := pullRequest.Commits.Nodes; len(nodes) > 0 {
-						ciState = nodes[0].Commit.Status.State
-
-						if contexts := nodes[0].Commit.Status.Contexts; len(contexts) > 0 {
-							ciStateLink = contexts[0].TargetUrl
-						}
-					}
-
-					if !yield(pullRequest.Number, &models.GithubPullRequest{
-						Id:          strconv.Itoa(pullRequest.Number),
-						Closed:      pullRequest.Closed,
-						Url:         pullRequest.Url,
-						Title:       pullRequest.Title,
-						CreatedAt:   pullRequest.CreatedAt,
-						UpdatedAt:   pullRequest.UpdatedAt,
-						CiState:     ciState,
-						CiStateLink: ciStateLink,
-						Labels:      pullRequest.CreateLabelsArray(),
-						Comments:    pullRequest.Comments.TotalCount,
-						Files:       pullRequest.CreateFilesArray(),
-						Author:      pullRequest.Author.Login,
-					}) {
+					if !yield(&rawObject.Node) {
 						return
 					}
 				}
@@ -225,46 +202,68 @@ func fetchAllPullRequests() iter.Seq2[int, *models.GithubPullRequest] {
 	}
 }
 
-func updatePullRequestsAfter() {
-	pullRequests := make(map[int]*models.GithubPullRequest, 1_000)
-	maps.Insert(pullRequests, fetchAllPullRequests())
+func (pullRequest *GitHubPullRequestSearchNode) ToPullRequest() *models.GithubPullRequest {
+	var ciState, ciStateLink string
+	if nodes := pullRequest.Commits.Nodes; len(nodes) > 0 {
+		ciState = nodes[0].Commit.Status.State
 
-	if len(pullRequests) == 0 {
-		slog.Info("No pull requests to insert")
-		return
+		if contexts := nodes[0].Commit.Status.Contexts; len(contexts) > 0 {
+			ciStateLink = contexts[0].TargetUrl
+		}
 	}
+	return &models.GithubPullRequest{
+		Id:          strconv.Itoa(pullRequest.Number),
+		Closed:      pullRequest.Closed,
+		Url:         pullRequest.Url,
+		Title:       pullRequest.Title,
+		CreatedAt:   pullRequest.CreatedAt,
+		UpdatedAt:   pullRequest.UpdatedAt,
+		CiState:     ciState,
+		CiStateLink: ciStateLink,
+		Labels:      pullRequest.CreateLabelsArray(),
+		Comments:    pullRequest.Comments.TotalCount,
+		Author:      pullRequest.Author.Login,
+	}
+}
 
-	categoriesPullRequests := make(map[string]map[string]struct{})
+func updatePullRequestsAfter() {
+	categoriesPullRequests := make(map[string]map[int]struct{})
+	pullRequestsRows := make([]*models.GithubPullRequest, 0, 1_000)
 	var pkgsPullRequests []*models.PackageToGithubPullRequest
-	for _, pullrequest := range pullRequests {
-		affectedPackages := make(map[string]struct{})
-		for _, file := range pullrequest.Files {
-			pathParts := strings.Split(file.Path, "/")
+	for pullRequest := range fetchAllPullRequests() {
+		pullRequestObject := pullRequest.ToPullRequest()
+		pullRequestsRows = append(pullRequestsRows, pullRequestObject)
+
+		affectedPackages := make(map[string]struct{}, len(pullRequest.Files.Edges))
+		for _, file := range pullRequest.Files.Edges {
+			pathParts := strings.Split(file.Node.Path, "/")
 			if len(pathParts) >= 2 && strings.Contains(pathParts[0], "-") {
 				affectedPackages[pathParts[0]+"/"+pathParts[1]] = struct{}{}
 
 				prs, ok := categoriesPullRequests[pathParts[0]]
 				if !ok {
-					prs = make(map[string]struct{})
+					prs = make(map[int]struct{})
 				}
-				prs[pullrequest.Id] = struct{}{}
+				prs[pullRequest.Number] = struct{}{}
 				categoriesPullRequests[pathParts[0]] = prs
 			}
 		}
+		pkgsPullRequests = slices.Grow(pkgsPullRequests, len(affectedPackages))
 		for affectedPackage := range affectedPackages {
 			pkgsPullRequests = append(pkgsPullRequests, &models.PackageToGithubPullRequest{
-				Id:                  affectedPackage + "-" + pullrequest.Id,
+				Id:                  affectedPackage + "-" + pullRequestObject.Id,
 				PackageAtom:         affectedPackage,
-				GithubPullRequestId: pullrequest.Id,
+				GithubPullRequestId: pullRequestObject.Id,
 			})
 		}
 	}
 
-	rows := make([]*models.GithubPullRequest, 0, len(pullRequests))
-	for _, row := range pullRequests {
-		rows = append(rows, row)
+	if len(pullRequestsRows) == 0 {
+		slog.Info("No pull requests to insert")
+		return
 	}
-	result, err := database.DBCon.Model(&rows).OnConflict("(id) DO UPDATE").Insert()
+
+	result, err := database.DBCon.Model(&pullRequestsRows).OnConflict("(id) DO UPDATE").Insert()
 	if err != nil {
 		slog.Error("Failed to insert pull requests", slog.Any("err", err))
 		return
@@ -281,7 +280,7 @@ func updatePullRequestsAfter() {
 	updateCategoriesPullRequests(categoriesPullRequests)
 }
 
-func updateCategoriesPullRequests(categoriesPullRequests map[string]map[string]struct{}) {
+func updateCategoriesPullRequests(categoriesPullRequests map[string]map[int]struct{}) {
 	var categories []*models.CategoryPackagesInformation
 	err := database.DBCon.Model(&categories).Column("name").Select()
 	if err != nil {

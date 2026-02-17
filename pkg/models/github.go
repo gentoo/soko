@@ -12,7 +12,6 @@ type GithubPullRequest struct {
 	CiStateLink string
 	Labels      []GitHubPullRequestLabelNode
 	Comments    int
-	Files       []GitHubPullRequestFileNode
 	Author      string
 }
 
@@ -25,10 +24,4 @@ type PackageToGithubPullRequest struct {
 type GitHubPullRequestLabelNode struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`
-}
-
-type GitHubPullRequestFileNode struct {
-	Path      string `json:"path"`
-	Additions int    `json:"additions"`
-	Deletions int    `json:"deletions"`
 }
