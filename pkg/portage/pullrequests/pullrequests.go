@@ -8,6 +8,7 @@ import (
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
+	"soko/pkg/portage/pullrequests/codeberg"
 	"soko/pkg/portage/pullrequests/github"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ func FullUpdatePullRequests() {
 }
 
 var fetchers = [...]func() iter.Seq[models.PullRequestProvider]{
+	codeberg.FetchPullRequests,
 	github.FetchPullRequests,
 }
 
@@ -34,6 +36,7 @@ func updatePullRequests() {
 	pullRequestsRows := make([]*models.PullRequest, 0, 1_000)
 	var pkgsPullRequests []*models.PackageToPullRequest
 
+	slog.Info("Arthur started")
 	for _, fetcher := range fetchers {
 		for pullRequest := range fetcher() {
 			pullRequestObject := pullRequest.ToPullRequest()
@@ -63,6 +66,7 @@ func updatePullRequests() {
 			}
 		}
 	}
+	slog.Info("Arthur finished")
 
 	if len(pullRequestsRows) == 0 {
 		slog.Info("No pull requests to insert")

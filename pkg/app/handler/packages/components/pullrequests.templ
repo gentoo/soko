@@ -17,7 +17,8 @@ func isDarkBadgeColor(color string) bool {
 }
 
 var prTypeToURL = map[string]string{
-	"github": "https://github.com/gentoo/gentoo/pull/",
+	"github":   "https://github.com/gentoo/gentoo/pull/",
+	"codeberg": "https://codeberg.org/gentoo/gentoo/pulls/",
 }
 
 templ PullRequests(pullRequests []*models.PullRequest) {

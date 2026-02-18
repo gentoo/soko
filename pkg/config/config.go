@@ -55,6 +55,10 @@ func GithubAPIToken() string {
 	return getEnv("SOKO_GITHUB_TOKEN", "")
 }
 
+func CodebergAPIToken() string {
+	return getEnv("SOKO_CODEBERG_TOKEN", "")
+}
+
 func CacheControl() string {
 	return getEnv("SOKO_CACHE_CONTROL", "max-age=300")
 }
