@@ -63,29 +63,6 @@ templ show(useflag models.Useflag, localUseflags, otherUseExpands []models.Usefl
 		<div class="container mb-5">
 			<div class="row">
 				<div class="col-12">
-					if len(otherUseExpands) != 0 {
-						<h3 class="mb-2">Other “{ useflag.UseExpand }” USE_EXPAND flag values</h3>
-						<div class="card">
-							<div class="table-responsive">
-								<table class="table">
-									<thead>
-										<th>Use Flag</th>
-										<th>Description</th>
-									</thead>
-									<tbody>
-										for _, use := range otherUseExpands {
-											<tr>
-												<th class="kk-nobreak-cell">
-													<a href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
-												</th>
-												<td>{ use.Description }</td>
-											</tr>
-										}
-									</tbody>
-								</table>
-							</div>
-						</div>
-					}
 					if len(localUseflags) != 0 {
 						<h3 class="mb-2">Packages describing “{ useflag.Name }” as local USE flag</h3>
 						<div class="card mb-4 border-top-0">
@@ -118,6 +95,29 @@ templ show(useflag models.Useflag, localUseflags, otherUseExpands []models.Usefl
 										<li><a href={ templ.URL("/packages/" + pkg) }>{ pkg }</a></li>
 									}
 								</ul>
+							</div>
+						</div>
+					}
+					if len(otherUseExpands) != 0 {
+						<h3 class="mb-2">Other “{ useflag.UseExpand }” USE_EXPAND flag values</h3>
+						<div class="card">
+							<div class="table-responsive">
+								<table class="table">
+									<thead>
+										<th>Use Flag</th>
+										<th>Description</th>
+									</thead>
+									<tbody>
+										for _, use := range otherUseExpands {
+											<tr>
+												<th class="kk-nobreak-cell">
+													<a href={ templ.URL("/useflags/" + use.Name) }>{ use.Name }</a>
+												</th>
+												<td>{ use.Description }</td>
+											</tr>
+										}
+									</tbody>
+								</table>
 							</div>
 						</div>
 					}
