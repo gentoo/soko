@@ -48,24 +48,24 @@ func FetchPullRequests() iter.Seq[models.PullRequestProvider] {
 			files := make([][]apiPRFile, len(prs))
 
 			var wg sync.WaitGroup
-			for prID, pr := range prs {
+			for index, pr := range prs {
 				if sha := pr.Head.Sha; sha != "" {
 					wg.Go(func() {
 						s, link, err := client.getLatestCIStatus(sha)
 						if err != nil {
-							slog.Error("Failed to get latest CI status", slog.Int("pr", prID), slog.String("sha", sha), slog.Any("err", err))
+							slog.Error("Failed to get latest CI status", slog.Int("pr", int(pr.Number)), slog.String("sha", sha), slog.Any("err", err))
 							return
 						}
-						results[prID] = ciResult{state: s, link: link}
+						results[index] = ciResult{state: s, link: link}
 					})
 				}
 				wg.Go(func() {
 					const pageSize = 50
 					var allFiles []apiPRFile
 					for page := 1; ; page++ {
-						files, err := client.listPRFiles(prID, page, pageSize)
+						files, err := client.listPRFiles(int(pr.Number), page, pageSize)
 						if err != nil {
-							slog.Error("Failed to list PR files", slog.Int("pr", prID), slog.Int("page", page), slog.Any("err", err))
+							slog.Error("Failed to list PR files", slog.Int("pr", int(pr.Number)), slog.Int("page", page), slog.Any("err", err))
 							break
 						}
 						allFiles = append(allFiles, files...)
@@ -73,7 +73,7 @@ func FetchPullRequests() iter.Seq[models.PullRequestProvider] {
 							break
 						}
 					}
-					files[prID] = allFiles
+					files[index] = allFiles
 				})
 			}
 			wg.Wait()
