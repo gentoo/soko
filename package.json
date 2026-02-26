@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "@gentoo/tyrian": "git+https://anongit.gentoo.org/git/sites/tyrian-theme.git#v2.0.2",
-    "core-js": "^3.47.0",
+    "core-js": "^3.48.0",
     "d3-selection": "^3.0.0",
     "d3-fetch": "^3.0.1",
-    "d3-format": "^3.1.0",
+    "d3-format": "^3.1.2",
     "d3-scale": "^4.0.2",
     "d3-hierarchy": "^3.1.2",
     "jquery-typeahead": "^2.11.1",
@@ -13,12 +13,12 @@
     "turbolinks": "^5.2.0"
   },
   "devDependencies": {
-    "css-loader": "^7.1.2",
-    "mini-css-extract-plugin": "^2.9.4",
+    "css-loader": "^7.1.4",
+    "mini-css-extract-plugin": "^2.10.0",
     "resolve-url-loader": "^5.0.0",
-    "sass": "^1.95.0",
-    "sass-loader": "^16.0.6",
-    "webpack": "^5.103.0",
+    "sass": "^1.97.3",
+    "sass-loader": "^16.0.7",
+    "webpack": "^5.105.2",
     "webpack-cli": "^6.0.1"
   }
 }
