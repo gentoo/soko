@@ -36,7 +36,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Relation("Bugs", func(q *pg.Query) (*pg.Query, error) {
 			return q.OrderExpr("bug.id::INT DESC"), nil
 		}).
-		Relation("PullRequests").
+		Relation("PullRequests", func(q *pg.Query) (*pg.Query, error) {
+			return q.Order("pull_request.created_at DESC"), nil
+		}).
 		Relation("Versions", func(q *pg.Query) (*pg.Query, error) {
 			// performs mostly correct ordering of versions, which is perfected by sortVersionsDesc
 			return q.Order("version DESC"), nil

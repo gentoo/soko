@@ -165,6 +165,7 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 		OrderExpr("pull_request.id DESC").
 		Join("JOIN package_to_pull_requests").JoinOn("pull_request.id = package_to_pull_requests.pull_request_id").
 		Where("package_atom IN (?)", query).
+		Order("pull_request.created_at DESC").
 		Select()
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
