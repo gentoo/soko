@@ -430,7 +430,7 @@ templ overview(pkg *models.Package) {
 					}
 					<dd>
 						<span class="octicon octicon-git-pull-request opticon-resource-icon ml-1"></span>
-						<a href={ templ.URL("https://github.com/gentoo/gentoo/pulls?q=is%3Apr+is%3Aopen+in%3Atitle+" + pkg.Atom) } target="_blank">
+						<a href={ templ.URL("https://codeberg.org/gentoo/gentoo/pulls/?state=open&q=" + pkg.Atom) } target="_blank">
 							Open Pull Requests
 						</a>
 					</dd>
