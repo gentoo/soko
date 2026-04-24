@@ -1,7 +1,7 @@
 FROM node:21 AS assetsbuilder
 WORKDIR /go/src/soko
 COPY . /go/src/soko
-RUN npm install --no-audit && npx webpack
+RUN npm install --no-audit && npm run build
 
 FROM golang:1.25 AS builder
 WORKDIR /go/src/soko

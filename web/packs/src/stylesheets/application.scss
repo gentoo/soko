@@ -1,5 +1,5 @@
-@use "~@gentoo/tyrian/dist/tyrian";
-@use "~@gentoo/tyrian/dist/components/searchbars";
+@use "@gentoo/tyrian/dist/tyrian";
+@use "@gentoo/tyrian/dist/components/searchbars";
 
 @use "index";
 @use "keywords";
@@ -8,4 +8,4 @@
 @use "sprockets-octicons";
 @use "useflags";
 
-@use "~jquery-typeahead/dist/jquery.typeahead.min"
+@use "jquery-typeahead/dist/jquery.typeahead.min"

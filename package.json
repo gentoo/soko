@@ -1,4 +1,8 @@
 {
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
   "dependencies": {
     "@gentoo/tyrian": "git+https://anongit.gentoo.org/git/sites/tyrian-theme.git#v2.0.2",
     "core-js": "^3.48.0",
@@ -13,12 +17,8 @@
     "turbolinks": "^5.2.0"
   },
   "devDependencies": {
-    "css-loader": "^7.1.4",
-    "mini-css-extract-plugin": "^2.10.0",
-    "resolve-url-loader": "^5.0.0",
+    "@rollup/plugin-inject": "^5.0.5",
     "sass": "^1.97.3",
-    "sass-loader": "^16.0.7",
-    "webpack": "^5.105.2",
-    "webpack-cli": "^6.0.1"
+    "vite": "^6.3.3"
   }
 }
