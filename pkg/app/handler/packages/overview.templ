@@ -442,7 +442,7 @@ templ overview(pkg *models.Package) {
 					</dd>
 					<dd>
 						<span class="fa fa-fw fa-comments-o"></span>
-						<a href={ templ.URL("https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords=" + pkg.Name + "&mode=results") } target="_blank">
+						<a href={ templ.URL("https://forums.gentoo.org/search.php?terms=any&sc=1&sf=all&sr=posts&sk=t&sd=d&st=0&ch=300&t=0&submit=Search&keywords=" + pkg.Name) } target="_blank">
 							Forums posts
 						</a>
 					</dd>

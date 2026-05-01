@@ -38,7 +38,7 @@ templ ChangedVersionsTable(versions []*models.Version) {
 							<a
 								class="dropdown-item"
 								target="_blank"
-								href={ templ.URL("https://forums.gentoo.org/search.php?search_terms=all&show_results=topics&search_keywords=" + version.Package + "&mode=results") }
+								href={ templ.URL("https://forums.gentoo.org/search.php?terms=any&sc=1&sf=all&sr=posts&sk=t&sd=d&st=0&ch=300&t=0&submit=Search&keywords=" + version.Package) }
 							>
 								<span class="fa fa-fw fa-comments-o"></span>
 								Forums posts
