@@ -161,11 +161,10 @@ func ShowPullRequests(w http.ResponseWriter, r *http.Request) {
 	}
 	var pullRequests []*models.PullRequest
 	err = database.DBCon.Model(&pullRequests).
-		DistinctOn("pull_request.id").
-		OrderExpr("pull_request.id DESC").
+		DistinctOn("pull_request.created_at").
+		Order("pull_request.created_at DESC").
 		Join("JOIN package_to_pull_requests").JoinOn("pull_request.id = package_to_pull_requests.pull_request_id").
 		Where("package_atom IN (?)", query).
-		Order("pull_request.created_at DESC").
 		Select()
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
