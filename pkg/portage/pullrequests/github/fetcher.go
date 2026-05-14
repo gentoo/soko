@@ -27,7 +27,7 @@ func FetchPullRequests() iter.Seq[models.PullRequestProvider] {
 		var after string
 		index := 0
 		for {
-			for limit := 100; limit >= 8; limit /= 2 {
+			for limit := 64; limit >= 8; limit /= 2 {
 				time.Sleep(2 * time.Second)
 				slog.Info("Requesting pull requests", slog.Int("index", index), slog.Int("limit", limit))
 				data, statusCode, err := fetchPullRequestsBatch(token, limit, isOpen, lastUpdated, after)
@@ -83,8 +83,7 @@ func fetchPullRequestsBatch(
 		if len(body) > 100 {
 			body = body[:100]
 		}
-		slog.Error("The HTTP request failed with status code", slog.Int("status", response.StatusCode), slog.String("body", string(body)))
-		err = fmt.Errorf("status code: %d", statusCode)
+		err = fmt.Errorf("status code: %d, body: %q", statusCode, string(body))
 		return
 	}
 
