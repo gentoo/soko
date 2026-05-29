@@ -1,7 +1,9 @@
 FROM node:24 AS assetsbuilder
 WORKDIR /go/src/soko
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . /go/src/soko
-RUN npm install --no-audit && npx webpack
+RUN npx webpack
 
 FROM golang:1.25 AS builder
 WORKDIR /go/src/soko
