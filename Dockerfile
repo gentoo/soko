@@ -1,4 +1,4 @@
-FROM node:21 AS assetsbuilder
+FROM node:24 AS assetsbuilder
 WORKDIR /go/src/soko
 COPY . /go/src/soko
 RUN npm install --no-audit && npx webpack
