@@ -3,7 +3,7 @@ WORKDIR /go/src/soko
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . /go/src/soko
-RUN npx webpack
+RUN npm run build
 
 FROM golang:1.27 AS builder
 WORKDIR /go/src/soko

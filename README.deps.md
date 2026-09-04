@@ -33,7 +33,7 @@ docker run -it --rm -v "${PWD}:/go/src/soko" -w /go/src/soko node:24 bash
 Then inside the docker, run this command to update:
 
 ```bash
-npx npm-check-updates -u && rm package-lock.json && npm install && npx webpack
+npx npm-check-updates -u && rm package-lock.json && npm install && npm run build
 ```
 
 And this should regen `package-lock.json` (which included the full tree of dependencies).

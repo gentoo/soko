@@ -1,4 +1,10 @@
 {
+  "name": "soko",
+  "private": true,
+  "license": "GPL-2.0-only",
+  "scripts": {
+    "build": "webpack"
+  },
   "dependencies": {
     "@gentoo/tyrian": "git+https://anongit.gentoo.org/git/sites/tyrian-theme.git#v2.0.2",
     "core-js": "^3.50.0",
