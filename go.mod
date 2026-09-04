@@ -7,7 +7,6 @@ require (
 	github.com/go-pg/pg/v10 v10.15.1
 	github.com/gorilla/feeds v1.2.0
 	github.com/lmittmann/tint v1.2.0
-	github.com/samber/slog-multi v1.8.0
 	github.com/ulikunitz/xz v0.5.16
 	golang.org/x/text v0.41.0
 	golang.org/x/time v0.15.0
@@ -28,8 +27,6 @@ require (
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/onsi/gomega v1.34.1 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/samber/lo v1.53.0 // indirect
-	github.com/samber/slog-common v0.22.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/vmihailenco/bufpool v0.1.11 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect

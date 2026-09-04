@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/lmittmann/tint"
-	slogmulti "github.com/samber/slog-multi"
 
 	"soko/pkg/app"
 	"soko/pkg/config"
@@ -123,7 +122,7 @@ func initLoggers() {
 			TimeFormat: time.DateTime,
 		})
 	} else {
-		handler = slogmulti.Fanout(
+		handler = slog.NewMultiHandler(
 			tint.NewHandler(os.Stdout, &tint.Options{
 				Level:      slog.LevelInfo,
 				AddSource:  true,
