@@ -42,6 +42,10 @@ setTimeout(deleteDuplicate, 200);
 setTimeout(deleteDuplicate, 500);
 setTimeout(deleteDuplicate, 1000);
 
+function gotoUseflag(event, d) {
+    location.href = "/useflags/" + encodeURIComponent(d.data.className);
+}
+
 function createUseflagChart() {
     if (!useflagChartCreated) {
         $('#bubble-placeholder').show();
@@ -82,13 +86,13 @@ function createUseflagChart() {
             node.append("circle")
                 .attr("r", function (d) { return d.r; })
                 .attr("class", "kk-useflag-circle")
-                .attr("onclick", function (d) { return "location.href='/useflags/" + d.data.className + "';"; })
+                .on("click", gotoUseflag)
                 .style("fill", function (d) { return color(d.data.className); });
 
             node.append("text")
                 .attr("dy", ".3em")
                 .attr('class', 'kk-useflag-circle')
-                .attr("onclick", function (d) { return "location.href='/useflags/" + d.data.className + "';"; })
+                .on("click", gotoUseflag)
                 .style("text-anchor", "middle")
                 .style("font-size", function (d) {
                     var len = d.data.className.substring(0, d.r / 3).length;
