@@ -1,3 +1,4 @@
+const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const webpack = require('webpack');
 const path = require('path');
@@ -10,6 +11,9 @@ module.exports = {
         useflags:    './web/packs/useflags.js',
     },
     mode: 'production',
+    externals: {
+        jquery: 'jQuery',
+    },
     output: {
         path: path.resolve(__dirname, 'assets'),
         filename: '[name].js',
@@ -38,6 +42,15 @@ module.exports = {
         ],
     },
     plugins: [
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: require.resolve('jquery/dist/jquery.min.js'),
+                    to: 'jquery.min.js',
+                    info: { minimized: true },
+                },
+            ],
+        }),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery',
