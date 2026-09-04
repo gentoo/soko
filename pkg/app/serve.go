@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"soko/pkg/app/handler/about"
 	"soko/pkg/app/handler/arches"
