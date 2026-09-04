@@ -12,8 +12,8 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '^1.27.1'
           cache-dependency-path: go.sum
@@ -25,17 +25,17 @@ jobs:
         run: mkdir -p assets && touch assets/empty
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.9.0
+          version: v2.13.2
 
   test-go:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: '^1.27.1'
           cache-dependency-path: go.sum
@@ -52,13 +52,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -66,7 +66,7 @@ jobs:
 
       - name: Docker meta (web)
         id: web
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/gentoo/soko
           tags: |
@@ -75,7 +75,7 @@ jobs:
 
       - name: Docker meta (updater)
         id: updater
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/gentoo/soko
           tags: |
@@ -83,7 +83,7 @@ jobs:
             type=raw,value={{branch}}-updater-latest
 
       - name: Build and push (web)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile
@@ -93,7 +93,7 @@ jobs:
           labels: ${{ steps.web.outputs.labels }}
 
       - name: Build and push (updater)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile
