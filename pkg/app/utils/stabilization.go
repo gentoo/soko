@@ -58,12 +58,14 @@ func StabilizationExport(w http.ResponseWriter, pageUrl string, results []*model
 		w.Header().Set("Content-Type", "application/xml")
 		w.Write(b)
 	case "list":
-		var lines string
+		var lines strings.Builder
+		lines.Grow(len(result) * 32)
 		for _, pkg := range result {
-			lines += pkg.String() + "\n"
+			_, _ = lines.WriteString(pkg.String())
+			_ = lines.WriteByte('\n')
 		}
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(lines))
+		w.Write([]byte(lines.String()))
 	}
 }
 

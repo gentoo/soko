@@ -175,14 +175,6 @@ type VersionSuffix struct {
 	Number int
 }
 
-// get the minimum of the two given ints
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // numberGreaterThan takes two strings and returns true if the
 // first strings is greater than the second one using integer
 // comparison. - In case of an error during the string to int

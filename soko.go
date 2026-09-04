@@ -116,20 +116,20 @@ func initLoggers() {
 
 	var handler slog.Handler
 	if config.Debug() {
-		handler = tint.NewHandler(os.Stdout, &tint.Options{
+		handler = tint.NewTextHandler(os.Stdout, &tint.Options{
 			Level:      slog.LevelDebug,
 			AddSource:  true,
 			TimeFormat: time.DateTime,
 		})
 	} else {
 		handler = slog.NewMultiHandler(
-			tint.NewHandler(os.Stdout, &tint.Options{
+			tint.NewTextHandler(os.Stdout, &tint.Options{
 				Level:      slog.LevelInfo,
 				AddSource:  true,
 				TimeFormat: time.DateTime,
 				NoColor:    true,
 			}),
-			tint.NewHandler(errorHandler, &tint.Options{
+			tint.NewTextHandler(errorHandler, &tint.Options{
 				Level:      slog.LevelError,
 				AddSource:  true,
 				TimeFormat: time.DateTime,
