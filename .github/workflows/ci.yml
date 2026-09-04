@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
-          go-version: '^1.25.0'
+          go-version: '^1.27.1'
           cache-dependency-path: go.sum
 
       - name: templ generate
@@ -37,7 +37,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '^1.25.0'
+          go-version: '^1.27.1'
           cache-dependency-path: go.sum
       - name: Test
         run: go test -v ./pkg/models/...

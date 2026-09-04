@@ -5,7 +5,7 @@ RUN npm ci
 COPY . /go/src/soko
 RUN npx webpack
 
-FROM golang:1.25 AS builder
+FROM golang:1.27 AS builder
 WORKDIR /go/src/soko
 COPY . /go/src/soko
 COPY --from=assetsbuilder /go/src/soko/assets /go/src/soko/assets
