@@ -10,7 +10,7 @@ import (
 	"soko/pkg/database"
 	"soko/pkg/models"
 
-	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/v10"
 )
 
 // Suggest returns json encoded suggestions of

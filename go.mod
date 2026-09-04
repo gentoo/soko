@@ -4,7 +4,6 @@ go 1.27.1
 
 require (
 	github.com/a-h/templ v0.3.1020
-	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-pg/pg/v10 v10.15.1
 	github.com/gorilla/feeds v1.2.0
 	github.com/lmittmann/tint v1.2.0
