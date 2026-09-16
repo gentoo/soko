@@ -14,7 +14,7 @@ update_repository(){
         --single-branch \
         --branch "${GIT_BRANCH}" \
         --origin "${GIT_REMOTE}" \
-        "${GIT_URI}"
+        -- "${GIT_URI}"
   else
       cd /mnt/packages-tree/gentoo/ || exit 1
       if [ "$(git remote get-url "${GIT_REMOTE}")" != "${GIT_URI}" ]; then

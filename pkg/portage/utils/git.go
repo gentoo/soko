@@ -40,7 +40,9 @@ func ChangedFiles(startCommit string, endCommit string) []string {
 	cmd := exec.Command("git", "--no-pager",
 		"diff",
 		"--name-status",
-		startCommit+".."+endCommit)
+		"--end-of-options",
+		startCommit+".."+endCommit,
+		"--")
 
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()
@@ -72,7 +74,9 @@ func GetCommits(startCommit string, endCommit string) []string {
 		"--date=format:'%Y-%m-%dT%H:%M:%S%z'",
 		"--format=fuller",
 		"--reverse",
-		startCommit+".."+endCommit)
+		"--end-of-options",
+		startCommit+".."+endCommit,
+		"--")
 
 	cmd.Dir = config.PortDir()
 	out, err := cmd.CombinedOutput()

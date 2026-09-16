@@ -176,7 +176,7 @@ func createKeywordChange(id, path, commitLine string) {
 		return
 	}
 
-	raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
+	raw_lines, err := utils.Exec(config.PortDir(), "git", "show", "--end-of-options", id, "--", ":(literal)"+path)
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
 			slog.Error("Failed running git show", slog.String("id", id), slog.String("path", path), slog.Any("err", err))
@@ -226,7 +226,7 @@ func createAddedKeywords(id string, path string, commitLine string) {
 	if strings.HasSuffix(strings.TrimSpace(strings.Split(commitLine, "\t")[1]), ".ebuild") &&
 		(strings.Count(commitLine, "/") >= 2) {
 
-		raw_lines, err := utils.Exec(config.PortDir(), "git", "show", id, "--", path)
+		raw_lines, err := utils.Exec(config.PortDir(), "git", "show", "--end-of-options", id, "--", ":(literal)"+path)
 		if err != nil {
 			if exitError, ok := err.(*exec.ExitError); !ok || exitError.ExitCode() != 1 {
 				slog.Error("Failed running git show", slog.String("id", id), slog.String("path", path), slog.Any("err", err))
