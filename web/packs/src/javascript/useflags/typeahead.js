@@ -1,3 +1,5 @@
+import { escapeHtml, highlightHtml } from '../html';
+
 $(function() {
   $('#q').typeahead({
     order: "asc",
@@ -13,7 +15,10 @@ $(function() {
             q: "{{query}}"
           }
         }, 'results'],
-        template: '<span>{{name}}</span> <span class="kk-suggest-detail">{{description}}</span>'
+        template: function (query, item) {
+          return '<span>' + highlightHtml(item.name, query) + '</span> ' +
+            '<span class="kk-suggest-detail">' + escapeHtml(item.description) + '</span>';
+        }
       }
     },
     callback: {
