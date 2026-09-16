@@ -26,14 +26,15 @@ func Resolve(w http.ResponseWriter, r *http.Request) {
 		Limit(1).
 		Select()
 
-	if err == pg.ErrNoRows {
+	switch {
+	case err == pg.ErrNoRows:
 		http.NotFound(w, r)
 		return
-	} else if err != nil {
+	case err != nil:
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
-	} else if len(gpackage.Versions) == 0 || len(gpackage.Commits) == 0 {
+	case len(gpackage.Versions) == 0 || len(gpackage.Commits) == 0:
 		http.NotFound(w, r)
 		return
 	}
