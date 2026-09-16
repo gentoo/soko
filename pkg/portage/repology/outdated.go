@@ -120,6 +120,10 @@ func (o *outdatedCheck) getOutdatedStartingWith(letter rune) {
 	}
 
 	for packagename := range repoPackages {
+		if packagename == "" {
+			continue
+		}
+
 		outdated := make(map[string]bool)
 		currentVersion := make(map[string]string)
 		var newestVersion string

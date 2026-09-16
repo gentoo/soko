@@ -197,12 +197,15 @@ func numberGreaterThan(a, b string) bool {
 // version and is computing a VersionIdentifier based on this
 // string.
 func (v *Version) computeVersionIdentifier() VersionIdentifier {
-
 	rawVersionParts := strings.FieldsFunc(v.Version, func(r rune) bool {
 		return r == '_' || r == '-'
 	})
 
-	versionIdentifier := new(VersionIdentifier)
+	if len(rawVersionParts) == 0 {
+		return VersionIdentifier{}
+	}
+
+	var versionIdentifier VersionIdentifier
 	versionIdentifier.NumericPart, versionIdentifier.Letter = getNumericPart(rawVersionParts[0])
 	rawVersionParts = rawVersionParts[1:]
 
@@ -217,7 +220,7 @@ func (v *Version) computeVersionIdentifier() VersionIdentifier {
 		}
 	}
 
-	return *versionIdentifier
+	return versionIdentifier
 }
 
 // getNumericPart returns the numeric part of the version, that is:

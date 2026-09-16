@@ -97,6 +97,9 @@ func UpdateDependencies(lastModified string) (newLastModified string, dependenci
 		}
 		if hdr.Typeflag == tar.TypeReg {
 			nameParts := strings.SplitN(hdr.Name, "/", 2)
+			if len(nameParts) != 2 {
+				continue
+			}
 
 			rawResponse, err := io.ReadAll(tr)
 			if err != nil {
