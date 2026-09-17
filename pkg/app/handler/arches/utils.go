@@ -41,7 +41,7 @@ func getKeywordedVersionsForArch(arch string, n int) ([]*models.Version, error) 
 		Relation("Version").
 		Relation("Commit").
 		Order("commit.preceding_commits DESC").
-		Where("added::jsonb @> ?", "\""+arch+"\"").
+		Where("added::jsonb @> ?", "\"~"+arch+"\"").
 		Where("version.id IS NOT NULL").
 		Limit(n).
 		Select()
