@@ -12,6 +12,7 @@ import (
 	"soko/pkg/models"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/go-pg/pg/v10"
 )
@@ -263,24 +264,55 @@ func remoteIdLink(remoteId models.RemoteId) string {
 	}
 }
 
-// getMask returns the mask entry of the first version that is masked
-func getMask(versions []*models.Version) *models.Mask {
-	for _, version := range versions {
-		if len(version.Masks) > 0 {
-			return version.Masks[0]
-		}
-	}
-	return nil
+type packageMask struct {
+	Author        string
+	AuthorEmail   string
+	Date          time.Time
+	Reason        string
+	Atoms         []string
+	RemovalNotice bool
 }
 
-// showRemovalNotice if all versions of the package are masked
-func showRemovalNotice(versions []*models.Version) bool {
+type maskKey struct {
+	Author      string
+	AuthorEmail string
+	Date        int64
+	Reason      string
+}
+
+func getMasks(versions []*models.Version) []packageMask {
+	var masks []packageMask
+	entries := make(map[maskKey]int)
 	for _, version := range versions {
-		if len(version.Masks) > 0 && version.Masks[0].Versions == version.Atom {
-			return true
+		for _, mask := range version.Masks {
+			key := maskKey{mask.Author, mask.AuthorEmail, mask.Date.Unix(), mask.Reason}
+			idx, found := entries[key]
+			if !found {
+				idx = len(masks)
+				entries[key] = idx
+				masks = append(masks, packageMask{
+					Author:      mask.Author,
+					AuthorEmail: mask.AuthorEmail,
+					Date:        mask.Date,
+					Reason:      mask.Reason,
+				})
+			}
+			if !slices.Contains(masks[idx].Atoms, mask.Versions) {
+				masks[idx].Atoms = append(masks[idx].Atoms, mask.Versions)
+			}
+			if mask.Versions == version.Atom {
+				masks[idx].RemovalNotice = true
+			}
 		}
 	}
-	return false
+
+	for _, mask := range masks {
+		slices.Sort(mask.Atoms)
+	}
+	slices.SortStableFunc(masks, func(a, b packageMask) int {
+		return b.Date.Compare(a.Date)
+	})
+	return masks
 }
 
 // getDeprecation returns the deprecation entry of the first version that is deprecated

@@ -170,42 +170,53 @@ templ overview(pkg *models.Package) {
 				}
 			}
 			@overviewVersions(pkg)
-			if mask := getMask(pkg.Versions); mask != nil {
-				<h3 class="pt-3 mb-2">Masks</h3>
+			if masks := getMasks(pkg.Versions); len(masks) > 0 {
+				if len(masks) > 1 {
+					<h3 class="pt-3 mb-2">Masks</h3>
+				} else {
+					<h3 class="pt-3 mb-2">Mask</h3>
+				}
 				<div class="card kk-mask mb-3">
 					<ul class="list-group list-group-flush kk-mask">
-						<li class="list-group-item kk-mask">
-							if showRemovalNotice(pkg.Versions) {
-								<p style="color:#721c24;">
-									<strong><span class="fa fa-fw fa-warning"></span> This package is masked and could be removed soon!</strong>
-									<br/>
-									The mask comment indicates that this package is scheduled for removal from our package repository.
-									<br/>
-									Please review the mask information below for more details.
-								</p>
-							}
-							<strong class="kk-mask-reason">
-								@templ.Raw(mask.Reason)
-							</strong>
-							<div class="kk-mask-details">
-								<div class="row">
-									<div class="col-xs-12 col-md-3 kk-metadata-key">
-										Affected packages
+						for _, mask := range masks {
+							<li class="list-group-item kk-mask">
+								if mask.RemovalNotice {
+									<p style="color:#721c24;">
+										<strong><span class="fa fa-fw fa-warning"></span> This package is masked and could be removed soon!</strong>
+										<br/>
+										The mask comment indicates that this package is scheduled for removal from our package repository.
+										<br/>
+										Please review the mask information below for more details.
+									</p>
+								}
+								<strong class="kk-mask-reason">
+									@templ.Raw(mask.Reason)
+								</strong>
+								<div class="kk-mask-details">
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											Affected packages
+										</div>
+										<div class="col-xs-12 col-md-9 kk-mask-atoms overflow-hidden">
+											for i, atom := range mask.Atoms {
+												if i > 0 {
+													<br/>
+												}
+												{ atom }
+											}
+										</div>
 									</div>
-									<div class="col-xs-12 col-md-9 kk-mask-atoms overflow-hidden">
-										{ mask.Versions }
+									<div class="row">
+										<div class="col-xs-12 col-md-3 kk-metadata-key">
+											Author/Date
+										</div>
+										<div class="col-xs-12 col-md-9">
+											{ mask.Author } &lt;{ mask.AuthorEmail }&gt; <span class="text-muted">({ mask.Date.Format(time.DateOnly) })</span>
+										</div>
 									</div>
 								</div>
-								<div class="row">
-									<div class="col-xs-12 col-md-3 kk-metadata-key">
-										Author/Date
-									</div>
-									<div class="col-xs-12 col-md-9">
-										{ mask.Author } &lt;{ mask.AuthorEmail }&gt; <span class="text-muted">({ mask.Date.Format(time.DateOnly) })</span>
-									</div>
-								</div>
-							</div>
-						</li>
+							</li>
+						}
 					</ul>
 				</div>
 			} else if deprecation := getDeprecation(pkg.Versions); deprecation != nil {
