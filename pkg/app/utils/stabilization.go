@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"html"
 	"net/http"
+	sokofeeds "soko/pkg/app/handler/feeds"
 	"soko/pkg/models"
 	"strings"
 	"time"
@@ -85,5 +86,5 @@ func StabilizationFeed(w http.ResponseWriter, link, title string, results []*mod
 			Id:          pkgcheck.CPV,
 		})
 	}
-	feed.WriteAtom(w)
+	sokofeeds.WriteAtom(w, feed)
 }

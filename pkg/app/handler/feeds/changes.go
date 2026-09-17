@@ -21,7 +21,7 @@ func Changes(title string, description string, changedVersions []*models.Version
 		Link:        &feeds.Link{Href: "https://packages.gentoo.org/"},
 	}
 	addFeedItems(feed, changedVersions)
-	feed.WriteAtom(w)
+	WriteAtom(w, feed)
 }
 
 // addFeedItems is a helper to add items to a feed; most of the feeds use []*models.Version as the entity.

@@ -21,7 +21,7 @@ func Packages(query string, gpackages []models.Package, w http.ResponseWriter) {
 		Link:        &feeds.Link{Href: "https://packages.gentoo.org/"},
 	}
 	addPackageFeedItems(feed, gpackages)
-	feed.WriteAtom(w)
+	WriteAtom(w, feed)
 }
 
 // addPackageFeedItems is a helper to add items to a feed; the Package feed is using []models.Package as the entity.
@@ -48,7 +48,7 @@ func AddedPackages(title string, description string, addedPackages []*models.Pac
 		Link:        &feeds.Link{Href: "https://packages.gentoo.org/"},
 	}
 	addAddedPackageFeedItems(feed, addedPackages)
-	feed.WriteAtom(w)
+	WriteAtom(w, feed)
 }
 
 // addAddedPackageFeedItems is a helper to add items to the added packages feed;

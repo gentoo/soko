@@ -49,6 +49,10 @@ module.exports = {
                     to: 'jquery.min.js',
                     info: { minimized: true },
                 },
+                {
+                    from: path.resolve(__dirname, 'web/packs/src/feed.xsl'),
+                    to: 'feed.xsl',
+                },
             ],
         }),
         new webpack.ProvidePlugin({

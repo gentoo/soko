@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/feeds"
 
+	sokofeeds "soko/pkg/app/handler/feeds"
 	"soko/pkg/models"
 )
 
@@ -26,5 +27,5 @@ func OutdatedFeed(w http.ResponseWriter, link, title string, outdated []models.O
 			Link:        &feeds.Link{Href: "https://packages.gentoo.org/packages/" + entry.Atom, Type: "text/html", Rel: "alternate"},
 		})
 	}
-	feed.WriteAtom(w)
+	sokofeeds.WriteAtom(w, feed)
 }

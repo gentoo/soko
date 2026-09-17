@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"html"
 	"net/http"
+	sokofeeds "soko/pkg/app/handler/feeds"
 	"soko/pkg/app/handler/packages/components"
 	"soko/pkg/app/layout"
 	"soko/pkg/app/utils"
@@ -110,7 +111,7 @@ func ShowChangelogFeed(w http.ResponseWriter, r *http.Request) {
 			Id:      commit.Id,
 		})
 	}
-	feed.WriteAtom(w)
+	sokofeeds.WriteAtom(w, feed)
 }
 
 func ShowOutdated(w http.ResponseWriter, r *http.Request) {
