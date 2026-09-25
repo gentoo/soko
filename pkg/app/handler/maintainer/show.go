@@ -18,6 +18,14 @@ import (
 	"github.com/gorilla/feeds"
 )
 
+func maintainerFilter(email string) string {
+	marshal, err := json.Marshal(email)
+	if err != nil {
+		return "[]"
+	}
+	return `[{"Email": ` + string(marshal) + `}]`
+}
+
 func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintainer, packagesQuery *pg.Query, packagesCount int, includeProjects bool, err error) {
 	maintainerEmail := r.PathValue("email")
 	if !strings.Contains(maintainerEmail, "@") {
@@ -29,7 +37,7 @@ func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintaine
 	if maintainerEmail == "maintainer-needed@gentoo.org" {
 		packagesQuery = packagesQuery.Where("NULLIF(maintainers, '[]') IS null")
 	} else {
-		packagesQuery = packagesQuery.Where("maintainers @> ?", `[{"Email": "`+maintainerEmail+`"}]`)
+		packagesQuery = packagesQuery.Where("maintainers @> ?", maintainerFilter(maintainerEmail))
 		includeProjects = r.FormValue("include-projects") == "true"
 	}
 
@@ -42,7 +50,7 @@ func common(w http.ResponseWriter, r *http.Request) (maintainer models.Maintaine
 
 	if includeProjects {
 		for _, proj := range maintainer.Projects {
-			packagesQuery = packagesQuery.WhereOr("maintainers @> ?", `[{"Email": "`+proj.Email+`"}]`)
+			packagesQuery = packagesQuery.WhereOr("maintainers @> ?", maintainerFilter(proj.Email))
 		}
 	}
 
