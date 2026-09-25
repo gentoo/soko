@@ -13,6 +13,11 @@ import (
 // Show renders a template to show a given package
 func Resolve(w http.ResponseWriter, r *http.Request) {
 	atom := getParam(r, "atom")
+	if atom == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest),
+			http.StatusBadRequest)
+		return
+	}
 
 	var gpackage models.Package
 	err := database.DBCon.Model(&gpackage).

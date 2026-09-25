@@ -17,6 +17,11 @@ import (
 // packages based on the given query
 func Suggest(w http.ResponseWriter, r *http.Request) {
 	searchTerm := getParameterValue("q", r)
+	if searchTerm == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest),
+			http.StatusBadRequest)
+		return
+	}
 
 	var suggestions struct {
 		Results []searchResults `json:"results"`

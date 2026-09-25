@@ -96,6 +96,11 @@ func SearchFeed(w http.ResponseWriter, r *http.Request) {
 
 	searchTerm := getParameterValue("q", r)
 	searchTerm = strings.ReplaceAll(searchTerm, "*", "")
+	if strings.TrimSpace(searchTerm) == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest),
+			http.StatusBadRequest)
+		return
+	}
 
 	var packages []models.Package
 	err := BuildSearchQuery(database.DBCon.Model(&packages), searchTerm).

@@ -78,7 +78,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	param := ""
 	var useflags []models.Useflag
-	if len(results) != 0 {
+	if len(results) != 0 && results[0] != "" {
 		param = results[0]
 		err := database.DBCon.Model(&useflags).
 			Column("name", "description", "scope", "package").
