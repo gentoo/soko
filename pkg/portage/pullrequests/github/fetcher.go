@@ -95,15 +95,18 @@ func fetchPullRequestsBatch(
 	return
 }
 
-func buildQuery(limit int, isOpen bool, lastUpdated, after string) map[string]string {
+func buildQuery(limit int, isOpen bool, lastUpdated, after string) map[string]any {
 	var lastUpdatedQuery string
 	if lastUpdated != "" {
 		lastUpdatedQuery = `updated:>` + lastUpdated
 	}
 
-	var afterQuery string
+	var variableDecl, afterQuery string
+	variables := map[string]any{}
 	if after != "" {
-		afterQuery = `after: "` + after + `",`
+		variableDecl = `($after: String)`
+		afterQuery = `after: $after,`
+		variables["after"] = after
 	}
 
 	var isOpenQuery string
@@ -111,9 +114,10 @@ func buildQuery(limit int, isOpen bool, lastUpdated, after string) map[string]st
 		isOpenQuery = `is:open`
 	}
 
-	return map[string]string{
+	return map[string]any{
+		"variables": variables,
 		"query": `
-            {
+            query` + variableDecl + ` {
 			  rateLimit {
 				limit
 				cost
