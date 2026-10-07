@@ -30,9 +30,6 @@ services:
       SOKO_LOG_FILE: '/var/log/soko/updater.log'
       SOKO_GITHUB_TOKEN: '${SOKO_GITHUB_TOKEN}'
       SOKO_CODEBERG_TOKEN: '${SOKO_CODEBERG_TOKEN}'
-    # See https://github.com/repology/repology-rs/issues/560
-    extra_hosts:
-      - "repology.org:92.63.176.157"
     depends_on:
       - db
   db:
