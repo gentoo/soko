@@ -2,13 +2,17 @@
 package pkgcheck
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"soko/pkg/config"
 	"soko/pkg/database"
 	"soko/pkg/models"
 	"time"
+
+	"github.com/go-pg/pg/v10"
 )
 
 // Descriptions of the json format of the pkgcheck reports
@@ -54,20 +58,27 @@ func UpdatePkgCheckResults() {
 		}
 	}
 
-	// clean up the database
-	database.TruncateTable((*models.PkgCheckResult)(nil))
-
-	// update the database with the new results
 	rows := make([]*models.PkgCheckResult, 0, len(collected))
 	for _, row := range collected {
 		rows = append(rows, row)
 	}
-	res, err := database.DBCon.Model(&rows).OnConflict("(id) DO NOTHING").Insert()
+
+	// replace the old results in one transaction, so a failed insert keeps them
+	err = database.DBCon.RunInTransaction(context.Background(), func(tx *pg.Tx) error {
+		if _, err := tx.Model((*models.PkgCheckResult)(nil)).Exec("TRUNCATE TABLE ?TableName"); err != nil {
+			return fmt.Errorf("truncating table: %w", err)
+		}
+		res, err := tx.Model(&rows).OnConflict("(id) DO NOTHING").Insert()
+		if err != nil {
+			return fmt.Errorf("inserting rows: %w", err)
+		}
+		slog.Info("Inserted pkgcheck results", slog.Int("rows", res.RowsAffected()))
+		return nil
+	})
 	if err != nil {
-		slog.Error("Failed inserting pkgcheck results", slog.Any("err", err))
+		slog.Error("Failed updating pkgcheck results", slog.Any("err", err))
 		return
 	}
-	slog.Info("Inserted pkgcheck results", slog.Int("rows", res.RowsAffected()))
 
 	updateCategoriesInfo()
 
