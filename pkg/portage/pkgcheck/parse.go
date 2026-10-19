@@ -2,7 +2,7 @@
 package pkgcheck
 
 import (
-	"encoding/xml"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"soko/pkg/config"
@@ -11,20 +11,14 @@ import (
 	"time"
 )
 
-// Descriptions of the xml format of the pkgcheck reports
-
-type PkgCheckResults struct {
-	XMLName xml.Name         `xml:"checks"`
-	Results []PkgCheckResult `xml:"result"`
-}
+// Descriptions of the json format of the pkgcheck reports
 
 type PkgCheckResult struct {
-	XMLName  xml.Name `xml:"result"`
-	Category string   `xml:"category"`
-	Package  string   `xml:"package"`
-	Version  string   `xml:"version"`
-	Class    string   `xml:"class"`
-	Message  string   `xml:"msg"`
+	Category string `json:"category"`
+	Package  string `json:"package"`
+	Version  string `json:"version"`
+	Class    string `json:"class"`
+	Message  string `json:"msg"`
 }
 
 // UpdatePkgCheckResults will update the database table that contains all pkgcheck results
@@ -80,16 +74,16 @@ func UpdatePkgCheckResults() {
 	updateStatus()
 }
 
-// parseQAReport gets the xml from qa-reports.gentoo.org and parses it
+// parseQAReport gets the json from qa-reports.gentoo.org and parses it
 func parseQAReport() ([]PkgCheckResult, error) {
-	resp, err := http.Get("https://qa-reports.gentoo.org/output/gentoo-ci/output.xml")
+	resp, err := http.Get("https://qa-reports.gentoo.org/output/gentoo-ci/output.json")
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var pkgCheckResults PkgCheckResults
-	err = xml.NewDecoder(resp.Body).Decode(&pkgCheckResults)
-	return pkgCheckResults.Results, err
+	var pkgCheckResults []PkgCheckResult
+	err = json.NewDecoder(resp.Body).Decode(&pkgCheckResults)
+	return pkgCheckResults, err
 }
 
 func updateCategoriesInfo() {
