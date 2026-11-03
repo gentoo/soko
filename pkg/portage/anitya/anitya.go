@@ -105,7 +105,7 @@ nextPackage:
 			continue
 		}
 
-		currentLatest := p.Versions[0]
+		var currentLatest *models.Version
 		for _, v := range p.Versions {
 			if slices.Contains(v.Properties, "live") {
 				continue
@@ -113,9 +113,12 @@ nextPackage:
 			if strings.HasPrefix(v.Version, latest.Version) || !latest.GreaterThan(*v) {
 				continue nextPackage
 			}
-			if v.GreaterThan(*currentLatest) {
+			if currentLatest == nil || v.GreaterThan(*currentLatest) {
 				currentLatest = v
 			}
+		}
+		if currentLatest == nil {
+			continue
 		}
 		outdatedEntries = append(outdatedEntries, &models.OutdatedPackages{
 			Atom:          p.Atom,
