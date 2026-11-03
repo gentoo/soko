@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -197,12 +198,24 @@ func readAllResults() (result []ApiPackage, err error) {
 	return
 }
 
+var prereleaseRe = regexp.MustCompile(`^([0-9]+(?:\.[0-9]+)*)[._-]?(a|alpha|b|beta|rc)[._-]?([0-9]+)$`)
+
+var prereleaseSuffix = map[string]string{
+	"a": "_alpha", "alpha": "_alpha",
+	"b": "_beta", "beta": "_beta",
+	"rc": "_rc",
+}
+
 func (p *ApiPackage) LatestVersion() (result string) {
 	result = p.Version
 	if p.StableVersion != "" {
 		result = p.StableVersion
 	}
 	result, _, _ = strings.Cut(result, ".post")
+	// 1.0b2 -> 1.0_beta2
+	if m := prereleaseRe.FindStringSubmatch(result); m != nil {
+		result = m[1] + prereleaseSuffix[m[2]] + m[3]
+	}
 	return
 }
 
