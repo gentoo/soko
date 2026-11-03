@@ -123,7 +123,7 @@ nextPackage:
 		outdatedEntries = append(outdatedEntries, &models.OutdatedPackages{
 			Atom:          p.Atom,
 			GentooVersion: currentLatest.Version,
-			NewestVersion: anitya.StableVersion,
+			NewestVersion: latest.Version,
 			Source:        models.OutdatedSourceAnitya,
 		})
 	}
