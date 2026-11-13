@@ -264,7 +264,7 @@ func parseRepologyData(letter rune) (Packages, error) {
 // lines whereas comments as well as empty lines are ignored
 func readBlockList(file string) map[string]struct{} {
 	blocklist := make(map[string]struct{})
-	resp, err := client.Get("https://gitweb.gentoo.org/sites/soko-metadata.git/plain/repology/" + file)
+	resp, err := client.Get("https://raw.githubusercontent.com/gentoo/soko-metadata/refs/heads/master/repology/" + file)
 	if err != nil {
 		slog.Error("Failed to fetch blacklist", slog.String("file", file), slog.Any("err", err))
 		return blocklist
