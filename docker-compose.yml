@@ -61,3 +61,5 @@ services:
       - "0 0 * * * *"
       - --host
       - unix:///var/run/docker-watchtower/docker.sock
+    environment:
+      DOCKER_API_VERSION: '1.44'
